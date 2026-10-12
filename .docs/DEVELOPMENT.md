@@ -1,6 +1,6 @@
 # توسعه راه‌انداز — Laravel + Inertia + React/TypeScript
 
-> راهنمای هدف برای مخزن Laravel بعد از مهاجرت. صرف وجود این دستورها به معنی آن نیست که در مخزن فعلی اسکریپت/کد پیاده‌سازی شده باشد؛ نام دقیق Composer/NPM scriptها باید هنگام bootstrap تثبیت شود.
+> راهنمای توسعه همین مخزن Laravel. فرمان‌های Artisan و npm زیر با کد فعلی جورند. نصب‌کننده production و اسکریپت‌های `scripts/` هنوز وجود ندارند.
 
 ## پیش‌نیازها
 
@@ -20,17 +20,14 @@ npm ci
 # یا Compose صرفاً dependencyهای db/redis-queue/redis-cache را بالا بیاورد:
 # docker compose -f compose.dev.yml up -d
 php artisan key:generate
-# ساخت master key محلی مستقل از APP_KEY مطابق command طراحی‌شده پروژه:
-# php artisan rahandaz:keys:init --local-only
-# قبل از migrate، config/database.php و config/queue.php را مطابق .env ست کنید.
 php artisan migrate
-# تنها پس از پیاده‌سازی command مربوطه:
-# php artisan rahandaz:bootstrap-owner --credentials-file=./var/initial-owner.txt
+php artisan rahandaz:keys:init --local-only
+php artisan rahandaz:bootstrap-owner --credentials-file=./var/initial-owner.txt
 npm run dev
 php artisan serve --host=127.0.0.1 --port=8000
 ```
 
-`rahandaz:keys:init` و `rahandaz:bootstrap-owner` نام قراردادی **برای پیاده‌سازی** هستند و نباید قبل از ساخته‌شدن commandها اجراشده فرض شوند. `APP_KEY` کلید master عملیاتی راه‌انداز نیست. داده production با کلید local باز نشود.
+`rahandaz:keys:init --local-only` و `rahandaz:bootstrap-owner` در مخزن هستند. اولی اگر فایل کلید پر باشد بازنویسی نمی‌کند. دومی مسیر فایل را اجباری می‌کند، داخل `public/` نمی‌نویسد و فایل موجود را عوض نمی‌کند. `APP_KEY` کلید master عملیاتی راه‌انداز نیست. داده production با کلید local باز نشود.
 
 ## Worker و scheduler — terminalهای جدا
 
