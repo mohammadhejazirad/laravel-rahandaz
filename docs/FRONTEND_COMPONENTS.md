@@ -18,7 +18,7 @@
 | PersianDate | `resources/js/components/dates/persian-date.tsx` | نمایش جلالی و tooltip از ISO | Intl | در استفاده |
 | ThemeToggle | `resources/js/components/theme-toggle.tsx` | روشن / تیره / سیستم | Lucide | در استفاده |
 | FlashToaster | `resources/js/components/flash-toaster.tsx` | Toast نشست | Sonner، notify | در استفاده |
-| AppLayout | `resources/js/layouts/app-layout.tsx` | سایدبار، Drawer موبایل با focus trap، skip link، عنوان و زنگ اعلان | Lucide | در استفاده |
+| AppLayout | `resources/js/layouts/app-layout.tsx` | سایدبار راست دسکتاپ و Drawer راست موبایل با همان لینک‌ها، focus trap، skip link، عنوان و زنگ اعلان | Lucide | در استفاده |
 | AuthLayout | `resources/js/layouts/auth-layout.tsx` | پوسته responsive ورود و گذرواژه | AppLogo، Lucide | در استفاده |
 | notify | `resources/js/lib/notify.ts` | success / error / info / queued | Sonner | success و error در استفاده |
 
@@ -26,7 +26,7 @@ Props صفحه‌بندی: `current_page`، `last_page`، `per_page`، `total`،
 
 `PersianDate` فقط `iso: string | null` می‌گیرد و timezone را از کاربر مشترک Inertia می‌خواند.
 
-`AppLayout` علاوه بر `title`، متن اختیاری `description` و `eyebrow` می‌گیرد. سایدبار از عرض `lg` فعال می‌شود تا viewport تبلت ۷۶۸ پیکسل فضای محتوای کافی داشته باشد.
+`AppLayout` علاوه بر `title`، متن اختیاری `description` و `eyebrow` می‌گیرد. سایدبار ثابت از عرض `lg` (۱۰۲۴px) و چسبیده به لبه فیزیکی راست فعال می‌شود تا در ۷۶۸px محتوا فشرده نشود. زیر `lg`، دکمه همبرگری Drawer را با `side` راست باز می‌کند. Sheet شادسی‌ان نصب نشده است. لینک Desktop و Mobile از یک `Sidebar` می‌آیند.
 
 `AppLogo` پراپ‌های `variant`، `theme`، `size`، `decorative`، `ariaLabel` و `showTagline` را می‌پذیرد. حالت `auto` تغییر `data-theme` ریشه را مشاهده می‌کند تا انتخاب دستی پوسته با رنگ نشان ناسازگار نشود.
 

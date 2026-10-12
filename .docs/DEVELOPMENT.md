@@ -43,7 +43,7 @@ php artisan schedule:run
 
 - صفحات در `resources/js/pages/*.tsx` یا فولدر متناظر، `resources/js/layouts`, `resources/js/components`؛ بدون Django Templates، Alpine یا SPA router دوم.
 - Laravel route + Inertia page + typed page props؛ shared props داده حساس را افشا نکنند. FormRequest/Policy سمت سرور مبنای authorization/validation هستند.
-- Tailwind CSS 4 با CSS tokens، Vazirmatn محلی، Lucide React، shadcn/ui/Radix در حد componentهای موردنیاز، Sonner برای اعلان Toast. از CDN و بارگذاری تمام chart/UI dependencies روی همه صفحه‌ها خودداری شود.
+- Tailwind CSS 4 با CSS tokens، Vazirmatn محلی، Lucide React، و Sonner برای اعلان Toast. shadcn/ui و Radix فقط وقتی یک Dialog یا Select واقعی لازم شد نصب می‌شوند؛ Drawer فعلی موبایل سفارشی است و از لبه فیزیکی راست باز می‌شود. پوسته پنل edge-to-edge است و سایدبار دسکتاپ به همان لبه می‌چسبد. از CDN و بارگذاری تمام chart/UI dependencies روی همه صفحه‌ها خودداری شود.
 - هویت بصری فقط از `public/branding` و `resources/js/components/branding` مصرف می‌شود. favicon و PNGهای عمومی از همان Symbol تولید می‌شوند؛ SVG تازه باید بدون script، event handler، `foreignObject` و منبع خارجی باشد.
 - Toast هنگام ارسال Job فقط «ثبت شد» می‌گوید؛ موفقیت نصب/استقرار تنها بعد از `Job.status=succeeded` تاییدشده از backend نمایش داده می‌شود. برای log/status، incremental polling با backoff در tab مخفی.
 - برای calendar جلالی، کتابخانه نسخه‌دار معتبر و تست leap-year/timezone؛ همه timestamps PostgreSQL/JSON همچنان UTC ISO 8601 هستند.

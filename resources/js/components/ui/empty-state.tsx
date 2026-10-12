@@ -13,8 +13,8 @@ export function EmptyState({
             <span className="mx-auto grid size-11 place-items-center rounded-xl bg-surface-muted text-muted" aria-hidden="true">
                 <Inbox className="size-5" />
             </span>
-            <h2 className="mt-4 text-base font-semibold">{title}</h2>
-            <p className="mt-2 text-sm text-muted">{children}</p>
+            <h2 className="mt-4 break-words text-base font-semibold">{title}</h2>
+            <p className="mt-2 break-words text-sm text-muted">{children}</p>
         </div>
     );
 }

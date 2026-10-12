@@ -34,6 +34,10 @@ export function FlashToaster() {
             position="top-center"
             closeButton
             theme={theme}
+            visibleToasts={3}
+            containerAriaLabel="پیام‌های موقت"
+            offset={{ top: '4.75rem', right: '16px', bottom: '16px', left: '16px' }}
+            mobileOffset={{ top: '4.75rem', right: '12px', bottom: '12px', left: '12px' }}
             toastOptions={{ className: 'font-sans' }}
         />
     );

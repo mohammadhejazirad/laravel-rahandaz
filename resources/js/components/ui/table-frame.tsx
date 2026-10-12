@@ -5,7 +5,7 @@ export function TableFrame({ children, label = "جدول داده" }: { children
 
     return (
         <div
-            className="surface-shadow overflow-x-auto rounded-2xl border border-line bg-surface/95 focus:outline-none focus:ring-2 focus:ring-accent"
+            className="surface-shadow w-full min-w-0 max-w-full overflow-x-auto rounded-2xl border border-line bg-surface/95 focus:outline-none focus:ring-2 focus:ring-accent"
             role="region"
             aria-label={label}
             aria-describedby={hintId}

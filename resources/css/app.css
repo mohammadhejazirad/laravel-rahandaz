@@ -96,6 +96,11 @@
         outline-offset: 2px;
     }
 
+    .flex > *,
+    .grid > * {
+        min-width: 0;
+    }
+
     @media (prefers-reduced-motion: reduce) {
         *,
         *::before,
@@ -113,9 +118,60 @@
         direction: ltr;
         unicode-bidi: isolate;
         font-family: var(--font-mono);
+        overflow-wrap: anywhere;
     }
 
     .surface-shadow {
         box-shadow: 0 1px 2px color-mix(in srgb, var(--color-ink) 5%, transparent), 0 18px 50px color-mix(in srgb, var(--color-ink) 5%, transparent);
     }
+
+    :where(dd, p, h1, h2, h3, li, span, div)[dir='ltr'] {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+
+    pre[dir='ltr'] {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+        overflow-x: auto;
+    }
+
+    .rahandaz-drawer {
+        animation: rahandaz-drawer-in 180ms ease-out;
+    }
+}
+
+@keyframes rahandaz-drawer-in {
+    from {
+        transform: translate3d(100%, 0, 0);
+    }
+
+    to {
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+/* Sonner injects a later RTL rule that pulls the toaster to a negative left offset. */
+@media (max-width: 600px) {
+    html [data-sonner-toaster][dir='rtl'] {
+        right: 12px;
+        left: 12px;
+        width: auto;
+        transform: none;
+    }
+
+    html [data-sonner-toaster][dir='rtl'] [data-sonner-toast] {
+        left: 0;
+        right: 0;
+        width: 100%;
+    }
+}
+
+html [data-sonner-toaster] {
+    font-family: var(--font-sans);
+}
+
+html [data-sonner-toast] [data-title],
+html [data-sonner-toast] [data-description] {
+    overflow-wrap: anywhere;
 }

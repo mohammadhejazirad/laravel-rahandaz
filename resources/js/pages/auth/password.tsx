@@ -66,7 +66,7 @@ export default function Password() {
                         )
                     }
                 />
-                <Button type="submit" loading={form.processing} loadingLabel="در حال ذخیره">
+                <Button type="submit" className="w-full" loading={form.processing} loadingLabel="در حال ذخیره">
                     ذخیره گذرواژه
                 </Button>
             </form>

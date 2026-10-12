@@ -6,9 +6,9 @@ import { ThemeToggle } from "@/components/theme-toggle";
 
 export function AuthLayout({ title, children }: { title: string; children: ReactNode }) {
     return (
-        <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-8 sm:px-6">
+        <main className="relative flex min-h-dvh w-full items-center justify-center px-4 py-8 sm:px-6">
             <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_80%_15%,var(--color-accent-soft),transparent_32rem)]" />
-            <div className="surface-shadow grid w-full max-w-5xl overflow-hidden rounded-[1.75rem] border border-line bg-surface/95 lg:grid-cols-[0.9fr_1.1fr]">
+            <div className="surface-shadow grid w-full min-w-0 max-w-5xl overflow-hidden rounded-[1.75rem] border border-line bg-surface/95 lg:grid-cols-[0.9fr_1.1fr]">
                 <section className="relative hidden overflow-hidden bg-[#111827] p-10 text-white lg:flex lg:flex-col lg:justify-between">
                     <div className="absolute -start-24 -top-24 size-64 rounded-full border border-white/10" aria-hidden="true" />
                     <div className="absolute -bottom-32 -end-16 size-80 rounded-full bg-indigo-500/15 blur-3xl" aria-hidden="true" />

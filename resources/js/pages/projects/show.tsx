@@ -85,7 +85,7 @@ export default function ProjectShow({
                     <ul className="mt-3 space-y-2">
                         {environments.map((environment) => (
                             <li key={environment.uuid} className="flex flex-wrap items-center justify-between gap-2 border-t border-line py-2">
-                                <span>
+                                <span className="min-w-0">
                                     {environment.name}{" "}
                                     <span className="font-mono text-sm text-muted" dir="ltr">
                                         {environment.branch_name}

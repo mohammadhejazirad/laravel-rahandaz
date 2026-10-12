@@ -46,7 +46,7 @@ export function ThemeToggle({ compact = false }: { compact?: boolean }) {
     }
 
     return (
-        <div className="inline-flex rounded-xl border border-line bg-surface/90 p-1 shadow-sm" role="group" aria-label="پوسته">
+        <div className={`max-w-full rounded-xl border border-line bg-surface/90 p-1 shadow-sm ${compact ? "inline-flex" : "flex w-full"}`} role="group" aria-label="پوسته">
             {options.map((option) => {
                 const Icon = option.icon;
                 const selected = current === option.value;
@@ -59,8 +59,8 @@ export function ThemeToggle({ compact = false }: { compact?: boolean }) {
                         aria-label={`پوسته ${option.label}`}
                         title={`پوسته ${option.label}`}
                         className={selected
-                            ? 'rounded-lg bg-accent-soft px-2.5 py-1.5 text-accent'
-                            : 'rounded-lg px-2.5 py-1.5 text-muted hover:bg-surface-muted hover:text-ink'}
+                            ? `inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg bg-accent-soft px-2.5 text-accent ${compact ? "" : "flex-1"}`
+                            : `inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg px-2.5 text-muted hover:bg-surface-muted hover:text-ink ${compact ? "" : "flex-1"}`}
                         onClick={() => select(option.value)}
                     >
                         <Icon className="inline size-4" aria-hidden="true" />

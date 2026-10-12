@@ -818,11 +818,11 @@ theme سه حالت `light`، `dark` و `system` دارد. precedence: preferenc
 
 ### 15.4 layout و رفتار واکنش‌گرا
 
-- desktop: sidebar سمت راست حدود 264px، topbar، breadcrumb، content max-width قابل تنظیم؛ صفحه job/log فضای وسیع‌تر.
+- desktop: پوسته edge-to-edge است. sidebar حدود 264px به لبه فیزیکی راست viewport می‌چسبد، topbar داخل ستون محتواست و padding داخلی حفظ می‌شود. سقف عرض بیرونی پوسته را از لبه جدا نکند. breadcrumb و content max-width داخلی در صفحه‌های بعدی قابل تنظیم است؛ صفحه job/log فضای وسیع‌تر دارد.
 - sidebar بخش‌ها: داشبورد، سرور، سرویس‌ها، **میرورها**، پروژه‌ها، استقرارها، عملیات، دامنه‌ها، دیتابیس‌ها، پشتیبان‌ها، پایش، گزارش فعالیت، تنظیمات. «میرورها» وضعیت source فعال هر نرم‌افزار، سلامت/freshness، آخرین آزمون و امکان تغییر یا rollback را نشان می‌دهد.
 - active state هر گزینه sidebar از namespace/route واقعی درخواست به‌دست می‌آید، نه از نام عمومی view مانند `index` یا تطبیق مبهم متن URL. routeهای جزئی و تو‌در‌تو، از جمله environmentهای یک پروژه، باید والد درست را active کنند و در هر صفحه حداکثر یک مقصد هم‌سطح active باشد.
 - topbar یک دکمه اعلان با آیکون زنگوله دارد؛ وجود اعلان خوانده‌نشده با badge قرمز و تعداد سقف‌دار نمایش داده می‌شود. badge صرفاً از داده پایگاه داده می‌آید و پس از خواندن مورد یا همه موارد به‌روزرسانی می‌شود.
-- mobile: sidebar drawer قابل بستن با Escape و overlay، فرم تک‌ستون، primary action واضح؛ عملیات مهم در overflow پنهان نشود.
+- زیر ۱۰۲۴px سایدبار ثابت مخفی است. دکمه همبرگری همان لینک‌ها را در Drawer از لبه فیزیکی راست باز می‌کند. کلاس منطقی `end` در RTL سمت چپ است و برای این Drawer ممنوع است. overlay، Escape، کلیک بیرون، بستن با ناوبری، قفل scroll و بازگشت فوکوس الزامی است. فرم تک‌ستون و primary action واضح بماند؛ عملیات مهم در overflow پنهان نشود.
 - breakpointهای مرجع 360، 768، 1280، 1440px؛ این پروژه در desktop داشبورد مناسب desktop دارد، محدود به frame موبایل نیست.
 - table بزرگ با wrapper اسکرول افقی یا کارت موبایل؛ overflow کل صفحه ممنوع.
 - RTL با logical CSS properties (`margin-inline`، `padding-inline`، `inset-inline`)؛ icon جهت‌دار مناسب RTL، icon فنی بی‌جهت mirror نشود.

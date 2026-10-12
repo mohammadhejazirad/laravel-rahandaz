@@ -80,13 +80,28 @@ export function AppLayout({ title, description, eyebrow = "فضای کاری م�
     ];
 
     useEffect(() => {
+        const media = window.matchMedia("(min-width: 1024px)");
+        const closeOnDesktop = () => {
+            if (media.matches) {
+                setOpen(false);
+            }
+        };
+
+        media.addEventListener("change", closeOnDesktop);
+
+        return () => media.removeEventListener("change", closeOnDesktop);
+    }, []);
+
+    useEffect(() => {
         if (!open) {
             return;
         }
 
-        const previousOverflow = document.body.style.overflow;
+        const previousBodyOverflow = document.body.style.overflow;
+        const previousHtmlOverflow = document.documentElement.style.overflow;
         const menuButton = menuRef.current;
         document.body.style.overflow = "hidden";
+        document.documentElement.style.overflow = "hidden";
         closeRef.current?.focus();
 
         function onKey(event: KeyboardEvent) {
@@ -123,7 +138,8 @@ export function AppLayout({ title, description, eyebrow = "فضای کاری م�
 
         return () => {
             window.removeEventListener("keydown", onKey);
-            document.body.style.overflow = previousOverflow;
+            document.body.style.overflow = previousBodyOverflow;
+            document.documentElement.style.overflow = previousHtmlOverflow;
             menuButton?.focus();
         };
     }, [open]);
@@ -136,15 +152,15 @@ export function AppLayout({ title, description, eyebrow = "فضای کاری م�
             >
                 رفتن به محتوای اصلی
             </a>
-            <div className="mx-auto flex min-h-screen max-w-[1600px]">
-                <Sidebar path={path} links={links} className="sticky top-0 hidden h-screen w-[264px] shrink-0 lg:block" />
-                <div className="min-w-0 flex-1">
+            <div className="flex min-h-dvh w-full">
+                <Sidebar path={path} links={links} className="sticky top-0 hidden h-dvh w-[264px] shrink-0 overflow-y-auto lg:block" />
+                <div className="min-w-0 flex-1" inert={open ? true : undefined}>
                     <header className="sticky top-0 z-30 flex min-h-16 items-center justify-between gap-3 border-b border-line bg-canvas/85 px-3 py-2 backdrop-blur-xl sm:px-4 md:px-7">
                         <div className="flex min-w-0 items-center gap-3">
                             <button
                                 ref={menuRef}
                                 type="button"
-                                className="grid size-10 shrink-0 place-items-center rounded-xl border border-line bg-surface shadow-sm lg:hidden"
+                                className="grid size-11 shrink-0 place-items-center rounded-xl border border-line bg-surface shadow-sm lg:hidden"
                                 aria-label="باز کردن منو"
                                 aria-expanded={open}
                                 aria-controls="mobile-navigation"
@@ -162,7 +178,7 @@ export function AppLayout({ title, description, eyebrow = "فضای کاری م�
                         <div className="flex items-center gap-1.5 sm:gap-2">
                             <Link
                                 href={`${base}/notifications`}
-                                className="relative grid size-10 place-items-center rounded-xl border border-line bg-surface shadow-sm hover:bg-surface-muted"
+                                className="relative grid size-11 shrink-0 place-items-center rounded-xl border border-line bg-surface shadow-sm hover:bg-surface-muted"
                                 aria-label={unread > 0 ? `اعلان‌ها، ${unread} خوانده‌نشده` : "اعلان‌ها"}
                             >
                                 <Bell className="size-[18px]" aria-hidden="true" />
@@ -177,7 +193,7 @@ export function AppLayout({ title, description, eyebrow = "فضای کاری م�
                             </div>
                             <button
                                 type="button"
-                                className="inline-flex size-10 items-center justify-center gap-1 rounded-xl text-sm text-muted hover:bg-surface-muted hover:text-ink lg:w-auto lg:px-3"
+                                className="inline-flex size-11 shrink-0 items-center justify-center gap-1 rounded-xl text-sm text-muted hover:bg-surface-muted hover:text-ink lg:w-auto lg:px-3"
                                 onClick={() => router.post(`${base}/logout`)}
                                 aria-label="خروج از حساب"
                             >
@@ -186,11 +202,11 @@ export function AppLayout({ title, description, eyebrow = "فضای کاری م�
                             </button>
                         </div>
                     </header>
-                    <main id="main-content" className="px-4 py-6 sm:px-5 md:px-7 md:py-8">
-                        <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
-                            <div className="max-w-3xl">
+                    <main id="main-content" className="min-w-0 max-w-full px-4 py-6 sm:px-5 md:px-7 md:py-8">
+                        <header className="mb-6 flex min-w-0 flex-wrap items-end justify-between gap-4">
+                            <div className="min-w-0 max-w-3xl">
                                 <p className="mb-1 text-xs font-semibold text-accent">{eyebrow}</p>
-                                <h1 className="text-2xl font-bold leading-tight text-ink sm:text-3xl">{title}</h1>
+                                <h1 className="break-words text-2xl font-bold leading-tight text-ink sm:text-3xl">{title}</h1>
                                 {description ? <p className="mt-2 text-sm leading-7 text-muted sm:text-base">{description}</p> : null}
                             </div>
                             <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-xs text-muted shadow-sm">
@@ -218,11 +234,13 @@ export function AppLayout({ title, description, eyebrow = "فضای کاری م�
                         role="dialog"
                         aria-modal="true"
                         aria-labelledby={titleId}
-                        className="absolute inset-y-0 end-0 flex w-[min(88vw,320px)] flex-col bg-surface shadow-2xl"
+                        dir="rtl"
+                        data-side="right"
+                        className="rahandaz-drawer absolute inset-y-0 right-0 flex w-[min(85vw,320px)] max-w-full flex-col bg-surface shadow-2xl"
                     >
-                        <div className="flex items-center justify-between border-b border-line p-3">
-                            <div id={titleId}><AppLogo /></div>
-                            <button ref={closeRef} type="button" className="rounded-lg border border-line p-2" aria-label="بستن منو" onClick={() => setOpen(false)}>
+                        <div className="flex items-center justify-between gap-2 border-b border-line p-3">
+                            <div id={titleId} className="min-w-0"><AppLogo size="sm" showTagline={false} /></div>
+                            <button ref={closeRef} type="button" className="grid size-11 shrink-0 place-items-center rounded-lg border border-line" aria-label="بستن منو" onClick={() => setOpen(false)}>
                                 <X className="size-4" aria-hidden="true" />
                             </button>
                         </div>
@@ -272,12 +290,12 @@ function Sidebar({
 
                     if (!link.enabled) {
                         return (
-                            <div key={link.label} aria-disabled="true" className="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-muted opacity-70">
-                                <span className="inline-flex items-center gap-2">
-                                    <Icon className="size-4" aria-hidden="true" />
+                            <div key={link.label} aria-disabled="true" className="flex min-h-11 items-center justify-between gap-2 rounded-xl px-3 py-2 text-sm text-muted opacity-70">
+                                <span className="inline-flex min-w-0 items-center gap-2">
+                                    <Icon className="size-4 shrink-0" aria-hidden="true" />
                                     {link.label}
                                 </span>
-                                <span className="rounded-full border border-line px-1.5 text-[10px]">بعداً</span>
+                                <span className="shrink-0 rounded-full border border-line px-1.5 text-[10px]">بعداً</span>
                             </div>
                         );
                     }
@@ -289,10 +307,10 @@ function Sidebar({
                             aria-current={active ? "page" : undefined}
                             onClick={onNavigate}
                             className={active
-                                ? "flex items-center gap-2 rounded-xl bg-accent-soft px-3 py-2 text-sm font-semibold text-accent"
-                                : "flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted hover:bg-surface-muted hover:text-ink"}
+                                ? "flex min-h-11 items-center gap-2 rounded-xl bg-accent-soft px-3 py-2 text-sm font-semibold text-accent"
+                                : "flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted hover:bg-surface-muted hover:text-ink"}
                         >
-                            <Icon className="size-4" aria-hidden="true" />
+                            <Icon className="size-4 shrink-0" aria-hidden="true" />
                             {link.label}
                         </Link>
                     );

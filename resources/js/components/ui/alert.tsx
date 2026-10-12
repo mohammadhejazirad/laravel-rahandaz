@@ -13,5 +13,5 @@ const tones = {
 };
 
 export function Alert({ tone = 'neutral', className, ...props }: AlertProps) {
-    return <div role={tone === 'danger' ? 'alert' : 'status'} className={cn('rounded-xl border px-4 py-3 text-sm', tones[tone], className)} {...props} />;
+    return <div role={tone === 'danger' ? 'alert' : 'status'} className={cn('min-w-0 max-w-full break-words rounded-xl border px-4 py-3 text-sm', tones[tone], className)} {...props} />;
 }
