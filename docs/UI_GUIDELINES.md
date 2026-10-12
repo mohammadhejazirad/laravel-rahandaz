@@ -1,0 +1,63 @@
+# راهنمای رابط راه‌انداز
+
+این سند قرارداد پیاده‌سازی فعلی است. هدف محصول در `.docs/PROJECT_SPEC.md` فصل ۱۵ است. صفحه‌ای که اینجا یا در `docs/UI_PAGE_INVENTORY.md` نیامده، ساخته نشده است.
+
+## Tokenها
+
+رنگ‌ها در `resources/css/app.css` با `@theme` و override برای `[data-theme='dark']` هستند.
+
+| Token | روشن | تیره | کلاس |
+| --- | --- | --- | --- |
+| background | `#F8FAFC` | `#0B1120` | `bg-canvas` |
+| surface | `#FFFFFF` | `#111827` | `bg-surface` |
+| surface-muted | `#F1F5F9` | `#1E293B` | `bg-surface-muted` |
+| border | `#E2E8F0` | `#334155` | `border-line` |
+| text | `#0F172A` | `#F8FAFC` | `text-ink` |
+| muted | `#475569` | `#CBD5E1` | `text-muted` |
+| accent | `#4F46E5` | `#818CF8` | `text-accent` / `bg-accent` |
+| success | `#047857` | `#34D399` | `text-success` |
+| warning | `#92400E` | `#FBBF24` | `text-warning` |
+| danger | `#B91C1C` | `#F87171` | `text-danger` |
+| info | `#1D4ED8` | `#93C5FD` | `text-info` |
+
+رنگ وضعیت تنها نشانه نیست. `StatusBadge` متن فارسی هم دارد. شمارنده اعلان خوانده‌نشده پس‌زمینه ثابت `#B91C1C` و متن سفید دارد تا در پوسته تیره با قرمز روشن `#F87171` کنتراستش نشکند. اندازه‌گیری ماشینی WCAG هنوز انجام نشده است.
+
+## تایپوگرافی
+
+وزیرمتن متغیر، فایل محلی `resources/fonts/vazirmatn/Vazirmatn-Variable.woff2`، `font-display: swap`، بدون CDN. بدنه ۱۵px و line-height حدود ۱٫۷. متن فارسی letter-spacing ندارد. مقدار فنی با `font-mono` و `dir="ltr"` است.
+
+## پوسته
+
+حالت‌ها: `light`، `dark`، `system`. مهمان در `localStorage` کلید `rahandaz-theme`. کاربر واردشده با `PATCH /rahandaz/theme` ذخیره می‌کند. اسکریپت `public/assets/theme-init.js` پیش از رندر، `data-theme` را می‌گذارد. `color-scheme` هم ست می‌شود.
+
+## فاصله و واکنش
+
+محتوا تا ۱۴۴۰px. سایدبار ۲۶۴px از `md` به بالا. پایین‌تر از آن دکمه منو و dialog است. جدول داخل `TableFrame` اسکرول افقی دارد. viewportهای ۳۶۰، ۷۶۸، ۱۲۸۰ و ۱۴۴۰ در مرورگر این جلسه بازبینی نشدند.
+
+## RTL
+
+`html` دارای `lang="fa"` و `dir="rtl"` است. فاصله‌ها با کلاس‌های منطقی Tailwind (`ps`، `pe`، `start`) ترجیح داده می‌شوند. آیکون فنی Lucide آینه‌وار نمی‌شود.
+
+## فرم
+
+ورود و تغییر گذرواژه از `useForm` اینرسی استفاده می‌کنند. اعتبار اصلی در FormRequest لاراول است. خطا زیر همان فیلد و با `aria-invalid` می‌آید. دکمه ارسال در `processing` غیرفعال است. React Hook Form کنار اینرسی برای همین فرم‌ها اضافه نشده است.
+
+## تاریخ
+
+PostgreSQL مقدار را UTC نگه می‌دارد. props تاریخ ISO 8601 هستند. `PersianDate` با `Intl` و تقویم `persian` و رقم لاتین، قالب `YYYY/MM/DD HH:mm:ss` را در timezone کاربر نشان می‌دهد. `title` همان ISO است. ورودی شمسی و date picker هنوز صفحه واقعی ندارد و lazy-load نشده است.
+
+## Toast
+
+`notify` در `resources/js/lib/notify.ts` تنها مسیر Sonner است. `FlashToaster` پیام `status` و `error` نشست را نشان می‌دهد. `notify.queued` برای وقتی است که درخواست فقط در صف ثبت شده باشد و نباید موفقیت عملیات را بگوید. هنوز فرمی آن را صدا نمی‌زند، چون عملیات نصب از UI ارسال نمی‌شود.
+
+## نمودار و حرکت
+
+نمودار کشیده نمی‌شود. شمارش `metric_samples` روی داشبورد فقط عدد است. انیمیشن دائمی اضافه نشده است. `prefers-reduced-motion` مدت transition و animation را کوتاه می‌کند.
+
+## دسترسی
+
+کنترل‌ها `button` هستند. منوی موبایل `role="dialog"` و بستن با Escape دارد. فوکوس قابل‌دیدن سراسری است. دام فوکوس کامل داخل dialog هنوز پیاده نشده است.
+
+## نام‌گذاری
+
+کامپوننت رابط در `components/ui`. صفحه در `pages/<area>`. برچسب وضعیت از `lib/labels.ts`. شناسه در URL همان `uuid` است.

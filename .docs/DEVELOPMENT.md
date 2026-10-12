@@ -81,12 +81,15 @@ Schema::create('projects', function (Blueprint $table) {
 ```bash
 npm run build
 npx tsc --noEmit
+npm run lint
+node --experimental-strip-types --test tests/js/datetime.test.ts
 php artisan test
 # پس از اضافه‌کردن ابزارهای مربوط به composer.json:
 # vendor/bin/pint --test
 # vendor/bin/phpstan analyse
-# npm run lint
 ```
+
+کامپوننت تازه در `resources/js/components` و با tokenهای `resources/css/app.css` ساخته می‌شود. صفحه تازه فقط وقتی controller واقعی و Policy دارد اضافه می‌شود. راهنمای ظاهر در `docs/UI_GUIDELINES.md` است.
 
 Test suite شامل PostgreSQL واقعی برای migrations/index/locking/outbox، Redis جدا برای Queue integration، mock/fake local executor برای unit/feature، Playwright برای E2E و VM آزمایشی Ubuntu 22.04/24.04/26.04 برای تغییرات Nginx/systemd/SSH/UFW و installer است. **SQLite جایگزین آزمون invariantهای PostgreSQL نمی‌شود.** قرارداد HTTPS، reverse proxy و base path `/rahandaz/` باید در VM پشت Nginx + PHP-FPM جدا از `artisan serve` آزمایش شود.
 

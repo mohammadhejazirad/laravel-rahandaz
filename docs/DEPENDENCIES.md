@@ -32,6 +32,6 @@
 | clsx | 2.1.1 | MIT |
 | tailwind-merge | 3.7.0 | MIT |
 
-فونت وزیرمتن متغیر در `resources/fonts/vazirmatn/` همراه `OFL.txt` است. آیکون عملیاتی فقط از Lucide می‌آید.
+فونت وزیرمتن متغیر در `resources/fonts/vazirmatn/` همراه `OFL.txt` است. آیکون عملیاتی فقط از Lucide می‌آید. نمایش جلالی از `Intl` با تقویم `persian` است و بسته تاریخ جدا نصب نشده است. تصمیم رد یا پذیرش shadcn، Recharts، React Hook Form، Motion و date picker در `docs/FRONTEND_DEPENDENCIES.md` است.
 
 Horizon، Pest، Ziggy، Wayfinder و SSR نصب نشده‌اند.

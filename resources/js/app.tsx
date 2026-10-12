@@ -1,21 +1,21 @@
-import { createInertiaApp } from "@inertiajs/react";
+import { createInertiaApp, type ResolvedComponent } from "@inertiajs/react";
 import { createRoot } from "react-dom/client";
-import { StrictMode, type ComponentType } from "react";
+import { StrictMode } from "react";
 
-const pages = import.meta.glob("./pages/**/*.tsx", { eager: true });
+const pages = import.meta.glob("./pages/**/*.tsx");
 
 createInertiaApp({
     title: (title) => (title ? `${title} · راه‌انداز` : "راه‌انداز"),
-    resolve: (name) => {
-        const page = pages[`./pages/${name}.tsx`] as
-            | { default: ComponentType }
-            | undefined;
+    resolve: async (name) => {
+        const load = pages[`./pages/${name}.tsx`];
 
-        if (!page) {
+        if (!load) {
             throw new Error(`Missing page: ${name}`);
         }
 
-        return page;
+        const module = (await load()) as { default: ResolvedComponent };
+
+        return module.default;
     },
     setup({ el, App, props }) {
         createRoot(el).render(

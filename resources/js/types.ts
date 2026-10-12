@@ -32,6 +32,9 @@ export type SharedProps = PageProps & {
         name: string;
         base_path: string;
     };
+    notifications: {
+        unread: number;
+    };
 };
 
 export interface HostFacts {

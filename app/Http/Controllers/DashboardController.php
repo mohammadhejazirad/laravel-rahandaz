@@ -5,20 +5,20 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Domain\Jobs\Enums\JobStatus;
+use App\Http\CurrentWorkspace;
+use App\Models\LocalHost;
+use App\Models\MetricSample;
 use App\Models\OperationJob;
+use App\Models\Project;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function __invoke(): Response
+    public function __invoke(Request $request): Response
     {
-        $user = request()->user();
-        abort_if($user === null, 403);
-
-        $workspace = $user->currentWorkspace();
-        abort_if($workspace === null, 403);
-        $this->authorize('view', $workspace);
+        $workspace = CurrentWorkspace::get($request);
 
         $counts = OperationJob::query()
             ->where('workspace_id', $workspace->id)
@@ -43,9 +43,12 @@ class DashboardController extends Controller
                 'running' => (int) ($counts['running'] ?? 0),
                 'failed' => (int) ($counts['failed'] ?? 0),
             ],
-            'modules' => [
-                'projects' => 'not_installed',
-                'servers' => 'not_installed',
+            'inventory' => [
+                'projects' => Project::query()->forWorkspace($workspace->id)->count(),
+                'servers' => LocalHost::query()->forWorkspace($workspace->id)->count(),
+                'metric_samples' => MetricSample::query()
+                    ->whereIn('local_host_id', LocalHost::query()->forWorkspace($workspace->id)->select('id'))
+                    ->count(),
             ],
         ]);
     }

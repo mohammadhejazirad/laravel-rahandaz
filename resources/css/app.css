@@ -25,6 +25,7 @@
     --color-success: #047857;
     --color-warning: #92400e;
     --color-danger: #b91c1c;
+    --color-info: #1d4ed8;
 }
 
 @layer base {
@@ -40,6 +41,7 @@
         --color-success: #34d399;
         --color-warning: #fbbf24;
         --color-danger: #f87171;
+        --color-info: #93c5fd;
     }
 
     html {
@@ -56,5 +58,16 @@
     :focus-visible {
         outline: 2px solid var(--color-accent);
         outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            scroll-behavior: auto !important;
+            transition-duration: 0.01ms !important;
+        }
     }
 }

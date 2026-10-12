@@ -138,7 +138,7 @@ class PanelHttpTest extends TestCase
             ->where('facts', null));
     }
 
-    public function test_dashboard_reports_real_queue_counts_and_uninstalled_modules(): void
+    public function test_dashboard_reports_real_queue_counts_and_inventory(): void
     {
         [$user, $workspace] = $this->panelAccount(setupComplete: true);
 
@@ -156,8 +156,9 @@ class PanelHttpTest extends TestCase
             ->where('execution_mode', 'disabled')
             ->where('operations.queued', 1)
             ->where('operations.failed', 0)
-            ->where('modules.projects', 'not_installed')
-            ->where('modules.servers', 'not_installed'));
+            ->where('inventory.projects', 0)
+            ->where('inventory.servers', 0)
+            ->where('inventory.metric_samples', 0));
     }
 
     public function test_theme_preference_is_saved_for_the_authenticated_user(): void

@@ -23,6 +23,7 @@
 - ورود موفق `last_login_at` و `last_activity_at` را با `forceFill` می‌نویسد. این ستون‌ها fillable نیستند.
 - مسیر `GET /rahandaz/projects/{project}` مدل را با `uuid` resolve می‌کند، `id` عددی را در JSON نمی‌گذارد، شناسه غیر v7 را ۴۰۴ می‌کند و عضویت workspace دیگر را ۴۰۳ می‌کند.
 - Inertia کاربر و workspace فیلد `uuid` می‌فرستد. نوع عمومی TypeScript برند `PublicUuid` است.
+- پوسته‌های واقعی پنل: داشبورد، راه‌اندازی فقط-خواندنی، فهرست سرور محلی، کاتالوگ، میرور، پروژه، عملیات و لاگ ذخیره‌شده، اعلان، گزارش فعالیت برای مالک و مدیر، و تنظیمات نمایه. جزئیات و مسیرهای ساخته‌نشده در `docs/UI_PAGE_INVENTORY.md`. هیچ دکمه نصب، اعمال میرور، استقرار یا لغو جعلی اضافه نشده است.
 
 ## شناسه‌ها — 2026-10-12
 
@@ -40,7 +41,8 @@ AAD پاکت credential از id دهدهی workspace استفاده می‌کن�
 - job نگهداری متریک و لاگ، چرخش کلید credential، نقش جدا برای migration، RLS، reconciliation لیز، کنترلر webhook، و probe زنده میرور.
 - `manage_secrets` برای operator در اسکیما هست و `openFor()` هنوز فقط owner و admin را راه می‌دهد.
 - DNS rebinding و SSRF بعد از resolve برای GitLab خودمیزبان.
-- بازبینی چهار viewport و کنتراست در مرورگر.
+- بازبینی چهار viewport در مرورگر. کنتراست به‌صورت اندازه‌گیری‌شده با ابزار WCAG ثبت نشده است.
+- Wizard چندمرحله‌ای، Git، دامنه، دیتابیس، پشتیبان، نمودار مانیتورینگ، کاربران و کنسول فقط-خواندنی. این‌ها در منو «آماده نیست» هستند.
 - قرارداد امن برای علامت‌زدن پایان راه‌اندازی. دکمه موفقیت ساختگی اضافه نشده است.
 - reconciliation، helper ممتاز، systemd، installer، میرورها، جلالی.
 - اندازه‌گیری RAM/CPU. هدف ۵۱۲MiB و ۰.۵ vCPU هنوز benchmark نشده است.
@@ -54,10 +56,12 @@ AAD پاکت credential از id دهدهی workspace استفاده می‌کن�
 
 | فرمان | نتیجه |
 | --- | --- |
-| `XDEBUG_MODE=off php artisan test --compact --display-warnings` | 45 passed، 367 assertions، بعد از قرارداد BIGINT + UUIDv7، روی `rahandaz_test` |
+| `XDEBUG_MODE=off php artisan test --compact --display-warnings` | 50 passed، 519 assertions، روی `rahandaz_test`، شامل صفحات خواندنی پنل |
+| `node --experimental-strip-types --test tests/js/datetime.test.ts` | ۳ آزمون جلالی، از جمله مرز سال کبیسه ۱۴۰۳ |
+| `npx tsc --noEmit` و `npm run lint` | خروج ۰ |
+| `npm run build` | خروج ۰. chunk اصلی `app` حدود ۳۵۱KiB و gzip حدود ۱۱۰KiB. فونت وزیرمتن ۱۱۱KiB. CSS حدود ۱۸KiB. صفحات جدا code-split شده‌اند |
 | `php artisan migrate --force` | forward روی `rahandaz`؛ اول جدول‌ها از ۱۸ به ۷۲ رسیدند، بعد `120000` و `120100` همان ۷۲ جدول را به کلید `bigint` بردند. `migrations` اکنون ۱۶ ردیف است. `migrate:fresh` روی این پایگاه اجرا نشد |
-| `npx tsc --noEmit` | خروج ۰ بعد از عوض شدن شناسه Inertia به `uuid` |
-| `vendor/bin/pint` | روی مدل‌ها، دامنه، HTTP، migration و تست شناسه بدون خطای باقی‌مانده |
+| `vendor/bin/pint` | روی مدل‌ها، دامنه، HTTP، migration و تست‌های پنل بدون خطای باقی‌مانده |
 | `php artisan rahandaz:doctor` | در آزمون قبلی هسته خروج ۰ بود؛ بعد از migration و cutover دوباره اجرا نشد |
 
 بازبینی viewport در مرورگر انجام نشده است. `EXPLAIN (ANALYZE, BUFFERS)` اجرا نشد چون ردیف دامنه صفر بود؛ بهبود سرعت ادعا نمی‌شود. PHPStan و benchmark رم و CPU اجرا نشده‌اند.

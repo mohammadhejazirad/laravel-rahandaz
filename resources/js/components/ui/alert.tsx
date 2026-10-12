@@ -2,12 +2,13 @@ import type { HTMLAttributes } from 'react';
 import { cn } from '@/lib/cn';
 
 type AlertProps = HTMLAttributes<HTMLDivElement> & {
-    tone?: 'warning' | 'danger' | 'neutral';
+    tone?: 'warning' | 'danger' | 'neutral' | 'info';
 };
 
 const tones = {
     warning: 'border-warning/40 bg-surface text-warning',
     danger: 'border-danger/40 bg-surface text-danger',
+    info: 'border-info/40 bg-surface text-info',
     neutral: 'border-line bg-surface-muted text-ink',
 };
 

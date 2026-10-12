@@ -53,6 +53,10 @@ PostgreSQL منبع نهایی وضعیت است. dispatcher ردیف‌های O
 
 `uuid` ترتیب ردیف را در URL پنهان می‌کند و مجوز دسترسی نیست. Policy و عضویت workspace بعد از resolve شدن منبع جدا بررسی می‌شوند. جدول‌های فریم‌ورک و pivot بدون هویت مستقل این جفت شناسه را ندارند؛ استثنا باید در ADR 0004 ثبت شود.
 
+## Frontend
+
+صفحات Inertia در `resources/js/pages` هستند و هر صفحه یک chunk جدا می‌گیرد. Layout مهمان و پنل جداست. داده از controller با allowlist می‌آید و `id` عددی در props عمومی نیست. فرم‌های ساده ورود و گذرواژه از `useForm` خود Inertia استفاده می‌کنند. Toast فقط پیام session را نشان می‌دهد و موفقیت نصب را از روی کلیک اعلام نمی‌کند. نمودار و تقویم انتخابی تا وقتی داده یا فرم واقعی نباشد بارگذاری نمی‌شوند. جزئیات در `docs/UI_GUIDELINES.md`.
+
 ## Deployment بدون Docker
 
 هر Project چند Environment مستقل دارد. برای هر Environment: UID، path release/shared، port یا FPM pool، secret، database role، domain و Nginx site مستقل ذخیره می‌شود. repo GitHub/GitLab و branch/tag انتخابی به commit SHA ثابت resolve می‌شود؛ webhook فقط branch مطلوب و delivery id امضاشده را می‌پذیرد. static release از symlink، Laravel از release + PHP-FPM/OPcache policy، Next/Nuxt از blue-green روی portهای مستقل استفاده می‌کنند. healthcheck از route واقعی، release marker و rollout/rollback برای هر deployment ثبت می‌شوند. zero downtime **مشروط** به capacity، migration سازگار و drain است و تضمین مطلق نیست.

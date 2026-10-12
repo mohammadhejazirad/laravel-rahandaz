@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Models\PanelNotification;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -53,6 +54,13 @@ class HandleInertiaRequests extends Middleware
             'app' => [
                 'name' => 'راه‌انداز',
                 'base_path' => (string) config('rahandaz.base_path'),
+            ],
+            'notifications' => [
+                'unread' => $user === null || $membership === null ? 0 : PanelNotification::query()
+                    ->where('workspace_id', $membership->workspace_id)
+                    ->where('recipient_id', $user->id)
+                    ->whereNull('read_at')
+                    ->count(),
             ],
         ];
     }
