@@ -118,7 +118,7 @@ return new class extends Migration
             create or replace function rahandaz_grant_same_workspace() returns trigger
             language plpgsql as $$
             declare
-                found uuid;
+                found bigint;
             begin
                 if new.resource_type = 'project' then
                     select workspace_id into found from projects where id = new.resource_id;

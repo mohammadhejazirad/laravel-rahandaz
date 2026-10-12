@@ -1,6 +1,6 @@
 # امنیت لایه داده راه‌انداز
 
-اولویت این لایه: محرمانگی راز، بعد یکپارچگی ارجاع، بعد دوام وضعیت. UUID و `workspace_id` به‌تنهایی مجوز دسترسی نیستند. RLS فعال نشده است و جایگزین policy لاراول نیست.
+اولویت این لایه: محرمانگی راز، بعد یکپارچگی ارجاع، بعد دوام وضعیت. شناسه عمومی `uuid` ترتیب `id` عددی را در URL پنهان می‌کند و به‌تنهایی مجوز دسترسی نیست. `workspace_id` عددی هم مجوز نیست. RLS فعال نشده است و جایگزین policy لاراول نیست.
 
 ## رمزنگاری
 
@@ -10,7 +10,7 @@
 
 1. کلید اصلی فایل ۳۲ بایت خارج از git و خارج از پایگاه است. `APP_KEY` این کلید نیست.
 2. KEK با HKDF-SHA256 و info ثابت `rahandaz-envelope-kek-v1` از کلید اصلی و salt تصادفی ۱۶ بایت ساخته می‌شود.
-3. DEK تصادفی، plaintext را با libsodium XChaCha20-Poly1305-IETF رمز می‌کند. AAD برای credential برابر `{workspaceId}|credential|{type}` است.
+3. DEK تصادفی، plaintext را با libsodium XChaCha20-Poly1305-IETF رمز می‌کند. AAD برای credential برابر `{workspaceId}|credential|{type}` است. `workspaceId` نمایش دهدهی `workspaces.id` است، نه `uuid`. info ایندکس کور هم workspace را با همین id دهدهی جدا می‌کند. پیش از این قرارداد، پایگاه توسعه صفر ردیف `credentials` داشت؛ پاکت قبلی برای تبدیل وجود نداشت.
 4. DEK با AAD برابر `dek|{keyVersion}` پیچیده می‌شود.
 5. ستون `envelope` این قطعات را به صورت jsonb نگه می‌دارد. الگوریتم مجاز فقط `xchacha20poly1305-ietf` است.
 6. fingerprint یک HMAC کور با info جداگانه `rahandaz-blind-index-v1` است، نه hash عمومی plaintext.
@@ -24,6 +24,10 @@
 `Credential::$hidden` شامل `envelope` است. `revoked_at` در fillable نیست. `CredentialStore::open()` برای مسیرهای داخلی موجود مانده است. `openFor()` فقط عضویت owner یا admin همان workspace را، و فقط اگر credential ابطال نشده باشد، رمزگشایی می‌کند و یک `credential_access_events` بدون plaintext می‌نویسد. مجوز `manage_secrets` برای operator در اسکیما هست و هنوز در `openFor()` اعمال نشده است.
 
 Payload صف فقط `operation_job_id` دارد. `PlanGuard` کلیدهای شبیه secret و مقدارهای Bearer یا URL دارای userinfo را پیش از insert در plan، پاسخ setup و متن تنظیم رد می‌کند.
+
+## شناسه و افشا
+
+`id` عددی در Inertia و JSON عمومی نیست. Route مدل با `uuid` resolve می‌شود. مقدار غیر v7 پیش از مقایسه با ستون `uuid` رد می‌شود تا خطای cast پستگرس تراکنش را نشکند. دانستن `uuid` یک منبع در workspace دیگر مجوز دیدن آن را نمی‌دهد؛ Policy عضویت را جدا بررسی می‌کند. payload صف فقط `operation_job_id` را به‌صورت رشته دهدهی دارد، نه عدد JSON. شناسه GitHub/GitLab در ستون provider جدا ذخیره می‌شود و با `id` یا `uuid` یکی گرفته نمی‌شود.
 
 ## کلید
 

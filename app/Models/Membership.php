@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Domain\Accounts\Enums\MembershipRole;
-use App\Models\Concerns\HasUuidV7;
+use App\Models\Concerns\HasPublicUuid;
 use Database\Factories\MembershipFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Membership extends Model
 {
     /** @use HasFactory<MembershipFactory> */
-    use HasFactory, HasUuidV7;
+    use HasFactory, HasPublicUuid;
 
     /**
      * @return array<string, string>

@@ -7,7 +7,7 @@ namespace App\Models;
 use App\Domain\Jobs\PlanGuard;
 use App\Domain\Setup\Enums\SetupState;
 use App\Models\Concerns\BelongsToWorkspace;
-use App\Models\Concerns\HasUuidV7;
+use App\Models\Concerns\HasPublicUuid;
 use Database\Factories\SetupSessionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class SetupSession extends Model
 {
     /** @use HasFactory<SetupSessionFactory> */
-    use BelongsToWorkspace, HasFactory, HasUuidV7;
+    use BelongsToWorkspace, HasFactory, HasPublicUuid;
 
     protected static function booted(): void
     {

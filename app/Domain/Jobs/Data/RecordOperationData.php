@@ -10,8 +10,8 @@ final readonly class RecordOperationData
      * @param  array<string, mixed>  $plan
      */
     public function __construct(
-        public string $workspaceId,
-        public string $actorId,
+        public int|string $workspaceId,
+        public int|string $actorId,
         public string $type,
         public string $idempotencyKey,
         public array $plan,

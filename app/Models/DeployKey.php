@@ -6,7 +6,7 @@ namespace App\Models;
 
 use App\Domain\Git\Enums\DeployKeyState;
 use App\Models\Concerns\BelongsToWorkspace;
-use App\Models\Concerns\HasUuidV7;
+use App\Models\Concerns\HasPublicUuid;
 use Database\Factories\DeployKeyFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class DeployKey extends Model
 {
     /** @use HasFactory<DeployKeyFactory> */
-    use BelongsToWorkspace, HasFactory, HasUuidV7;
+    use BelongsToWorkspace, HasFactory, HasPublicUuid;
 
     /**
      * @return array<string, string>

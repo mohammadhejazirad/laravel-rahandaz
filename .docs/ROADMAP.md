@@ -6,7 +6,7 @@
 
 | مرحله | کار اصلی | معیار پذیرش |
 | --- | --- | --- |
-| 0 — هسته | Laravel 13، Inertia 3/React 19/TypeScript، Tailwind 4، PostgreSQL، Redis queue/cache، UUIDv7، Key Management، lockfiles | نصب dependency، migration، test/typecheck/build و policy سالم |
+| 0 — هسته | Laravel 13، Inertia 3/React 19/TypeScript، Tailwind 4، PostgreSQL، Redis queue/cache، کلید BIGINT و شناسه عمومی UUIDv7، Key Management، lockfiles | نصب dependency، migration، test/typecheck/build و policy سالم |
 | 1 — UI و حساب | فارسی/RTL، Vazirmatn، light/dark، Lucide، Sonner Toast، auth، RBAC/Policy، Wizard probe read-only | تجربه mobile/desktop و permission/first-login tests |
 | 2 — موتور عملیات | `Job/Step/Outbox/Lease` PostgreSQL، Laravel Queue Redis، workerهای کم‌مصرف systemd، scheduler timer، report و reconcile | duplicate/crash/retry/cancel بدون mutation هم‌زمان |
 | 3 — نصب تک‌دستوری | release تایید امضا، installer idempotent، user `rahandaz` non-root/locked، helper allowlisted، PHP-FPM/Nginx/Postgres/Redis، Welcome static | copy/paste واقعی فرمان README و healthcheck روی ۳ Ubuntu |

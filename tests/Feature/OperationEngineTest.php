@@ -145,7 +145,7 @@ class OperationEngineTest extends TestCase
         $this->assertStringContainsString('where', strtolower((string) $indexes['operation_jobs_active_idx']->indexdef));
     }
 
-    private function operation(string $workspaceId, string $actorId, string $key, array $plan): RecordOperationData
+    private function operation(int|string $workspaceId, int|string $actorId, string $key, array $plan): RecordOperationData
     {
         return new RecordOperationData(
             workspaceId: $workspaceId,

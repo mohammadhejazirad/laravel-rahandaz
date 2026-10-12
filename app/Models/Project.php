@@ -8,7 +8,7 @@ use App\Domain\Projects\Enums\MigrationPolicy;
 use App\Domain\Projects\Enums\ProjectStatus;
 use App\Domain\Projects\Enums\ProjectType;
 use App\Models\Concerns\BelongsToWorkspace;
-use App\Models\Concerns\HasUuidV7;
+use App\Models\Concerns\HasPublicUuid;
 use Database\Factories\ProjectFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Project extends Model
 {
     /** @use HasFactory<ProjectFactory> */
-    use BelongsToWorkspace, HasFactory, HasUuidV7;
+    use BelongsToWorkspace, HasFactory, HasPublicUuid;
 
     /**
      * @return array<string, string>

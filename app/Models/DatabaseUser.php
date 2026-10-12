@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToWorkspace;
-use App\Models\Concerns\HasUuidV7;
+use App\Models\Concerns\HasPublicUuid;
 use Database\Factories\DatabaseUserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class DatabaseUser extends Model
 {
     /** @use HasFactory<DatabaseUserFactory> */
-    use BelongsToWorkspace, HasFactory, HasUuidV7;
+    use BelongsToWorkspace, HasFactory, HasPublicUuid;
 
     /**
      * @return array<string, string>

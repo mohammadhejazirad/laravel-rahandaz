@@ -17,8 +17,10 @@ final class OperationRunner
         private readonly JobLogger $logger,
     ) {}
 
-    public function run(string $operationJobId): void
+    public function run(int|string $operationJobId): void
     {
+        $operationJobId = (string) $operationJobId;
+
         DB::transaction(function () use ($operationJobId): void {
             $job = OperationJob::query()->lockForUpdate()->find($operationJobId);
 

@@ -7,7 +7,7 @@ namespace App\Models;
 use App\Domain\Accounts\Enums\MembershipRole;
 use App\Domain\Accounts\Enums\Theme;
 use App\Domain\Accounts\Enums\UserStatus;
-use App\Models\Concerns\HasUuidV7;
+use App\Models\Concerns\HasPublicUuid;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -23,7 +23,7 @@ use Illuminate\Support\Str;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasUuidV7, Notifiable;
+    use HasFactory, HasPublicUuid, Notifiable;
 
     protected static function booted(): void
     {

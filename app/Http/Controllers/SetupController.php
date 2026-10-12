@@ -25,7 +25,7 @@ class SetupController extends Controller
         return Inertia::render('setup/index', [
             'holding' => ! $isOwner,
             'workspace' => [
-                'id' => $workspace->id,
+                'uuid' => $workspace->uuid,
                 'name' => $workspace->name,
                 'setup_completed_at' => $workspace->setup_completed_at?->toIso8601String(),
             ],

@@ -7,7 +7,7 @@ namespace App\Models;
 use App\Domain\Audit\Enums\AuditResult;
 use App\Domain\Audit\Enums\CredentialAccessAction;
 use App\Models\Concerns\BelongsToWorkspace;
-use App\Models\Concerns\HasUuidV7;
+use App\Models\Concerns\HasPublicUuid;
 use Database\Factories\CredentialAccessEventFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class CredentialAccessEvent extends Model
 {
     /** @use HasFactory<CredentialAccessEventFactory> */
-    use BelongsToWorkspace, HasFactory, HasUuidV7;
+    use BelongsToWorkspace, HasFactory, HasPublicUuid;
 
     /**
      * @return array<string, string>

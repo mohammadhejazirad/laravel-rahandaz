@@ -6,13 +6,14 @@
 
 مرحله ۰ (هسته) پیاده‌سازی و تست شده است. بخش قابل آزمون مرحله ۱ (ورود، پوسته، probe فقط-خواندنی) هم ساخته شده، ولی بازبینی viewport در مرورگر انجام نشده و بنابراین مرحله ۱ بسته نیست.
 
-اسکیمای PostgreSQL نسخه اول اضافه و روی پایگاه آزمایشی و پایگاه توسعه migrate شده است. رفتار اجرایی مرحله‌های ۲ تا ۶ هنوز ساخته نشده است. `RAHANDAZ_EXECUTION_MODE` برابر `disabled` مانده و runner هنوز هیچ job یا deployment را `succeeded` نمی‌کند.
+اسکیمای PostgreSQL نسخه اول روی پایگاه توسعه migrate شده و سپس قرارداد شناسه به کلید اصلی `bigint` و شناسه عمومی UUIDv7 تغییر کرده است. رفتار اجرایی مرحله‌های ۲ تا ۶ هنوز ساخته نشده است. `RAHANDAZ_EXECUTION_MODE` برابر `disabled` مانده و runner هنوز هیچ job یا deployment را `succeeded` نمی‌کند.
 
 ## انجام‌شده
 
 - Laravel 13.35، Inertia 3، React 19، TypeScript سخت‌گیر، Tailwind 4، Vite.
 - PostgreSQL برای حساب، نشست، عملیات و outbox. Redis صف و cache جدا.
-- UUIDv7، مالک اولیه، workspace، policy، پاکت رمز، canary، doctor.
+- شناسه: `id` از نوع BIGINT برای کلید اصلی و رابطه داخلی، `uuid` از نوع native UUIDv7 برای API و URL. Trait `HasPublicUuid`، trigger `rahandaz_guard_public_uuid`، و cutover در `IdentityCutover`. جزئیات در `docs/adr/0004-bigint-primary-key-uuidv7-public-identifier.md`.
+- مالک اولیه، workspace، policy، پاکت رمز، canary، doctor.
 - موتور عملیات در حد fail-closed: ثبت، idempotency، outbox، lease بدون تصاحب lease منقضی. هیچ عملیاتی `succeeded` نمی‌شود.
 - صفحات واقعی: ورود، تغییر گذرواژه، راه‌اندازی فقط-خواندنی، داشبورد شمارش عملیات، خطای Inertia.
 - پوسته روشن/تیره/سیستم، Vazirmatn محلی، RTL، Lucide، Sonner فقط برای flash واقعی.
@@ -20,6 +21,18 @@
 - گاردهای کوچک دامنه: ثبت deployment با قفل محیط، ثبت delivery وب‌هوک بدون payload، بررسی URL عمومی، زنجیره hash حسابرسی، و `CredentialStore::openFor()` با رویداد دسترسی.
 - Seeder کاتالوگ بسته با lifecycle `untested` و میرور candidate. کاربر یا توکن نمونه ساخته نمی‌شود.
 - ورود موفق `last_login_at` و `last_activity_at` را با `forceFill` می‌نویسد. این ستون‌ها fillable نیستند.
+- مسیر `GET /rahandaz/projects/{project}` مدل را با `uuid` resolve می‌کند، `id` عددی را در JSON نمی‌گذارد، شناسه غیر v7 را ۴۰۴ می‌کند و عضویت workspace دیگر را ۴۰۳ می‌کند.
+- Inertia کاربر و workspace فیلد `uuid` می‌فرستد. نوع عمومی TypeScript برند `PublicUuid` است.
+
+## شناسه‌ها — 2026-10-12
+
+پایگاه توسعه `rahandaz` پیش از تبدیل فقط ۱۴ ردیف در `migrations` داشت. `users` و `credentials` صفر بودند. migrationهای ایجاد جدول در فایل بازنویسی شدند تا نصب تازه و `rahandaz_test` مستقیم BIGINT بسازند. تاریخچه git amend نشد. `migrate:fresh` روی `rahandaz` اجرا نشد.
+
+`php artisan migrate --force` فقط `2026_10_12_120000` و `2026_10_12_120100` را اعمال کرد. بعد از آن: ۷۲ جدول، ۱۶ ردیف migration، `users.id` برابر `int8`، `users.uuid` برابر native `uuid` و NOT NULL، `sessions.user_id` برابر `int8`، `audit_events.resource_id` هنوز `uuid`، `failed_jobs.uuid` هنوز `varchar`، ۶۴ trigger نگهبان، تابع `rahandaz_guard_public_uuid`، ۱۲۶ کلید خارجی، و همچنان فقط `migrations` غیرخالی. UUID دامنه وجود نداشت که regenerate شود. `down()` این تبدیل استثنا می‌دهد.
+
+آزمون PHPUnit مسیر cutover را اجرا نمی‌کند، چون `RefreshDatabase` اسکیما را از migrationهای بازنویسی‌شده می‌سازد و `120000` آنجا بی‌اثر است. یک dry-run قبلی داخل transaction روی `rahandaz` برگشت داده شد و پیش از migrate واقعی اسکیما را uuid باقی گذاشت. خود migrate واقعی جدا اجرا شد.
+
+AAD پاکت credential از id دهدهی workspace استفاده می‌کند. این تغییر فقط به این دلیل امن بود که شمارش `credentials` پیش از migrate صفر بود.
 
 ## مانده
 
@@ -35,20 +48,19 @@
 
 ## تصمیم
 
-`docs/adr/0001-laravel-modular-monolith.md`
+`docs/adr/0001-laravel-modular-monolith.md` و برای شناسه `docs/adr/0004-bigint-primary-key-uuidv7-public-identifier.md`. بند شناسه ADR 0001 منسوخ شده و متن تاریخی‌اش مانده است.
 
 ## آزمون واقعی — 2026-10-12
 
 | فرمان | نتیجه |
 | --- | --- |
-| `XDEBUG_MODE=off php artisan test --compact` | 44 passed، 321 assertions، بعد از اسکیمای نسخه اول |
-| `php artisan migrate --force` | forward روی `rahandaz`؛ جدول‌های پایه از ۱۸ به ۷۲ رسید، شامل `migrations`. `migrate:fresh` روی این پایگاه اجرا نشد |
-| `vendor/bin/pint` | روی مدل‌ها، دامنه، factory، seeder و تست‌های جدید بدون خطای سبک اجرا شد |
-| `php artisan rahandaz:doctor` | در آزمون قبلی هسته خروج ۰ بود؛ بعد از migration دوباره اجرا نشد |
+| `XDEBUG_MODE=off php artisan test --compact --display-warnings` | 45 passed، 367 assertions، بعد از قرارداد BIGINT + UUIDv7، روی `rahandaz_test` |
+| `php artisan migrate --force` | forward روی `rahandaz`؛ اول جدول‌ها از ۱۸ به ۷۲ رسیدند، بعد `120000` و `120100` همان ۷۲ جدول را به کلید `bigint` بردند. `migrations` اکنون ۱۶ ردیف است. `migrate:fresh` روی این پایگاه اجرا نشد |
+| `npx tsc --noEmit` | خروج ۰ بعد از عوض شدن شناسه Inertia به `uuid` |
+| `vendor/bin/pint` | روی مدل‌ها، دامنه، HTTP، migration و تست شناسه بدون خطای باقی‌مانده |
+| `php artisan rahandaz:doctor` | در آزمون قبلی هسته خروج ۰ بود؛ بعد از migration و cutover دوباره اجرا نشد |
 
-آزمون‌های قبلی پوسته (`tsc`، lint، build) بعد از این تغییر دیتابیس دوباره اجرا نشدند چون UI عوض نشده است. مرورگر در دسترس نبود.
-
-`EXPLAIN (ANALYZE, BUFFERS)`، PHPStan، benchmark رم و CPU، و بازبینی viewport اجرا نشده‌اند.
+بازبینی viewport در مرورگر انجام نشده است. `EXPLAIN (ANALYZE, BUFFERS)` اجرا نشد چون ردیف دامنه صفر بود؛ بهبود سرعت ادعا نمی‌شود. PHPStan و benchmark رم و CPU اجرا نشده‌اند.
 
 ## محدودیت محیط
 

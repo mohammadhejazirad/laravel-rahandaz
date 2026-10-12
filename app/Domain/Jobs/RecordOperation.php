@@ -61,7 +61,7 @@ final class RecordOperation
 
             $job->outboxMessages()->create([
                 'event_type' => 'job.queued',
-                'payload' => ['operation_job_id' => $job->id],
+                'payload' => ['operation_job_id' => (string) $job->id],
                 'available_at' => now(),
                 'attempt' => 0,
             ]);

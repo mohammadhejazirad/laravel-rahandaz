@@ -8,8 +8,10 @@ use App\Infrastructure\Secrets\EnvelopeCipher;
 use App\Infrastructure\Secrets\KeyCanary;
 use App\Infrastructure\Secrets\MasterKey;
 use App\Models\OperationJob;
+use App\Models\Project;
 use App\Models\Workspace;
 use App\Policies\OperationJobPolicy;
+use App\Policies\ProjectPolicy;
 use App\Policies\WorkspacePolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -31,5 +33,6 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::policy(Workspace::class, WorkspacePolicy::class);
         Gate::policy(OperationJob::class, OperationJobPolicy::class);
+        Gate::policy(Project::class, ProjectPolicy::class);
     }
 }

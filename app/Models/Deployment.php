@@ -9,7 +9,7 @@ use App\Domain\Projects\Enums\DeploymentTrigger;
 use App\Domain\Projects\Enums\PhaseStatus;
 use App\Domain\Projects\Enums\RollbackStatus;
 use App\Models\Concerns\BelongsToWorkspace;
-use App\Models\Concerns\HasUuidV7;
+use App\Models\Concerns\HasPublicUuid;
 use Database\Factories\DeploymentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Deployment extends Model
 {
     /** @use HasFactory<DeploymentFactory> */
-    use BelongsToWorkspace, HasFactory, HasUuidV7;
+    use BelongsToWorkspace, HasFactory, HasPublicUuid;
 
     /**
      * @return array<string, string>

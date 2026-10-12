@@ -12,10 +12,11 @@ return new class extends Migration
         DB::statement('alter table managed_services add constraint managed_services_id_host_uniq unique (id, local_host_id)');
 
         Schema::create('database_instances', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('workspace_id');
-            $table->uuid('local_host_id');
-            $table->uuid('managed_service_id')->nullable();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->unsignedBigInteger('workspace_id');
+            $table->unsignedBigInteger('local_host_id');
+            $table->unsignedBigInteger('managed_service_id')->nullable();
             $table->string('engine', 32);
             $table->string('version', 32);
             $table->unsignedSmallInteger('port')->nullable();
@@ -38,11 +39,12 @@ return new class extends Migration
         });
 
         Schema::create('database_users', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('database_instance_id');
-            $table->uuid('workspace_id');
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->unsignedBigInteger('database_instance_id');
+            $table->unsignedBigInteger('workspace_id');
             $table->string('username', 63);
-            $table->uuid('credential_id');
+            $table->unsignedBigInteger('credential_id');
             $table->string('auth_method', 32);
             $table->string('status', 16)->default('active');
             $table->timestampsTz();
@@ -56,12 +58,13 @@ return new class extends Migration
         });
 
         Schema::create('project_databases', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('database_instance_id');
-            $table->uuid('environment_id');
-            $table->uuid('workspace_id');
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->unsignedBigInteger('database_instance_id');
+            $table->unsignedBigInteger('environment_id');
+            $table->unsignedBigInteger('workspace_id');
             $table->string('name', 63);
-            $table->uuid('owner_database_user_id');
+            $table->unsignedBigInteger('owner_database_user_id');
             $table->string('status', 16)->default('requested');
             $table->boolean('protected')->default(false);
             $table->timestampsTz();
@@ -79,10 +82,11 @@ return new class extends Migration
         });
 
         Schema::create('database_user_grants', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('database_instance_id');
-            $table->uuid('database_user_id');
-            $table->uuid('project_database_id');
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->unsignedBigInteger('database_instance_id');
+            $table->unsignedBigInteger('database_user_id');
+            $table->unsignedBigInteger('project_database_id');
             $table->string('privilege', 16);
             $table->timestampsTz();
 
@@ -94,21 +98,22 @@ return new class extends Migration
         });
 
         Schema::create('backups', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('workspace_id');
-            $table->uuid('local_host_id')->nullable();
-            $table->uuid('project_database_id')->nullable();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->unsignedBigInteger('workspace_id');
+            $table->unsignedBigInteger('local_host_id')->nullable();
+            $table->unsignedBigInteger('project_database_id')->nullable();
             $table->string('backup_type', 32);
             $table->string('storage', 16);
             $table->string('artifact_path', 420);
             $table->string('checksum_sha256', 64)->nullable();
             $table->unsignedBigInteger('size_bytes')->default(0);
             $table->string('encryption_status', 32);
-            $table->uuid('credential_id')->nullable();
+            $table->unsignedBigInteger('credential_id')->nullable();
             $table->timestampTz('retention_until')->nullable();
             $table->timestampTz('verified_at')->nullable();
             $table->string('state', 16);
-            $table->uuid('operation_job_id')->nullable();
+            $table->unsignedBigInteger('operation_job_id')->nullable();
             $table->boolean('protected')->default(false);
             $table->timestampTz('started_at')->nullable();
             $table->timestampTz('finished_at')->nullable();
@@ -127,13 +132,14 @@ return new class extends Migration
         });
 
         Schema::create('restore_operations', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('backup_id');
-            $table->uuid('workspace_id');
-            $table->foreignUuid('actor_id')->constrained('users')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->unsignedBigInteger('backup_id');
+            $table->unsignedBigInteger('workspace_id');
+            $table->foreignId('actor_id')->constrained('users')->restrictOnDelete();
             $table->string('status', 16);
             $table->string('approval_state', 16)->default('pending');
-            $table->uuid('operation_job_id')->nullable();
+            $table->unsignedBigInteger('operation_job_id')->nullable();
             $table->string('failure_code', 64)->nullable();
             $table->timestampTz('started_at')->nullable();
             $table->timestampTz('finished_at')->nullable();

@@ -6,7 +6,7 @@ namespace App\Models;
 
 use App\Domain\Mirrors\Enums\MirrorConfigState;
 use App\Domain\Mirrors\Enums\MirrorMode;
-use App\Models\Concerns\HasUuidV7;
+use App\Models\Concerns\HasPublicUuid;
 use Database\Factories\MirrorConfigurationFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class MirrorConfiguration extends Model
 {
     /** @use HasFactory<MirrorConfigurationFactory> */
-    use HasFactory, HasUuidV7;
+    use HasFactory, HasPublicUuid;
 
     /**
      * @return array<string, string>

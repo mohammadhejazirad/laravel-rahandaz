@@ -4,7 +4,7 @@ import { AppLayout } from "@/layouts/app-layout";
 
 interface DashboardPageProps {
     workspace: {
-        id: string;
+        uuid: string;
         name: string;
         slug: string;
     };

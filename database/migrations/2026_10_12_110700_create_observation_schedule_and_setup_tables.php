@@ -11,8 +11,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('schedules', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('workspace_id')->constrained('workspaces')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('workspace_id')->constrained('workspaces')->restrictOnDelete();
             $table->string('operation_key', 64);
             $table->string('timezone', 64);
             $table->string('cron_expression', 80);
@@ -21,16 +22,17 @@ return new class extends Migration
             $table->boolean('enabled')->default(false);
             $table->string('overlap_policy', 16)->default('skip');
             $table->string('resource_type', 64)->nullable();
-            $table->uuid('resource_id')->nullable();
+            $table->unsignedBigInteger('resource_id')->nullable();
             $table->timestampsTz();
 
             $table->index(['workspace_id', 'operation_key'], 'schedules_operation_idx');
         });
 
         Schema::create('scheduled_operation_runs', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('schedule_id')->constrained('schedules')->restrictOnDelete();
-            $table->foreignUuid('operation_job_id')->nullable()->constrained('operation_jobs')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('schedule_id')->constrained('schedules')->restrictOnDelete();
+            $table->foreignId('operation_job_id')->nullable()->constrained('operation_jobs')->restrictOnDelete();
             $table->timestampTz('scheduled_for');
             $table->string('state', 16);
             $table->timestampsTz();
@@ -39,9 +41,10 @@ return new class extends Migration
         });
 
         Schema::create('metric_samples', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('local_host_id')->constrained('local_hosts')->restrictOnDelete();
-            $table->foreignUuid('managed_service_id')->nullable()->constrained('managed_services')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('local_host_id')->constrained('local_hosts')->restrictOnDelete();
+            $table->foreignId('managed_service_id')->nullable()->constrained('managed_services')->restrictOnDelete();
             $table->string('source', 16);
             $table->timestampTz('collected_at');
             $table->timestampTz('observed_at');
@@ -56,9 +59,10 @@ return new class extends Migration
         });
 
         Schema::create('alert_rules', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('workspace_id')->constrained('workspaces')->restrictOnDelete();
-            $table->foreignUuid('local_host_id')->constrained('local_hosts')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('workspace_id')->constrained('workspaces')->restrictOnDelete();
+            $table->foreignId('local_host_id')->constrained('local_hosts')->restrictOnDelete();
             $table->string('metric', 32);
             $table->decimal('threshold', 20, 4);
             $table->unsignedInteger('duration_seconds');
@@ -71,9 +75,10 @@ return new class extends Migration
         });
 
         Schema::create('alert_events', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('alert_rule_id')->constrained('alert_rules')->restrictOnDelete();
-            $table->foreignUuid('workspace_id')->constrained('workspaces')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('alert_rule_id')->constrained('alert_rules')->restrictOnDelete();
+            $table->foreignId('workspace_id')->constrained('workspaces')->restrictOnDelete();
             $table->string('state', 16);
             $table->timestampTz('started_at');
             $table->timestampTz('resolved_at')->nullable();
@@ -85,8 +90,9 @@ return new class extends Migration
         });
 
         Schema::create('service_health_checks', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('managed_service_id')->constrained('managed_services')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('managed_service_id')->constrained('managed_services')->restrictOnDelete();
             $table->timestampTz('observed_at');
             $table->string('status', 16);
             $table->string('error_code', 64)->nullable();
@@ -96,15 +102,16 @@ return new class extends Migration
         });
 
         Schema::create('setup_sessions', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('workspace_id')->constrained('workspaces')->restrictOnDelete();
-            $table->foreignUuid('owner_id')->constrained('users')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('workspace_id')->constrained('workspaces')->restrictOnDelete();
+            $table->foreignId('owner_id')->constrained('users')->restrictOnDelete();
             $table->unsignedSmallInteger('current_step')->default(1);
             $table->string('mode', 16);
             $table->jsonb('answers')->default(new Expression("'{}'::jsonb"));
             $table->string('plan_hash', 64)->nullable();
             $table->string('state', 32)->default('in_progress');
-            $table->foreignUuid('operation_job_id')->nullable()->constrained('operation_jobs')->restrictOnDelete();
+            $table->foreignId('operation_job_id')->nullable()->constrained('operation_jobs')->restrictOnDelete();
             $table->string('error_code', 64)->nullable();
             $table->timestampTz('started_at');
             $table->timestampTz('finished_at')->nullable();
@@ -114,14 +121,15 @@ return new class extends Migration
         });
 
         Schema::create('setup_components', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('setup_session_id')->constrained('setup_sessions')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('setup_session_id')->constrained('setup_sessions')->restrictOnDelete();
             $table->string('catalog_key', 64);
             $table->string('version', 64)->nullable();
             $table->boolean('required')->default(false);
             $table->boolean('selected')->default(false);
             $table->unsignedSmallInteger('sort_order')->default(0);
-            $table->foreignUuid('operation_job_step_id')->nullable()->constrained('operation_job_steps')->restrictOnDelete();
+            $table->foreignId('operation_job_step_id')->nullable()->constrained('operation_job_steps')->restrictOnDelete();
             $table->string('state', 16)->default('not_started');
             $table->string('error_code', 64)->nullable();
             $table->timestampsTz();

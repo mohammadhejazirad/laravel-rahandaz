@@ -7,7 +7,7 @@ namespace App\Models;
 use App\Domain\Hosts\Enums\HostCompatibility;
 use App\Domain\Hosts\Enums\HostState;
 use App\Models\Concerns\BelongsToWorkspace;
-use App\Models\Concerns\HasUuidV7;
+use App\Models\Concerns\HasPublicUuid;
 use Database\Factories\LocalHostFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class LocalHost extends Model
 {
     /** @use HasFactory<LocalHostFactory> */
-    use BelongsToWorkspace, HasFactory, HasUuidV7;
+    use BelongsToWorkspace, HasFactory, HasPublicUuid;
 
     /**
      * @return array<string, string>

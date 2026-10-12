@@ -8,7 +8,7 @@ use App\Domain\Jobs\PlanGuard;
 use App\Domain\Settings\Enums\SettingScope;
 use App\Domain\Settings\Enums\SettingValueType;
 use App\Models\Concerns\BelongsToWorkspace;
-use App\Models\Concerns\HasUuidV7;
+use App\Models\Concerns\HasPublicUuid;
 use Database\Factories\ApplicationSettingFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ApplicationSetting extends Model
 {
     /** @use HasFactory<ApplicationSettingFactory> */
-    use BelongsToWorkspace, HasFactory, HasUuidV7;
+    use BelongsToWorkspace, HasFactory, HasPublicUuid;
 
     protected static function booted(): void
     {

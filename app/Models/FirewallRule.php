@@ -6,7 +6,7 @@ namespace App\Models;
 
 use App\Domain\Hosts\Enums\FirewallOrigin;
 use App\Domain\Hosts\Enums\FirewallState;
-use App\Models\Concerns\HasUuidV7;
+use App\Models\Concerns\HasPublicUuid;
 use Database\Factories\FirewallRuleFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class FirewallRule extends Model
 {
     /** @use HasFactory<FirewallRuleFactory> */
-    use HasFactory, HasUuidV7;
+    use HasFactory, HasPublicUuid;
 
     /**
      * @return array<string, string>

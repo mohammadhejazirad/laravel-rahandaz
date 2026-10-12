@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Domain\Setup\Enums\SetupComponentState;
-use App\Models\Concerns\HasUuidV7;
+use App\Models\Concerns\HasPublicUuid;
 use Database\Factories\SetupComponentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class SetupComponent extends Model
 {
     /** @use HasFactory<SetupComponentFactory> */
-    use HasFactory, HasUuidV7;
+    use HasFactory, HasPublicUuid;
 
     /**
      * @return array<string, string>

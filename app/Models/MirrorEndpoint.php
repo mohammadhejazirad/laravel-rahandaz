@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Domain\Mirrors\Enums\TrustStatus;
-use App\Models\Concerns\HasUuidV7;
+use App\Models\Concerns\HasPublicUuid;
 use Database\Factories\MirrorEndpointFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class MirrorEndpoint extends Model
 {
     /** @use HasFactory<MirrorEndpointFactory> */
-    use HasFactory, HasUuidV7;
+    use HasFactory, HasPublicUuid;
 
     /**
      * @return array<string, string>

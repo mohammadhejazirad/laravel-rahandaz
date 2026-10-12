@@ -45,6 +45,14 @@ PostgreSQL منبع نهایی وضعیت است. dispatcher ردیف‌های O
 
 در پروفایل `lite` یک worker کوتاه `control` و یک worker اجرایی `provision,deploy,backup` با concurrency=1 کافی است؛ `monitor` با scheduler کوتاه انجام می‌شود. Laravel Horizon اختیاری است و نباید هم‌زمان با worker معمولی همان صف را مصرف کند. Scheduler با `php artisan schedule:run` و systemd timer هر دقیقه اجرا می‌شود.
 
+## مرز شناسه
+
+داخل PostgreSQL رابطه با `id` از نوع BIGINT است. مرز HTTP و Inertia شناسه `uuid` از نوع UUIDv7 را می‌بیند. این دو به‌جای هم در کد داخلی عوض نمی‌شوند.
+
+سه مفهوم جدا هستند: `id` داخلی، `uuid` عمومی، و شناسه provider مانند شناسه مخزن GitHub یا GitLab. مورد سوم نوع خودش را دارد و الزاماً UUID نیست.
+
+`uuid` ترتیب ردیف را در URL پنهان می‌کند و مجوز دسترسی نیست. Policy و عضویت workspace بعد از resolve شدن منبع جدا بررسی می‌شوند. جدول‌های فریم‌ورک و pivot بدون هویت مستقل این جفت شناسه را ندارند؛ استثنا باید در ADR 0004 ثبت شود.
+
 ## Deployment بدون Docker
 
 هر Project چند Environment مستقل دارد. برای هر Environment: UID، path release/shared، port یا FPM pool، secret، database role، domain و Nginx site مستقل ذخیره می‌شود. repo GitHub/GitLab و branch/tag انتخابی به commit SHA ثابت resolve می‌شود؛ webhook فقط branch مطلوب و delivery id امضاشده را می‌پذیرد. static release از symlink، Laravel از release + PHP-FPM/OPcache policy، Next/Nuxt از blue-green روی portهای مستقل استفاده می‌کنند. healthcheck از route واقعی، release marker و rollout/rollback برای هر deployment ثبت می‌شوند. zero downtime **مشروط** به capacity، migration سازگار و drain است و تضمین مطلق نیست.

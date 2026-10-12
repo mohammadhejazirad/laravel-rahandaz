@@ -53,7 +53,7 @@ class DatabaseSchemaTest extends TestCase
 {
     use AssertsPostgresConstraints, CreatesPanelAccount, RefreshDatabase;
 
-    public function test_domain_rows_use_uuid_v7_and_reject_client_v4_keys(): void
+    public function test_domain_rows_use_bigint_keys_and_reject_client_uuid_keys(): void
     {
         [$user, $workspace] = $this->panelAccount();
         $host = LocalHost::factory()->create(['workspace_id' => $workspace->id]);
@@ -63,16 +63,29 @@ class DatabaseSchemaTest extends TestCase
             'created_by' => $user->id,
         ]);
 
-        $this->assertTrue(Identifiers::isUuidV7($user->id));
-        $this->assertTrue(Identifiers::isUuidV7($host->id));
-        $this->assertTrue(Identifiers::isUuidV7($project->id));
+        $this->assertTrue(Identifiers::isUuidV7($user->uuid));
+        $this->assertTrue(Identifiers::isUuidV7($host->uuid));
+        $this->assertTrue(Identifiers::isUuidV7($project->uuid));
+        $this->assertNotSame($user->uuid, (string) $user->id);
+        $this->assertGreaterThan(0, (int) $user->id);
         $this->assertNotContains('id', $project->getFillable());
+        $this->assertNotContains('uuid', $project->getFillable());
         $this->assertNotContains('protected', $host->getFillable());
         $this->assertFalse(Schema::hasColumn('users', 'deleted_at'));
-        $this->assertTrue(Schema::hasColumns('users', ['last_login_at', 'last_activity_at']));
+        $this->assertTrue(Schema::hasColumns('users', ['last_login_at', 'last_activity_at', 'uuid']));
 
+        $clientUuid = (string) Str::uuid7();
+        $filled = User::factory()->make();
+        $filled->fill(['uuid' => $clientUuid]);
+        $this->assertNotSame($clientUuid, $filled->uuid);
+
+        $imported = User::factory()->create(['uuid' => $clientUuid]);
+        $this->assertSame($clientUuid, $imported->uuid);
+
+        $rejected = User::factory()->make();
+        $rejected->uuid = (string) Str::uuid();
         $this->expectException(InvalidArgumentException::class);
-        User::factory()->create(['id' => (string) Str::uuid()]);
+        $rejected->save();
     }
 
     public function test_project_graph_keeps_workspace_scope_and_restricts_history(): void
@@ -233,8 +246,8 @@ class DatabaseSchemaTest extends TestCase
             'local_host_id' => $host->id,
         ]);
         $recorder = app(AuditRecorder::class);
-        $first = $recorder->record($workspace, $user, 'auth.login', 'user', $user->id, AuditResult::Success, ['method' => 'password']);
-        $second = $recorder->record($workspace, $user, 'project.create', 'project', $project->id, AuditResult::Success);
+        $first = $recorder->record($workspace, $user, 'auth.login', 'user', $user->uuid, AuditResult::Success, ['method' => 'password']);
+        $second = $recorder->record($workspace, $user, 'project.create', 'project', $project->uuid, AuditResult::Success);
         $this->assertSame($first->event_hash, $second->prev_hash);
         $this->assertTrue($user->auditEvents()->whereKey($first->id)->exists());
         $this->assertSqlstate('42501', fn () => $first->delete());
@@ -406,7 +419,7 @@ class DatabaseSchemaTest extends TestCase
             mutatesHost: false,
         ));
         $payload = $job->outboxMessages()->firstOrFail()->payload;
-        $this->assertSame(['operation_job_id' => $job->id], $payload);
+        $this->assertSame(['operation_job_id' => (string) $job->id], $payload);
 
         OperationJobLog::query()->create([
             'operation_job_id' => $job->id,

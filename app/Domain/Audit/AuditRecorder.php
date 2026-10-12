@@ -45,7 +45,7 @@ final class AuditRecorder
             throw new InvalidArgumentException('Audit resource id must be a UUIDv7.');
         }
 
-        if ($operationJob !== null && $workspace !== null && $operationJob->workspace_id !== $workspace->id) {
+        if ($operationJob !== null && $workspace !== null && (string) $operationJob->workspace_id !== (string) $workspace->id) {
             throw new InvalidArgumentException('Audit job is outside the workspace.');
         }
 
@@ -67,13 +67,12 @@ final class AuditRecorder
                 ->lockForUpdate()
                 ->first();
 
-            $id = Identifiers::uuid7();
+            $uuid = Identifiers::uuid7();
             $recordedAt = now()->utc();
             $prevHash = $previous?->event_hash;
             $eventHash = hash('sha256', $this->plans->canonical([
                 'action' => $action,
                 'actor_id' => $actor?->id,
-                'id' => $id,
                 'metadata' => $metadata,
                 'operation_job_id' => $operationJob?->id,
                 'prev_hash' => $prevHash,
@@ -81,11 +80,12 @@ final class AuditRecorder
                 'resource_id' => $resourceId,
                 'resource_type' => $resourceType,
                 'result' => $result->value,
+                'uuid' => $uuid,
                 'workspace_id' => $workspace?->id,
             ]));
 
-            return AuditEvent::query()->create([
-                'id' => $id,
+            $event = new AuditEvent;
+            $event->forceFill([
                 'workspace_id' => $workspace?->id,
                 'actor_id' => $actor?->id,
                 'action' => $action,
@@ -100,6 +100,10 @@ final class AuditRecorder
                 'event_hash' => $eventHash,
                 'recorded_at' => $recordedAt,
             ]);
+            $event->uuid = $uuid;
+            $event->save();
+
+            return $event;
         });
     }
 }

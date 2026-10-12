@@ -11,13 +11,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('resource_grants', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('workspace_id');
-            $table->uuid('membership_id');
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->unsignedBigInteger('workspace_id');
+            $table->unsignedBigInteger('membership_id');
             $table->string('resource_type', 64);
-            $table->uuid('resource_id');
+            $table->unsignedBigInteger('resource_id');
             $table->string('permission', 32);
-            $table->foreignUuid('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestampsTz();
 
             $table->unique(['membership_id', 'resource_type', 'resource_id', 'permission'], 'resource_grants_member_perm_uidx');
@@ -29,11 +30,12 @@ return new class extends Migration
         });
 
         Schema::create('credential_access_events', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('workspace_id');
-            $table->uuid('credential_id');
-            $table->foreignUuid('actor_id')->constrained('users')->restrictOnDelete();
-            $table->uuid('operation_job_id')->nullable();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->unsignedBigInteger('workspace_id');
+            $table->unsignedBigInteger('credential_id');
+            $table->foreignId('actor_id')->constrained('users')->restrictOnDelete();
+            $table->unsignedBigInteger('operation_job_id')->nullable();
             $table->string('action', 32);
             $table->string('result', 16);
             $table->uuid('request_id')->nullable();
@@ -53,16 +55,17 @@ return new class extends Migration
         });
 
         Schema::create('audit_events', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('workspace_id')->nullable()->constrained('workspaces')->restrictOnDelete();
-            $table->foreignUuid('actor_id')->nullable()->constrained('users')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('workspace_id')->nullable()->constrained('workspaces')->restrictOnDelete();
+            $table->foreignId('actor_id')->nullable()->constrained('users')->restrictOnDelete();
             $table->string('action', 100);
             $table->string('resource_type', 64);
             $table->uuid('resource_id')->nullable();
             $table->ipAddress('source_ip')->nullable();
             $table->uuid('request_id')->nullable();
             $table->uuid('correlation_id')->nullable();
-            $table->foreignUuid('operation_job_id')->nullable()->constrained('operation_jobs')->restrictOnDelete();
+            $table->foreignId('operation_job_id')->nullable()->constrained('operation_jobs')->restrictOnDelete();
             $table->string('result', 16);
             $table->jsonb('metadata')->default(new Expression("'{}'::jsonb"));
             $table->string('prev_hash', 64)->nullable();
@@ -79,16 +82,17 @@ return new class extends Migration
         });
 
         Schema::create('panel_notifications', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('workspace_id')->constrained('workspaces')->restrictOnDelete();
-            $table->foreignUuid('recipient_id')->constrained('users')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('workspace_id')->constrained('workspaces')->restrictOnDelete();
+            $table->foreignId('recipient_id')->constrained('users')->restrictOnDelete();
             $table->string('type', 64);
             $table->string('level', 16);
             $table->string('title', 160);
             $table->text('body');
             $table->timestampTz('read_at')->nullable();
             $table->string('action_path', 200)->nullable();
-            $table->uuid('operation_job_id')->nullable();
+            $table->unsignedBigInteger('operation_job_id')->nullable();
             $table->string('event_key', 160);
             $table->timestampsTz();
 
@@ -101,8 +105,9 @@ return new class extends Migration
         });
 
         Schema::create('notification_preferences', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->string('channel', 16);
             $table->string('event_type', 64);
             $table->boolean('enabled')->default(true);
@@ -112,15 +117,16 @@ return new class extends Migration
         });
 
         Schema::create('application_settings', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('workspace_id')->nullable();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->unsignedBigInteger('workspace_id')->nullable();
             $table->string('scope', 32);
             $table->string('key', 80);
             $table->string('value_type', 32);
             $table->text('value_text')->nullable();
             $table->bigInteger('value_integer')->nullable();
             $table->boolean('value_boolean')->nullable();
-            $table->uuid('credential_id')->nullable();
+            $table->unsignedBigInteger('credential_id')->nullable();
             $table->timestampsTz();
 
             $table->foreign('workspace_id', 'application_settings_ws_fk')

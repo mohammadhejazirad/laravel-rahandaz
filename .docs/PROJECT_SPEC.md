@@ -115,7 +115,7 @@
 | وب | Nginx + PHP-FPM اختصاصی پنل، FastCGI و OPcache | کم‌مصرف، بدون PHP-FPM/ASGI/Node SSR runtime |
 | process | systemd برای FPM pool، workerها، timer و سرویس پروژه | مالکیت و resource isolation روشن |
 | فونت/زمان | Vazirmatn محلی، locale `fa-IR`، UTC در DB و جلالی در frontend | عدم وابستگی به CDN |
-| شناسه‌ها | UUIDv7 از generator مرکزی و سازگار با Laravel/DB | constraints و permission جداگانه الزامی |
+| شناسه‌ها | `id` از نوع BIGINT کلید اصلی داخلی؛ `uuid` از نوع native UUIDv7 شناسه عمومی | کلید خارجی داخلی BIGINT است. API و URL فقط `uuid` می‌بینند. UUID مجوز نیست |
 
 **تایید نسخه‌ها:** نسخه‌های major بالا مبنای طراحی این سندند، نه مجوز نصب `latest`. Agent پیش از bootstrap باید نسخه‌های patch، Laravel/React/Inertia/Tailwind و PHP/extensionها را از منابع رسمی/CI بررسی و در `composer.lock`، `package-lock.json` و `docs/DEPENDENCIES.md` قفل کند. در صورت عدم پشتیبانی یک ترکیب روی Ubuntu 22.04/24.04/26.04، آن ترکیب باید `untested` یا `unsupported` باشد؛ با جایگزین‌کردن خاموش runtime یا package نباید موفقیت جعل شود. Node.js فقط برای build دارایی‌های frontend پنل در development/CI است و برای اجرای production پنل نیاز نیست؛ Node پروژه‌های کاربر مستقل است.
 
@@ -248,7 +248,7 @@ rahandaz/
 
 ## 6. مدل داده و invariantها
 
-تمام مدل‌های اصلی `id: UUIDv7`، `created_at` و `updated_at` timezone-aware دارند. تولید UUIDv4 یا sequence عددی برای شناسه اصلی مدل‌های داخلی ممنوع است. identifierهای فنی لاتین‌اند. حذف soft فقط برای منابع مناسب است؛ secret و log retention قوانین مستقل دارند.
+تمام مدل‌های اصلی دامنه کلید اصلی BIGINT به‌نام `id` و شناسه عمومی یکتا UUIDv7 به‌نام `uuid` دارند. `created_at` و `updated_at` در صورت کاربرد timezone-aware هستند. `uuid` کلید اصلی نیست. تولید UUIDv4 برای شناسه عمومی، و استفاده از `id` عددی در URL یا API عمومی، ممنوع است. کلید خارجی داخلی BIGINT است. identifierهای فنی لاتین‌اند. حذف soft فقط برای منابع مناسب است؛ secret و log retention قوانین مستقل دارند.
 
 | مدل                 | فیلدهای کلیدی / رفتار                                                                               |
 | ------------------- | --------------------------------------------------------------------------------------------------- |
@@ -310,12 +310,16 @@ invariantهای الزامی:
 - تکمیل onboarding یک transition اتمیک و auditشده است؛ تا پیش از success نهایی، `setup_completed_at` خالی و dashboard اصلی برای Owner قابل دسترس نیست. answerها و plan hash نسخه‌دارند تا resume/retry همان تصمیم‌ها را بازسازی کند.
 - `MirrorEndpoint` روی `(software_kind, base_url)` یکتا و `MirrorConfiguration` برای هر `(local_host, software_kind)` فقط یک وضعیت فعال دارد؛ history/snapshot حذف cascade نمی‌شود تا rollback و audit قابل اتکا بماند.
 
-### 6.1 قرارداد UUIDv7 و طراحی بهینه PostgreSQL
+### 6.1 قرارداد شناسه و طراحی بهینه PostgreSQL
 
-- generator مرکزی و تست‌شده UUIDv7 (ترجیح `Illuminate\Support\Str::uuid7()` در نسخه بررسی‌شده یا abstraction سازگار در `app/Support/Identifiers.php`) تنها مسیر ساخت شناسه داخلی است. Eloquent model، factory، event، Job، JobStep، log، metric و artifact همگی از همان generator استفاده می‌کنند.
-- پیاده‌سازی تا زمانی که runtime استاندارد UUIDv7 ندارد از کتابخانه کوچک، pin‌شده و بازبینی‌شده استفاده می‌کند؛ ساخت UUIDv7 دست‌نویس در چند app ممنوع است.
-- فیلد PostgreSQL از نوع native `uuid` باقی می‌ماند. تست migration و model باید `id.version == 7`، uniqueness، ترتیب زمانی تقریبی و رفتار clock rollback/concurrency را بررسی کند.
-- timestamp داخل UUIDv7 جای `created_at` را نمی‌گیرد؛ زمان کسب‌وکار، audit و sort قطعی همچنان ستون مستقل UTC است. cursor pagination برای تساوی زمان از زوج `(created_at, id)` استفاده می‌کند.
+- هر مدل اصلی دامنه دو شناسه دارد: `id` از نوع BIGINT، کلید اصلی و identity سازگار با `$table->id()`، و `uuid` از نوع native PostgreSQL `uuid`، یکتا، NOT NULL و نسخه ۷. `uuid` کلید اصلی نیست و `varchar(36)` نیست.
+- generator مرکزی `app/Support/Identifiers.php` روی `Illuminate\Support\Str::uuid7()` تنها مسیر ساخت شناسه عمومی در PHP است. مدل از `HasPublicUuid` استفاده می‌کند، نه `HasUuids`. factory، seeder و event همین مسیر را دارند. ساخت دست‌نویس UUIDv7 در چند نقطه ممنوع است.
+- کلید خارجی داخلی BIGINT است. رابطه Eloquent پیش‌فرض روی `id` است. شناسه provider، مانند `provider_repository_id`، ستون جدا با نوع مناسب همان provider است و به UUID تبدیل اجباری نمی‌شود.
+- API، URL و Inertia عمومی فقط `uuid` را می‌بینند. `id` عددی در JSON عمومی افشا نمی‌شود. UUID مجوز دسترسی نیست؛ Policy و scope ورک‌اسپیس جدا هستند.
+- درج انبوه و Query Builder رویداد مدل را اجرا نمی‌کنند. trigger پایگاه `rahandaz_guard_public_uuid` تهی بودن، نسخه ۷ و تغییرناپذیری `uuid` را تضمین می‌کند.
+- جدول‌های فریم‌ورک `sessions`، `cache`، `cache_locks`، `jobs`، `failed_jobs`، `job_batches` و `password_reset_tokens` شناسه دوتایی دامنه نمی‌گیرند. `sessions.user_id` از نوع `users.id` است. `failed_jobs.uuid` همان varchar لاراول می‌ماند. `audit_events.resource_id` شناسه عمومی منبع است، نه کلید خارجی عددی.
+- timestamp داخل UUIDv7 جای `created_at` را نمی‌گیرد. cursor داخلی برای تساوی زمان از زوج `(created_at, id)` استفاده می‌کند. شناسه عمومی در URL و cursor بیرونی `uuid` است.
+- تست باید BIGINT بودن `id`، UUIDv7 و یکتا و NOT NULL بودن `uuid`، BIGINT بودن کلید خارجی، و resolve مسیر با `uuid` را روی PostgreSQL واقعی بررسی کند. نسخه ستون `uuid` باید ۷ باشد.
 - هر foreign key پرتکرار index هدفمند دارد، ولی index تکراری ناشی از constraint/foreign key دوباره ساخته نمی‌شود. ترتیب ستون index براساس query واقعی و selectivity تعیین می‌شود.
 - indexهای پایه شامل jobهای فعال بر `(status, created_at)`، log بر `(job_id, sequence)`، metric بر `(local_host_id, collected_at DESC)`، audit بر `(workspace_id, created_at DESC)`، deployment بر `(environment_id, created_at DESC)` و lookupهای username/email normalized است.
 - برای stateهای کم‌تعداد از partial index مانند jobهای non-terminal استفاده شود. `jsonb` فقط برای snapshot/plan انعطاف‌پذیر است؛ فیلدی که filter/join/sort پرتکرار دارد ستون typed مستقل می‌خواهد.
@@ -965,7 +969,7 @@ GET  /api/v1/servers/{id}/metrics/?range=1h
 }
 ```
 
-`id`، `component_id` و `key_id` در API شناسه UUIDv7 هستند. `setup/apply` به plan hash، confirmation و idempotency key bind می‌شود و submit دوباره parent Job جدید نمی‌سازد. HTTP statusها: 400 داده نامعتبر، 401 نیاز auth، 403 عدم مجوز، 404 منبع ناموجود/خارج scope، 409 conflict/plan stale، 429 rate limit، 503 control dependency unavailable. secret مقدار برگشتی ندارد. pagination با سقف limit، cursor برای logs و timestamps ISO 8601 UTC است. GET هیچ mutation ندارد.
+در API و URL، شناسه منبع راه‌انداز UUIDv7 ستون `uuid` است. `id` عددی پایگاه در پاسخ عمومی نیست. `component_id` و `key_id` وقتی به منبع راه‌انداز اشاره می‌کنند همین `uuid` عمومی‌اند. شناسه provider جداست. `setup/apply` به plan hash، confirmation و idempotency key bind می‌شود و submit دوباره parent Job جدید نمی‌سازد. HTTP statusها: 400 داده نامعتبر، 401 نیاز auth، 403 عدم مجوز، 404 منبع ناموجود/خارج scope، 409 conflict/plan stale، 429 rate limit، 503 control dependency unavailable. secret مقدار برگشتی ندارد. pagination با سقف limit، cursor برای logs و timestamps ISO 8601 UTC است. GET هیچ mutation ندارد.
 
 ## 18. امنیت کاربردی و مدل تهدید
 
@@ -1029,7 +1033,7 @@ MVP: probe محلی سبک برای CPU/core/load، RAM/swap، disk/filesystem،
 - هر poll مستقیم در PostgreSQL به raw row دائمی تبدیل نمی‌شود. snapshot جاری در cache/ring buffer محدود نگه داشته و sampleهای تاریخی با interval آرام‌تر، batch و retention ذخیره می‌شوند.
 - retention raw نمونه آغازین 7 روز و aggregation ساعت/روز، قابل تنظیم؛ حجم metric و هزینه query در UI قابل مشاهده و cleanup آن آزموده است.
 - alert دارای duration/hysteresis و deduplication؛ هر sample ایمیل جدید نسازد.
-- اعلان داخلی مرحله اول یک subsystem پایدار است، نه toast موقت. هر اعلان شناسه اصلی UUIDv7، workspace، recipient، نوع، level، عنوان، متن پالایش‌شده، زمان ایجاد، `read_at`، لینک اقدام داخلی اختیاری، ارتباط اختیاری با Job و `event_key` یکتا دارد.
+- اعلان داخلی مرحله اول یک subsystem پایدار است، نه toast موقت. هر اعلان شناسه عمومی UUIDv7 در ستون `uuid`، کلید اصلی BIGINT، workspace، recipient، نوع، level، عنوان، متن پالایش‌شده، زمان ایجاد، `read_at`، لینک اقدام داخلی اختیاری، ارتباط اختیاری با Job و `event_key` یکتا دارد.
 - چرخه هر Job واقعی حداقل اعلان «شروع» را پس از claim و ورود واقعی به وضعیت running و یک اعلان terminal برای موفق، ناموفق یا لغوشده تولید می‌کند. queue شدن یا کلیک کاربر موفقیت عملیات نیست؛ اعلان موفق فقط پس از verification همان اجرا ثبت می‌شود.
 - تولید اعلان در retry/redelivery idempotent است؛ `event_key` یک phase مشخص از یک Job را دوباره‌سازی نمی‌کند. متن خطا باید error code/خلاصه قابل پیگیری داشته باشد، ولی secret، command حساس یا stderr خام در اعلان ذخیره نمی‌شود.
 - صفحه اعلان‌ها فقط داده همان recipient و workspace را نشان می‌دهد، pagination سمت سرور دارد، خواندن تک‌مورد و «خواندن همه» را با POST/CSRF انجام می‌دهد و unread badge قرمز topbar را تغذیه می‌کند. لینک اقدام فقط path داخلی امن است؛ redirect خارجی یا scheme دلخواه پذیرفته نمی‌شود.
@@ -1089,7 +1093,7 @@ RAHANDAZ_MASTER_KEY_FILE=./var/config/master.key
 ### 23.1 آزمون backend و صف
 
 - canonical بودن `/dashboard/`، redirect شدن `/`، guard احراز هویت/onboarding و active state دقیق sidebar برای routeهای اصلی و تو‌در‌تو.
-- isolation اعلان بر اساس recipient/workspace، UUIDv7، badge خوانده‌نشده، خواندن تک‌مورد/همه، منع redirect خارجی، pagination و idempotency اعلان‌های start/success/failure/cancel Job.
+- isolation اعلان بر اساس recipient/workspace، شناسه عمومی UUIDv7، badge خوانده‌نشده، خواندن تک‌مورد/همه، منع redirect خارجی، pagination و idempotency اعلان‌های start/success/failure/cancel Job.
 - pagination همه collectionهای unbounded همراه حفظ filter/sort، page نامعتبر و query count سقف‌دار روی dataset بزرگ.
 - guard اولین ورود، redirect dashboard، autosave/resume، انحصار SetupSession فعال و جلوگیری از دور زدن setup با API مستقیم.
 - plan دستی و خودکار، plan hash stale، submit تکراری، dependency order، skip اختیاری و منع skip/uncheck کردن Nginx.
@@ -1118,7 +1122,7 @@ RAHANDAZ_MASTER_KEY_FILE=./var/config/master.key
 - credential اولیه فقط یک بار ساخته، mode آن `0600`، تغییر password در اولین ورود اجباری و نبود credential در argv/journal/log اثبات شود.
 - افزودن کلید، `sshd -t` ناموفق، reload، حذف آخرین کلید، قطع verification و recovery از console برای جلوگیری از SSH lockout تست شوند.
 - ترتیب امن UFW شامل باز کردن route/port جدید پیش از بستن قبلی، ruleهای DB loopback، rollback healthcheck و حفظ session مدیریت آزموده شود.
-- همه factory/model/eventها UUIDv7 بسازند و migration یا fixture دارای UUIDv4 تست را fail کند.
+- factory و مدل اصلی برای ستون `uuid` مقدار UUIDv7 بسازند. کلید اصلی `id` عددی است. fixture با UUIDv4 در ستون `uuid` تست را fail کند.
 - ماتریس Wizard برای PHP/Node/Python، databaseها و tools روی هر Ubuntu، unavailable/EOL، conflict MySQL/MariaDB، MSSQL unsupported و کمبود RAM/disk را با پیام دقیق تست کند.
 - mirror workflow روی VM داخل ایران و یک مسیر شبکه محدود برای Ubuntu APT، Docker registry، npm و Composer اجرا شود: probe چند endpoint، signature/freshness، انتخاب خودکار، config موجود، apply اتمیک، قطع شبکه وسط کار، mirror stale/malicious fixture، rollback و بازگشت به official. PyPI custom index و منع dependency-confusion نیز تست امنیتی داشته باشد.
 - Nginx bootstrap و config نهایی، صفحه static نمونه روی `/`، لینک `/rahandaz/` و fallback بدون overwrite برای root route موجود با probe HTTP واقعی آزموده شوند.
@@ -1153,7 +1157,7 @@ fixtureهای static، Laravel، Next.js، Nuxt.js و Node مطابق مرحله
 
 ### مرحله 0 — پایه و تصمیم‌ها
 
-ایجاد Laravel modular monolith + Inertia/React/TypeScript/Tailwind، Eloquent User/UUIDv7/Workspace، PostgreSQL، Redis queue/cache مستقل، Composer/NPM lockfiles، PHP extension matrix برای سه Ubuntu، Laravel APP_KEY و master-key مستقل، secret envelope، fake executor، ADR و harness تست. خروجی: lint, typecheck, migration و build تمیز؛ mutation زیرساخت disabled.
+ایجاد Laravel modular monolith + Inertia/React/TypeScript/Tailwind، Eloquent User با `id` عددی و `uuid` عمومی، Workspace، PostgreSQL، Redis queue/cache مستقل، Composer/NPM lockfiles، PHP extension matrix برای سه Ubuntu، Laravel APP_KEY و master-key مستقل، secret envelope، fake executor، ADR و harness تست. خروجی: lint, typecheck, migration و build تمیز؛ mutation زیرساخت disabled.
 
 ### مرحله 1 — رابط و امنیت حساب
 
@@ -1199,7 +1203,7 @@ monitoring با polling adaptive و Toast اعلان واقعی، سرور/SSH k
 10. گزارش نهایی نتیجه، validation و محدودیت‌های باقی‌مانده را دقیق بیان کند.
 11. روی Ubuntuهای هدف و پروفایل 1 vCPU/2GB benchmark منابع و footprint را پاس کند یا صادقانه feature را محدود/غیرفعال کند.
 12. عملیات SSH/firewall مسیر recovery آزموده داشته و نتواند آخرین دسترسی سالم مدیر را در workflow معمول حذف کند.
-13. همه شناسه‌های داخلی UUIDv7، timestampهای ذخیره‌شده UTC و نمایش زمان کاربر جلالی باشند.
+13. کلید اصلی داخلی BIGINT و شناسه عمومی UUIDv7 باشند، timestampهای ذخیره‌شده UTC و نمایش زمان کاربر جلالی باشند.
 14. query و index با dataset مرتبط سنجیده شوند؛ pagination، retention و سقف polling از رشد کنترل‌نشده جلوگیری کنند.
 15. onboarding اولین ورود قابل resume و idempotent باشد، plan دستی/خودکار و گزارش component-level داشته باشد و تا تکمیل امن قابل دور زدن نباشد.
 16. حساب عملیاتی بدون root/broad sudo، password قفل‌شده و credential اولیه Owner وب فقط در فایل root-only، همراه Nginx/page نمونه با healthcheck واقعی داشته باشد؛ success صرفاً براساس exit code اعلام نشود.
@@ -1221,7 +1225,7 @@ monitoring با polling adaptive و Toast اعلان واقعی، سرور/SSH k
 
 ## 27. دستور شروع قابل کپی برای Agent
 
-> پروژه «راه‌انداز / rahandaz» را مطابق `docs/PROJECT_SPEC.md` نسخه 2.0 و `docs/ARCHITECTURE.md` پیاده‌سازی کن. قبل از کدنویسی واقعیت مخزن/فایل‌ها را بخوان و بدون حذف کورِ کار موجود، Django/Celery/Python **کنترل‌پلین** را به Laravel 13، Inertia.js 3، React 19 با TypeScript strict، Tailwind 4 و Vite تبدیل کن. PostgreSQL منبع حقیقت User/Job/Outbox است؛ Redis queue و cache به‌صورت instanceهای مستقل، Laravel `ShouldQueue`، workerهای سبک systemd و scheduler timer طراحی شوند. ابتدا فازهای 0 و 1: migration Eloquent UUIDv7، Owner/Workspace/Policy، master key جدا از APP_KEY و encrypted secrets، پنل RTL/Vazirmatn، Lucide، Sonner Toast، جلالی، تم light/dark/system، login، Wizard real read-only و shell صفحه «میرورها» با تست واقعی تکمیل شوند. سپس Job/Outbox/reconciler/lease، installer GitHub signed one-command، حساب سیستم `rahandaz` locked/no-sudo، helper allowlisted، UID مستقل پروژه‌ها، Nginx/PHP-FPM، GitHub/GitLab branch deployment و main/beta، SSL و PostgreSQL/MySQL/MongoDB و rollback مرحله‌ای پیاده شوند. اجرای پروژه‌ها با Docker و remote SSH در v1 ممنوع است. هیچ root shell یا اجرای mutation واقعی پیش از تکمیل helper و آزمون VM disposable مجاز نیست. هدف مصرف idle <=512MiB و <=0.5 vCPU با benchmark اندازه‌گیری شود، نه موفقیت ساختگی؛ برنامه سنگین اگر منابع کافی ندارد block شود. پس از هر برش اجرا، test/lint/typecheck/build، فایل‌های تغییرکرده و محدودیت‌های واقعی را گزارش کن.
+> پروژه «راه‌انداز / rahandaz» را مطابق `docs/PROJECT_SPEC.md` نسخه 2.0 و `docs/ARCHITECTURE.md` پیاده‌سازی کن. قبل از کدنویسی واقعیت مخزن/فایل‌ها را بخوان و بدون حذف کورِ کار موجود، Django/Celery/Python **کنترل‌پلین** را به Laravel 13، Inertia.js 3، React 19 با TypeScript strict، Tailwind 4 و Vite تبدیل کن. PostgreSQL منبع حقیقت User/Job/Outbox است؛ Redis queue و cache به‌صورت instanceهای مستقل، Laravel `ShouldQueue`، workerهای سبک systemd و scheduler timer طراحی شوند. ابتدا فازهای 0 و 1: migration با کلید BIGINT و شناسه عمومی UUIDv7، Owner/Workspace/Policy، master key جدا از APP_KEY و encrypted secrets، پنل RTL/Vazirmatn، Lucide، Sonner Toast، جلالی، تم light/dark/system، login، Wizard real read-only و shell صفحه «میرورها» با تست واقعی تکمیل شوند. سپس Job/Outbox/reconciler/lease، installer GitHub signed one-command، حساب سیستم `rahandaz` locked/no-sudo، helper allowlisted، UID مستقل پروژه‌ها، Nginx/PHP-FPM، GitHub/GitLab branch deployment و main/beta، SSL و PostgreSQL/MySQL/MongoDB و rollback مرحله‌ای پیاده شوند. اجرای پروژه‌ها با Docker و remote SSH در v1 ممنوع است. هیچ root shell یا اجرای mutation واقعی پیش از تکمیل helper و آزمون VM disposable مجاز نیست. هدف مصرف idle <=512MiB و <=0.5 vCPU با benchmark اندازه‌گیری شود، نه موفقیت ساختگی؛ برنامه سنگین اگر منابع کافی ندارد block شود. پس از هر برش اجرا، test/lint/typecheck/build، فایل‌های تغییرکرده و محدودیت‌های واقعی را گزارش کن.
 
 ## 28. منابع رسمی برای بررسی پیاده‌سازی
 
@@ -1264,7 +1268,7 @@ Agent باید مستندات **نسخه دقیق pin‌شده** را بررسی
 - [ ] account `rahandaz` بدون sudo/docker، locked password و no-login، web/worker identity محدود، helper root-owned allowlisted و UIDهای پروژه مجزا هستند؛ password لینوکسی ساخته/ذخیره نمی‌شود.
 - [ ] Owner وب تصادفی تنها در root-only credential file قرار دارد، first-login password change و session revoke و MFA/permission مطابق scope واقعی تست شده‌اند.
 - [ ] APP_KEY و MASTER_KEY مستقل، versioned AEAD secrets، backup/canary، key rotation/recovery و fail-closed test شده‌اند؛ هیچ plaintext در DB/log/Redis payload/Inertia props/export قرار نمی‌گیرد.
-- [ ] Laravel Eloquent UUIDv7، UTC timestamp و cursor pagination PostgreSQL با unique constraints، index، locking و EXPLAIN بررسی شده‌اند.
+- [ ] کلید اصلی BIGINT، شناسه عمومی UUIDv7، UTC timestamp و cursor pagination PostgreSQL با unique constraints، index، locking و EXPLAIN بررسی شده‌اند.
 - [ ] Redis queue و cache با config/ACL/isolation جدا، queue persistence/noeviction، dispatch outbox، duplicate/retry/worker crash reconciliation، Laravel timeout/retry_after و PostgreSQL lease/fencing تست شده‌اند.
 - [ ] Wizard فارسی اینرسی از login تا plan hash/apply/autosave/retry/rollback/progress و گزارش پالایش‌شده انجام می‌شود، Nginx/پنل protected و guard onboarding دورزدنی نیست.
 - [ ] خوشامدگویی static نیم‌صفحه‌ای روی domain اصلی یا IP/route غیرمتعارض با route سالم مشاهده و سپس بدون آسیب به پنل حذف می‌شود.

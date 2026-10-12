@@ -11,8 +11,10 @@ use Illuminate\Support\Facades\DB;
 
 final class LeaseManager
 {
-    public function acquire(string $resourceKey, string $jobId, int $attempt, int $ttlSeconds = 60): ExecutionLease
+    public function acquire(string $resourceKey, int|string $jobId, int $attempt, int $ttlSeconds = 60): ExecutionLease
     {
+        $jobId = (string) $jobId;
+
         try {
             return DB::transaction(function () use ($resourceKey, $jobId, $attempt, $ttlSeconds): ExecutionLease {
                 $active = ExecutionLease::query()
@@ -21,7 +23,7 @@ final class LeaseManager
                     ->lockForUpdate()
                     ->first();
 
-                if ($active !== null && $active->owner_job_id === $jobId && $active->expires_at->isFuture()) {
+                if ($active !== null && (string) $active->owner_job_id === $jobId && $active->expires_at->isFuture()) {
                     $active->forceFill([
                         'attempt' => $attempt,
                         'expires_at' => now()->addSeconds($ttlSeconds),

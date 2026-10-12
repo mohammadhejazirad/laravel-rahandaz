@@ -8,7 +8,7 @@ import type { HostFacts } from "@/types";
 interface SetupPageProps {
     holding: boolean;
     workspace: {
-        id: string;
+        uuid: string;
         name: string;
         setup_completed_at: string | null;
     };

@@ -8,7 +8,7 @@ use App\Domain\Git\Enums\GitAuthMethod;
 use App\Domain\Git\Enums\GitConnectionState;
 use App\Domain\Git\Enums\GitProvider;
 use App\Models\Concerns\BelongsToWorkspace;
-use App\Models\Concerns\HasUuidV7;
+use App\Models\Concerns\HasPublicUuid;
 use Database\Factories\GitConnectionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class GitConnection extends Model
 {
     /** @use HasFactory<GitConnectionFactory> */
-    use BelongsToWorkspace, HasFactory, HasUuidV7;
+    use BelongsToWorkspace, HasFactory, HasPublicUuid;
 
     /**
      * @return array<string, string>

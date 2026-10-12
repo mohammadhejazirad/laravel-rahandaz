@@ -11,14 +11,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('git_connections', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('workspace_id')->constrained('workspaces')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('workspace_id')->constrained('workspaces')->restrictOnDelete();
             $table->string('provider', 16);
             $table->string('auth_method', 32);
             $table->string('account_label', 120);
             $table->string('external_account_id', 64);
             $table->string('external_account_type', 32);
-            $table->uuid('credential_id');
+            $table->unsignedBigInteger('credential_id');
             $table->string('base_url', 300);
             $table->jsonb('scopes')->default(new Expression("'[]'::jsonb"));
             $table->string('state', 32)->default('active');
@@ -37,9 +38,10 @@ return new class extends Migration
         });
 
         Schema::create('remote_repositories', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('workspace_id');
-            $table->uuid('git_connection_id');
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->unsignedBigInteger('workspace_id');
+            $table->unsignedBigInteger('git_connection_id');
             $table->string('provider_repository_id', 64);
             $table->string('full_name', 200);
             $table->string('namespace', 160);
@@ -62,8 +64,9 @@ return new class extends Migration
         });
 
         Schema::create('remote_branches', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('remote_repository_id')->constrained('remote_repositories')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('remote_repository_id')->constrained('remote_repositories')->restrictOnDelete();
             $table->string('name', 255);
             $table->string('head_sha', 64);
             $table->boolean('protected')->default(false);
@@ -74,13 +77,14 @@ return new class extends Migration
         });
 
         Schema::create('git_webhooks', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('workspace_id');
-            $table->uuid('git_connection_id');
-            $table->foreignUuid('remote_repository_id')->nullable()->constrained('remote_repositories')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->unsignedBigInteger('workspace_id');
+            $table->unsignedBigInteger('git_connection_id');
+            $table->foreignId('remote_repository_id')->nullable()->constrained('remote_repositories')->restrictOnDelete();
             $table->string('provider', 16);
             $table->string('external_id', 64);
-            $table->uuid('credential_id')->nullable();
+            $table->unsignedBigInteger('credential_id')->nullable();
             $table->boolean('enabled')->default(false);
             $table->jsonb('subscribed_events')->default(new Expression("'[]'::jsonb"));
             $table->timestampsTz();
@@ -102,9 +106,10 @@ return new class extends Migration
         });
 
         Schema::create('git_webhook_deliveries', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('workspace_id');
-            $table->uuid('git_webhook_id');
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->unsignedBigInteger('workspace_id');
+            $table->unsignedBigInteger('git_webhook_id');
             $table->string('delivery_id', 128);
             $table->string('event_name', 64);
             $table->string('payload_digest', 64);
@@ -113,7 +118,7 @@ return new class extends Migration
             $table->string('processing_state', 32);
             $table->boolean('signature_valid');
             $table->string('failure_code', 64)->nullable();
-            $table->uuid('operation_job_id')->nullable();
+            $table->unsignedBigInteger('operation_job_id')->nullable();
             $table->timestampsTz();
 
             $table->unique(['git_webhook_id', 'delivery_id'], 'git_deliveries_uidx');

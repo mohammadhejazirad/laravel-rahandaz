@@ -21,6 +21,10 @@
 9. UI به React/TSX، Sonner Toast، Lucide React، primitiveهای shadcn/Radix گزینشی، فونت Vazirmatn محلی و dark/light/system تغییر یافت. اعلان موفق باید نتیجه واقعی Job را منعکس کند.
 10. `DEVELOPMENT.md` و `ROADMAP.md` و `ARCHITECTURE.md` از پایه با این قراردادها هماهنگ شدند.
 
+## به‌روزرسانی قرارداد شناسه — 2026-10-12
+
+بندهای مشخصات که UUIDv7 را کلید اصلی داخلی معرفی می‌کردند اصلاح شدند. قرارداد جاری: `id` از نوع BIGINT کلید اصلی و کلید خارجی داخلی است، و `uuid` از نوع native UUIDv7 شناسه عمومی API و URL است. تصمیم در `docs/adr/0004-bigint-primary-key-uuidv7-public-identifier.md` است. متن تاریخی ADR 0001 حذف نشده و بند شناسه‌اش منسوخ علامت خورده است.
+
 ## نکات باقیمانده برای پیاده‌سازی واقعی
 
 - تنظیم نسخه‌های patch و `composer.lock`/`package-lock.json` پس از آزمون runtime هر Ubuntu.

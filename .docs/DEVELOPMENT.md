@@ -50,6 +50,32 @@ php artisan schedule:run
 - Toast هنگام ارسال Job فقط «ثبت شد» می‌گوید؛ موفقیت نصب/استقرار تنها بعد از `Job.status=succeeded` تاییدشده از backend نمایش داده می‌شود. برای log/status، incremental polling با backoff در tab مخفی.
 - برای calendar جلالی، کتابخانه نسخه‌دار معتبر و تست leap-year/timezone؛ همه timestamps PostgreSQL/JSON همچنان UTC ISO 8601 هستند.
 
+## مدل و migration جدید
+
+مدل اصلی دامنه `App\Models\Concerns\HasPublicUuid` را استفاده می‌کند. کلید اصلی پیش‌فرض لاراول همان `id` عددی می‌ماند؛ `HasUuids` و `$primaryKey = 'uuid'` ممنوع است. `id` و `uuid` در `$fillable` نیستند. اگر مدل route عمومی دارد، `getRouteKeyName()` مقدار `uuid` برمی‌گرداند، مگر attribute `#[RouteKey]` صریحاً چیز دیگری بگوید.
+
+migration جدید این شکل را دارد. ستون‌های واقعی دامنه را به‌خاطر این نمونه حذف نکن:
+
+```php
+Schema::create('projects', function (Blueprint $table) {
+    $table->id();
+    $table->uuid('uuid')->unique();
+
+    $table->foreignId('workspace_id')
+        ->constrained('workspaces')
+        ->restrictOnDelete();
+
+    $table->string('name');
+    $table->string('slug');
+
+    $table->timestampsTz();
+});
+```
+
+کلید خارجی داخلی `foreignId()` است. `foreignUuid()` برای رابطه معمول داخلی استفاده نمی‌شود. جدول‌های `sessions`، `cache`، `cache_locks`، `jobs`، `failed_jobs`، `job_batches` و `password_reset_tokens` این جفت شناسه را نمی‌گیرند. `sessions.user_id` همچنان نوع `users.id` را دنبال می‌کند.
+
+درج Query Builder رویداد مدل را اجرا نمی‌کند. trigger `rahandaz_guard_public_uuid` برای جدول دارای ستون `uuid` باید سر جایش بماند. مسیر import فقط UUIDv7 معتبر را پیش از اولین save می‌پذیرد.
+
 ## Build / Tests
 
 ```bash

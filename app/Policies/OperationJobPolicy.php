@@ -22,7 +22,7 @@ class OperationJobPolicy
         return $this->role($user, $workspace->id)?->managesHost() === true;
     }
 
-    private function role(User $user, string $workspaceId): ?MembershipRole
+    private function role(User $user, int|string $workspaceId): ?MembershipRole
     {
         $role = Membership::query()
             ->where('workspace_id', $workspaceId)

@@ -33,7 +33,7 @@ class DashboardController extends Controller
 
         return Inertia::render('dashboard/index', [
             'workspace' => [
-                'id' => $workspace->id,
+                'uuid' => $workspace->uuid,
                 'name' => $workspace->name,
                 'slug' => $workspace->slug,
             ],

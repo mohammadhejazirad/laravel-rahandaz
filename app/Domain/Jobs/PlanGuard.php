@@ -22,11 +22,11 @@ final class PlanGuard
     public function hash(RecordOperationData $data): string
     {
         $payload = [
-            'actor_id' => $data->actorId,
+            'actor_id' => (string) $data->actorId,
             'mutates_host' => $data->mutatesHost,
             'plan' => $data->plan,
             'type' => $data->type,
-            'workspace_id' => $data->workspaceId,
+            'workspace_id' => (string) $data->workspaceId,
         ];
 
         return hash('sha256', $this->canonical($payload));

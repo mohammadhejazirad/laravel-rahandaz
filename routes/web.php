@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SetupController;
 use App\Http\Controllers\ThemeController;
 use Illuminate\Support\Facades\Route;
@@ -33,6 +34,7 @@ Route::prefix(trim((string) config('rahandaz.base_path'), '/'))->group(function 
 
             Route::middleware('setup.complete')->group(function () {
                 Route::get('/dashboard', DashboardController::class)->name('dashboard');
+                Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
             });
         });
     });

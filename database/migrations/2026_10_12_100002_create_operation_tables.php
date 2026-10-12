@@ -11,12 +11,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('operation_jobs', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('workspace_id')->constrained('workspaces')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('workspace_id')->constrained('workspaces')->restrictOnDelete();
             $table->string('type', 100);
             $table->string('resource_type', 100)->nullable();
-            $table->uuid('resource_id')->nullable();
-            $table->foreignUuid('actor_id')->constrained('users')->restrictOnDelete();
+            $table->unsignedBigInteger('resource_id')->nullable();
+            $table->foreignId('actor_id')->constrained('users')->restrictOnDelete();
             $table->string('status', 32);
             $table->string('idempotency_key');
             $table->string('request_hash', 64);
@@ -34,8 +35,9 @@ return new class extends Migration
         });
 
         Schema::create('operation_job_steps', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('operation_job_id')->constrained('operation_jobs')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('operation_job_id')->constrained('operation_jobs')->restrictOnDelete();
             $table->string('key', 64);
             $table->string('status', 32);
             $table->unsignedInteger('timeout_seconds');
@@ -49,8 +51,9 @@ return new class extends Migration
         });
 
         Schema::create('operation_job_logs', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('operation_job_id')->constrained('operation_jobs')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('operation_job_id')->constrained('operation_jobs')->restrictOnDelete();
             $table->unsignedInteger('sequence');
             $table->string('level', 16);
             $table->string('step_key', 64)->nullable();
@@ -62,8 +65,9 @@ return new class extends Migration
         });
 
         Schema::create('operation_job_outbox', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('operation_job_id')->constrained('operation_jobs')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('operation_job_id')->constrained('operation_jobs')->restrictOnDelete();
             $table->string('event_type', 64);
             $table->jsonb('payload')->default(new Expression("'{}'::jsonb"));
             $table->timestampTz('published_at')->nullable();
@@ -73,9 +77,10 @@ return new class extends Migration
         });
 
         Schema::create('execution_leases', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
+            $table->uuid('uuid')->unique();
             $table->string('resource_key');
-            $table->foreignUuid('owner_job_id')->constrained('operation_jobs')->restrictOnDelete();
+            $table->foreignId('owner_job_id')->constrained('operation_jobs')->restrictOnDelete();
             $table->unsignedInteger('attempt');
             $table->unsignedBigInteger('fencing_token');
             $table->timestampTz('expires_at');

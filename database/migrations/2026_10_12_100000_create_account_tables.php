@@ -11,8 +11,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('user_profiles', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('user_id')->unique()->constrained('users')->cascadeOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('user_id')->unique()->constrained('users')->cascadeOnDelete();
             $table->string('display_name')->nullable();
             $table->jsonb('mobile_envelope')->nullable();
             $table->jsonb('national_id_envelope')->nullable();
@@ -22,10 +23,11 @@ return new class extends Migration
         });
 
         Schema::create('workspaces', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
+            $table->uuid('uuid')->unique();
             $table->string('name');
             $table->string('slug');
-            $table->foreignUuid('owner_id')->constrained('users')->restrictOnDelete();
+            $table->foreignId('owner_id')->constrained('users')->restrictOnDelete();
             $table->jsonb('settings')->default(new Expression("'{}'::jsonb"));
             $table->timestampTz('setup_completed_at')->nullable();
             $table->timestampsTz();
@@ -34,9 +36,10 @@ return new class extends Migration
         });
 
         Schema::create('memberships', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('workspace_id')->constrained('workspaces')->cascadeOnDelete();
-            $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('workspace_id')->constrained('workspaces')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->string('role');
             $table->timestampsTz();
 

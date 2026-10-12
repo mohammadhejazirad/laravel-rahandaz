@@ -6,7 +6,7 @@ namespace App\Models;
 
 use App\Domain\Git\Enums\RepositoryVisibility;
 use App\Models\Concerns\BelongsToWorkspace;
-use App\Models\Concerns\HasUuidV7;
+use App\Models\Concerns\HasPublicUuid;
 use Database\Factories\RemoteRepositoryFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class RemoteRepository extends Model
 {
     /** @use HasFactory<RemoteRepositoryFactory> */
-    use BelongsToWorkspace, HasFactory, HasUuidV7;
+    use BelongsToWorkspace, HasFactory, HasPublicUuid;
 
     /**
      * @return array<string, string>

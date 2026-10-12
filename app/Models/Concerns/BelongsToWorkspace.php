@@ -19,7 +19,7 @@ trait BelongsToWorkspace
      * @param  Builder<static>  $query
      * @return Builder<static>
      */
-    public function scopeForWorkspace(Builder $query, string $workspaceId): Builder
+    public function scopeForWorkspace(Builder $query, int|string $workspaceId): Builder
     {
         return $query->where($this->getTable().'.workspace_id', $workspaceId);
     }

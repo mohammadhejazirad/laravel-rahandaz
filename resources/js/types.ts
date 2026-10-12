@@ -2,8 +2,12 @@ import type { PageProps } from "@inertiajs/core";
 
 export type ThemePreference = "light" | "dark" | "system";
 
+declare const publicUuidBrand: unique symbol;
+
+export type PublicUuid = string & { readonly [publicUuidBrand]: true };
+
 export interface AuthUser {
-    id: string;
+    uuid: PublicUuid;
     username: string;
     display_name: string | null;
     role: string | null;

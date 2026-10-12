@@ -9,7 +9,7 @@ use App\Domain\Catalog\Enums\ServiceKind;
 use App\Domain\Catalog\Enums\ServiceManagement;
 use App\Domain\Catalog\Enums\ServiceRuntimeState;
 use App\Models\Concerns\BelongsToWorkspace;
-use App\Models\Concerns\HasUuidV7;
+use App\Models\Concerns\HasPublicUuid;
 use Database\Factories\ManagedServiceFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class ManagedService extends Model
 {
     /** @use HasFactory<ManagedServiceFactory> */
-    use BelongsToWorkspace, HasFactory, HasUuidV7;
+    use BelongsToWorkspace, HasFactory, HasPublicUuid;
 
     /**
      * @return array<string, string>

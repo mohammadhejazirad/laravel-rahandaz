@@ -11,7 +11,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('package_definitions', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
+            $table->uuid('uuid')->unique();
             $table->string('key', 64);
             $table->string('display_name', 120);
             $table->string('service_kind', 32);
@@ -25,8 +26,9 @@ return new class extends Migration
         });
 
         Schema::create('package_versions', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('package_definition_id')->constrained('package_definitions')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('package_definition_id')->constrained('package_definitions')->restrictOnDelete();
             $table->string('version', 64);
             $table->string('os_codename', 64)->default('');
             $table->string('architecture', 32)->default('');
@@ -44,10 +46,11 @@ return new class extends Migration
         });
 
         Schema::create('managed_services', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('workspace_id');
-            $table->uuid('local_host_id');
-            $table->foreignUuid('package_definition_id')->nullable()->constrained('package_definitions')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->unsignedBigInteger('workspace_id');
+            $table->unsignedBigInteger('local_host_id');
+            $table->foreignId('package_definition_id')->nullable()->constrained('package_definitions')->restrictOnDelete();
             $table->string('kind', 32);
             $table->string('instance_key', 64);
             $table->string('requested_version', 64)->nullable();
@@ -73,7 +76,8 @@ return new class extends Migration
         });
 
         Schema::create('mirror_endpoints', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
+            $table->uuid('uuid')->unique();
             $table->string('provider', 80);
             $table->string('software_kind', 32);
             $table->string('country', 2)->nullable();
@@ -90,8 +94,9 @@ return new class extends Migration
         });
 
         Schema::create('mirror_health_checks', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('mirror_endpoint_id')->constrained('mirror_endpoints')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('mirror_endpoint_id')->constrained('mirror_endpoints')->restrictOnDelete();
             $table->timestampTz('observed_at');
             $table->unsignedInteger('latency_ms')->nullable();
             $table->boolean('tls_ok');
@@ -104,27 +109,29 @@ return new class extends Migration
         });
 
         Schema::create('mirror_configurations', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('local_host_id')->constrained('local_hosts')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('local_host_id')->constrained('local_hosts')->restrictOnDelete();
             $table->string('software_kind', 32);
             $table->string('mode', 32);
-            $table->foreignUuid('mirror_endpoint_id')->nullable()->constrained('mirror_endpoints')->restrictOnDelete();
+            $table->foreignId('mirror_endpoint_id')->nullable()->constrained('mirror_endpoints')->restrictOnDelete();
             $table->string('state', 32);
             $table->timestampTz('applied_at')->nullable();
             $table->timestampTz('last_probe_at')->nullable();
-            $table->uuid('rollback_revision_id')->nullable();
+            $table->unsignedBigInteger('rollback_revision_id')->nullable();
             $table->timestampsTz();
 
             $table->unique(['local_host_id', 'software_kind'], 'mirror_config_current_uidx');
         });
 
         Schema::create('mirror_configuration_revisions', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('mirror_configuration_id')->constrained('mirror_configurations')->restrictOnDelete();
-            $table->foreignUuid('local_host_id')->constrained('local_hosts')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('mirror_configuration_id')->constrained('mirror_configurations')->restrictOnDelete();
+            $table->foreignId('local_host_id')->constrained('local_hosts')->restrictOnDelete();
             $table->string('software_kind', 32);
             $table->string('mode', 32);
-            $table->foreignUuid('mirror_endpoint_id')->nullable()->constrained('mirror_endpoints')->restrictOnDelete();
+            $table->foreignId('mirror_endpoint_id')->nullable()->constrained('mirror_endpoints')->restrictOnDelete();
             $table->string('base_url_snapshot', 300)->nullable();
             $table->string('state', 32);
             $table->timestampTz('recorded_at');

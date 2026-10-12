@@ -86,12 +86,12 @@ final class CredentialStore
         ]);
     }
 
-    private function aad(string $workspaceId, string $type): string
+    private function aad(int|string $workspaceId, string $type): string
     {
         return $workspaceId.'|credential|'.$type;
     }
 
-    private function indexKey(string $workspaceId, string $type): string
+    private function indexKey(int|string $workspaceId, string $type): string
     {
         return hash_hkdf(
             'sha256',

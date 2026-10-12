@@ -10,8 +10,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('local_hosts', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('workspace_id')->constrained('workspaces')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('workspace_id')->constrained('workspaces')->restrictOnDelete();
             $table->string('slug', 64);
             $table->string('display_name', 120);
             $table->string('hostname', 253)->nullable();
@@ -27,8 +28,9 @@ return new class extends Migration
         });
 
         Schema::create('host_facts', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('local_host_id')->constrained('local_hosts')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('local_host_id')->constrained('local_hosts')->restrictOnDelete();
             $table->timestampTz('observed_at');
             $table->string('hostname', 253)->nullable();
             $table->string('os_name', 64)->nullable();
@@ -52,8 +54,9 @@ return new class extends Migration
         });
 
         Schema::create('host_network_interfaces', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('host_fact_id')->constrained('host_facts')->cascadeOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('host_fact_id')->constrained('host_facts')->cascadeOnDelete();
             $table->string('name', 32);
             $table->macAddress('mac_address')->nullable();
             $table->unsignedInteger('mtu')->nullable();
@@ -64,8 +67,9 @@ return new class extends Migration
         });
 
         Schema::create('host_ip_addresses', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('host_network_interface_id')->constrained('host_network_interfaces')->cascadeOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('host_network_interface_id')->constrained('host_network_interfaces')->cascadeOnDelete();
             $table->ipAddress('address');
             $table->string('scope', 32);
             $table->timestampsTz();
@@ -74,8 +78,9 @@ return new class extends Migration
         });
 
         Schema::create('host_disks', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('host_fact_id')->constrained('host_facts')->cascadeOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('host_fact_id')->constrained('host_facts')->cascadeOnDelete();
             $table->string('name', 64);
             $table->unsignedBigInteger('capacity_bytes');
             $table->string('model', 160)->nullable();
@@ -86,8 +91,9 @@ return new class extends Migration
         });
 
         Schema::create('host_mounts', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('host_fact_id')->constrained('host_facts')->cascadeOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('host_fact_id')->constrained('host_facts')->cascadeOnDelete();
             $table->string('device', 160);
             $table->string('mount_point', 255);
             $table->string('filesystem', 32);
@@ -99,8 +105,9 @@ return new class extends Migration
         });
 
         Schema::create('host_ports', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('host_fact_id')->constrained('host_facts')->cascadeOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('host_fact_id')->constrained('host_facts')->cascadeOnDelete();
             $table->string('protocol', 8);
             $table->ipAddress('address');
             $table->unsignedSmallInteger('port');
@@ -111,8 +118,9 @@ return new class extends Migration
         });
 
         Schema::create('host_packages', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('host_fact_id')->constrained('host_facts')->cascadeOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('host_fact_id')->constrained('host_facts')->cascadeOnDelete();
             $table->string('name', 128);
             $table->string('version', 128);
             $table->string('architecture', 32)->default('unknown');
@@ -122,15 +130,16 @@ return new class extends Migration
         });
 
         Schema::create('host_ssh_keys', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('local_host_id')->constrained('local_hosts')->restrictOnDelete();
-            $table->foreignUuid('user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('local_host_id')->constrained('local_hosts')->restrictOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('linux_account', 32);
             $table->text('public_key');
             $table->string('fingerprint', 128);
             $table->string('label', 120);
             $table->boolean('enabled')->default(true);
-            $table->foreignUuid('added_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('added_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestampTz('last_verified_at')->nullable();
             $table->timestampTz('revoked_at')->nullable();
             $table->timestampsTz();
@@ -139,8 +148,9 @@ return new class extends Migration
         });
 
         Schema::create('firewall_rules', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('local_host_id')->constrained('local_hosts')->restrictOnDelete();
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('local_host_id')->constrained('local_hosts')->restrictOnDelete();
             $table->string('direction', 8);
             $table->string('protocol', 8);
             $table->unsignedSmallInteger('port_start')->nullable();
