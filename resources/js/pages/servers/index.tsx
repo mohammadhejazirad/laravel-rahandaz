@@ -1,5 +1,6 @@
 import { Head, Link, usePage } from "@inertiajs/react";
 import { PersianDate } from "@/components/dates/persian-date";
+import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Pagination, type PageMeta } from "@/components/ui/pagination";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -22,7 +23,7 @@ export default function ServersIndex({ hosts }: { hosts: { data: HostRow[]; meta
     return (
         <AppLayout title="سرورها" description="موجودی میزبان‌های قابل مشاهده در این فضای کاری؛ نسخه اول تنها میزبان محلی را پشتیبانی می‌کند.">
             <Head title="سرورها" />
-            <p className="text-sm text-muted">نسخه اول فقط میزبان محلی همین نصب را می‌شناسد. افزودن سرور راه‌دور اینجا نیست.</p>
+            <Alert tone="info">نسخه اول فقط میزبان محلی همین نصب را می‌شناسد. افزودن سرور راه‌دور در این نسخه انجام نمی‌شود.</Alert>
             {hosts.data.length === 0 ? (
                 <EmptyState title="میزبانی ثبت نشده است">راه‌اندازی فقط خواندنی است و از این صفحه میزبان ساخته نمی‌شود.</EmptyState>
             ) : (

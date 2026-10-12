@@ -1,5 +1,6 @@
 import { Head, Link, usePage } from "@inertiajs/react";
 import { PersianDate } from "@/components/dates/persian-date";
+import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Pagination, type PageMeta } from "@/components/ui/pagination";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -32,7 +33,7 @@ export default function ProjectsIndex({
         <AppLayout title="پروژه‌ها" description="پروژه‌های ثبت‌شده در فضای کاری و محیط‌های مستقل آن‌ها.">
             <Head title="پروژه‌ها" />
             {create_available ? null : (
-                <p className="text-sm text-muted">ساخت پروژه از این صفحه انجام نمی‌شود. فرم استقرار هنوز به عملیات واقعی وصل نیست.</p>
+                <Alert tone="neutral">ساخت پروژه از این صفحه انجام نمی‌شود. فرم استقرار هنوز به عملیات واقعی وصل نیست.</Alert>
             )}
             {projects.data.length === 0 ? (
                 <EmptyState title="پروژه‌ای ثبت نشده است">وقتی پروژه‌ای در این فضای کاری ساخته شود، اینجا با شناسه عمومی دیده می‌شود.</EmptyState>

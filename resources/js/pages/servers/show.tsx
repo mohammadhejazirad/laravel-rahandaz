@@ -1,6 +1,7 @@
 import { Head, Link, usePage } from "@inertiajs/react";
 import { PersianDate } from "@/components/dates/persian-date";
 import { Alert } from "@/components/ui/alert";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { AppLayout } from "@/layouts/app-layout";
@@ -26,11 +27,13 @@ export default function ServerShow({
     return (
         <AppLayout title={host.display_name} description="نمای کلی وضعیت ذخیره‌شده و آخرین مشاهده این میزبان محلی." eyebrow="سرورها">
             <Head title={host.display_name} />
-            <p className="text-sm">
-                <Link className="text-accent" href={`${base}/servers`}>
-                    سرورها
-                </Link>
-            </p>
+            <Breadcrumb>
+                <BreadcrumbList>
+                    <BreadcrumbItem><BreadcrumbLink asChild><Link href={`${base}/servers`}>سرورها</Link></BreadcrumbLink></BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem><BreadcrumbPage>{host.display_name}</BreadcrumbPage></BreadcrumbItem>
+                </BreadcrumbList>
+            </Breadcrumb>
             {monitoring_available ? null : (
                 <Alert tone="info">نمودار CPU و RAM، شبکه، فایروال و کنسول برای این میزبان وصل نیست. فقط فیلدهای ذخیره‌شده نشان داده می‌شود.</Alert>
             )}

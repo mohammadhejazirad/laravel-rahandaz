@@ -1,6 +1,7 @@
 import { createInertiaApp, type ResolvedComponent } from "@inertiajs/react";
 import { createRoot } from "react-dom/client";
 import { StrictMode } from "react";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const pages = import.meta.glob("./pages/**/*.tsx");
 
@@ -20,7 +21,9 @@ createInertiaApp({
     setup({ el, App, props }) {
         createRoot(el).render(
             <StrictMode>
-                <App {...props} />
+                <TooltipProvider>
+                    <App {...props} />
+                </TooltipProvider>
             </StrictMode>,
         );
     },

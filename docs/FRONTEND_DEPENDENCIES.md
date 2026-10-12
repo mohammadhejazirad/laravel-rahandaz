@@ -10,13 +10,15 @@
 | Sonner | حذف شد | دو کتابخانه Toast موازی نگه داشته نمی‌شود |
 | clsx، tailwind-merge، CVA | مانده | variant دکمه و کلاس شرطی |
 | Inertia React 3.9.1 و React 19.3.0 | مانده | معماری پنل |
-| shadcn/ui و Radix | نصب نشد | Drawer موبایل با همان لینک‌های Sidebar و از لبه فیزیکی راست باز می‌شود. Dialog و Select واقعی هنوز صفحه ندارند. Sheet فقط برای همین منو نصب نشد |
+| shadcn/ui گزینشی + Radix | نصب شد | پیکربندی `components.json` با RTL فعال است. فقط Sheet، Dropdown Menu، Tooltip، Avatar، Separator، Breadcrumb و Slot موردنیاز فعلی اضافه شدند؛ Toast همچنان React-Toastify است و Select/Dialog فرم تا نیاز واقعی اضافه نمی‌شود |
 | Recharts | نصب نشد | سری زمانی تجمیعی از backend نمی‌آید. نمودار ساختگی ممنوع است. شمارش نمونه متریک متنی است |
 | react-multi-date-picker | نصب نشد | فرم زمان‌بندی وجود ندارد. بسته سنگین است و تقویم را در همه صفحه‌ها می‌کشید. نمایش فقط-خواندنی با `Intl` تقویم `persian` انجام شد |
 | date-fns-jalali | نصب نشد | `Intl` در Node 22 و مرورگر همین ماشین تقویم فارسی و timezone را دارد. آزمون مرز ۱۴۰۳ بدون بسته اضافه پاس شد. اگر بعداً ورودی شمسی لازم شد، این گزینه دوباره سنجیده می‌شود |
 | React Hook Form، Zod، resolver | نصب نشد | دو فرم فعلی ساده هستند و `useForm` اینرسی خطای ۴۲۲ لاراول را به فیلد می‌دهد. دو کتابخانه فرم موازی ممنوع است |
 | Motion | نصب نشد | باز و بسته شدن منو با CSS کافی است. `prefers-reduced-motion` در `app.css` است |
 
-اثر build فعلی، بدون Recharts و date picker: chunk اصلی `350.97 KiB` خام و `110.05 KiB` gzip، chunk مشترک Toast/پوسته `21.30 KiB` خام و `8.63 KiB` gzip، chunk مشترک لوگو `32.57 KiB` خام و `10.92 KiB` gzip، فونت `111.15 KiB`، و CSS `52.31 KiB` خام و `10.21 KiB` gzip است. CSS پایه React-Toastify در خروجی CSS قرار دارد و entrypoint `react-toastify/unstyled` از تزریق دوباره style در runtime جلوگیری می‌کند. صفحات با `import.meta.glob` بدون `eager` جدا شده‌اند.
+Primitiveهای Radix به‌صورت بسته‌های مستقل Avatar، Dialog، Dropdown Menu، Separator، Slot و Tooltip نصب شده‌اند؛ بسته تجمیعی `radix-ui` نصب نیست. این انتخاب سطح وابستگی را به قابلیت‌های واقعاً مصرف‌شده محدود می‌کند. فایل‌های shadcn با tokenهای معنایی راه‌انداز تطبیق داده شده‌اند و default theme شادسی‌ان جایگزین هویت محصول نشده است.
+
+اثر build فعلی، بدون Recharts و date picker: chunk مشترک اصلی `373.83 KiB` خام و `116.67 KiB` gzip، AppLayout برابر `62.68 KiB` خام و `20.65 KiB` gzip، chunk پوسته/Tooltip برابر `22.88 KiB` خام و `9.25 KiB` gzip، فونت `111.15 KiB`، و CSS `65.95 KiB` خام و `11.88 KiB` gzip است. CSS پایه React-Toastify در خروجی CSS قرار دارد و entrypoint `react-toastify/unstyled` از تزریق دوباره style در runtime جلوگیری می‌کند. صفحات با `import.meta.glob` بدون `eager` جدا شده‌اند.
 
 جایگزین ردشده برای تاریخ نمایشی، الگوریتم دست‌نویس جلالی بود. مشخصات آن را ممنوع کرده است.

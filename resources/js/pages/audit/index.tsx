@@ -1,5 +1,6 @@
 import { Head } from "@inertiajs/react";
 import { PersianDate } from "@/components/dates/persian-date";
+import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Pagination, type PageMeta } from "@/components/ui/pagination";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -19,7 +20,7 @@ export default function AuditIndex({ events }: { events: { data: AuditRow[]; met
     return (
         <AppLayout title="گزارش فعالیت" description="رخدادهای حسابرسی‌شده این فضای کاری، بدون نمایش راز یا فراداده حساس.">
             <Head title="گزارش فعالیت" />
-            <p className="text-sm text-muted">متن رخداد بدون فراداده و بدون راز است. خروجی فایل از این صفحه ساخته نمی‌شود.</p>
+            <Alert tone="neutral">متن رخداد بدون فراداده و بدون راز است. خروجی فایل از این صفحه ساخته نمی‌شود.</Alert>
             {events.data.length === 0 ? (
                 <EmptyState title="رخدادی ثبت نشده است">زنجیره حسابرسی پس از ثبت رخداد واقعی اینجا دیده می‌شود.</EmptyState>
             ) : (

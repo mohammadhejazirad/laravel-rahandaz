@@ -2,6 +2,7 @@ import { Head, Link, usePage } from "@inertiajs/react";
 import { PersianDate } from "@/components/dates/persian-date";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Card } from "@/components/ui/card";
 import { AppLayout } from "@/layouts/app-layout";
 import { labelOf } from "@/lib/labels";
@@ -39,11 +40,13 @@ export default function ProjectShow({
     return (
         <AppLayout title={project.name} description="مشخصات ثبت‌شده پروژه و محیط‌های مستقل آن؛ استقرار هنوز از این صفحه آغاز نمی‌شود." eyebrow="پروژه‌ها">
             <Head title={project.name} />
-            <p className="text-sm">
-                <Link className="text-accent" href={`${base}/projects`}>
-                    پروژه‌ها
-                </Link>
-            </p>
+            <Breadcrumb>
+                <BreadcrumbList>
+                    <BreadcrumbItem><BreadcrumbLink asChild><Link href={`${base}/projects`}>پروژه‌ها</Link></BreadcrumbLink></BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem><BreadcrumbPage>{project.name}</BreadcrumbPage></BreadcrumbItem>
+                </BreadcrumbList>
+            </Breadcrumb>
             <Card>
                 <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>

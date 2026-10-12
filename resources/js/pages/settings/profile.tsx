@@ -1,5 +1,8 @@
 import { Head, Link, usePage } from "@inertiajs/react";
+import { UserRound } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AppLayout } from "@/layouts/app-layout";
 import { labelOf } from "@/lib/labels";
@@ -30,41 +33,75 @@ export default function ProfileSettings({
         <AppLayout title="تنظیمات" description="تنظیمات نمایشی حساب، منطقه زمانی و پوسته رابط.">
             <Head title="تنظیمات" />
             <Card>
-                <h2 className="text-lg font-semibold">{profile.display_name || profile.username}</h2>
-                <dl className="mt-4 grid gap-3 sm:grid-cols-2">
+                <div className="flex items-center gap-3 border-b border-line pb-5">
+                    <Avatar size="lg">
+                        <AvatarFallback>
+                            {(profile.display_name || profile.username)
+                                .trim()
+                                .charAt(0)
+                                .toLocaleUpperCase("fa-IR") || (
+                                <UserRound className="size-5" aria-hidden="true" />
+                            )}
+                        </AvatarFallback>
+                    </Avatar>
                     <div>
+                        <h2 className="text-lg font-semibold">
+                            {profile.display_name || profile.username}
+                        </h2>
+                        <p className="text-sm text-muted">حساب فعال در {workspace.name}</p>
+                    </div>
+                </div>
+                <dl className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    <div className="rounded-xl bg-surface-muted/75 p-3.5">
                         <dt className="text-sm text-muted">نام کاربری</dt>
-                        <dd className="font-mono" dir="ltr">
+                        <dd className="mt-1 font-mono text-sm" dir="ltr">
                             {profile.username}
                         </dd>
                     </div>
-                    <div>
+                    <div className="rounded-xl bg-surface-muted/75 p-3.5">
                         <dt className="text-sm text-muted">فضای کاری</dt>
-                        <dd>{workspace.name}</dd>
+                        <dd className="mt-1 text-sm font-medium">{workspace.name}</dd>
                     </div>
-                    <div>
+                    <div className="rounded-xl bg-surface-muted/75 p-3.5">
+                        <dt className="text-sm text-muted">شناسه فضای کاری</dt>
+                        <dd className="mt-1 font-mono text-xs" dir="ltr">
+                            {workspace.uuid}
+                        </dd>
+                    </div>
+                    <div className="rounded-xl bg-surface-muted/75 p-3.5">
                         <dt className="text-sm text-muted">منطقه زمانی</dt>
-                        <dd className="font-mono" dir="ltr">
+                        <dd className="mt-1 font-mono text-sm" dir="ltr">
                             {profile.timezone}
                         </dd>
                     </div>
-                    <div>
+                    <div className="rounded-xl bg-surface-muted/75 p-3.5">
                         <dt className="text-sm text-muted">زبان ذخیره‌شده</dt>
-                        <dd className="font-mono" dir="ltr">
+                        <dd className="mt-1 font-mono text-sm" dir="ltr">
                             {profile.locale}
                         </dd>
                     </div>
-                    <div>
+                    <div className="rounded-xl bg-surface-muted/75 p-3.5">
                         <dt className="text-sm text-muted">پوسته ذخیره‌شده</dt>
-                        <dd>{labelOf(profile.theme, labels)}</dd>
+                        <dd className="mt-1 text-sm font-medium">
+                            {labelOf(profile.theme, labels)}
+                        </dd>
                     </div>
                 </dl>
-                <p className="mt-4 text-sm text-muted">پوسته را از نوار بالا عوض کنید. تاریخ‌های صفحه با همین منطقه زمانی به جلالی تبدیل می‌شوند.</p>
-                <Link className="mt-3 inline-block text-sm text-accent" href={`${base}/password`}>
-                    تغییر گذرواژه
-                </Link>
+                <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5">
+                    <p className="max-w-2xl text-sm leading-7 text-muted">
+                        دکمه خورشید/ماه در نوار بالا پوسته را با یک کلیک عوض می‌کند.
+                        تاریخ‌ها با منطقه زمانی ذخیره‌شده به جلالی نمایش داده می‌شوند.
+                    </p>
+                    <Button asChild variant="secondary">
+                        <Link href={`${base}/password`}>تغییر گذرواژه</Link>
+                    </Button>
+                </div>
             </Card>
-            {mfa_available ? null : <Alert tone="info">راه‌اندازی MFA در این نسخه وجود ندارد و وضعیت فعال برای آن نشان داده نمی‌شود.</Alert>}
+            {mfa_available ? null : (
+                <Alert tone="info">
+                    راه‌اندازی MFA در این نسخه وجود ندارد و وضعیت فعال برای آن نشان داده نمی‌شود.
+                </Alert>
+            )}
         </AppLayout>
     );
 }

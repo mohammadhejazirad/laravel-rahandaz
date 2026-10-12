@@ -2,6 +2,7 @@ import { Head, useForm, usePage } from "@inertiajs/react";
 import type { FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import { AuthLayout } from "@/layouts/auth-layout";
 import { notify } from "@/lib/notify";
 import type { SharedProps } from "@/types";
@@ -54,7 +55,8 @@ export default function Login() {
                     ورود
                 </Button>
             </form>
-            <p className="mt-5 border-t border-line pt-4 text-sm leading-7 text-muted">
+            <Separator className="my-5" />
+            <p className="text-sm leading-7 text-muted">
                 ثبت‌نام عمومی بسته است. فقط حساب ساخته‌شده روی همین سرور
                 می‌تواند وارد شود.
             </p>

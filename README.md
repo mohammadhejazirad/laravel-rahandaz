@@ -154,11 +154,12 @@ flowchart LR
 | CSS | Tailwind CSS | ۴٫۳٫۳ |
 | Build | Vite | ۸٫۳٫۴. فقط توسعه و CI. اجرای production پنل به Node نیاز ندارد |
 | آیکون و اعلان | Lucide، React-Toastify | Lucide ۱٫۵۵٫۰، React-Toastify ۱۱٫۱٫۰ |
+| Primitive رابط | shadcn/ui گزینشی، Radix | فقط Sheet، Dropdown Menu، Tooltip، Avatar، Separator، Breadcrumb و Slot |
 | پایگاه | PostgreSQL | image توسعه ۱۶ |
 | صف و cache | Redis | image توسعه ۷، دو سرویس جدا |
 | ORM و صف | Eloquent، Laravel Queue، Scheduler | Horizon نصب نشده |
 
-shadcn/ui، Radix، Recharts، React Hook Form، Zod و Motion نصب نشده‌اند. دلیل در [docs/FRONTEND_DEPENDENCIES.md](docs/FRONTEND_DEPENDENCIES.md) است. فرم ورود و رمز از `useForm` خود Inertia استفاده می‌کند.
+shadcn/ui به‌صورت گزینشی و فقط برای Primitiveهای مصرف‌شده روی Radix نصب شده است. React-Toastify همچنان تنها سیستم Toast است. Recharts، React Hook Form، Zod و Motion نصب نشده‌اند؛ دلیل در [docs/FRONTEND_DEPENDENCIES.md](docs/FRONTEND_DEPENDENCIES.md) است. فرم ورود و رمز از `useForm` خود Inertia استفاده می‌کند.
 
 ### چرا این مرزها
 

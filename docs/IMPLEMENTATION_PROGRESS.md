@@ -25,7 +25,7 @@
 - مسیر `GET /rahandaz/projects/{project}` مدل را با `uuid` resolve می‌کند، `id` عددی را در JSON نمی‌گذارد، شناسه غیر v7 را ۴۰۴ می‌کند و عضویت workspace دیگر را ۴۰۳ می‌کند.
 - Inertia کاربر و workspace فیلد `uuid` می‌فرستد. نوع عمومی TypeScript برند `PublicUuid` است.
 - پوسته‌های واقعی پنل: داشبورد، راه‌اندازی فقط-خواندنی، فهرست سرور محلی، کاتالوگ، میرور، پروژه، عملیات و لاگ ذخیره‌شده، اعلان، گزارش فعالیت برای مالک و مدیر، و تنظیمات نمایه. جزئیات و مسیرهای ساخته‌نشده در `docs/UI_PAGE_INVENTORY.md`. هیچ دکمه نصب، اعمال میرور، استقرار یا لغو جعلی اضافه نشده است.
-- بازطراحی foundation رابط: برند رسمی مشترک، سطح‌های soft معنایی، AuthLayout دوپنله در desktop، AppLayout با عنوان/شرح مشترک، skip link، Drawer دارای focus trap و بازگردانی فوکوس، breakpoint تبلت روی `lg`، جدول قابل پیمایش با keyboard، loading واقعی فرم و rollback پوسته در خطای ذخیره. پکیج تازه نصب نشد.
+- بازطراحی foundation رابط: برند رسمی مشترک، سطح‌های soft معنایی، AuthLayout دوپنله در desktop، AppLayout با عنوان/شرح مشترک، skip link، Sheet دارای focus trap و بازگردانی فوکوس، breakpoint تبلت روی `lg`، جدول قابل پیمایش با keyboard، loading واقعی فرم و rollback پوسته در خطای ذخیره. shadcn/ui به‌صورت گزینشی با Primitiveهای مستقل Radix برای نیازهای واقعی نصب شد.
 
 ## هویت بصری — 2026-10-12
 
@@ -64,15 +64,16 @@ AAD پاکت credential از id دهدهی workspace استفاده می‌کن�
 
 `docs/adr/0001-laravel-modular-monolith.md` و برای شناسه `docs/adr/0004-bigint-primary-key-uuidv7-public-identifier.md`. بند شناسه ADR 0001 منسوخ شده و متن تاریخی‌اش مانده است.
 
-## آزمون واقعی — 2026-10-12
+## آزمون واقعی — 2026-10-13
 
 | فرمان | نتیجه |
 | --- | --- |
-| `XDEBUG_MODE=off php artisan test --compact --display-warnings` | 55 passed، 979 assertions، روی `rahandaz_test`، شامل آزمون امنیت و ابعاد assetهای برند و fallback خطای بدون JavaScript |
+| `XDEBUG_MODE=off php artisan test --compact --display-warnings` | خروج ۰؛ ۶۵ آزمون، ۶۴ موفق، یک skip و ۲۶۲۵ assertion روی `rahandaz_test` |
 | `node --experimental-strip-types --test tests/js/datetime.test.ts` | ۳ آزمون جلالی، از جمله مرز سال کبیسه ۱۴۰۳ |
-| `npx tsc --noEmit` و `npm run lint` | خروج ۰ پس از تغییر layout و componentهای مشترک |
-| `npm run build` | خروج ۰. chunk اصلی `app` برابر `350.98KiB` و gzip برابر `110.06KiB`. chunk لوگو `32.57KiB` و gzip `10.92KiB`، فونت وزیرمتن `111.15KiB`، و CSS برابر `33.31KiB` و gzip `6.97KiB`. صفحات جدا code-split شده‌اند |
-| Chrome headless visual smoke | ورود و راه‌اندازی واقعی در ۳۶۰، ۷۶۸، ۱۲۸۰ و ۱۴۴۰؛ روشن و تیره، پوسته `system` در ترجیح روشن/تیره، و fallback مستقیم ۴۰۴ در ۳۶۰ روشن و ۱۲۸۰ تیره. overflow، تصویر شکسته یا درخواست ناموفق asset برند مشاهده نشد |
+| `npx tsc --noEmit` و `npm run lint` | خروج ۰ و بدون warning پس از تغییر layout و componentهای مشترک |
+| `npm run build` | خروج ۰. chunk مشترک اصلی `373.83KiB` و gzip `116.67KiB`، AppLayout برابر `62.68KiB` و gzip `20.65KiB`، chunk پوسته/Tooltip برابر `22.88KiB` و gzip `9.25KiB`، CSS برابر `65.95KiB` و gzip `11.88KiB`، و فونت `111.15KiB` است |
+| Chrome headless visual smoke | ورود واقعی در ۳۹۰، ۷۶۸، ۱۲۸۰ و ۱۴۴۰ بدون overflow؛ RTL، Vazirmatn و یک دکمه پوسته تایید شد. ترجیح `system` با media روشن/تیره همگام شد، انتخاب دستی در localStorage ماند و ورود نامعتبر Toast فارسی RTL نشان داد. صفحه‌های احراز هویت‌شده با نشست واقعی مرور نشدند چون credential معتبر در اختیار این اجرا نبود |
+| `npm audit --omit=dev --audit-level=high` | صفر vulnerability |
 | `php artisan migrate --force` | forward روی `rahandaz`؛ اول جدول‌ها از ۱۸ به ۷۲ رسیدند، بعد `120000` و `120100` همان ۷۲ جدول را به کلید `bigint` بردند. `migrations` اکنون ۱۶ ردیف است. `migrate:fresh` روی این پایگاه اجرا نشد |
 | `vendor/bin/pint` | روی مدل‌ها، دامنه، HTTP، migration و تست‌های پنل بدون خطای باقی‌مانده |
 | `php artisan rahandaz:doctor` | در آزمون قبلی هسته خروج ۰ بود؛ بعد از migration و cutover دوباره اجرا نشد |
@@ -99,13 +100,19 @@ PHP این ماشین داخل کانتینر Lerd/Podman است و `127.0.0.1` 
 
 ## واکنش‌گرایی و Drawer راست — 2026-10-12
 
-منوی موبایل قبلاً با کلاس منطقی `end` در RTL از لبه فیزیکی چپ باز می‌شد. Drawer اکنون `right-0`، `dir="rtl"` و `data-side="right"` دارد و از لبه راست روی محتوا می‌آید. لینک‌ها همچنان یک `Sidebar` هستند. Sheet و Radix نصب نشد. پوسته از `max-w-[1600px]` خارج شد تا سایدبار دسکتاپ به لبه راست بچسبد. زیر ۱۰۲۴px سایدبار ثابت نیست؛ عبور از این عرض Drawer را می‌بندد.
+منوی موبایل قبلاً با کلاس منطقی `end` در RTL از لبه فیزیکی چپ باز می‌شد. Sheet اکنون `right-0`، `dir="rtl"` و `data-side="right"` دارد و از لبه راست روی محتوا می‌آید. لینک‌ها همچنان یک `Sidebar` هستند. focus trap، Escape، scroll lock و بازگردانی فوکوس را Radix Dialog مدیریت می‌کند. پوسته از `max-w-[1600px]` خارج شد تا سایدبار دسکتاپ به لبه راست بچسبد. زیر ۱۰۲۴px سایدبار ثابت نیست؛ عبور از این عرض Sheet را می‌بندد.
 
-جدول در قاب خودش اسکرول می‌شود. فیلدها ۱۶px هستند. هدف لمسی منو، صفحه‌بندی و دکمه حداقل ۴۴px است. React-Toastify حداکثر سه اعلان، فونت وزیرمتن، RTL و فاصله از Header دارد. نمودار، DatePicker و Dialog هنوز ساخته یا نصب نشده‌اند. صفحه‌هایی که در مخزن نیستند، از جمله محیط مستقل، استقرار، Git، دیتابیس، دامنه، SSL، پشتیبان، کاربران و نقش‌ها، ساخته نشدند.
+جدول در قاب خودش اسکرول می‌شود. فیلدها ۱۶px هستند. هدف لمسی منو، صفحه‌بندی و دکمه حداقل ۴۴px است. React-Toastify حداکثر سه اعلان، فونت وزیرمتن، RTL و فاصله از Header دارد. نمودار، DatePicker و کامپوننت Dialog عمومی هنوز ساخته نشده‌اند. صفحه‌هایی که در مخزن نیستند، از جمله محیط مستقل، استقرار، Git، دیتابیس، دامنه، SSL، پشتیبان، کاربران و نقش‌ها، ساخته نشدند.
 
 `docs/PROJECT_SPEC.md` و `docs/DEVELOPMENT.md` وجود ندارند. جمله پوسته و Drawer در `.docs/PROJECT_SPEC.md` و `.docs/DEVELOPMENT.md` به‌روز شد.
 
 بازبینی Chrome headless روی بیلد `app-OyE2MnwH.js` و `app-BQrqy3Z8.css`: صفحه ورود واقعی در عرض‌های ۳۲۰ تا ۱۹۲۰ بدون اسکرول افقی بود و فونت فیلد ۱۶px. خطای واقعی ۴۰۴ و پاسخ متنی `/` هم اسکرول افقی نداشتند. گذرواژه فایل اولیه دیگر پذیرفته نمی‌شود، پس صفحه‌های داخل پنل با همان بسته تولید و props نمایشی سنجیده شدند، نه با نشست مالک. در ۳۹۰px کشوی بسته‌شده لبه راست `right=390` و `left=70` داشت؛ در ۳۲۰px عرض ۲۷۲px و چسبیده به راست بود. بستن با بیرون، دکمه، Escape و لینک، بازگشت فوکوس به همبرگر، قفل scroll، پوسته تیره `#111827`، و بسته‌شدن هنگام رسیدن به ۱۲۸۰px دیده شد. سایدبار دسکتاپ در ۱۲۸۰ و ۱۴۴۰ و ۱۹۲۰ به لبه viewport چسبیده بود. در ۱۰۲۴ به‌خاطر نوار اسکرول، لبه با عرض layout (۱۰۰۹) یکی بود. بزرگ‌نمایی ۲۰۰٪ در عرض ۱۲۸۰ اسکرول افقی صفحه نساخت. اندازه‌گیری Toast قدیمی Sonner با برش React-Toastify زیر جایگزین شده است.
+
+## بازطراحی رابط و shadcn/ui گزینشی — 2026-10-13
+
+`components.json` با RTL و سبک `radix-nova` اضافه شد. فقط Primitiveهای دارای مصرف واقعی نصب شدند: Avatar، Dialog برای Sheet، Dropdown Menu، Separator، Slot و Tooltip. بسته تجمیعی `radix-ui`، Skeleton بدون مصرف، Toast شادسی‌ان، Dialog عمومی، Select و کتابخانه فرم اضافه نشدند. React-Toastify تنها سیستم Toast باقی ماند.
+
+AppLayout اکنون سایدبار گروه‌بندی‌شده، Sheet موبایل، منوی حساب، Avatar، Header فشرده و عرض محتوای کنترل‌شده دارد. ThemeToggle از سه کنترل به یک دکمه خورشید/ماه تبدیل شد؛ ترجیح `system` تا انتخاب دستی تغییرات سیستم را دنبال می‌کند و شکست ذخیره سمت سرور DOM و localStorage را rollback می‌کند. Breadcrumb مشترک در جزئیات سرور، پروژه و عملیات استفاده می‌شود. اعلان‌ها loading واقعی، تمایز خوانده‌نشده و اقدام مشترک دارند؛ setup و profile نیز با داده موجود بازآرایی شدند. نمودار، داده، فیلتر و عملیات ساختگی اضافه نشد.
 
 ## اعلان Toast با React-Toastify — 2026-10-12
 

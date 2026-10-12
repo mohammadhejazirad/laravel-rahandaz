@@ -37,10 +37,16 @@ export default function Setup({ holding, workspace, facts }: SetupPageProps) {
                         </p>
                     </Card>
                 ) : (
-                    <Card>
+                    <Card className="overflow-hidden p-0">
+                        <div className="border-b border-line bg-surface-muted/55 p-5 sm:p-6">
                         <div className="flex flex-wrap items-start justify-between gap-3">
                             <div>
-                                <AppLogo variant="symbol" size="sm" decorative className="mb-3" />
+                                <AppLogo
+                                    variant="symbol"
+                                    size="sm"
+                                    decorative
+                                    className="mb-3"
+                                />
                                 <h2 className="text-lg font-semibold">
                                     {workspace.name}
                                 </h2>
@@ -56,7 +62,8 @@ export default function Setup({ holding, workspace, facts }: SetupPageProps) {
                                 آزموده نشده
                             </span>
                         </div>
-                        <dl className="mt-5 grid gap-3 sm:grid-cols-2">
+                        </div>
+                        <dl className="grid gap-px bg-line sm:grid-cols-2">
                             <Fact
                                 label="سیستم"
                                 value={
@@ -110,10 +117,14 @@ function Fact({
     ltr?: boolean;
 }) {
     return (
-        <div className="rounded-lg bg-surface-muted px-3 py-2">
-            <dt className="text-xs text-muted">{label}</dt>
+        <div className="bg-surface px-5 py-4 sm:px-6">
+            <dt className="text-xs font-medium text-muted">{label}</dt>
             <dd
-                className={ltr ? "font-mono text-sm" : "text-sm"}
+                className={
+                    ltr
+                        ? "mt-1 font-mono text-sm text-ink"
+                        : "mt-1 text-sm font-medium text-ink"
+                }
                 dir={ltr ? "ltr" : undefined}
             >
                 {value}

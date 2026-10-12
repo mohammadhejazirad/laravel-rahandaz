@@ -28,10 +28,16 @@
 | laravel-vite-plugin | 3.2.0 | MIT |
 | lucide-react | 1.55.0 | ISC |
 | react-toastify | 11.1.0 | MIT |
+| @radix-ui/react-avatar | 1.3.0 | MIT |
+| @radix-ui/react-dialog | 1.3.0 | MIT |
+| @radix-ui/react-dropdown-menu | 2.2.0 | MIT |
+| @radix-ui/react-separator | 1.2.0 | MIT |
+| @radix-ui/react-slot | 1.5.0 | MIT |
+| @radix-ui/react-tooltip | 1.4.0 | MIT |
 | class-variance-authority | 0.7.1 | Apache-2.0 |
 | clsx | 2.1.1 | MIT |
 | tailwind-merge | 3.7.0 | MIT |
 
-فونت وزیرمتن متغیر در `resources/fonts/vazirmatn/` همراه `OFL.txt` است. آیکون عملیاتی فقط از Lucide می‌آید. نمایش جلالی از `Intl` با تقویم `persian` است و بسته تاریخ جدا نصب نشده است. تصمیم رد یا پذیرش shadcn، Recharts، React Hook Form، Motion و date picker در `docs/FRONTEND_DEPENDENCIES.md` است.
+فونت وزیرمتن متغیر در `resources/fonts/vazirmatn/` همراه `OFL.txt` است. آیکون عملیاتی فقط از Lucide می‌آید. نمایش جلالی از `Intl` با تقویم `persian` است و بسته تاریخ جدا نصب نشده است. shadcn/ui کتابخانه runtime جدا نیست؛ فایل‌های گزینشی آن داخل مخزن و روی Primitiveهای مستقل Radix بالا ساخته شده‌اند. تصمیم رد یا پذیرش Recharts، React Hook Form، Motion و date picker در `docs/FRONTEND_DEPENDENCIES.md` است.
 
 Horizon، Pest، Ziggy، Wayfinder و SSR نصب نشده‌اند.

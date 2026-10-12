@@ -1,6 +1,7 @@
 import { Head, Link, usePage } from "@inertiajs/react";
 import { PersianDate } from "@/components/dates/persian-date";
 import { Alert } from "@/components/ui/alert";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Pagination, type PageMeta } from "@/components/ui/pagination";
@@ -39,11 +40,13 @@ export default function JobShow({
     return (
         <AppLayout title="جزئیات عملیات" description="وضعیت، زمان‌بندی و خروجی پالایش‌شده این Job." eyebrow="عملیات">
             <Head title="جزئیات عملیات" />
-            <p className="text-sm">
-                <Link className="text-accent" href={`${base}/jobs`}>
-                    عملیات
-                </Link>
-            </p>
+            <Breadcrumb>
+                <BreadcrumbList>
+                    <BreadcrumbItem><BreadcrumbLink asChild><Link href={`${base}/jobs`}>عملیات</Link></BreadcrumbLink></BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem><BreadcrumbPage>{job.type}</BreadcrumbPage></BreadcrumbItem>
+                </BreadcrumbList>
+            </Breadcrumb>
             <Card>
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <h2 className="font-mono text-xl" dir="ltr">
