@@ -63,7 +63,7 @@
 | در حال ساخت | طرح یا داده هست؛ عمل نهایی به میزبان یا سرویس کاربر نمی‌رسد |
 | برنامه‌ریزی‌شده | در مشخصات نسخه ۱ است و در این مخزن ساخته نشده |
 
-هسته حساب، اسکیما، پوسته فارسی و صفحه‌های خواندنی آماده‌اند. موتور عملیات رکورد را ثبت می‌کند و عمداً آن را `succeeded` نمی‌کند. نصب تک‌دستوری، helper ممتاز، استقرار، گواهی و پشتیبان اجرایی جزو مرحله‌های بعدی نقشه هستند. نقشه در [.docs/ROADMAP.md](.docs/ROADMAP.md) است.
+هسته حساب، اسکیما، پوسته فارسی و صفحه‌های خواندنی آماده‌اند. موتور عملیات رکورد را ثبت می‌کند و عمداً آن را `succeeded` نمی‌کند. اسکریپت‌های میزبان در `infrastructure/operations/` هستند و اعمال زنده را روی همین میزبان توسعه مسدود می‌کنند. قرارداد helper در `infrastructure/privilege_helper/` است، ولی daemon سوکت root نصب نشده است. نصب تک‌دستوری، استقرار واقعی، گواهی و پشتیبان اجرایی هنوز production نیستند. نقشه در [.docs/ROADMAP.md](.docs/ROADMAP.md) و وضعیت موتور در [docs/OPERATIONS.md](docs/OPERATIONS.md) است.
 
 <a id="features"></a>
 ## قابلیت‌ها
@@ -88,7 +88,7 @@
 | فهرست و برگه سرور محلی از ردیف‌های ذخیره‌شده | آماده | CPU، دیسک و شبکه زنده را نشان نمی‌دهد |
 | راه‌اندازی فقط‌خواندنی | آماده | probe نصب نمی‌کند و سازگاری بسته را `untested` می‌گذارد |
 | کاتالوگ و میرور | آماده | فقط خواندن. اعمال میرور و نصب بسته نیست |
-| اطلاعات زنده Ubuntu، systemd، UFW، کلید SSH | برنامه‌ریزی‌شده | کنسول آزاد root ساخته نمی‌شود |
+| اطلاعات زنده Ubuntu، systemd، UFW، کلید SSH | در حال ساخت | اسکریپت facts هست و سازگاری را `untested` می‌گذارد. پنل آن را اجرا نمی‌کند. کنسول آزاد root نیست |
 | نصب PHP، Node، Python، Nginx و سرویس‌ها روی میزبان | برنامه‌ریزی‌شده | اجرا خاموش است |
 | نمودار پایش | برنامه‌ریزی‌شده | داشبورد فقط شمارش job، پروژه، سرور و نمونه متریک است |
 
@@ -166,14 +166,14 @@ PostgreSQL منبع کاربر، workspace، پروژه، job، outbox، audit �
 
 کار طولانی از درخواست HTTP اجرا نمی‌شود. وب، در طرح نسخه ۱، job را در تراکنش ثبت می‌کند. dispatcher ردیف outbox را داخل همان تراکنش به Redis می‌فرستد و بعد `published_at` را می‌نویسد. تحویل at-least-once است. `retry_after` پیش‌فرض ۹۰ ثانیه است و باید از timeout ورکر، ۶۰ ثانیه، بلندتر بماند. worker شناسه job را می‌گیرد و وضعیت را در PostgreSQL می‌نویسد.
 
-Helper ممتاز در طرح، یک برنامه root-owned با اسکیمای ثابت و allowlist است تا حساب پنل sudo عمومی نداشته باشد. این برنامه در `infrastructure/` نیست و امروز هیچ مسیری به APT، Nginx یا systemd نمی‌رسد.
+Helper ممتاز در طرح، یک برنامه root-owned با اسکیمای ثابت و allowlist است تا حساب پنل sudo عمومی نداشته باشد. فایل قرارداد در `infrastructure/privilege_helper/bin/rahandaz-helper` است و سوکت root را نصب نمی‌کند. dispatcher لاراول تا بسته بودن `ExecutionGate` فرآیندی نمی‌سازد، پس امروز مسیر پنل به APT، Nginx یا systemd نمی‌رسد.
 
 جزئیات مرز ماژول‌ها در [.docs/ARCHITECTURE.md](.docs/ARCHITECTURE.md) است.
 
 <a id="compatibility"></a>
 ## سازگاری سیستم‌عامل
 
-هدف نسخه ۱ فقط Ubuntu Server روی x86_64 است. «هدف» با «آزموده‌شده» یکی نیست. ماتریس VM و CI برای این نسخه‌ها در مخزن نیست.
+هدف نسخه ۱ فقط Ubuntu Server روی x86_64 است. «هدف» با «آزموده‌شده» یکی نیست. ماتریس در [docs/OPERATIONS_TEST_MATRIX.md](docs/OPERATIONS_TEST_MATRIX.md) هر سه نسخه را `untested` ثبت کرده است. آزمون VM اجرا نشده است.
 
 | سیستم‌عامل | معماری | نصب تولید | وضعیت |
 | --- | --- | --- | --- |
@@ -363,7 +363,7 @@ rahandaz/
 └── README.md
 ```
 
-این‌ها در ریشه نیستند: `scripts/`، `infrastructure/privilege_helper/`، واحد systemd، `LICENSE`، `SECURITY.md`، `CHANGELOG.md` و `CONTRIBUTING.md`. معماری هدف آن مسیرها را در [.docs/ARCHITECTURE.md](.docs/ARCHITECTURE.md) توصیف می‌کند.
+این‌ها در ریشه نیستند: `scripts/`، واحد systemd، `LICENSE`، `SECURITY.md`، `CHANGELOG.md` و `CONTRIBUTING.md`. `infrastructure/operations/` و قرارداد `infrastructure/privilege_helper/` در مخزن هستند. daemon سوکت نصب نشده است. معماری هدف در [.docs/ARCHITECTURE.md](.docs/ARCHITECTURE.md) است.
 
 <a id="updates"></a>
 ## به‌روزرسانی

@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "verification": "untested",
+  "note": "Names are declarations for Ubuntu Server 22.04, 24.04, and 26.04. No package in this catalog is vm-passed.",
+  "releases": {
+    "22.04": {"codename": "jammy", "compatibility": "untested"},
+    "24.04": {"codename": "noble", "compatibility": "untested"},
+    "26.04": {"codename": "resolute", "compatibility": "untested"}
+  },
+  "packages": {
+    "nginx": {"apt": "nginx", "unit": "nginx", "reload": true},
+    "postgresql": {"apt": "postgresql", "unit": "postgresql", "reload": true},
+    "mysql": {"apt": "mysql-server", "unit": "mysql", "reload": false, "conflicts": ["mariadb"]},
+    "mariadb": {"apt": "mariadb-server", "unit": "mariadb", "reload": false, "conflicts": ["mysql"]},
+    "mongodb": {"apt": null, "unit": "mongod", "reload": false, "note": "Vendor repository and architecture are untested on every supported Ubuntu."},
+    "redis": {"apt": "redis-server", "unit": "redis-server", "reload": false},
+    "php-fpm": {"apt": null, "unit": null, "note": "PHP is installed as a pinned side-by-side runtime, not by changing the system default."},
+    "nodejs": {"apt": null, "unit": null, "note": "Node.js is a project runtime. The system Node package is not assumed."},
+    "python": {"apt": null, "unit": null, "note": "Project Python uses a venv. /usr/bin/python3 is not modified."},
+    "ffmpeg": {"apt": "ffmpeg", "unit": null},
+    "clamav": {"apt": "clamav", "unit": "clamav-daemon"},
+    "clamav-freshclam": {"apt": "clamav-freshclam", "unit": "clamav-freshclam"},
+    "docker": {"apt": "docker.io", "unit": "docker", "optional": true, "note": "Optional software. Not a dependency of the panel or of project deployment."},
+    "ufw": {"apt": "ufw", "unit": "ufw"},
+    "supervisor": {"apt": "supervisor", "unit": "supervisor"},
+    "openssh": {"apt": "openssh-server", "unit": "ssh", "reload": true, "stop": false},
+    "fail2ban": {"apt": "fail2ban", "unit": "fail2ban"},
+    "memcached": {"apt": "memcached", "unit": "memcached"}
+  }
+}

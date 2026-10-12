@@ -409,6 +409,10 @@ stateDiagram-v2
 
 متن stdout/stderr، executor event و command preview پیش از ذخیره و stream پالایش شوند. برای stepهای secretدار ثبت output خام ممنوع است و حذف URL credential، token، Authorization و environment حساس الزامی است. redaction باید با chunk boundary و encoding تست شود؛ فقط regex پس از ذخیره کافی نیست. هیچ output غیرقابل اعتماد به HTML یا escape sequence اجرایی تبدیل نشود. download لاگ نیز scope و redaction دارد.
 
+### 7.6 وضعیت این برش در مخزن
+
+موتور فعلی در `infrastructure/operations/` و قرارداد PHP در `app/Infrastructure/Operations/` است. `ExecutionGate` بسته است و `OperationRunner` به این موتور وصل نیست، پس job میزبان `succeeded` نمی‌شود. جزئیات آزمون و محدودیت در `docs/OPERATIONS.md` است. این زیربخش وضعیت مخزن را می‌گوید و رفتار هدف همین فصل را عوض نمی‌کند.
+
 ## 8. مدیریت میزبان محلی و onboarding
 
 در نصب اولیه یک منبع حفاظت‌شده و یکتا با شناسه `local-host` ساخته می‌شود. کاربر سرور اضافه نمی‌کند؛ wizard راه‌اندازی میزبان محلی است: probe فقط‌خواندنی → نمایش سازگاری → بررسی privilege helper → preview bootstrap → تایید → job.

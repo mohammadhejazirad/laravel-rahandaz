@@ -27,8 +27,10 @@ flowchart LR
 | `app/Domain/` | accounts, onboarding, servers, mirrors, Git, projects, deployments, databases, backups, monitoring, audit, notifications؛ Eloquent و use caseهای business |
 | `app/Http/` | FormRequest، Policy، controller و Inertia props محدود یا endpoint JSON؛ HTTP به‌هیچ‌وجه package/deploy اجرا نمی‌کند |
 | `app/Jobs/`, `app/Application/` | Job/Step/Outbox PostgreSQL، enqueue پس از commit، claim، lease/fencing، idempotency و rollback/reconcile |
-| `app/Infrastructure/Executor/` | adapterهای PHP برای probe و operationهای versioned؛ هیچ command متکی به string interpolation ناامن نیست |
-| `infrastructure/privilege_helper/` | binary/daemon root-owned با request schema ثابت، peer credentials، allowlist operation و audit، immutable برای accountهای پنل |
+| `app/Infrastructure/Executor/` | دروازه اجرا. `allowsHostMutation()` هنوز `false` است و runner را موفق نمی‌کند |
+| `app/Infrastructure/Operations/` | کاتالوگ، اعتبارسنجی ورودی، تجزیه JSON و Process با argv. dispatcher تا باز شدن دروازه فرآیندی نمی‌سازد |
+| `infrastructure/operations/` | موتور Bash نسخه‌دار. apply زنده روی میزبان توسعه `LIVE_MUTATION_BLOCKED` است |
+| `infrastructure/privilege_helper/` | قرارداد CLI محدود. سوکت root و نصب daemon هنوز وجود ندارد |
 | `resources/js/` | صفحات TSX، layout RTL، type-safe props، theme، Sonner Toast و UI shadcn/Radix گزینشی، Lucide و assets محلی |
 | `public/build/` | assetهای Vite آماده؛ Node runtime برای سرویس production پنل لازم نیست |
 

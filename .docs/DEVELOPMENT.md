@@ -1,6 +1,6 @@
 # توسعه راه‌انداز — Laravel + Inertia + React/TypeScript
 
-> راهنمای توسعه همین مخزن Laravel. فرمان‌های Artisan و npm زیر با کد فعلی جورند. نصب‌کننده production و اسکریپت‌های `scripts/` هنوز وجود ندارند.
+> راهنمای توسعه همین مخزن Laravel. فرمان‌های Artisan و npm زیر با کد فعلی جورند. نصب‌کننده production و اسکریپت‌های `scripts/` هنوز وجود ندارند. موتور میزبان در `infrastructure/operations/` است و آزمونش `bash infrastructure/operations/tests/run.sh` است. این آزمون بسته را روی میزبان واقعی نصب نمی‌کند.
 
 ## پیش‌نیازها
 
@@ -82,6 +82,7 @@ npx tsc --noEmit
 npm run lint
 node --experimental-strip-types --test tests/js/datetime.test.ts
 php artisan test
+bash infrastructure/operations/tests/run.sh
 # پس از اضافه‌کردن ابزارهای مربوط به composer.json:
 # vendor/bin/pint --test
 # vendor/bin/phpstan analyse

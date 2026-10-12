@@ -56,7 +56,7 @@ AAD پاکت credential از id دهدهی workspace استفاده می‌کن�
 - بازبینی تصویری همه صفحه‌های داده‌دار و مسیرهای empty/error در چهار viewport. ورود و راه‌اندازی در ۳۶۰، ۷۶۸، ۱۲۸۰ و ۱۴۴۰ روشن/تیره بازبینی شده‌اند؛ کنتراست به‌صورت اندازه‌گیری‌شده با ابزار WCAG ثبت نشده است.
 - Wizard چندمرحله‌ای، Git، دامنه، دیتابیس، پشتیبان، نمودار مانیتورینگ، کاربران و کنسول فقط-خواندنی. این‌ها در منو «آماده نیست» هستند.
 - قرارداد امن برای علامت‌زدن پایان راه‌اندازی. دکمه موفقیت ساختگی اضافه نشده است.
-- reconciliation، helper ممتاز، systemd، installer، میرورها، جلالی.
+- reconciliation، سوکت root برای helper، systemd واحدهای نصب، installer، میرورها، جلالی. قرارداد CLI موتور و helper در مخزن است و به runner وصل نیست.
 - اندازه‌گیری RAM/CPU. هدف ۵۱۲MiB و ۰.۵ vCPU هنوز benchmark نشده است.
 - PHPStan اجرا نشده است.
 
@@ -93,7 +93,7 @@ PHP این ماشین داخل کانتینر Lerd/Podman است و `127.0.0.1` 
 
 در `.docs/DEVELOPMENT.md` دو جمله‌ای که `rahandaz:keys:init` و `rahandaz:bootstrap-owner` را هنوز نساخته می‌دانست، با فرمان‌های واقعی عوض شد.
 
-لینک‌های README فقط به فایل‌های موجود می‌روند. سندهایی که هنوز نیستند و در README لینک نشده‌اند: نصب تولید، عملیات، مدل تهدید مستقل، استراتژی استقرار، کارایی، changelog محصول و `SECURITY.md`. گزارش بازنگری اسناد در `.docs/CHANGELOG_DOCUMENTATION.md` با changelog محصول یکی نیست.
+لینک‌های README فقط به فایل‌های موجود می‌روند. در زمان این بازنویسی، سندهای نصب تولید، عملیات، مدل تهدید مستقل، استراتژی استقرار، کارایی، changelog محصول و `SECURITY.md` هنوز نبودند. گزارش بازنگری اسناد در `.docs/CHANGELOG_DOCUMENTATION.md` با changelog محصول یکی نیست. از ۲۰۲۶-۱۰-۱۲ سندهای وضعیت موتور در بخش «موتور عملیات Bash» اضافه شده‌اند. کارایی، changelog محصول و `SECURITY.md` هنوز نیستند.
 
 ابزار markdownlint در محیط نصب نبود. بررسی محلی: یک H1، ۱۴ فنس زوج، لنگرهای فهرست موجود، و هیچ مسیر نسبی شکسته. آزمون تازه برای این ویرایش README اجرا نشد.
 
@@ -110,6 +110,20 @@ PHP این ماشین داخل کانتینر Lerd/Podman است و `127.0.0.1` 
 ## برچسب فارسی Enum — 2026-10-12
 
 هر Enum زیر `app/Domain/**/Enums` از `HasEnumLabel` استفاده می‌کند و `label()` مقدار ذخیره‌شده را برای نمایش فارسی می‌کند. مقدار ستون پایگاه و propهای Inertia همان توکن اصلی است (`queued`، `owner`، `light`). فرهنگ لغت مشترک `EnumLabelCatalog` از همین متدها ساخته می‌شود و با `enum_labels` به رابط می‌رسد. `StatusBadge`، نقش کاربر، پوسته ذخیره‌شده، نوع پروژه و گونه سرویس از همین فرهنگ می‌خوانند. اگر یک توکن در چند Enum باشد، متن فارسی آن یکی است تا جستجو با مقدار ذخیره‌شده دو معنی ندهد. نام محصول‌ها، مثل Laravel و PostgreSQL، به فارسی برگردانده نشده‌اند. بیلد رابط `app-DJLPUJ7o.js` است و CSS همان `app-BQrqy3Z8.css` مانده؛ اندازه chunk اصلی و CSS تغییر نکرد.
+
+## موتور عملیات Bash — 2026-10-12
+
+`infrastructure/operations/` نسخه `1.0.0` دارد و ۱۲۱ عملیات در `contracts/registry.json` ثبت شده‌اند. wrapperها نازک هستند و کتابخانه‌های مشترک اعتبارسنجی، قفل، sandbox، JSON و رد secret را انجام می‌دهند. apply زنده بدون sandbox زیر دایرکتوری موقت `LIVE_MUTATION_BLOCKED` است. کاتالوگ Ubuntu برای 22.04 و 24.04 و 26.04 نوشته شده و `verification` آن `untested` است، پس نصب بسته موفق گزارش نمی‌شود.
+
+حساب `rahandaz` در sandbox با `nologin`، بدون sudo، و گذرواژه تصادفی در فایل `0600` ساخته می‌شود و سپس قفل می‌گردد. ورود تعاملی این حساب ساخته نشده است. مشخصات گذرواژه را از ویزارد نمی‌پرسد؛ این برش همان راز را فقط داخل apply سندباکس می‌سازد و در اتوماسیون از آن استفاده نمی‌کند.
+
+`infrastructure/privilege_helper/bin/rahandaz-helper` قرارداد CLI است. سوکت root نصب نشده و فایل sudoers ساخته نشده است. اسکریپت سفارشی از این helper رد می‌شود.
+
+`app/Infrastructure/Operations/` کاتالوگ، گارد ورودی، تجزیه نتیجه و `LocalOperationProcess` را دارد. `OperationDispatcher` پیش از ساخت فرآیند `HostExecutionDenied` با کد `EXECUTION_DISABLED` می‌دهد. `OperationRunner` و `ExecutionGate` تغییر نکرده‌اند. job همچنان موفق نمی‌شود.
+
+آزمون `bash infrastructure/operations/tests/run.sh` خروج ۰ بود: `bash -n`، fixtureهای jammy و noble و resolute با سازگاری untested، رد جهش زنده و کلید خصوصی و reboot و بسته نیازموده، حساب sandbox، Nginx، symlink استقرار، اسکریپت غیر root، و آداپتر PHP روی `/usr/bin/php`. `php artisan test tests/Unit/OperationsEngineTest.php` شش آزمون را گذراند و facts را skip کرد چون runtime لاراول bash ندارد. `shellcheck`، `shfmt`، `bats` و VM ایزوله اجرا نشدند. هیچ عملیات نصبی production-ready اعلام نمی‌شود.
+
+سندهای وضعیت: `docs/OPERATIONS.md`، `docs/OPERATIONS_CATALOG.md`، `docs/BASH_SCRIPT_STANDARDS.md`، `docs/PRIVILEGED_HELPER_CONTRACT.md`، `docs/OPERATIONS_SECURITY.md`، `docs/OPERATIONS_TEST_MATRIX.md`، `docs/CUSTOM_SCRIPT_EXECUTION.md`، `docs/INSTALLATION.md`، `docs/SECURITY_MODEL.md` و `docs/DEPLOYMENT_STRATEGIES.md`. این‌ها جایگزین مشخصات `.docs/PROJECT_SPEC.md` نیستند.
 
 ## کار بعدی
 

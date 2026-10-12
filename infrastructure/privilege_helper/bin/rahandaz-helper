@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Restricted helper entry. This file is the contract, not an installed root daemon.
+# It does not grant sudo, does not accept a shell string, and does not run custom scripts.
+set -euo pipefail
+
+if [[ "$#" -ne 1 ]]; then
+    printf '%s\n' "UNKNOWN_OPERATION" >&2
+    exit 1
+fi
+
+operation="$1"
+case "$operation" in
+    automation.*)
+        printf '%s\n' "ROOT_SCRIPT_FORBIDDEN" >&2
+        exit 1
+        ;;
+    *";"* | *"|"* | *'$'* | *'`'*)
+        printf '%s\n' "UNKNOWN_OPERATION" >&2
+        exit 1
+        ;;
+esac
+
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../operations" && pwd)"
+export RAHANDAZ_OPS_HELPER_CONFIRMED="${RAHANDAZ_OPS_HELPER_CONFIRMED:-}"
+if [[ "$(id -u)" -eq 0 && "${RAHANDAZ_OPS_HELPER_SOCKET:-}" == "1" ]]; then
+    export RAHANDAZ_OPS_HELPER_CONFIRMED=1
+fi
+
+exec "$root/bin/rahandaz-ops" "$operation"

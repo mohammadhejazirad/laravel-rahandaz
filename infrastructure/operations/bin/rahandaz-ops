@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Allowlisted dispatcher. It never evaluates a shell string from the request.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+operation="${1:-}"
+
+if [[ ! "$operation" =~ ^[a-z0-9._]+$ ]]; then
+    printf '%s\n' "UNKNOWN_OPERATION" >&2
+    exit 1
+fi
+
+row="$(python3 "$ROOT/lib/opsjson.py" registry "$ROOT/contracts/registry.json" "$operation")" || exit 1
+script="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["script"])' "$row")"
+timeout_seconds="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["timeout_seconds"])' "$row")"
+target="$ROOT/$script"
+
+if [[ ! -f "$target" || -L "$target" ]]; then
+    printf '%s\n' "UNKNOWN_OPERATION" >&2
+    exit 1
+fi
+
+input="$(mktemp)"
+chmod 0600 "$input"
+cleanup() {
+    rm -f "$input"
+}
+trap cleanup EXIT
+cat >"$input"
+
+if [[ -x /usr/bin/timeout ]]; then
+    exec /usr/bin/timeout --signal=TERM --kill-after=5s "${timeout_seconds}s" /usr/bin/env bash "$target" "$input"
+fi
+
+exec /usr/bin/env bash "$target" "$input"
