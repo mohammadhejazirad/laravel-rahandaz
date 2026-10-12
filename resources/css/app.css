@@ -17,15 +17,21 @@
     --color-canvas: #f8fafc;
     --color-surface: #ffffff;
     --color-surface-muted: #f1f5f9;
+    --color-surface-raised: #ffffff;
     --color-line: #e2e8f0;
     --color-ink: #0f172a;
     --color-muted: #475569;
     --color-accent: #4f46e5;
     --color-accent-foreground: #ffffff;
+    --color-accent-soft: #eef2ff;
     --color-success: #047857;
+    --color-success-soft: #ecfdf5;
     --color-warning: #92400e;
+    --color-warning-soft: #fffbeb;
     --color-danger: #b91c1c;
+    --color-danger-soft: #fef2f2;
     --color-info: #1d4ed8;
+    --color-info-soft: #eff6ff;
 }
 
 @layer base {
@@ -33,19 +39,27 @@
         --color-canvas: #0b1120;
         --color-surface: #111827;
         --color-surface-muted: #1e293b;
+        --color-surface-raised: #172033;
         --color-line: #334155;
         --color-ink: #f8fafc;
         --color-muted: #cbd5e1;
         --color-accent: #818cf8;
         --color-accent-foreground: #1e1b4b;
+        --color-accent-soft: #252d52;
         --color-success: #34d399;
+        --color-success-soft: #102e2b;
         --color-warning: #fbbf24;
+        --color-warning-soft: #382b13;
         --color-danger: #f87171;
+        --color-danger-soft: #3b1d28;
         --color-info: #93c5fd;
+        --color-info-soft: #172c49;
     }
 
     html {
         background: var(--color-canvas);
+        min-width: 320px;
+        scroll-behavior: smooth;
     }
 
     body {
@@ -53,6 +67,28 @@
         color: var(--color-ink);
         font-size: 15px;
         line-height: 1.7;
+        min-width: 320px;
+        min-height: 100vh;
+        text-rendering: optimizeLegibility;
+    }
+
+    body::before {
+        position: fixed;
+        z-index: -1;
+        inset: 0;
+        content: '';
+        pointer-events: none;
+        background:
+            radial-gradient(circle at 88% 2%, color-mix(in srgb, var(--color-accent) 8%, transparent) 0, transparent 27rem),
+            linear-gradient(color-mix(in srgb, var(--color-line) 24%, transparent) 1px, transparent 1px),
+            linear-gradient(90deg, color-mix(in srgb, var(--color-line) 24%, transparent) 1px, transparent 1px);
+        background-size: auto, 32px 32px, 32px 32px;
+        mask-image: linear-gradient(to bottom, black, transparent 72%);
+    }
+
+    ::selection {
+        background: var(--color-accent-soft);
+        color: var(--color-ink);
     }
 
     :focus-visible {
@@ -69,5 +105,17 @@
             scroll-behavior: auto !important;
             transition-duration: 0.01ms !important;
         }
+    }
+}
+
+@layer components {
+    .technical-value {
+        direction: ltr;
+        unicode-bidi: isolate;
+        font-family: var(--font-mono);
+    }
+
+    .surface-shadow {
+        box-shadow: 0 1px 2px color-mix(in srgb, var(--color-ink) 5%, transparent), 0 18px 50px color-mix(in srgb, var(--color-ink) 5%, transparent);
     }
 }

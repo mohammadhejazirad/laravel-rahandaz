@@ -88,6 +88,8 @@ php artisan test
 
 کامپوننت تازه در `resources/js/components` و با tokenهای `resources/css/app.css` ساخته می‌شود. صفحه تازه فقط وقتی controller واقعی و Policy دارد اضافه می‌شود. راهنمای ظاهر در `docs/UI_GUIDELINES.md` است.
 
+پس از تغییر layout یا component مشترک، علاوه بر lint/typecheck/build، صفحه‌های متاثر در عرض‌های ۳۶۰، ۷۶۸، ۱۲۸۰ و ۱۴۴۰ و هر دو پوسته مرور شوند. در ۷۶۸px پنل از Drawer استفاده می‌کند و سایدبار ثابت از breakpoint `lg` شروع می‌شود. وجود screenshot دستی جای آزمون feature/authorization را نمی‌گیرد.
+
 Test suite شامل PostgreSQL واقعی برای migrations/index/locking/outbox، Redis جدا برای Queue integration، mock/fake local executor برای unit/feature، Playwright برای E2E و VM آزمایشی Ubuntu 22.04/24.04/26.04 برای تغییرات Nginx/systemd/SSH/UFW و installer است. **SQLite جایگزین آزمون invariantهای PostgreSQL نمی‌شود.** قرارداد HTTPS، reverse proxy و base path `/rahandaz/` باید در VM پشت Nginx + PHP-FPM جدا از `artisan serve` آزمایش شود.
 
 ## Release و محیط production

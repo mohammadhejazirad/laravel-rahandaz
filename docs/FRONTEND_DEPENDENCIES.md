@@ -16,6 +16,6 @@
 | React Hook Form، Zod، resolver | نصب نشد | دو فرم فعلی ساده هستند و `useForm` اینرسی خطای ۴۲۲ لاراول را به فیلد می‌دهد. دو کتابخانه فرم موازی ممنوع است |
 | Motion | نصب نشد | باز و بسته شدن منو با CSS کافی است. `prefers-reduced-motion` در `app.css` است |
 
-اثر build این برش، بدون Recharts و date picker: chunk اصلی حدود ۳۵۱KiB خام و ۱۱۰KiB gzip، فونت ۱۱۱KiB، CSS حدود ۱۸KiB. صفحات با `import.meta.glob` بدون `eager` جدا شده‌اند.
+اثر build این برش، بدون Recharts و date picker: chunk اصلی `350.99 KiB` خام و `110.06 KiB` gzip، فونت `111.15 KiB`، و CSS `32.46 KiB` خام و `6.90 KiB` gzip است. رشد CSS مربوط به tokenهای soft، سطح‌ها، focus و responsive layout است؛ JavaScript اصلی نسبت به گزارش قبلی تقریباً ثابت مانده است. صفحات با `import.meta.glob` بدون `eager` جدا شده‌اند.
 
 جایگزین ردشده برای تاریخ نمایشی، الگوریتم دست‌نویس جلالی بود. مشخصات آن را ممنوع کرده است.

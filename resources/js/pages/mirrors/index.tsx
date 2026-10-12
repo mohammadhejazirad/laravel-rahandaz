@@ -25,7 +25,7 @@ export default function MirrorsIndex({
     apply_available: false;
 }) {
     return (
-        <AppLayout title="میرورها">
+        <AppLayout title="میرورها" description="منابع ثبت‌شده برای دریافت بسته‌ها همراه وضعیت اعتماد و زمان آخرین بررسی.">
             <Head title="میرورها" />
             {apply_available ? null : (
                 <Alert tone="warning">اعمال یا بازگشت میرور از این صفحه انجام نمی‌شود. اعتماد «نامزد» به‌معنی آزموده‌بودن نیست.</Alert>
@@ -33,7 +33,7 @@ export default function MirrorsIndex({
             {mirrors.data.length === 0 ? (
                 <EmptyState title="میروری ثبت نشده است">نشانی‌های میرور پس از ثبت در پایگاه اینجا دیده می‌شوند.</EmptyState>
             ) : (
-                <TableFrame>
+                <TableFrame label="فهرست میرورها">
                     <thead className="bg-surface-muted text-muted">
                         <tr>
                             <th className="px-3 py-2 text-start font-medium">نرم‌افزار</th>

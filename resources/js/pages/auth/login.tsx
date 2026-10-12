@@ -22,6 +22,8 @@ export default function Login() {
                     label="نام کاربری یا ایمیل"
                     name="identifier"
                     autoComplete="username"
+                    autoFocus
+                    required
                     value={form.data.identifier}
                     error={form.errors.identifier}
                     onChange={(event) =>
@@ -33,6 +35,7 @@ export default function Login() {
                     name="password"
                     type="password"
                     autoComplete="current-password"
+                    required
                     value={form.data.password}
                     error={form.errors.password}
                     onChange={(event) =>
@@ -42,12 +45,13 @@ export default function Login() {
                 <Button
                     type="submit"
                     className="w-full"
-                    disabled={form.processing}
+                    loading={form.processing}
+                    loadingLabel="در حال ورود"
                 >
                     ورود
                 </Button>
             </form>
-            <p className="mt-4 text-sm text-muted">
+            <p className="mt-5 border-t border-line pt-4 text-sm leading-7 text-muted">
                 ثبت‌نام عمومی بسته است. فقط حساب ساخته‌شده روی همین سرور
                 می‌تواند وارد شود.
             </p>

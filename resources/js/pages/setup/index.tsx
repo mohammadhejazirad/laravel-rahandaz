@@ -17,7 +17,7 @@ interface SetupPageProps {
 
 export default function Setup({ holding, workspace, facts }: SetupPageProps) {
     return (
-        <AppLayout title="راه‌اندازی">
+        <AppLayout title="راه‌اندازی" description="مشاهده امن مشخصات همین میزبان، بدون نصب بسته یا تغییر پیکربندی سیستم.">
             <Head title="راه‌اندازی" />
             <div className="mx-auto max-w-4xl space-y-4">
                 <Alert tone="warning">

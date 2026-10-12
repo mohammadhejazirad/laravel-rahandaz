@@ -26,7 +26,7 @@ export default function NotificationsIndex({
     const unread = usePage<SharedProps>().props.notifications.unread;
 
     return (
-        <AppLayout title="اعلان‌ها">
+        <AppLayout title="اعلان‌ها" description="پیام‌های پایدار ثبت‌شده در پایگاه؛ Toastهای موقت جایگزین این فهرست نیستند.">
             <Head title="اعلان‌ها" />
             {unread > 0 ? (
                 <Button type="button" variant="secondary" onClick={() => router.post(`${base}/notifications/read-all`)}>

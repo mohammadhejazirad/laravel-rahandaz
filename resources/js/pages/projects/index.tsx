@@ -28,7 +28,7 @@ export default function ProjectsIndex({
     const base = usePage<SharedProps>().props.app.base_path;
 
     return (
-        <AppLayout title="پروژه‌ها">
+        <AppLayout title="پروژه‌ها" description="پروژه‌های ثبت‌شده در فضای کاری و محیط‌های مستقل آن‌ها.">
             <Head title="پروژه‌ها" />
             {create_available ? null : (
                 <p className="text-sm text-muted">ساخت پروژه از این صفحه انجام نمی‌شود. فرم استقرار هنوز به عملیات واقعی وصل نیست.</p>
@@ -36,7 +36,7 @@ export default function ProjectsIndex({
             {projects.data.length === 0 ? (
                 <EmptyState title="پروژه‌ای ثبت نشده است">وقتی پروژه‌ای در این فضای کاری ساخته شود، اینجا با شناسه عمومی دیده می‌شود.</EmptyState>
             ) : (
-                <TableFrame>
+                <TableFrame label="فهرست پروژه‌ها">
                     <thead className="bg-surface-muted text-muted">
                         <tr>
                             <th className="px-3 py-2 text-start font-medium">نام</th>

@@ -1,8 +1,11 @@
 import { Link, router, usePage } from "@inertiajs/react";
 import {
+    Activity,
+    ArchiveRestore,
     Bell,
+    Database,
     FolderGit2,
-    HardDrive,
+    Globe2,
     LayoutDashboard,
     ListChecks,
     LogOut,
@@ -17,6 +20,7 @@ import {
     type LucideIcon,
 } from "lucide-react";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { BrandMark } from "@/components/brand-mark";
 import { FlashToaster } from "@/components/flash-toaster";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Alert } from "@/components/ui/alert";
@@ -34,13 +38,23 @@ interface NavLink {
     label: string;
     icon: LucideIcon;
     enabled: boolean;
+    visible?: boolean;
 }
 
-export function AppLayout({ title, children }: { title: string; children: ReactNode }) {
+interface AppLayoutProps {
+    title: string;
+    description?: string;
+    eyebrow?: string;
+    children: ReactNode;
+}
+
+export function AppLayout({ title, description, eyebrow = "فضای کاری محلی", children }: AppLayoutProps) {
     const page = usePage<SharedProps>();
     const base = page.props.app.base_path;
     const [open, setOpen] = useState(false);
+    const menuRef = useRef<HTMLButtonElement>(null);
     const closeRef = useRef<HTMLButtonElement>(null);
+    const drawerRef = useRef<HTMLDivElement>(null);
     const titleId = useId();
     const path = page.url.split("?")[0] ?? "";
     const role = page.props.auth.user?.role;
@@ -56,12 +70,12 @@ export function AppLayout({ title, children }: { title: string; children: ReactN
         { href: `${base}/projects`, label: "پروژه‌ها", icon: FolderGit2, enabled: true },
         { href: "", label: "استقرارها", icon: Rocket, enabled: false },
         { href: `${base}/jobs`, label: "عملیات", icon: ListChecks, enabled: true },
-        { href: "", label: "دامنه‌ها", icon: Server, enabled: false },
-        { href: "", label: "دیتابیس‌ها", icon: HardDrive, enabled: false },
-        { href: "", label: "پشتیبان‌ها", icon: HardDrive, enabled: false },
-        { href: "", label: "پایش", icon: LayoutDashboard, enabled: false },
+        { href: "", label: "دامنه‌ها", icon: Globe2, enabled: false },
+        { href: "", label: "دیتابیس‌ها", icon: Database, enabled: false },
+        { href: "", label: "پشتیبان‌ها", icon: ArchiveRestore, enabled: false },
+        { href: "", label: "پایش", icon: Activity, enabled: false },
         { href: `${base}/notifications`, label: "اعلان‌ها", icon: Bell, enabled: true },
-        { href: `${base}/audit`, label: "گزارش فعالیت", icon: ScrollText, enabled: canAudit },
+        { href: `${base}/audit`, label: "گزارش فعالیت", icon: ScrollText, enabled: true, visible: canAudit },
         { href: `${base}/settings/profile`, label: "تنظیمات", icon: Settings, enabled: true },
     ];
 
@@ -70,89 +84,153 @@ export function AppLayout({ title, children }: { title: string; children: ReactN
             return;
         }
 
+        const previousOverflow = document.body.style.overflow;
+        const menuButton = menuRef.current;
+        document.body.style.overflow = "hidden";
         closeRef.current?.focus();
 
         function onKey(event: KeyboardEvent) {
             if (event.key === "Escape") {
                 setOpen(false);
+                return;
+            }
+
+            if (event.key !== "Tab") {
+                return;
+            }
+
+            const focusable = drawerRef.current?.querySelectorAll<HTMLElement>(
+                'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+            );
+
+            if (!focusable?.length) {
+                return;
+            }
+
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
             }
         }
 
         window.addEventListener("keydown", onKey);
-        return () => window.removeEventListener("keydown", onKey);
+
+        return () => {
+            window.removeEventListener("keydown", onKey);
+            document.body.style.overflow = previousOverflow;
+            menuButton?.focus();
+        };
     }, [open]);
 
     return (
         <div className="min-h-screen bg-canvas">
-            <div className="mx-auto flex min-h-screen max-w-[1440px]">
-                <Sidebar path={path} links={links} className="hidden w-[264px] shrink-0 md:block" />
+            <a
+                href="#main-content"
+                className="fixed start-4 top-3 z-[70] -translate-y-20 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground focus:translate-y-0"
+            >
+                رفتن به محتوای اصلی
+            </a>
+            <div className="mx-auto flex min-h-screen max-w-[1600px]">
+                <Sidebar path={path} links={links} className="sticky top-0 hidden h-screen w-[264px] shrink-0 lg:block" />
                 <div className="min-w-0 flex-1">
-                    <header className="flex items-center justify-between gap-3 border-b border-line px-4 py-3 md:px-6">
+                    <header className="sticky top-0 z-30 flex min-h-16 items-center justify-between gap-3 border-b border-line bg-canvas/85 px-3 py-2 backdrop-blur-xl sm:px-4 md:px-7">
                         <div className="flex min-w-0 items-center gap-3">
                             <button
+                                ref={menuRef}
                                 type="button"
-                                className="rounded-lg border border-line p-2 md:hidden"
+                                className="grid size-10 shrink-0 place-items-center rounded-xl border border-line bg-surface shadow-sm lg:hidden"
                                 aria-label="باز کردن منو"
                                 aria-expanded={open}
+                                aria-controls="mobile-navigation"
                                 onClick={() => setOpen(true)}
                             >
-                                <Menu className="size-4" aria-hidden="true" />
+                                <Menu className="size-5" aria-hidden="true" />
                             </button>
                             <div className="min-w-0">
-                                <p className="text-xs text-muted">راه‌انداز</p>
-                                <h1 className="truncate text-lg font-semibold">{title}</h1>
+                                <p className="hidden text-xs text-muted sm:block">راه‌انداز / {title}</p>
+                                <p className="truncate text-sm font-semibold sm:text-base">
+                                    {page.props.auth.user?.display_name || page.props.auth.user?.username}
+                                </p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
                             <Link
                                 href={`${base}/notifications`}
-                                className="relative rounded-lg border border-line p-2"
+                                className="relative grid size-10 place-items-center rounded-xl border border-line bg-surface shadow-sm hover:bg-surface-muted"
                                 aria-label={unread > 0 ? `اعلان‌ها، ${unread} خوانده‌نشده` : "اعلان‌ها"}
                             >
-                                <Bell className="size-4" aria-hidden="true" />
+                                <Bell className="size-[18px]" aria-hidden="true" />
                                 {unread > 0 ? (
-                                    <span className="absolute -top-1 -start-1 min-w-5 rounded-full bg-[#B91C1C] px-1 text-center text-[10px] leading-5 text-white">
+                                    <span className="absolute -start-1 -top-1 min-w-5 rounded-full bg-[#B91C1C] px-1 text-center text-[10px] leading-5 text-white">
                                         {unread > 99 ? "99+" : unread}
                                     </span>
                                 ) : null}
                             </Link>
-                            <ThemeToggle />
+                            <div className="hidden sm:block">
+                                <ThemeToggle compact />
+                            </div>
                             <button
                                 type="button"
-                                className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm text-muted hover:bg-surface-muted"
+                                className="inline-flex size-10 items-center justify-center gap-1 rounded-xl text-sm text-muted hover:bg-surface-muted hover:text-ink lg:w-auto lg:px-3"
                                 onClick={() => router.post(`${base}/logout`)}
+                                aria-label="خروج از حساب"
                             >
                                 <LogOut className="size-4" aria-hidden="true" />
-                                خروج
+                                <span className="hidden lg:inline">خروج</span>
                             </button>
                         </div>
                     </header>
-                    <main className="space-y-4 px-4 py-6 md:px-6">
-                        {page.props.execution.mode === "disabled" ? (
-                            <Alert tone="warning">
-                                اجرای دستور میزبان خاموش است. ثبت یک درخواست به‌معنی نصب یا استقرار موفق نیست.
-                            </Alert>
-                        ) : null}
-                        {children}
+                    <main id="main-content" className="px-4 py-6 sm:px-5 md:px-7 md:py-8">
+                        <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
+                            <div className="max-w-3xl">
+                                <p className="mb-1 text-xs font-semibold text-accent">{eyebrow}</p>
+                                <h1 className="text-2xl font-bold leading-tight text-ink sm:text-3xl">{title}</h1>
+                                {description ? <p className="mt-2 text-sm leading-7 text-muted sm:text-base">{description}</p> : null}
+                            </div>
+                            <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-xs text-muted shadow-sm">
+                                <span className="size-1.5 rounded-full bg-success" aria-hidden="true" />
+                                میزبان محلی
+                            </span>
+                        </header>
+                        <div className="space-y-4">
+                            {page.props.execution.mode === "disabled" ? (
+                                <Alert tone="warning">
+                                    اجرای دستور میزبان خاموش است. ثبت یک درخواست به‌معنی نصب یا استقرار موفق نیست.
+                                </Alert>
+                            ) : null}
+                            {children}
+                        </div>
                     </main>
                 </div>
             </div>
             {open ? (
-                <div className="fixed inset-0 z-40 md:hidden">
-                    <button type="button" className="absolute inset-0 bg-ink/40" aria-label="بستن منو" onClick={() => setOpen(false)} />
+                <div className="fixed inset-0 z-40 lg:hidden">
+                    <button type="button" className="absolute inset-0 bg-slate-950/55 backdrop-blur-sm" aria-label="بستن منو" onClick={() => setOpen(false)} />
                     <div
+                        ref={drawerRef}
+                        id="mobile-navigation"
                         role="dialog"
                         aria-modal="true"
                         aria-labelledby={titleId}
-                        className="absolute inset-y-0 end-0 w-[264px] bg-canvas"
+                        className="absolute inset-y-0 end-0 flex w-[min(88vw,320px)] flex-col bg-surface shadow-2xl"
                     >
-                        <div className="flex items-center justify-between p-3">
-                            <p id={titleId} className="text-sm font-medium">منو</p>
+                        <div className="flex items-center justify-between border-b border-line p-3">
+                            <div id={titleId}><BrandMark /></div>
                             <button ref={closeRef} type="button" className="rounded-lg border border-line p-2" aria-label="بستن منو" onClick={() => setOpen(false)}>
                                 <X className="size-4" aria-hidden="true" />
                             </button>
                         </div>
-                        <Sidebar path={path} links={links} onNavigate={() => setOpen(false)} />
+                        <Sidebar path={path} links={links} className="min-h-0 flex-1 overflow-y-auto" onNavigate={() => setOpen(false)} hideBrand />
+                        <div className="border-t border-line p-3 sm:hidden">
+                            <p className="mb-2 text-xs font-medium text-muted">پوسته</p>
+                            <ThemeToggle />
+                        </div>
                     </div>
                 </div>
             ) : null}
@@ -166,41 +244,40 @@ function Sidebar({
     links,
     className = "",
     onNavigate,
+    hideBrand = false,
 }: {
     path: string;
     className?: string;
     links: NavLink[];
     onNavigate?: () => void;
+    hideBrand?: boolean;
 }) {
-    const page = usePage<SharedProps>();
-    const user = page.props.auth.user;
+    const user = usePage<SharedProps>().props.auth.user;
 
     return (
-        <aside className={`border-e border-line bg-surface ${className}`}>
-            <div className="px-4 py-5">
-                <p className="text-xs text-muted">کنترل‌پلین</p>
-                <p className="text-xl font-semibold">راه‌انداز</p>
+        <aside className={`border-e border-line bg-surface/95 ${className}`}>
+            {hideBrand ? null : <div className="border-b border-line px-4 py-5"><BrandMark /></div>}
+            <div className="px-4 py-4">
                 {user ? (
-                    <p className="mt-3 text-sm text-muted">
-                        <span className="text-ink">{user.display_name || user.username}</span>
-                        <span className="mx-1">·</span>
-                        {roleLabels[user.role ?? ""] ?? "بدون نقش"}
-                    </p>
+                    <div className="rounded-xl border border-line bg-surface-muted/70 px-3 py-2.5">
+                        <p className="truncate text-sm font-semibold text-ink">{user.display_name || user.username}</p>
+                        <p className="text-xs text-muted">{roleLabels[user.role ?? ""] ?? "بدون نقش"}</p>
+                    </div>
                 ) : null}
             </div>
             <nav className="space-y-1 px-3 pb-6" aria-label="اصلی">
-                {links.filter((link) => link.enabled || link.label !== "گزارش فعالیت").map((link) => {
+                {links.filter((link) => link.visible !== false).map((link) => {
                     const Icon = link.icon;
                     const active = link.enabled && (path === link.href || path.startsWith(`${link.href}/`));
 
                     if (!link.enabled) {
                         return (
-                            <div key={link.label} className="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-muted">
+                            <div key={link.label} aria-disabled="true" className="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-muted opacity-70">
                                 <span className="inline-flex items-center gap-2">
                                     <Icon className="size-4" aria-hidden="true" />
                                     {link.label}
                                 </span>
-                                <span className="text-xs">آماده نیست</span>
+                                <span className="rounded-full border border-line px-1.5 text-[10px]">بعداً</span>
                             </div>
                         );
                     }
@@ -211,11 +288,9 @@ function Sidebar({
                             href={link.href}
                             aria-current={active ? "page" : undefined}
                             onClick={onNavigate}
-                            className={
-                                active
-                                    ? "flex items-center gap-2 rounded-lg bg-surface-muted px-3 py-2 text-sm font-medium text-ink"
-                                    : "flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted hover:bg-surface-muted"
-                            }
+                            className={active
+                                ? "flex items-center gap-2 rounded-xl bg-accent-soft px-3 py-2 text-sm font-semibold text-accent"
+                                : "flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted hover:bg-surface-muted hover:text-ink"}
                         >
                             <Icon className="size-4" aria-hidden="true" />
                             {link.label}

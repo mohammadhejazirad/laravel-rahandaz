@@ -1,24 +1,50 @@
-import type { ReactNode } from 'react';
-import { FlashToaster } from '@/components/flash-toaster';
-import { ThemeToggle } from '@/components/theme-toggle';
+import { LockKeyhole, ServerCog, ShieldCheck, type LucideIcon } from "lucide-react";
+import type { ReactNode } from "react";
+import { BrandMark } from "@/components/brand-mark";
+import { FlashToaster } from "@/components/flash-toaster";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function AuthLayout({ title, children }: { title: string; children: ReactNode }) {
     return (
-        <div className="flex min-h-screen items-center justify-center px-4 py-10">
-            <div className="w-full max-w-md">
-                <div className="mb-6 flex items-center justify-between gap-3">
-                    <div>
-                        <p className="text-sm text-muted">کنترل‌پلین</p>
-                        <h1 className="text-2xl font-semibold text-ink">راه‌انداز</h1>
+        <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-8 sm:px-6">
+            <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_80%_15%,var(--color-accent-soft),transparent_32rem)]" />
+            <div className="surface-shadow grid w-full max-w-5xl overflow-hidden rounded-[1.75rem] border border-line bg-surface/95 lg:grid-cols-[0.9fr_1.1fr]">
+                <section className="relative hidden overflow-hidden bg-[#111827] p-10 text-white lg:flex lg:flex-col lg:justify-between">
+                    <div className="absolute -start-24 -top-24 size-64 rounded-full border border-white/10" aria-hidden="true" />
+                    <div className="absolute -bottom-32 -end-16 size-80 rounded-full bg-indigo-500/15 blur-3xl" aria-hidden="true" />
+                    <div className="relative">
+                        <BrandMark className="[&_span]:text-white" />
+                        <p className="mt-10 max-w-sm text-3xl font-bold leading-[1.65]">مدیریت روشن و قابل‌ردیابی برای همان سروری که در اختیار شماست.</p>
+                        <p className="mt-4 max-w-sm text-sm leading-7 text-slate-300">هیچ عملیات میزبانی از صفحه ورود اجرا نمی‌شود و وضعیت موفق بدون مشاهده نتیجه واقعی نمایش داده نخواهد شد.</p>
                     </div>
-                    <ThemeToggle />
-                </div>
-                <section className="rounded-xl border border-line bg-surface p-6 shadow-sm">
-                    <h2 className="mb-5 text-xl font-semibold">{title}</h2>
-                    {children}
+                    <ul className="relative mt-12 space-y-4 text-sm text-slate-200">
+                        <AuthFeature icon={ServerCog}>کنترل‌پلین تک‌میزبان و خودمیزبان</AuthFeature>
+                        <AuthFeature icon={ShieldCheck}>مجوز سمت سرور و گزارش فعالیت</AuthFeature>
+                        <AuthFeature icon={LockKeyhole}>بدون ثبت‌نام عمومی و بدون افشای Secret</AuthFeature>
+                    </ul>
+                </section>
+                <section className="p-5 sm:p-8 lg:p-10">
+                    <div className="mb-10 flex items-center justify-between gap-3 lg:justify-end">
+                        <BrandMark className="lg:hidden" />
+                        <ThemeToggle compact />
+                    </div>
+                    <div className="mx-auto max-w-md">
+                        <p className="text-xs font-semibold text-accent">دسترسی امن</p>
+                        <h1 className="mt-1 text-2xl font-bold sm:text-3xl">{title}</h1>
+                        <div className="mt-7">{children}</div>
+                    </div>
                 </section>
             </div>
             <FlashToaster />
-        </div>
+        </main>
+    );
+}
+
+function AuthFeature({ icon: Icon, children }: { icon: LucideIcon; children: ReactNode }) {
+    return (
+        <li className="flex items-center gap-3">
+            <span className="grid size-9 place-items-center rounded-xl bg-white/10" aria-hidden="true"><Icon className="size-4" /></span>
+            {children}
+        </li>
     );
 }

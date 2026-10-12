@@ -4,7 +4,7 @@
 
 ## مرحله فعلی
 
-مرحله ۰ (هسته) پیاده‌سازی و تست شده است. بخش قابل آزمون مرحله ۱ (ورود، پوسته، probe فقط-خواندنی) هم ساخته شده، ولی بازبینی viewport در مرورگر انجام نشده و بنابراین مرحله ۱ بسته نیست.
+مرحله ۰ (هسته) پیاده‌سازی و تست شده است. بخش قابل آزمون مرحله ۱ (ورود، پوسته، probe فقط-خواندنی) هم ساخته شده است. صفحه ورود و راه‌اندازی در viewportهای مرجع و هر دو پوسته بازبینی شده‌اند، ولی visual regression همه صفحه‌های داده‌دار و Wizard عملیاتی هنوز وجود ندارد و بنابراین مرحله ۱ بسته نیست.
 
 اسکیمای PostgreSQL نسخه اول روی پایگاه توسعه migrate شده و سپس قرارداد شناسه به کلید اصلی `bigint` و شناسه عمومی UUIDv7 تغییر کرده است. رفتار اجرایی مرحله‌های ۲ تا ۶ هنوز ساخته نشده است. `RAHANDAZ_EXECUTION_MODE` برابر `disabled` مانده و runner هنوز هیچ job یا deployment را `succeeded` نمی‌کند.
 
@@ -24,6 +24,7 @@
 - مسیر `GET /rahandaz/projects/{project}` مدل را با `uuid` resolve می‌کند، `id` عددی را در JSON نمی‌گذارد، شناسه غیر v7 را ۴۰۴ می‌کند و عضویت workspace دیگر را ۴۰۳ می‌کند.
 - Inertia کاربر و workspace فیلد `uuid` می‌فرستد. نوع عمومی TypeScript برند `PublicUuid` است.
 - پوسته‌های واقعی پنل: داشبورد، راه‌اندازی فقط-خواندنی، فهرست سرور محلی، کاتالوگ، میرور، پروژه، عملیات و لاگ ذخیره‌شده، اعلان، گزارش فعالیت برای مالک و مدیر، و تنظیمات نمایه. جزئیات و مسیرهای ساخته‌نشده در `docs/UI_PAGE_INVENTORY.md`. هیچ دکمه نصب، اعمال میرور، استقرار یا لغو جعلی اضافه نشده است.
+- بازطراحی foundation رابط: نشان مشترک، سطح‌های soft معنایی، AuthLayout دوپنله در desktop، AppLayout با عنوان/شرح مشترک، skip link، Drawer دارای focus trap و بازگردانی فوکوس، breakpoint تبلت روی `lg`، جدول قابل پیمایش با keyboard، loading واقعی فرم و rollback پوسته در خطای ذخیره. پکیج تازه نصب نشد.
 
 ## شناسه‌ها — 2026-10-12
 
@@ -41,7 +42,7 @@ AAD پاکت credential از id دهدهی workspace استفاده می‌کن�
 - job نگهداری متریک و لاگ، چرخش کلید credential، نقش جدا برای migration، RLS، reconciliation لیز، کنترلر webhook، و probe زنده میرور.
 - `manage_secrets` برای operator در اسکیما هست و `openFor()` هنوز فقط owner و admin را راه می‌دهد.
 - DNS rebinding و SSRF بعد از resolve برای GitLab خودمیزبان.
-- بازبینی چهار viewport در مرورگر. کنتراست به‌صورت اندازه‌گیری‌شده با ابزار WCAG ثبت نشده است.
+- بازبینی تصویری همه صفحه‌های داده‌دار و مسیرهای empty/error در چهار viewport. ورود و راه‌اندازی در ۳۶۰، ۷۶۸، ۱۲۸۰ و ۱۴۴۰ روشن/تیره بازبینی شده‌اند؛ کنتراست به‌صورت اندازه‌گیری‌شده با ابزار WCAG ثبت نشده است.
 - Wizard چندمرحله‌ای، Git، دامنه، دیتابیس، پشتیبان، نمودار مانیتورینگ، کاربران و کنسول فقط-خواندنی. این‌ها در منو «آماده نیست» هستند.
 - قرارداد امن برای علامت‌زدن پایان راه‌اندازی. دکمه موفقیت ساختگی اضافه نشده است.
 - reconciliation، helper ممتاز، systemd، installer، میرورها، جلالی.
@@ -56,15 +57,16 @@ AAD پاکت credential از id دهدهی workspace استفاده می‌کن�
 
 | فرمان | نتیجه |
 | --- | --- |
-| `XDEBUG_MODE=off php artisan test --compact --display-warnings` | 50 passed، 519 assertions، روی `rahandaz_test`، شامل صفحات خواندنی پنل |
+| `XDEBUG_MODE=off php artisan test --compact --display-warnings` | 50 passed، 519 assertions، روی `rahandaz_test`، شامل صفحات خواندنی پنل؛ پس از بازطراحی foundation دوباره اجرا شد |
 | `node --experimental-strip-types --test tests/js/datetime.test.ts` | ۳ آزمون جلالی، از جمله مرز سال کبیسه ۱۴۰۳ |
-| `npx tsc --noEmit` و `npm run lint` | خروج ۰ |
-| `npm run build` | خروج ۰. chunk اصلی `app` حدود ۳۵۱KiB و gzip حدود ۱۱۰KiB. فونت وزیرمتن ۱۱۱KiB. CSS حدود ۱۸KiB. صفحات جدا code-split شده‌اند |
+| `npx tsc --noEmit` و `npm run lint` | خروج ۰ پس از تغییر layout و componentهای مشترک |
+| `npm run build` | خروج ۰. chunk اصلی `app` برابر `350.99KiB` و gzip برابر `110.06KiB`. فونت وزیرمتن `111.15KiB`. CSS برابر `32.46KiB` و gzip برابر `6.90KiB`. صفحات جدا code-split شده‌اند |
+| Chrome headless visual smoke | ورود و راه‌اندازی واقعی در ۳۶۰، ۷۶۸، ۱۲۸۰ و ۱۴۴۰؛ روشن و تیره. overflow مشاهده نشد و سایدبار در ۷۶۸ پس از بازبینی به Drawer منتقل شد |
 | `php artisan migrate --force` | forward روی `rahandaz`؛ اول جدول‌ها از ۱۸ به ۷۲ رسیدند، بعد `120000` و `120100` همان ۷۲ جدول را به کلید `bigint` بردند. `migrations` اکنون ۱۶ ردیف است. `migrate:fresh` روی این پایگاه اجرا نشد |
 | `vendor/bin/pint` | روی مدل‌ها، دامنه، HTTP، migration و تست‌های پنل بدون خطای باقی‌مانده |
 | `php artisan rahandaz:doctor` | در آزمون قبلی هسته خروج ۰ بود؛ بعد از migration و cutover دوباره اجرا نشد |
 
-بازبینی viewport در مرورگر انجام نشده است. `EXPLAIN (ANALYZE, BUFFERS)` اجرا نشد چون ردیف دامنه صفر بود؛ بهبود سرعت ادعا نمی‌شود. PHPStan و benchmark رم و CPU اجرا نشده‌اند.
+visual regression خودکار و بازبینی همه صفحه‌ها انجام نشده است. `EXPLAIN (ANALYZE, BUFFERS)` اجرا نشد چون ردیف دامنه صفر بود؛ بهبود سرعت ادعا نمی‌شود. PHPStan و benchmark رم و CPU اجرا نشده‌اند.
 
 ## محدودیت محیط
 
@@ -86,4 +88,4 @@ PHP این ماشین داخل کانتینر Lerd/Podman است و `127.0.0.1` 
 
 ## کار بعدی
 
-صفحه ورود تا راه‌اندازی را در viewportهای ۳۶۰، ۷۶۸، ۱۲۸۰ و ۱۴۴۰ و هر دو پوسته طی کن. بعد از آن، فقط یک انتقال صریح و قابل بازگشت برای `setup_completed_at` طراحی شود که هیچ probe را «سازگار» اعلام نکند.
+صفحه‌های فهرست و جزئیات داده‌دار را با fixture معتبر در viewportهای مرجع و حالت‌های empty/error مرور کن. بعد از آن، فقط یک انتقال صریح و قابل بازگشت برای `setup_completed_at` طراحی شود که هیچ probe را «سازگار» اعلام نکند.

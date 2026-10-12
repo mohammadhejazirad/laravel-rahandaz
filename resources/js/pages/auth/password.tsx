@@ -31,6 +31,8 @@ export default function Password() {
                     name="current_password"
                     type="password"
                     autoComplete="current-password"
+                    autoFocus
+                    required
                     value={form.data.current_password}
                     error={form.errors.current_password}
                     onChange={(event) =>
@@ -42,6 +44,7 @@ export default function Password() {
                     name="password"
                     type="password"
                     autoComplete="new-password"
+                    required
                     value={form.data.password}
                     error={form.errors.password}
                     onChange={(event) =>
@@ -53,6 +56,7 @@ export default function Password() {
                     name="password_confirmation"
                     type="password"
                     autoComplete="new-password"
+                    required
                     value={form.data.password_confirmation}
                     error={form.errors.password_confirmation}
                     onChange={(event) =>
@@ -62,7 +66,7 @@ export default function Password() {
                         )
                     }
                 />
-                <Button type="submit" disabled={form.processing}>
+                <Button type="submit" loading={form.processing} loadingLabel="در حال ذخیره">
                     ذخیره گذرواژه
                 </Button>
             </form>

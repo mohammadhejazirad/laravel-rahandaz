@@ -33,4 +33,4 @@
 
 مجوز: عضویت workspace برای صفحه‌های پنل. گزارش فعالیت فقط `owner` و `admin`. اعلان فقط `recipient` همان workspace. شناسه عددی در props این صفحات نیست.
 
-آزمون: `tests/Feature/PanelPagesTest.php` و بخش داشبورد `tests/Feature/PanelHttpTest.php`. آزمون مرورگر و E2E Playwright اجرا نشده است.
+آزمون: `tests/Feature/PanelPagesTest.php` و بخش داشبورد `tests/Feature/PanelHttpTest.php`. smoke تصویری Chrome headless برای صفحه ورود و صفحه راه‌اندازی واقعی در عرض‌های ۳۶۰، ۷۶۸، ۱۲۸۰ و ۱۴۴۰ و پوسته روشن/تیره انجام شده است. Playwright/E2E جریان‌های عملیاتی و visual regression همه صفحه‌ها هنوز وجود ندارد.

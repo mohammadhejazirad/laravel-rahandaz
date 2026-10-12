@@ -17,13 +17,13 @@ interface AuditRow {
 
 export default function AuditIndex({ events }: { events: { data: AuditRow[]; meta: PageMeta } }) {
     return (
-        <AppLayout title="گزارش فعالیت">
+        <AppLayout title="گزارش فعالیت" description="رخدادهای حسابرسی‌شده این فضای کاری، بدون نمایش راز یا فراداده حساس.">
             <Head title="گزارش فعالیت" />
             <p className="text-sm text-muted">متن رخداد بدون فراداده و بدون راز است. خروجی فایل از این صفحه ساخته نمی‌شود.</p>
             {events.data.length === 0 ? (
                 <EmptyState title="رخدادی ثبت نشده است">زنجیره حسابرسی پس از ثبت رخداد واقعی اینجا دیده می‌شود.</EmptyState>
             ) : (
-                <TableFrame>
+                <TableFrame label="گزارش فعالیت">
                     <thead className="bg-surface-muted text-muted">
                         <tr>
                             <th className="px-3 py-2 text-start font-medium">کنش</th>

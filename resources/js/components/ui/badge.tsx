@@ -3,10 +3,10 @@ import { cn } from "@/lib/cn";
 
 const tones = {
     neutral: "border-line bg-surface-muted text-ink",
-    success: "border-success/40 text-success",
-    warning: "border-warning/40 text-warning",
-    danger: "border-danger/40 text-danger",
-    info: "border-info/40 text-info",
+    success: "border-success/35 bg-success-soft text-success",
+    warning: "border-warning/35 bg-warning-soft text-warning",
+    danger: "border-danger/35 bg-danger-soft text-danger",
+    info: "border-info/35 bg-info-soft text-info",
 };
 
 export function Badge({
@@ -17,7 +17,7 @@ export function Badge({
     return (
         <span
             className={cn(
-                "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium",
+                "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold",
                 tones[tone],
                 className,
             )}

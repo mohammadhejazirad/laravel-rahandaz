@@ -37,7 +37,7 @@ export default function JobShow({
     const base = usePage<SharedProps>().props.app.base_path;
 
     return (
-        <AppLayout title="جزئیات عملیات">
+        <AppLayout title="جزئیات عملیات" description="وضعیت، زمان‌بندی و خروجی پالایش‌شده این Job." eyebrow="عملیات">
             <Head title="جزئیات عملیات" />
             <p className="text-sm">
                 <Link className="text-accent" href={`${base}/jobs`}>

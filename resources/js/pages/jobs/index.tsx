@@ -22,12 +22,12 @@ export default function JobsIndex({ jobs }: { jobs: { data: JobRow[]; meta: Page
     const base = usePage<SharedProps>().props.app.base_path;
 
     return (
-        <AppLayout title="عملیات">
+        <AppLayout title="عملیات" description="وضعیت پایدار درخواست‌ها و Jobهای ثبت‌شده برای همین فضای کاری.">
             <Head title="عملیات" />
             {jobs.data.length === 0 ? (
                 <EmptyState title="عملیاتی ثبت نشده است">عملیات‌های همین فضای کاری پس از ثبت واقعی اینجا فهرست می‌شوند.</EmptyState>
             ) : (
-                <TableFrame>
+                <TableFrame label="فهرست عملیات">
                     <thead className="bg-surface-muted text-muted">
                         <tr>
                             <th className="px-3 py-2 text-start font-medium">نوع</th>

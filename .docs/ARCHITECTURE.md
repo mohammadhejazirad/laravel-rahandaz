@@ -55,7 +55,7 @@ PostgreSQL منبع نهایی وضعیت است. dispatcher ردیف‌های O
 
 ## Frontend
 
-صفحات Inertia در `resources/js/pages` هستند و هر صفحه یک chunk جدا می‌گیرد. Layout مهمان و پنل جداست. داده از controller با allowlist می‌آید و `id` عددی در props عمومی نیست. فرم‌های ساده ورود و گذرواژه از `useForm` خود Inertia استفاده می‌کنند. Toast فقط پیام session را نشان می‌دهد و موفقیت نصب را از روی کلیک اعلام نمی‌کند. نمودار و تقویم انتخابی تا وقتی داده یا فرم واقعی نباشد بارگذاری نمی‌شوند. جزئیات در `docs/UI_GUIDELINES.md`.
+صفحات Inertia در `resources/js/pages` هستند و هر صفحه یک chunk جدا می‌گیرد. Layout مهمان و پنل جداست. `AppLayout` عنوان/شرح مشترک، سایدبار desktop، Drawer تبلت/موبایل با focus trap، skip link و اعلان را فراهم می‌کند؛ `AuthLayout` ورود و تغییر گذرواژه را بدون افشای اطلاعات میزبان پوشش می‌دهد. داده از controller با allowlist می‌آید و `id` عددی در props عمومی نیست. فرم‌های ساده ورود و گذرواژه از `useForm` خود Inertia استفاده می‌کنند. Toast فقط پیام session را نشان می‌دهد و موفقیت نصب را از روی کلیک اعلام نمی‌کند. نمودار و تقویم انتخابی تا وقتی داده یا فرم واقعی نباشد بارگذاری نمی‌شوند. جزئیات در `docs/UI_GUIDELINES.md`.
 
 ## Deployment بدون Docker
 

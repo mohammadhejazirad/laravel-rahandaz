@@ -15,7 +15,7 @@ export function Pagination({ meta }: { meta: PageMeta }) {
     }
 
     return (
-        <nav className="flex items-center justify-between gap-3 text-sm" aria-label="صفحه‌بندی">
+        <nav className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface/80 px-3 py-2 text-sm" aria-label="صفحه‌بندی">
             <p className="text-muted">
                 صفحه{" "}
                 <span className="font-mono text-ink" dir="ltr">
@@ -25,21 +25,22 @@ export function Pagination({ meta }: { meta: PageMeta }) {
                 <span className="font-mono text-ink" dir="ltr">
                     {meta.last_page}
                 </span>
+                <span className="hidden sm:inline"> · {meta.total.toLocaleString("fa-IR")} مورد</span>
             </p>
             <div className="flex gap-2">
                 {meta.prev_url ? (
-                    <Link className="rounded-lg border border-line px-3 py-1 hover:bg-surface-muted" href={meta.prev_url} preserveScroll>
+                    <Link className="rounded-lg border border-line px-3 py-1.5 hover:bg-surface-muted" href={meta.prev_url} preserveScroll>
                         قبلی
                     </Link>
                 ) : (
-                    <span className="rounded-lg border border-line px-3 py-1 text-muted">قبلی</span>
+                    <span aria-disabled="true" className="rounded-lg border border-line px-3 py-1.5 text-muted opacity-60">قبلی</span>
                 )}
                 {meta.next_url ? (
-                    <Link className="rounded-lg border border-line px-3 py-1 hover:bg-surface-muted" href={meta.next_url} preserveScroll>
+                    <Link className="rounded-lg border border-line px-3 py-1.5 hover:bg-surface-muted" href={meta.next_url} preserveScroll>
                         بعدی
                     </Link>
                 ) : (
-                    <span className="rounded-lg border border-line px-3 py-1 text-muted">بعدی</span>
+                    <span aria-disabled="true" className="rounded-lg border border-line px-3 py-1.5 text-muted opacity-60">بعدی</span>
                 )}
             </div>
         </nav>

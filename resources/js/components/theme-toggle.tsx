@@ -10,7 +10,7 @@ const options: Array<{ value: ThemePreference; label: string; icon: typeof Sun }
     { value: 'system', label: 'سیستم', icon: MonitorSmartphone },
 ];
 
-export function ThemeToggle() {
+export function ThemeToggle({ compact = false }: { compact?: boolean }) {
     const page = usePage<SharedProps>();
     const saved = page.props.auth.user?.theme;
     const [current, setCurrent] = useState<ThemePreference>(saved ?? readGuestPreference());
@@ -22,19 +22,31 @@ export function ThemeToggle() {
     }, [saved]);
 
     function select(next: ThemePreference) {
+        const previous = current;
         setCurrent(next);
         applyTheme(next);
 
         if (page.props.auth.user) {
-            router.patch(`${page.props.app.base_path}/theme`, { theme: next }, { preserveScroll: true, preserveState: true });
+            router.patch(`${page.props.app.base_path}/theme`, { theme: next }, {
+                preserveScroll: true,
+                preserveState: true,
+                onError: () => {
+                    setCurrent(previous);
+                    applyTheme(previous);
+                },
+            });
             return;
         }
 
-        localStorage.setItem('rahandaz-theme', next);
+        try {
+            localStorage.setItem('rahandaz-theme', next);
+        } catch {
+            // Theme still applies for this page when storage is unavailable.
+        }
     }
 
     return (
-        <div className="inline-flex rounded-lg border border-line bg-surface p-1" role="group" aria-label="پوسته">
+        <div className="inline-flex rounded-xl border border-line bg-surface/90 p-1 shadow-sm" role="group" aria-label="پوسته">
             {options.map((option) => {
                 const Icon = option.icon;
                 const selected = current === option.value;
@@ -44,11 +56,15 @@ export function ThemeToggle() {
                         key={option.value}
                         type="button"
                         aria-pressed={selected}
-                        className={selected ? 'rounded-md bg-surface-muted px-2.5 py-1 text-ink' : 'rounded-md px-2.5 py-1 text-muted'}
+                        aria-label={`پوسته ${option.label}`}
+                        title={`پوسته ${option.label}`}
+                        className={selected
+                            ? 'rounded-lg bg-accent-soft px-2.5 py-1.5 text-accent'
+                            : 'rounded-lg px-2.5 py-1.5 text-muted hover:bg-surface-muted hover:text-ink'}
                         onClick={() => select(option.value)}
                     >
                         <Icon className="inline size-4" aria-hidden="true" />
-                        <span className="ms-1 text-sm">{option.label}</span>
+                        <span className={compact ? "sr-only" : "ms-1 text-sm"}>{option.label}</span>
                     </button>
                 );
             })}

@@ -24,7 +24,7 @@ export default function ServerShow({
     const base = usePage<SharedProps>().props.app.base_path;
 
     return (
-        <AppLayout title={host.display_name}>
+        <AppLayout title={host.display_name} description="نمای کلی وضعیت ذخیره‌شده و آخرین مشاهده این میزبان محلی." eyebrow="سرورها">
             <Head title={host.display_name} />
             <p className="text-sm">
                 <Link className="text-accent" href={`${base}/servers`}>

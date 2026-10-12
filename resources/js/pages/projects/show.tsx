@@ -36,7 +36,7 @@ export default function ProjectShow({
     const base = usePage<SharedProps>().props.app.base_path;
 
     return (
-        <AppLayout title={project.name}>
+        <AppLayout title={project.name} description="مشخصات ثبت‌شده پروژه و محیط‌های مستقل آن؛ استقرار هنوز از این صفحه آغاز نمی‌شود." eyebrow="پروژه‌ها">
             <Head title={project.name} />
             <p className="text-sm">
                 <Link className="text-accent" href={`${base}/projects`}>

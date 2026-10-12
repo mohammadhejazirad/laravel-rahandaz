@@ -24,7 +24,7 @@ export default function CatalogIndex({
     install_available: false;
 }) {
     return (
-        <AppLayout title="نرم‌افزارها">
+        <AppLayout title="نرم‌افزارها" description="تعریف‌های نسخه‌دار کاتالوگ؛ نمایش در این صفحه به‌معنی پشتیبانی یا امکان نصب نیست.">
             <Head title="نرم‌افزارها" />
             {install_available ? null : (
                 <Alert tone="info">نصب از این فهرست انجام نمی‌شود. وضعیت نسخه تا آزمون واقعی «آزموده‌نشده» می‌ماند.</Alert>
@@ -32,7 +32,7 @@ export default function CatalogIndex({
             {packages.data.length === 0 ? (
                 <EmptyState title="بسته‌ای در کاتالوگ نیست">کاتالوگ پس از seed یا ثبت تعریف بسته اینجا دیده می‌شود.</EmptyState>
             ) : (
-                <TableFrame>
+                <TableFrame label="کاتالوگ نرم‌افزارها">
                     <thead className="bg-surface-muted text-muted">
                         <tr>
                             <th className="px-3 py-2 text-start font-medium">نام</th>

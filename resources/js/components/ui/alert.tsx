@@ -6,12 +6,12 @@ type AlertProps = HTMLAttributes<HTMLDivElement> & {
 };
 
 const tones = {
-    warning: 'border-warning/40 bg-surface text-warning',
-    danger: 'border-danger/40 bg-surface text-danger',
-    info: 'border-info/40 bg-surface text-info',
+    warning: 'border-warning/35 bg-warning-soft text-warning',
+    danger: 'border-danger/35 bg-danger-soft text-danger',
+    info: 'border-info/35 bg-info-soft text-info',
     neutral: 'border-line bg-surface-muted text-ink',
 };
 
 export function Alert({ tone = 'neutral', className, ...props }: AlertProps) {
-    return <div role="status" className={cn('rounded-lg border px-3 py-2 text-sm', tones[tone], className)} {...props} />;
+    return <div role={tone === 'danger' ? 'alert' : 'status'} className={cn('rounded-xl border px-4 py-3 text-sm', tones[tone], className)} {...props} />;
 }

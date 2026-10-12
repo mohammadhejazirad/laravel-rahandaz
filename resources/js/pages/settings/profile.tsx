@@ -25,7 +25,7 @@ export default function ProfileSettings({
     const base = usePage<SharedProps>().props.app.base_path;
 
     return (
-        <AppLayout title="تنظیمات">
+        <AppLayout title="تنظیمات" description="تنظیمات نمایشی حساب، منطقه زمانی و پوسته رابط.">
             <Head title="تنظیمات" />
             <Card>
                 <h2 className="text-lg font-semibold">{profile.display_name || profile.username}</h2>
