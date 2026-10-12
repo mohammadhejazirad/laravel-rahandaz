@@ -17,6 +17,7 @@
 - موتور عملیات در حد fail-closed: ثبت، idempotency، outbox، lease بدون تصاحب lease منقضی. هیچ عملیاتی `succeeded` نمی‌شود.
 - صفحات واقعی: ورود، تغییر گذرواژه، راه‌اندازی فقط-خواندنی، داشبورد شمارش عملیات، خطای Inertia.
 - پوسته روشن/تیره/سیستم، Vazirmatn محلی، RTL، Lucide، Sonner فقط برای flash واقعی.
+- هویت بصری رسمی: مونوگرام هندسی اختصاصی، lockup فارسی، نسخه‌های روشن/تیره/تک‌رنگ، faviconهای SVG/ICO/PNG، Apple Touch Icon، تصویر Open Graph و کامپوننت‌های مشترک `AppLogo`/`AppLogoSymbol`. جزئیات در `docs/BRAND_GUIDELINES.md`.
 - اسکیمای نسخه اول: میزبان، کاتالوگ، میرور، Git، پروژه و محیط، deployment، دامنه و Nginx، دیتابیس کاربر، بکاپ، زمان‌بندی، متریک، اعلان پنل، تنظیم، setup، audit و دسترسی. جزئیات در `docs/DATABASE_SCHEMA.md`، `docs/DATABASE_ERD.md` و `docs/DATABASE_SECURITY.md`.
 - گاردهای کوچک دامنه: ثبت deployment با قفل محیط، ثبت delivery وب‌هوک بدون payload، بررسی URL عمومی، زنجیره hash حسابرسی، و `CredentialStore::openFor()` با رویداد دسترسی.
 - Seeder کاتالوگ بسته با lifecycle `untested` و میرور candidate. کاربر یا توکن نمونه ساخته نمی‌شود.
@@ -24,7 +25,17 @@
 - مسیر `GET /rahandaz/projects/{project}` مدل را با `uuid` resolve می‌کند، `id` عددی را در JSON نمی‌گذارد، شناسه غیر v7 را ۴۰۴ می‌کند و عضویت workspace دیگر را ۴۰۳ می‌کند.
 - Inertia کاربر و workspace فیلد `uuid` می‌فرستد. نوع عمومی TypeScript برند `PublicUuid` است.
 - پوسته‌های واقعی پنل: داشبورد، راه‌اندازی فقط-خواندنی، فهرست سرور محلی، کاتالوگ، میرور، پروژه، عملیات و لاگ ذخیره‌شده، اعلان، گزارش فعالیت برای مالک و مدیر، و تنظیمات نمایه. جزئیات و مسیرهای ساخته‌نشده در `docs/UI_PAGE_INVENTORY.md`. هیچ دکمه نصب، اعمال میرور، استقرار یا لغو جعلی اضافه نشده است.
-- بازطراحی foundation رابط: نشان مشترک، سطح‌های soft معنایی، AuthLayout دوپنله در desktop، AppLayout با عنوان/شرح مشترک، skip link، Drawer دارای focus trap و بازگردانی فوکوس، breakpoint تبلت روی `lg`، جدول قابل پیمایش با keyboard، loading واقعی فرم و rollback پوسته در خطای ذخیره. پکیج تازه نصب نشد.
+- بازطراحی foundation رابط: برند رسمی مشترک، سطح‌های soft معنایی، AuthLayout دوپنله در desktop، AppLayout با عنوان/شرح مشترک، skip link، Drawer دارای focus trap و بازگردانی فوکوس، breakpoint تبلت روی `lg`، جدول قابل پیمایش با keyboard، loading واقعی فرم و rollback پوسته در خطای ذخیره. پکیج تازه نصب نشد.
+
+## هویت بصری — 2026-10-12
+
+سه مسیر «زیرساخت هندسی»، «مونوگرام فارسی» و «جریان استقرار» مقایسه شدند. طرح نهایی ترکیب مونوگرام «ر» با مسیر کنترل/استقرار است؛ path ضخیم و فضای منفی محدود آن در اندازه‌های ۱۶ تا ۲۵۶ پیکسل بررسی شد. برند قبلی یک آیکون `Terminal` از Lucide بود و به‌عنوان placeholder حذف شد.
+
+assetهای رسمی در `public/branding` هستند. تمام faviconها، Apple Touch Icon و `public/og-image.png` از همان Symbol تولید شده‌اند. `resources/views/app.blade.php` metadata روشن/تیره، Open Graph و fallbackهای مرورگر را دارد. README، layout ورود، سایدبار/Drawer، setup فقط‌خواندنی و صفحه خطا از برند رسمی استفاده می‌کنند. درخواست مستقیم خطا با `resources/views/errors/show.blade.php` و CSS عمومی بدون وابستگی به Vite/JavaScript پاسخ می‌گیرد؛ navigation اینرسی همچنان صفحه React دارد.
+
+`assets/welcome-site/index.html` فقط منبع template installer آینده است و route یا publish نشده است. متن وضعیت و URL آن placeholder می‌مانند تا installer واقعی پس از موفقیت setup مقداردهی کند؛ وجود این فایل به‌معنی موفقیت نصب نیست. پروژه PWA نیست، بنابراین manifest، service worker و iconهای ۱۹۲/۵۱۲ اضافه نشده‌اند.
+
+`tests/Feature/BrandAssetsTest.php` وجود و غیرخالی‌بودن خروجی‌ها، parsing امن XML، نبود script/event handler/منبع remote، ابعاد PNG، ساختار ICO، metadata Blade و placeholderهای welcome را پوشش می‌دهد. هیچ dependency frontend تازه‌ای نصب نشد.
 
 ## شناسه‌ها — 2026-10-12
 
@@ -57,11 +68,11 @@ AAD پاکت credential از id دهدهی workspace استفاده می‌کن�
 
 | فرمان | نتیجه |
 | --- | --- |
-| `XDEBUG_MODE=off php artisan test --compact --display-warnings` | 50 passed، 519 assertions، روی `rahandaz_test`، شامل صفحات خواندنی پنل؛ پس از بازطراحی foundation دوباره اجرا شد |
+| `XDEBUG_MODE=off php artisan test --compact --display-warnings` | 55 passed، 979 assertions، روی `rahandaz_test`، شامل آزمون امنیت و ابعاد assetهای برند و fallback خطای بدون JavaScript |
 | `node --experimental-strip-types --test tests/js/datetime.test.ts` | ۳ آزمون جلالی، از جمله مرز سال کبیسه ۱۴۰۳ |
 | `npx tsc --noEmit` و `npm run lint` | خروج ۰ پس از تغییر layout و componentهای مشترک |
-| `npm run build` | خروج ۰. chunk اصلی `app` برابر `350.99KiB` و gzip برابر `110.06KiB`. فونت وزیرمتن `111.15KiB`. CSS برابر `32.46KiB` و gzip برابر `6.90KiB`. صفحات جدا code-split شده‌اند |
-| Chrome headless visual smoke | ورود و راه‌اندازی واقعی در ۳۶۰، ۷۶۸، ۱۲۸۰ و ۱۴۴۰؛ روشن و تیره. overflow مشاهده نشد و سایدبار در ۷۶۸ پس از بازبینی به Drawer منتقل شد |
+| `npm run build` | خروج ۰. chunk اصلی `app` برابر `350.98KiB` و gzip برابر `110.06KiB`. chunk لوگو `32.57KiB` و gzip `10.92KiB`، فونت وزیرمتن `111.15KiB`، و CSS برابر `33.31KiB` و gzip `6.97KiB`. صفحات جدا code-split شده‌اند |
+| Chrome headless visual smoke | ورود و راه‌اندازی واقعی در ۳۶۰، ۷۶۸، ۱۲۸۰ و ۱۴۴۰؛ روشن و تیره، پوسته `system` در ترجیح روشن/تیره، و fallback مستقیم ۴۰۴ در ۳۶۰ روشن و ۱۲۸۰ تیره. overflow، تصویر شکسته یا درخواست ناموفق asset برند مشاهده نشد |
 | `php artisan migrate --force` | forward روی `rahandaz`؛ اول جدول‌ها از ۱۸ به ۷۲ رسیدند، بعد `120000` و `120100` همان ۷۲ جدول را به کلید `bigint` بردند. `migrations` اکنون ۱۶ ردیف است. `migrate:fresh` روی این پایگاه اجرا نشد |
 | `vendor/bin/pint` | روی مدل‌ها، دامنه، HTTP، migration و تست‌های پنل بدون خطای باقی‌مانده |
 | `php artisan rahandaz:doctor` | در آزمون قبلی هسته خروج ۰ بود؛ بعد از migration و cutover دوباره اجرا نشد |

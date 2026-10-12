@@ -188,11 +188,20 @@ class PanelHttpTest extends TestCase
         app(MembershipRules::class)->assertCanDemote($workspace, $owner, MembershipRole::Admin);
     }
 
-    public function test_unknown_routes_render_the_error_page(): void
+    public function test_unknown_routes_render_a_javascript_independent_error_page(): void
     {
-        $this->get('/missing-rahandaz-page')->assertNotFound()->assertInertia(fn (Assert $page) => $page
-            ->component('errors/show')
-            ->where('status', 404));
+        $this->get('/missing-rahandaz-page')
+            ->assertNotFound()
+            ->assertViewIs('errors.show')
+            ->assertSee('branding/logo-symbol.svg', false)
+            ->assertSee('HTTP 404');
+
+        $this->withHeader('X-Inertia', 'true')
+            ->get('/missing-rahandaz-page')
+            ->assertNotFound()
+            ->assertHeader('X-Inertia', 'true')
+            ->assertJsonPath('component', 'errors/show')
+            ->assertJsonPath('props.status', 404);
     }
 
     public function test_outbox_dispatch_is_scheduled_once_per_minute(): void

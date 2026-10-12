@@ -1,0 +1,148 @@
+:root {
+    color-scheme: light dark;
+    font-family: Vazirmatn, Tahoma, sans-serif;
+    background: #f8fafc;
+    color: #0f172a;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background:
+        radial-gradient(circle at 84% 4%, rgb(79 70 229 / 10%), transparent 28rem),
+        #f8fafc;
+}
+
+main {
+    width: min(100%, 512px);
+    padding: clamp(24px, 5vw, 36px);
+    border: 1px solid #e2e8f0;
+    border-radius: 28px;
+    background: rgb(255 255 255 / 96%);
+    box-shadow: 0 24px 64px rgb(15 23 42 / 10%);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.brand img {
+    width: 40px;
+    height: 40px;
+}
+
+.brand strong,
+.brand small {
+    display: block;
+}
+
+.brand strong {
+    font-size: 18px;
+}
+
+.brand small,
+.description {
+    color: #475569;
+}
+
+.error-mark {
+    width: 48px;
+    height: 48px;
+    margin-top: 40px;
+    display: grid;
+    place-items: center;
+    border-radius: 16px;
+    background: #fef2f2;
+    color: #b91c1c;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.status {
+    margin: 20px 0 0;
+    color: #b91c1c;
+    direction: ltr;
+    font-family: ui-monospace, monospace;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: right;
+}
+
+h1 {
+    margin: 8px 0 0;
+    font-size: clamp(24px, 6vw, 32px);
+    line-height: 1.5;
+}
+
+.description {
+    margin: 12px 0 0;
+    line-height: 1.9;
+}
+
+a {
+    min-height: 40px;
+    margin-top: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: 12px;
+    background: #4f46e5;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+a:focus-visible {
+    outline: 2px solid #4f46e5;
+    outline-offset: 3px;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        background: #0b1120;
+        color: #f8fafc;
+    }
+
+    body {
+        background:
+            radial-gradient(circle at 84% 4%, rgb(129 140 248 / 12%), transparent 28rem),
+            #0b1120;
+    }
+
+    main {
+        border-color: #334155;
+        background: rgb(17 24 39 / 96%);
+        box-shadow: 0 24px 64px rgb(0 0 0 / 28%);
+    }
+
+    .brand small,
+    .description {
+        color: #cbd5e1;
+    }
+
+    .error-mark {
+        background: #3b1d28;
+        color: #f87171;
+    }
+
+    .status {
+        color: #f87171;
+    }
+
+    a {
+        background: #818cf8;
+        color: #1e1b4b;
+    }
+}

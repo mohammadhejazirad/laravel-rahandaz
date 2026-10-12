@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">نشان راه‌انداز برای پس‌زمینه روشن</title>
+  <rect width="64" height="64" rx="16" fill="#4F46E5"/>
+  <path fill="#FFFFFF" d="M49 13H31c-10.493 0-19 8.507-19 19v4h11v-4a8 8 0 0 1 8-8h7v8c0 7.18-5.82 13-13 13H14v11h11c13.255 0 24-10.745 24-24V13Z"/>
+</svg>

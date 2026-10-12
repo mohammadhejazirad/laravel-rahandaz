@@ -28,6 +28,14 @@
 
 وزیرمتن متغیر، فایل محلی `resources/fonts/vazirmatn/Vazirmatn-Variable.woff2`، `font-display: swap`، بدون CDN. بدنه ۱۵px و line-height حدود ۱٫۷. متن فارسی letter-spacing ندارد. مقدار فنی با `font-mono` و `dir="ltr"` است.
 
+## هویت بصری
+
+- نشان رسمی از مسیر `public/branding` می‌آید و در React فقط با `AppLogo` یا `AppLogoSymbol` نمایش داده می‌شود.
+- رنگ نشان در پوسته روشن `#4F46E5` و در پوسته تیره `#818CF8` است؛ کامپوننت حالت `auto` را از `data-theme` واقعی برنامه می‌خواند، نه فقط تنظیم سیستم‌عامل.
+- نسخه کامل در سایدبار، ورود و خطا به‌کار می‌رود. نسخه Symbol برای فضای محدود و favicon است؛ لوگوی بزرگ تزئینی در کارت‌های داشبورد اضافه نمی‌شود.
+- حداقل اندازه Symbol در رابط ۲۴ پیکسل و فضای خالی پیشنهادی پیرامون آن یک‌چهارم عرض Symbol است.
+- ساخت SVG مستقل در صفحه، استفاده از Lucide به‌عنوان لوگو، تغییر رنگ محلی و انیمیشن دائمی نشان ممنوع است. جزئیات در `docs/BRAND_GUIDELINES.md` است.
+
 ## پوسته
 
 حالت‌ها: `light`، `dark`، `system`. مهمان در `localStorage` کلید `rahandaz-theme`. کاربر واردشده با `PATCH /rahandaz/theme` ذخیره می‌کند. اسکریپت `public/assets/theme-init.js` پیش از رندر، `data-theme` را می‌گذارد. `color-scheme` هم ست می‌شود.

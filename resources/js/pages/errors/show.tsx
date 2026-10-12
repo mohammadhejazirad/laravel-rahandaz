@@ -1,6 +1,6 @@
 import { Head, usePage } from "@inertiajs/react";
 import { AlertTriangle } from "lucide-react";
-import { BrandMark } from "@/components/brand-mark";
+import { AppLogo } from "@/components/branding/app-logo";
 import type { SharedProps } from "@/types";
 
 const messages: Record<number, string> = {
@@ -19,7 +19,7 @@ export default function ErrorPage({ status }: { status: number }) {
         <main className="flex min-h-screen items-center justify-center px-4 py-8">
             <Head title="خطا" />
             <section className="surface-shadow w-full max-w-lg rounded-[1.75rem] border border-line bg-surface/95 p-6 sm:p-8">
-                <BrandMark />
+                <AppLogo />
                 <span className="mt-10 grid size-12 place-items-center rounded-2xl bg-danger-soft text-danger" aria-hidden="true">
                     <AlertTriangle className="size-6" />
                 </span>

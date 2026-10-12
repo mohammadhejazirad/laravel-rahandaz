@@ -1,6 +1,6 @@
 import { LockKeyhole, ServerCog, ShieldCheck, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
-import { BrandMark } from "@/components/brand-mark";
+import { AppLogo } from "@/components/branding/app-logo";
 import { FlashToaster } from "@/components/flash-toaster";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -13,7 +13,7 @@ export function AuthLayout({ title, children }: { title: string; children: React
                     <div className="absolute -start-24 -top-24 size-64 rounded-full border border-white/10" aria-hidden="true" />
                     <div className="absolute -bottom-32 -end-16 size-80 rounded-full bg-indigo-500/15 blur-3xl" aria-hidden="true" />
                     <div className="relative">
-                        <BrandMark className="[&_span]:text-white" />
+                        <AppLogo theme="dark" />
                         <p className="mt-10 max-w-sm text-3xl font-bold leading-[1.65]">مدیریت روشن و قابل‌ردیابی برای همان سروری که در اختیار شماست.</p>
                         <p className="mt-4 max-w-sm text-sm leading-7 text-slate-300">هیچ عملیات میزبانی از صفحه ورود اجرا نمی‌شود و وضعیت موفق بدون مشاهده نتیجه واقعی نمایش داده نخواهد شد.</p>
                     </div>
@@ -25,7 +25,7 @@ export function AuthLayout({ title, children }: { title: string; children: React
                 </section>
                 <section className="p-5 sm:p-8 lg:p-10">
                     <div className="mb-10 flex items-center justify-between gap-3 lg:justify-end">
-                        <BrandMark className="lg:hidden" />
+                        <AppLogo className="lg:hidden" />
                         <ThemeToggle compact />
                     </div>
                     <div className="mx-auto max-w-md">

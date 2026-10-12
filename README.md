@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="public/branding/logo.svg" width="360" height="96" alt="راه‌انداز؛ کنترل‌پلین سرور محلی">
+</p>
+
 # راه‌انداز | Rahandaz
 
 **راه‌انداز؛ کنترل‌پنل فارسی و خودمیزبان برای همان سرور Ubuntu که روی آن نصب می‌شود.**
@@ -414,6 +418,7 @@ php artisan rahandaz:doctor
 | امنیت داده | [docs/DATABASE_SECURITY.md](docs/DATABASE_SECURITY.md) |
 | وابستگی‌های قفل‌شده | [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md) |
 | تصمیم بسته رابط | [docs/FRONTEND_DEPENDENCIES.md](docs/FRONTEND_DEPENDENCIES.md) |
+| هویت بصری و لوگو | [docs/BRAND_GUIDELINES.md](docs/BRAND_GUIDELINES.md) |
 | اجزای رابط | [docs/FRONTEND_COMPONENTS.md](docs/FRONTEND_COMPONENTS.md)، [docs/UI_GUIDELINES.md](docs/UI_GUIDELINES.md) |
 | موجودی صفحات | [docs/UI_PAGE_INVENTORY.md](docs/UI_PAGE_INVENTORY.md) |
 | ADR مونولیت | [docs/adr/0001-laravel-modular-monolith.md](docs/adr/0001-laravel-modular-monolith.md) |

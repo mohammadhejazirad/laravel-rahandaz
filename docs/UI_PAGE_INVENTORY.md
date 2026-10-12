@@ -6,10 +6,10 @@
 
 | مسیر سند | مسیر واقعی | صفحه | Layout | وضعیت |
 | --- | --- | --- | --- | --- |
-| `/` | `/` | پاسخ متنی که ورود پنل را نشان می‌دهد | هیچ | خوشامد موفقیت نصب ساخته نشده است |
+| `/` | `/` | پاسخ متنی که ورود پنل را نشان می‌دهد | هیچ | template برندشده در `assets/welcome-site/index.html` وجود دارد ولی تا installer و setup موفق publish یا route نشده است |
 | `/auth/login/` | `GET/POST /rahandaz/login` | `pages/auth/login.tsx` | Auth | واقعی. ثبت‌نام عمومی نیست |
 | تغییر گذرواژه اول | `GET/PUT /rahandaz/password` | `pages/auth/password.tsx` | Auth | واقعی |
-| خطا | رندر خطای اینرسی | `pages/errors/show.tsx` | مستقل | ۴۰۳، ۴۰۴، ۴۱۹، ۵۰۰، ۵۰۳ |
+| خطا | رندر خطای اینرسی یا Blade مستقیم | `pages/errors/show.tsx` و `views/errors/show.blade.php` | مستقل | ۴۰۳، ۴۰۴، ۴۱۹، ۵۰۰، ۵۰۳؛ پاسخ مستقیم بدون JavaScript قابل استفاده است |
 | `/setup/` | `GET /rahandaz/setup` | `pages/setup/index.tsx` | App | فقط probe خواندنی برای مالک. stepper و نصب نیست |
 | `/setup/progress/` | — | — | — | آماده نیست |
 | `/dashboard/` | `GET /rahandaz/dashboard` | `pages/dashboard/index.tsx` | App | شمارش واقعی job، پروژه، سرور و نمونه متریک. نمودار نیست |
@@ -33,4 +33,4 @@
 
 مجوز: عضویت workspace برای صفحه‌های پنل. گزارش فعالیت فقط `owner` و `admin`. اعلان فقط `recipient` همان workspace. شناسه عددی در props این صفحات نیست.
 
-آزمون: `tests/Feature/PanelPagesTest.php` و بخش داشبورد `tests/Feature/PanelHttpTest.php`. smoke تصویری Chrome headless برای صفحه ورود و صفحه راه‌اندازی واقعی در عرض‌های ۳۶۰، ۷۶۸، ۱۲۸۰ و ۱۴۴۰ و پوسته روشن/تیره انجام شده است. Playwright/E2E جریان‌های عملیاتی و visual regression همه صفحه‌ها هنوز وجود ندارد.
+آزمون: `tests/Feature/PanelPagesTest.php`، بخش داشبورد `tests/Feature/PanelHttpTest.php` و asset/metadata برند در `tests/Feature/BrandAssetsTest.php`. smoke تصویری Chrome headless برای ورود و راه‌اندازی واقعی در عرض‌های ۳۶۰، ۷۶۸، ۱۲۸۰ و ۱۴۴۰ و پوسته روشن/تیره، پوسته system و صفحه خطای ۴۰۴ انجام شده است. Playwright/E2E جریان‌های عملیاتی و visual regression همه صفحه‌ها هنوز وجود ندارد.

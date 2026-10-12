@@ -1,5 +1,6 @@
 import { Head } from "@inertiajs/react";
 import { AlertTriangle } from "lucide-react";
+import { AppLogo } from "@/components/branding/app-logo";
 import { Alert } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
 import { AppLayout } from "@/layouts/app-layout";
@@ -39,6 +40,7 @@ export default function Setup({ holding, workspace, facts }: SetupPageProps) {
                     <Card>
                         <div className="flex flex-wrap items-start justify-between gap-3">
                             <div>
+                                <AppLogo variant="symbol" size="sm" decorative className="mb-3" />
                                 <h2 className="text-lg font-semibold">
                                     {workspace.name}
                                 </h2>

@@ -49,6 +49,12 @@ return Application::configure(basePath: dirname(__DIR__))
                 return $response;
             }
 
+            if (! $request->header('X-Inertia')) {
+                return response()->view('errors.show', [
+                    'status' => $status,
+                ], $status);
+            }
+
             return Inertia::render('errors/show', [
                 'status' => $status,
             ])->toResponse($request)->setStatusCode($status);

@@ -20,7 +20,7 @@ import {
     type LucideIcon,
 } from "lucide-react";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { BrandMark } from "@/components/brand-mark";
+import { AppLogo } from "@/components/branding/app-logo";
 import { FlashToaster } from "@/components/flash-toaster";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Alert } from "@/components/ui/alert";
@@ -221,7 +221,7 @@ export function AppLayout({ title, description, eyebrow = "فضای کاری م�
                         className="absolute inset-y-0 end-0 flex w-[min(88vw,320px)] flex-col bg-surface shadow-2xl"
                     >
                         <div className="flex items-center justify-between border-b border-line p-3">
-                            <div id={titleId}><BrandMark /></div>
+                            <div id={titleId}><AppLogo /></div>
                             <button ref={closeRef} type="button" className="rounded-lg border border-line p-2" aria-label="بستن منو" onClick={() => setOpen(false)}>
                                 <X className="size-4" aria-hidden="true" />
                             </button>
@@ -256,7 +256,7 @@ function Sidebar({
 
     return (
         <aside className={`border-e border-line bg-surface/95 ${className}`}>
-            {hideBrand ? null : <div className="border-b border-line px-4 py-5"><BrandMark /></div>}
+            {hideBrand ? null : <div className="border-b border-line px-4 py-5"><AppLogo /></div>}
             <div className="px-4 py-4">
                 {user ? (
                     <div className="rounded-xl border border-line bg-surface-muted/70 px-3 py-2.5">

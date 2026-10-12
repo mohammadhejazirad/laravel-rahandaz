@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="96" viewBox="0 0 360 96" role="img" aria-labelledby="title description">
+  <title id="title">راه‌انداز</title>
+  <desc id="description">نسخه تک‌رنگ لوگوی راه‌انداز</desc>
+  <g transform="translate(280 16)">
+    <path fill="#0F172A" d="M49 13H31c-10.493 0-19 8.507-19 19v4h11v-4a8 8 0 0 1 8-8h7v8c0 7.18-5.82 13-13 13H14v11h11c13.255 0 24-10.745 24-24V13Z"/>
+  </g>
+  <text x="264" y="51" direction="rtl" text-anchor="start" fill="#0F172A" font-family="Vazirmatn, Noto Sans Arabic, sans-serif" font-size="30" font-weight="700">راه‌انداز</text>
+</svg>

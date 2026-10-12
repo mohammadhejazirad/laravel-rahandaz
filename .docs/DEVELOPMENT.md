@@ -44,6 +44,7 @@ php artisan schedule:run
 - صفحات در `resources/js/pages/*.tsx` یا فولدر متناظر، `resources/js/layouts`, `resources/js/components`؛ بدون Django Templates، Alpine یا SPA router دوم.
 - Laravel route + Inertia page + typed page props؛ shared props داده حساس را افشا نکنند. FormRequest/Policy سمت سرور مبنای authorization/validation هستند.
 - Tailwind CSS 4 با CSS tokens، Vazirmatn محلی، Lucide React، shadcn/ui/Radix در حد componentهای موردنیاز، Sonner برای اعلان Toast. از CDN و بارگذاری تمام chart/UI dependencies روی همه صفحه‌ها خودداری شود.
+- هویت بصری فقط از `public/branding` و `resources/js/components/branding` مصرف می‌شود. favicon و PNGهای عمومی از همان Symbol تولید می‌شوند؛ SVG تازه باید بدون script، event handler، `foreignObject` و منبع خارجی باشد.
 - Toast هنگام ارسال Job فقط «ثبت شد» می‌گوید؛ موفقیت نصب/استقرار تنها بعد از `Job.status=succeeded` تاییدشده از backend نمایش داده می‌شود. برای log/status، incremental polling با backoff در tab مخفی.
 - برای calendar جلالی، کتابخانه نسخه‌دار معتبر و تست leap-year/timezone؛ همه timestamps PostgreSQL/JSON همچنان UTC ISO 8601 هستند.
 
@@ -87,6 +88,8 @@ php artisan test
 ```
 
 کامپوننت تازه در `resources/js/components` و با tokenهای `resources/css/app.css` ساخته می‌شود. صفحه تازه فقط وقتی controller واقعی و Policy دارد اضافه می‌شود. راهنمای ظاهر در `docs/UI_GUIDELINES.md` است.
+
+پس از تغییر assetهای رسمی برند، علاوه بر lint/typecheck/build، `tests/Feature/BrandAssetsTest.php` را اجرا کنید تا وجود فایل‌ها، ابعاد raster، امضای ICO، امنیت SVG و metadata اصلی بررسی شود.
 
 پس از تغییر layout یا component مشترک، علاوه بر lint/typecheck/build، صفحه‌های متاثر در عرض‌های ۳۶۰، ۷۶۸، ۱۲۸۰ و ۱۴۴۰ و هر دو پوسته مرور شوند. در ۷۶۸px پنل از Drawer استفاده می‌کند و سایدبار ثابت از breakpoint `lg` شروع می‌شود. وجود screenshot دستی جای آزمون feature/authorization را نمی‌گیرد.
 
