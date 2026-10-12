@@ -22,7 +22,7 @@
 | Separator | `resources/js/components/ui/separator.tsx` | جداسازی معنایی فرم ورود | Radix Separator | در استفاده |
 | Breadcrumb | `resources/js/components/ui/breadcrumb.tsx` | مسیر بازگشت در جزئیات سرور، پروژه و عملیات | Radix Slot، Lucide | در استفاده |
 | PersianDate | `resources/js/components/dates/persian-date.tsx` | نمایش جلالی و tooltip از ISO | Intl | در استفاده |
-| ThemeToggle | `resources/js/components/theme-toggle.tsx` | یک دکمه برای جابه‌جایی پوسته resolved بین روشن و تیره، با ذخیره و rollback | Button، Tooltip، Lucide | در استفاده |
+| ThemeToggle | `resources/js/components/theme-toggle.tsx` | یک دکمه با منوی سه‌حالته روشن / تیره / سیستم، نمایش انتخاب فعلی، ذخیره و rollback | Button، DropdownMenu، Tooltip، Lucide | در استفاده |
 | FlashToaster | `resources/js/components/flash-toaster.tsx` | Toast سراسری flash و همگام‌سازی پوسته | React-Toastify، notify | در استفاده |
 | AppLayout | `resources/js/layouts/app-layout.tsx` | سایدبار گروه‌بندی‌شده، Sheet موبایل، منوی حساب، skip link، عنوان و زنگ اعلان | Sheet، DropdownMenu، Avatar، Lucide | در استفاده |
 | AuthLayout | `resources/js/layouts/auth-layout.tsx` | پوسته responsive ورود و گذرواژه | AppLogo، Lucide | در استفاده |

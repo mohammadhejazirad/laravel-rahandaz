@@ -71,8 +71,8 @@ AAD پاکت credential از id دهدهی workspace استفاده می‌کن�
 | `XDEBUG_MODE=off php artisan test --compact --display-warnings` | خروج ۰؛ ۶۵ آزمون، ۶۴ موفق، یک skip و ۲۶۲۵ assertion روی `rahandaz_test` |
 | `node --experimental-strip-types --test tests/js/datetime.test.ts` | ۳ آزمون جلالی، از جمله مرز سال کبیسه ۱۴۰۳ |
 | `npx tsc --noEmit` و `npm run lint` | خروج ۰ و بدون warning پس از تغییر layout و componentهای مشترک |
-| `npm run build` | خروج ۰. chunk مشترک اصلی `373.83KiB` و gzip `116.67KiB`، AppLayout برابر `62.68KiB` و gzip `20.65KiB`، chunk پوسته/Tooltip برابر `22.88KiB` و gzip `9.25KiB`، CSS برابر `65.95KiB` و gzip `11.88KiB`، و فونت `111.15KiB` است |
-| Chrome headless visual smoke | ورود واقعی در ۳۹۰، ۷۶۸، ۱۲۸۰ و ۱۴۴۰ بدون overflow؛ RTL، Vazirmatn و یک دکمه پوسته تایید شد. ترجیح `system` با media روشن/تیره همگام شد، انتخاب دستی در localStorage ماند و ورود نامعتبر Toast فارسی RTL نشان داد. صفحه‌های احراز هویت‌شده با نشست واقعی مرور نشدند چون credential معتبر در اختیار این اجرا نبود |
+| `npm run build` | خروج ۰. chunk مشترک اصلی `373.83KiB` و gzip `116.67KiB`، AppLayout برابر `23.81KiB` و gzip `8.27KiB`، chunk پوسته/Dropdown برابر `65.67KiB` و gzip `23.10KiB`، CSS برابر `66.42KiB` و gzip `12.01KiB`، و فونت `111.15KiB` است |
+| Chrome headless visual smoke | ورود واقعی در ۳۹۰، ۷۶۸، ۱۲۸۰ و ۱۴۴۰ بدون overflow؛ RTL و Vazirmatn تایید شد. Dropdown پوسته هر سه گزینه روشن، تیره و سیستم را با cursor pointer و انتخاب فعلی نشان داد؛ انتخاب تیره DOM و localStorage را تغییر داد و هیچ exception مرورگر ثبت نشد. صفحه‌های احراز هویت‌شده با نشست واقعی مرور نشدند چون credential معتبر در اختیار این اجرا نبود |
 | `npm audit --omit=dev --audit-level=high` | صفر vulnerability |
 | `php artisan migrate --force` | forward روی `rahandaz`؛ اول جدول‌ها از ۱۸ به ۷۲ رسیدند، بعد `120000` و `120100` همان ۷۲ جدول را به کلید `bigint` بردند. `migrations` اکنون ۱۶ ردیف است. `migrate:fresh` روی این پایگاه اجرا نشد |
 | `vendor/bin/pint` | روی مدل‌ها، دامنه، HTTP، migration و تست‌های پنل بدون خطای باقی‌مانده |
@@ -112,7 +112,9 @@ PHP این ماشین داخل کانتینر Lerd/Podman است و `127.0.0.1` 
 
 `components.json` با RTL و سبک `radix-nova` اضافه شد. فقط Primitiveهای دارای مصرف واقعی نصب شدند: Avatar، Dialog برای Sheet، Dropdown Menu، Separator، Slot و Tooltip. بسته تجمیعی `radix-ui`، Skeleton بدون مصرف، Toast شادسی‌ان، Dialog عمومی، Select و کتابخانه فرم اضافه نشدند. React-Toastify تنها سیستم Toast باقی ماند.
 
-AppLayout اکنون سایدبار گروه‌بندی‌شده، Sheet موبایل، منوی حساب، Avatar، Header فشرده و عرض محتوای کنترل‌شده دارد. ThemeToggle از سه کنترل به یک دکمه خورشید/ماه تبدیل شد؛ ترجیح `system` تا انتخاب دستی تغییرات سیستم را دنبال می‌کند و شکست ذخیره سمت سرور DOM و localStorage را rollback می‌کند. Breadcrumb مشترک در جزئیات سرور، پروژه و عملیات استفاده می‌شود. اعلان‌ها loading واقعی، تمایز خوانده‌نشده و اقدام مشترک دارند؛ setup و profile نیز با داده موجود بازآرایی شدند. نمودار، داده، فیلتر و عملیات ساختگی اضافه نشد.
+AppLayout اکنون سایدبار گروه‌بندی‌شده، Sheet موبایل، منوی حساب، Avatar، Header فشرده و عرض محتوای کنترل‌شده دارد. ThemeToggle یک trigger آیکونی با Dropdown روشن، تیره و سیستم است؛ ترجیح `system` تغییرات دستگاه را دنبال می‌کند و شکست ذخیره سمت سرور DOM و localStorage را rollback می‌کند. Breadcrumb مشترک در جزئیات سرور، پروژه و عملیات استفاده می‌شود. اعلان‌ها loading واقعی، تمایز خوانده‌نشده و اقدام مشترک دارند؛ setup و profile نیز با داده موجود بازآرایی شدند. نمودار، داده، فیلتر و عملیات ساختگی اضافه نشد.
+
+خطای runtime صفحه پروفایل از ترکیب `Button asChild` با child تهی loading بود. شاخه `asChild` اکنون فقط همان React element را به Radix Slot می‌دهد و SSR مستقیم لینک تغییر گذرواژه بدون exception تایید شد. cursor تعاملی برای لینک‌ها، دکمه‌ها، triggerها و آیتم‌های منو به‌صورت سراسری و در primitiveها اعمال شد.
 
 ## اعلان Toast با React-Toastify — 2026-10-12
 

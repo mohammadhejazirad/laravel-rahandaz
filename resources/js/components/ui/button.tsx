@@ -23,15 +23,32 @@ export function Button({
     disabled,
     ...props
 }: ButtonProps) {
-    const Component = asChild ? Slot : "button";
+    const classes = cn(
+        buttonVariants({ variant, size }),
+        asChild && (disabled || loading) && "pointer-events-none opacity-50",
+        className,
+    );
+
+    if (asChild) {
+        return (
+            <Slot
+                data-slot="button"
+                className={classes}
+                aria-disabled={disabled || loading ? true : undefined}
+                aria-busy={loading || undefined}
+                {...props}
+            >
+                {children}
+            </Slot>
+        );
+    }
 
     return (
-        <Component
+        <button
             data-slot="button"
-            type={asChild ? undefined : type}
-            className={cn(buttonVariants({ variant, size }), className)}
-            disabled={asChild ? undefined : disabled || loading}
-            aria-disabled={asChild && (disabled || loading) ? true : undefined}
+            type={type}
+            className={classes}
+            disabled={disabled || loading}
             aria-busy={loading || undefined}
             {...props}
         >
@@ -42,6 +59,6 @@ export function Button({
                 />
             ) : null}
             {loading ? loadingLabel : children}
-        </Component>
+        </button>
     );
 }

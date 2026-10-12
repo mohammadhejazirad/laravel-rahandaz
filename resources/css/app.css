@@ -97,6 +97,23 @@
         outline-offset: 2px;
     }
 
+    :where(
+        a[href],
+        button:not(:disabled),
+        [role='button']:not([aria-disabled='true']),
+        [role='menuitem']:not([data-disabled]),
+        [role='menuitemradio']:not([data-disabled]),
+        summary,
+        select,
+        label[for]
+    ) {
+        cursor: pointer;
+    }
+
+    :where(button:disabled, [aria-disabled='true'], [data-disabled]) {
+        cursor: not-allowed;
+    }
+
     .flex > *,
     .grid > * {
         min-width: 0;

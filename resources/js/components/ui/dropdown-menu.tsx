@@ -1,4 +1,5 @@
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
+import { Check } from "lucide-react";
 import type { ComponentProps } from "react";
 import { cn } from "@/lib/cn";
 
@@ -72,7 +73,7 @@ function DropdownMenuItem({
             data-slot="dropdown-menu-item"
             data-variant={variant}
             className={cn(
-                "flex min-h-10 cursor-default select-none items-center gap-2 rounded-lg px-3 py-2 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
+                "flex min-h-10 cursor-pointer select-none items-center gap-2 rounded-lg px-3 py-2 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
                 variant === "destructive"
                     ? "text-danger focus:bg-danger-soft"
                     : "text-ink focus:bg-surface-muted",
@@ -80,6 +81,41 @@ function DropdownMenuItem({
             )}
             {...props}
         />
+    );
+}
+
+function DropdownMenuRadioGroup(
+    props: ComponentProps<typeof DropdownMenuPrimitive.RadioGroup>,
+) {
+    return (
+        <DropdownMenuPrimitive.RadioGroup
+            data-slot="dropdown-menu-radio-group"
+            {...props}
+        />
+    );
+}
+
+function DropdownMenuRadioItem({
+    className,
+    children,
+    ...props
+}: ComponentProps<typeof DropdownMenuPrimitive.RadioItem>) {
+    return (
+        <DropdownMenuPrimitive.RadioItem
+            data-slot="dropdown-menu-radio-item"
+            className={cn(
+                "flex min-h-10 cursor-pointer select-none items-center gap-2 rounded-lg px-3 py-2 text-sm text-ink outline-none focus:bg-surface-muted data-[disabled]:pointer-events-none data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
+                className,
+            )}
+            {...props}
+        >
+            {children}
+            <span className="ms-auto grid size-4 place-items-center text-accent">
+                <DropdownMenuPrimitive.ItemIndicator>
+                    <Check aria-hidden="true" />
+                </DropdownMenuPrimitive.ItemIndicator>
+            </span>
+        </DropdownMenuPrimitive.RadioItem>
     );
 }
 
@@ -102,6 +138,8 @@ export {
     DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 };

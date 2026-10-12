@@ -19,6 +19,6 @@
 
 Primitiveهای Radix به‌صورت بسته‌های مستقل Avatar، Dialog، Dropdown Menu، Separator، Slot و Tooltip نصب شده‌اند؛ بسته تجمیعی `radix-ui` نصب نیست. این انتخاب سطح وابستگی را به قابلیت‌های واقعاً مصرف‌شده محدود می‌کند. فایل‌های shadcn با tokenهای معنایی راه‌انداز تطبیق داده شده‌اند و default theme شادسی‌ان جایگزین هویت محصول نشده است.
 
-اثر build فعلی، بدون Recharts و date picker: chunk مشترک اصلی `373.83 KiB` خام و `116.67 KiB` gzip، AppLayout برابر `62.68 KiB` خام و `20.65 KiB` gzip، chunk پوسته/Tooltip برابر `22.88 KiB` خام و `9.25 KiB` gzip، فونت `111.15 KiB`، و CSS `65.95 KiB` خام و `11.88 KiB` gzip است. CSS پایه React-Toastify در خروجی CSS قرار دارد و entrypoint `react-toastify/unstyled` از تزریق دوباره style در runtime جلوگیری می‌کند. صفحات با `import.meta.glob` بدون `eager` جدا شده‌اند.
+اثر build فعلی، بدون Recharts و date picker: chunk مشترک اصلی `373.83 KiB` خام و `116.67 KiB` gzip، AppLayout برابر `23.81 KiB` خام و `8.27 KiB` gzip، chunk مشترک پوسته/Dropdown برابر `65.67 KiB` خام و `23.10 KiB` gzip، فونت `111.15 KiB`، و CSS `66.42 KiB` خام و `12.01 KiB` gzip است. CSS پایه React-Toastify در خروجی CSS قرار دارد و entrypoint `react-toastify/unstyled` از تزریق دوباره style در runtime جلوگیری می‌کند. صفحات با `import.meta.glob` بدون `eager` جدا شده‌اند.
 
 جایگزین ردشده برای تاریخ نمایشی، الگوریتم دست‌نویس جلالی بود. مشخصات آن را ممنوع کرده است.
