@@ -47,6 +47,8 @@ class OperationJob extends Model
             'status' => JobStatus::class,
             'plan' => 'array',
             'attempt' => 'integer',
+            'priority' => 'integer',
+            'max_attempts' => 'integer',
             'cancel_requested' => 'boolean',
             'heartbeat_at' => 'datetime',
             'started_at' => 'datetime',
@@ -77,5 +79,10 @@ class OperationJob extends Model
     public function outboxMessages(): HasMany
     {
         return $this->hasMany(OperationJobOutbox::class);
+    }
+
+    public function deployments(): HasMany
+    {
+        return $this->hasMany(Deployment::class);
     }
 }

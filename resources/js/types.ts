@@ -1,6 +1,6 @@
-import type { PageProps } from '@inertiajs/core';
+import type { PageProps } from "@inertiajs/core";
 
-export type ThemePreference = 'light' | 'dark' | 'system';
+export type ThemePreference = "light" | "dark" | "system";
 
 export interface AuthUser {
     id: string;
@@ -32,7 +32,7 @@ export type SharedProps = PageProps & {
 
 export interface HostFacts {
     observed_at: string;
-    compatibility: 'untested';
+    compatibility: "untested";
     compatibility_reason: string;
     hostname: string;
     kernel: string;

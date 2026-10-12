@@ -1,6 +1,6 @@
-import { Head } from '@inertiajs/react';
-import { Card } from '@/components/ui/card';
-import { AppLayout } from '@/layouts/app-layout';
+import { Head } from "@inertiajs/react";
+import { Card } from "@/components/ui/card";
+import { AppLayout } from "@/layouts/app-layout";
 
 interface DashboardPageProps {
     workspace: {
@@ -15,12 +15,17 @@ interface DashboardPageProps {
         failed: number;
     };
     modules: {
-        projects: 'not_installed';
-        servers: 'not_installed';
+        projects: "not_installed";
+        servers: "not_installed";
     };
 }
 
-export default function Dashboard({ workspace, execution_mode, operations, modules }: DashboardPageProps) {
+export default function Dashboard({
+    workspace,
+    execution_mode,
+    operations,
+    modules,
+}: DashboardPageProps) {
     return (
         <AppLayout title="داشبورد">
             <Head title="داشبورد" />
@@ -29,9 +34,15 @@ export default function Dashboard({ workspace, execution_mode, operations, modul
                     <p className="text-sm text-muted">فضای کاری</p>
                     <h2 className="text-2xl font-semibold">{workspace.name}</h2>
                     <p className="mt-2 text-sm text-muted">
-                        حالت اجرا: <span className="font-mono text-ink" dir="ltr">{execution_mode}</span>
+                        حالت اجرا:{" "}
+                        <span className="font-mono text-ink" dir="ltr">
+                            {execution_mode}
+                        </span>
                     </p>
-                    <p className="mt-1 text-sm text-muted">اجرای دستور میزبان در این نسخه خاموش است و هیچ عملیات موفقی از این پنل گزارش نمی‌شود.</p>
+                    <p className="mt-1 text-sm text-muted">
+                        اجرای دستور میزبان در این نسخه خاموش است و هیچ عملیات
+                        موفقی از این پنل گزارش نمی‌شود.
+                    </p>
                 </Card>
                 <div className="grid gap-4 md:grid-cols-3">
                     <Metric label="در صف" value={operations.queued} />
@@ -54,11 +65,13 @@ function Metric({ label, value }: { label: string; value: number }) {
     return (
         <Card>
             <p className="text-sm text-muted">{label}</p>
-            <p className="font-mono text-3xl font-semibold" dir="ltr">{value.toLocaleString('en-US')}</p>
+            <p className="font-mono text-3xl font-semibold" dir="ltr">
+                {value.toLocaleString("en-US")}
+            </p>
         </Card>
     );
 }
 
-function labelFor(state: 'not_installed'): string {
-    return state === 'not_installed' ? 'هنوز نصب نشده است' : state;
+function labelFor(state: "not_installed"): string {
+    return state === "not_installed" ? "هنوز نصب نشده است" : state;
 }

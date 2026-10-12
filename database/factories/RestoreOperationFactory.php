@@ -1,0 +1,19 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Database\Factories;
+
+use App\Models\RestoreOperation;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends Factory<RestoreOperation>
+ */
+class RestoreOperationFactory extends Factory
+{
+    public function definition(): array
+    {
+        return [];
+    }
+}

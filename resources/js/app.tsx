@@ -1,13 +1,15 @@
-import { createInertiaApp } from '@inertiajs/react';
-import { createRoot } from 'react-dom/client';
-import { StrictMode, type ComponentType } from 'react';
+import { createInertiaApp } from "@inertiajs/react";
+import { createRoot } from "react-dom/client";
+import { StrictMode, type ComponentType } from "react";
 
-const pages = import.meta.glob('./pages/**/*.tsx', { eager: true });
+const pages = import.meta.glob("./pages/**/*.tsx", { eager: true });
 
 createInertiaApp({
-    title: (title) => (title ? `${title} · راه‌انداز` : 'راه‌انداز'),
+    title: (title) => (title ? `${title} · راه‌انداز` : "راه‌انداز"),
     resolve: (name) => {
-        const page = pages[`./pages/${name}.tsx`] as { default: ComponentType } | undefined;
+        const page = pages[`./pages/${name}.tsx`] as
+            | { default: ComponentType }
+            | undefined;
 
         if (!page) {
             throw new Error(`Missing page: ${name}`);
@@ -23,7 +25,7 @@ createInertiaApp({
         );
     },
     progress: {
-        color: '#4F46E5',
+        color: "#4F46E5",
         showSpinner: false,
     },
 });

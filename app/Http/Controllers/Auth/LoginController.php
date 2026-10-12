@@ -24,7 +24,15 @@ class LoginController extends Controller
         $request->authenticate();
         $request->session()->regenerate();
 
-        $request->user()?->loadMissing('profile');
+        $user = $request->user();
+
+        if ($user !== null) {
+            $user->forceFill([
+                'last_login_at' => now(),
+                'last_activity_at' => now(),
+            ])->save();
+            $user->loadMissing('profile');
+        }
 
         if ($request->user()?->profile?->force_password_change) {
             return redirect()->route('password.edit');

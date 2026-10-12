@@ -46,6 +46,8 @@ class User extends Authenticatable
             'password' => 'hashed',
             'status' => UserStatus::class,
             'theme' => Theme::class,
+            'last_login_at' => 'datetime',
+            'last_activity_at' => 'datetime',
         ];
     }
 
@@ -71,6 +73,11 @@ class User extends Authenticatable
     public function memberships(): HasMany
     {
         return $this->hasMany(Membership::class);
+    }
+
+    public function auditEvents(): HasMany
+    {
+        return $this->hasMany(AuditEvent::class, 'actor_id');
     }
 
     public function currentMembership(): ?Membership

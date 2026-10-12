@@ -15,4 +15,9 @@ enum MembershipRole: string
     {
         return $this === self::Owner || $this === self::Admin;
     }
+
+    public function mayDecryptSecrets(): bool
+    {
+        return $this === self::Owner || $this === self::Admin;
+    }
 }

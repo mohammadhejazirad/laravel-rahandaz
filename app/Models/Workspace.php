@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable(['name', 'slug', 'owner_id', 'settings', 'setup_completed_at'])]
 class Workspace extends Model
@@ -37,6 +38,36 @@ class Workspace extends Model
     public function memberships(): HasMany
     {
         return $this->hasMany(Membership::class);
+    }
+
+    public function localHosts(): HasMany
+    {
+        return $this->hasMany(LocalHost::class);
+    }
+
+    public function localHost(): HasOne
+    {
+        return $this->hasOne(LocalHost::class)->where('slug', 'local-host');
+    }
+
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class);
+    }
+
+    public function credentials(): HasMany
+    {
+        return $this->hasMany(Credential::class);
+    }
+
+    public function gitConnections(): HasMany
+    {
+        return $this->hasMany(GitConnection::class);
+    }
+
+    public function auditEvents(): HasMany
+    {
+        return $this->hasMany(AuditEvent::class);
     }
 
     public function setupIsComplete(): bool
