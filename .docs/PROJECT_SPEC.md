@@ -106,7 +106,7 @@
 | PHP پنل | PHP 8.3+ مطابق ماتریس رسمی Laravel 13 و اکستنشن‌های آزموده؛ **ترجیح PHP 8.4/8.5 پس از CI** | نسخه PHP پنل مستقل از PHP پروژه‌ها و CLI default سیستم؛ از مسیر `/usr/bin/php` متغیر استفاده نشود |
 | Frontend | **Inertia.js 3 + React 19 + TypeScript strict + Vite** | routing از Laravel؛ React pages؛ API صرفاً برای عملیات/stream لازم |
 | CSS/UI | Tailwind CSS 4 + tokenهای CSS + shadcn/ui به صورت selective + Radix primitives + Lucide React | نسخه دقیق dependencyها lock، bundle self-hosted، اجتناب از import سنگین |
-| فرم و اعلان | Inertia `useForm` یا فرم typed، Zod برای UX اختیاری؛ Sonner برای Toast | validation اصلی FormRequest/Policy سمت Laravel؛ toast از state واقعی Job |
+| فرم و اعلان | Inertia `useForm` یا فرم typed، Zod برای UX اختیاری؛ React-Toastify برای Toast | validation اصلی FormRequest/Policy سمت Laravel؛ toast از state واقعی Job |
 | پایگاه داده | PostgreSQL با connection و role اختصاصی پنل | source of truth برای User، Job، Outbox، audit، configuration و metadata |
 | صف | Laravel Queue با driver Redis و `ShouldQueue`؛ `queue:work` زیر systemd | concurrency کم، retry/backoff، worker restart، idempotency؛ Horizon فقط optional |
 | Cache/lock | Redis مجزا از queue، ترجیحاً instance/service و ACL مستقل | cache eviction نباید job را حذف کند؛ PostgreSQL lease/fencing برای mutation |
@@ -836,7 +836,7 @@ theme سه حالت `light`، `dark` و `system` دارد. precedence: preferenc
 
 ### 15.5 component library
 
-Button variantها، Input/Select/Textarea، PasswordField، Card، DataTable، Badge، Alert، Modal، Drawer، Tabs، Breadcrumb، Pagination، Toast، Skeleton، EmptyState، ErrorState، ConfirmAction، CopyButton، SecretInput، StatusTimeline، ResourceUsage و JobLogViewer به‌صورت **React/TSX** تعریف شوند. تصمیم نصب واقعی و صفحه‌های پیاده‌شده در `docs/FRONTEND_DEPENDENCIES.md` و `docs/UI_PAGE_INVENTORY.md` ثبت می‌شود؛ نبودن یک صفحه در مخزن به‌معنی تکمیل عملیاتی آن نیست. پکیج‌های پیشنهادی کنترل‌شده: `@inertiajs/react`, `react`, `react-dom`, `typescript`, `vite`, `laravel-vite-plugin`, `tailwindcss`, `@tailwindcss/vite`, `lucide-react`, `sonner`, Radix/shadcn primitives فقط به‌اندازه نیاز، `clsx`, `tailwind-merge`, `class-variance-authority`. chart و date picker فقط در صفحه لازم lazy import شوند؛ `date-fns-jalali` یا جایگزین معتبر پس از بررسی licence/compatibility pin شود. از نصب مجموعه‌های UI متعدد و icon bundle عظیم خودداری شود.
+Button variantها، Input/Select/Textarea، PasswordField، Card، DataTable، Badge، Alert، Modal، Drawer، Tabs، Breadcrumb، Pagination، Toast، Skeleton، EmptyState، ErrorState، ConfirmAction، CopyButton، SecretInput، StatusTimeline، ResourceUsage و JobLogViewer به‌صورت **React/TSX** تعریف شوند. تصمیم نصب واقعی و صفحه‌های پیاده‌شده در `docs/FRONTEND_DEPENDENCIES.md` و `docs/UI_PAGE_INVENTORY.md` ثبت می‌شود؛ نبودن یک صفحه در مخزن به‌معنی تکمیل عملیاتی آن نیست. پکیج‌های پیشنهادی کنترل‌شده: `@inertiajs/react`, `react`, `react-dom`, `typescript`, `vite`, `laravel-vite-plugin`, `tailwindcss`, `@tailwindcss/vite`, `lucide-react`, `react-toastify`, Radix/shadcn primitives فقط به‌اندازه نیاز، `clsx`, `tailwind-merge`, `class-variance-authority`. chart و date picker فقط در صفحه لازم lazy import شوند؛ `date-fns-jalali` یا جایگزین معتبر پس از بررسی licence/compatibility pin شود. از نصب مجموعه‌های UI متعدد و icon bundle عظیم خودداری شود.
 
 هر collection با رشد نامحدود یا وابسته به کاربر، از جمله پروژه‌ها، environmentها، استقرارها، عملیات و logهای آن‌ها، اعلان‌ها، audit، backupها، کاربران، سرویس‌ها، databaseها، domainها و eventها باید pagination سمت سرور داشته باشد. دریافت کامل queryset و مخفی‌کردن بخشی از آن فقط با CSS/JavaScript صفحه‌بندی محسوب نمی‌شود. query stringهای filter و sort هنگام تغییر صفحه حفظ شوند و اندازه صفحه سقف امن داشته باشد.
 
@@ -1165,7 +1165,7 @@ fixtureهای static، Laravel، Next.js، Nuxt.js و Node مطابق مرحله
 
 ### مرحله 1 — رابط و امنیت حساب
 
-layout فارسی RTL با Vazirmatn محلی، tokens دارک/لایت، Lucide React، shadcn/ui گزینشی، Sonner Toast، صفحات Inertia و theme/system، auth username/email، Profile/Role/Policy، Persian Jalali نمایش و Wizard auto-save/probe read-only با guard کامل. خروجی: پنل کاربردی بدون اجرای privileged.
+layout فارسی RTL با Vazirmatn محلی، tokens دارک/لایت، Lucide React، shadcn/ui گزینشی، React-Toastify، صفحات Inertia و theme/system، auth username/email، Profile/Role/Policy، Persian Jalali نمایش و Wizard auto-save/probe read-only با guard کامل. خروجی: پنل کاربردی بدون اجرای privileged.
 
 ### مرحله 2 — Job engine و میزبان محلی
 
@@ -1229,7 +1229,7 @@ monitoring با polling adaptive و Toast اعلان واقعی، سرور/SSH k
 
 ## 27. دستور شروع قابل کپی برای Agent
 
-> پروژه «راه‌انداز / rahandaz» را مطابق `docs/PROJECT_SPEC.md` نسخه 2.0 و `docs/ARCHITECTURE.md` پیاده‌سازی کن. قبل از کدنویسی واقعیت مخزن/فایل‌ها را بخوان و بدون حذف کورِ کار موجود، Django/Celery/Python **کنترل‌پلین** را به Laravel 13، Inertia.js 3، React 19 با TypeScript strict، Tailwind 4 و Vite تبدیل کن. PostgreSQL منبع حقیقت User/Job/Outbox است؛ Redis queue و cache به‌صورت instanceهای مستقل، Laravel `ShouldQueue`، workerهای سبک systemd و scheduler timer طراحی شوند. ابتدا فازهای 0 و 1: migration با کلید BIGINT و شناسه عمومی UUIDv7، Owner/Workspace/Policy، master key جدا از APP_KEY و encrypted secrets، پنل RTL/Vazirmatn، Lucide، Sonner Toast، جلالی، تم light/dark/system، login، Wizard real read-only و shell صفحه «میرورها» با تست واقعی تکمیل شوند. سپس Job/Outbox/reconciler/lease، installer GitHub signed one-command، حساب سیستم `rahandaz` locked/no-sudo، helper allowlisted، UID مستقل پروژه‌ها، Nginx/PHP-FPM، GitHub/GitLab branch deployment و main/beta، SSL و PostgreSQL/MySQL/MongoDB و rollback مرحله‌ای پیاده شوند. اجرای پروژه‌ها با Docker و remote SSH در v1 ممنوع است. هیچ root shell یا اجرای mutation واقعی پیش از تکمیل helper و آزمون VM disposable مجاز نیست. هدف مصرف idle <=512MiB و <=0.5 vCPU با benchmark اندازه‌گیری شود، نه موفقیت ساختگی؛ برنامه سنگین اگر منابع کافی ندارد block شود. پس از هر برش اجرا، test/lint/typecheck/build، فایل‌های تغییرکرده و محدودیت‌های واقعی را گزارش کن.
+> پروژه «راه‌انداز / rahandaz» را مطابق `docs/PROJECT_SPEC.md` نسخه 2.0 و `docs/ARCHITECTURE.md` پیاده‌سازی کن. قبل از کدنویسی واقعیت مخزن/فایل‌ها را بخوان و بدون حذف کورِ کار موجود، Django/Celery/Python **کنترل‌پلین** را به Laravel 13، Inertia.js 3، React 19 با TypeScript strict، Tailwind 4 و Vite تبدیل کن. PostgreSQL منبع حقیقت User/Job/Outbox است؛ Redis queue و cache به‌صورت instanceهای مستقل، Laravel `ShouldQueue`، workerهای سبک systemd و scheduler timer طراحی شوند. ابتدا فازهای 0 و 1: migration با کلید BIGINT و شناسه عمومی UUIDv7، Owner/Workspace/Policy، master key جدا از APP_KEY و encrypted secrets، پنل RTL/Vazirmatn، Lucide، React-Toastify، جلالی، تم light/dark/system، login، Wizard real read-only و shell صفحه «میرورها» با تست واقعی تکمیل شوند. سپس Job/Outbox/reconciler/lease، installer GitHub signed one-command، حساب سیستم `rahandaz` locked/no-sudo، helper allowlisted، UID مستقل پروژه‌ها، Nginx/PHP-FPM، GitHub/GitLab branch deployment و main/beta، SSL و PostgreSQL/MySQL/MongoDB و rollback مرحله‌ای پیاده شوند. اجرای پروژه‌ها با Docker و remote SSH در v1 ممنوع است. هیچ root shell یا اجرای mutation واقعی پیش از تکمیل helper و آزمون VM disposable مجاز نیست. هدف مصرف idle <=512MiB و <=0.5 vCPU با benchmark اندازه‌گیری شود، نه موفقیت ساختگی؛ برنامه سنگین اگر منابع کافی ندارد block شود. پس از هر برش اجرا، test/lint/typecheck/build، فایل‌های تغییرکرده و محدودیت‌های واقعی را گزارش کن.
 
 ## 28. منابع رسمی برای بررسی پیاده‌سازی
 
@@ -1245,7 +1245,7 @@ Agent باید مستندات **نسخه دقیق pin‌شده** را بررسی
 - React/TypeScript: https://react.dev/learn/typescript
 - Tailwind CSS v4: https://tailwindcss.com/docs/installation
 - Vite: https://vite.dev/guide/
-- Sonner Toast: https://sonner.emilkowal.ski/
+- React-Toastify: https://fkhadra.github.io/react-toastify/
 - shadcn/ui React: https://ui.shadcn.com/
 - Radix primitives: https://www.radix-ui.com/primitives
 - Vazirmatn license: https://github.com/rastikerdar/vazirmatn
@@ -1276,7 +1276,7 @@ Agent باید مستندات **نسخه دقیق pin‌شده** را بررسی
 - [ ] Redis queue و cache با config/ACL/isolation جدا، queue persistence/noeviction، dispatch outbox، duplicate/retry/worker crash reconciliation، Laravel timeout/retry_after و PostgreSQL lease/fencing تست شده‌اند.
 - [ ] Wizard فارسی اینرسی از login تا plan hash/apply/autosave/retry/rollback/progress و گزارش پالایش‌شده انجام می‌شود، Nginx/پنل protected و guard onboarding دورزدنی نیست.
 - [ ] خوشامدگویی static نیم‌صفحه‌ای روی domain اصلی یا IP/route غیرمتعارض با route سالم مشاهده و سپس بدون آسیب به پنل حذف می‌شود.
-- [ ] Lucide React، Sonner Toast، component primitives انتخابی، Vazirmatn محلی، RTL، light/dark/system، TypeScript strict، a11y و هر چهار viewport با داده/empty/error واقعی آزموده‌اند؛ SSR daemon اجباری نیست.
+- [ ] Lucide React، React-Toastify، component primitives انتخابی، Vazirmatn محلی، RTL، light/dark/system، TypeScript strict، a11y و هر چهار viewport با داده/empty/error واقعی آزموده‌اند؛ SSR daemon اجباری نیست.
 - [ ] اتصال GitHub/GitLab، کمینه OAuth scope، مخزن‌ها/branchها، deploy key فقط‌خواندنی، signed webhook/delivery replay، resolve commit ثابت و preview secretless درست کار می‌کنند.
 - [ ] deployment پروژه‌های Laravel، Next.js، Nuxt.js، Node و static بدون Docker با UID مستقل، port/domain/TLS/routing جدا و healthcheck واقعی قابل مشاهده است؛ main/beta یک repo مستقل‌اند و rollback tested است.
 - [ ] قرارداد zero-downtime مشروط، blue-green/drain، Laravel FPM/opcache/queue و database expand/contract در benchmark ترافیک تست شده است؛ unsupported strategy درست blocked می‌شود.

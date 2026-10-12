@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AuthLayout } from "@/layouts/auth-layout";
+import { notify } from "@/lib/notify";
 import type { SharedProps } from "@/types";
 
 export default function Login() {
@@ -11,7 +12,9 @@ export default function Login() {
 
     function submit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        form.post(`${app.base_path}/login`);
+        form.post(`${app.base_path}/login`, {
+            onError: (errors) => notify.formErrors(errors),
+        });
     }
 
     return (

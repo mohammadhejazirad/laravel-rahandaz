@@ -25,6 +25,7 @@ import { FlashToaster } from "@/components/flash-toaster";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Alert } from "@/components/ui/alert";
 import { labelOf } from "@/lib/labels";
+import { notify } from "@/lib/notify";
 import type { SharedProps } from "@/types";
 
 interface NavLink {
@@ -188,7 +189,9 @@ export function AppLayout({ title, description, eyebrow = "فضای کاری م�
                             <button
                                 type="button"
                                 className="inline-flex size-11 shrink-0 items-center justify-center gap-1 rounded-xl text-sm text-muted hover:bg-surface-muted hover:text-ink lg:w-auto lg:px-3"
-                                onClick={() => router.post(`${base}/logout`)}
+                                onClick={() => router.post(`${base}/logout`, {}, {
+                                    onError: () => notify.error("خروج از حساب انجام نشد."),
+                                })}
                                 aria-label="خروج از حساب"
                             >
                                 <LogOut className="size-4" aria-hidden="true" />

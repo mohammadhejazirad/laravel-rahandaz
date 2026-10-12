@@ -2,6 +2,7 @@ import { router, usePage } from '@inertiajs/react';
 import { MonitorSmartphone, Moon, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { SharedProps, ThemePreference } from '@/types';
+import { notify } from '@/lib/notify';
 import { applyTheme } from '@/lib/theme';
 
 const options: Array<{ value: ThemePreference; label: string; icon: typeof Sun }> = [
@@ -33,6 +34,7 @@ export function ThemeToggle({ compact = false }: { compact?: boolean }) {
                 onError: () => {
                     setCurrent(previous);
                     applyTheme(previous);
+                    notify.error('ذخیره پوسته انجام نشد و انتخاب قبلی بازگردانده شد.');
                 },
             });
             return;

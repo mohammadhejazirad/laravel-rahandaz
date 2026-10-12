@@ -1,12 +1,13 @@
 # تصمیم وابستگی‌های Frontend
 
-نسخه‌های نصب‌شده در `docs/DEPENDENCIES.md` و `package-lock.json` هستند. این پرونده فقط تصمیم همین برش رابط است. بسته تازه‌ای نصب نشد.
+نسخه‌های نصب‌شده در `docs/DEPENDENCIES.md` و `package-lock.json` هستند. در برش اعلان، React-Toastify به درخواست مالک نصب و Sonner حذف شد؛ هر دو هم‌زمان نگه داشته نمی‌شوند.
 
 | بسته | تصمیم | دلیل |
 | --- | --- | --- |
 | Tailwind CSS 4 | مانده | الزام معماری. tokenها در CSS هستند |
 | Lucide React 1.55.0 | مانده | تنها مجموعه آیکون |
-| Sonner 2.0.8 | مانده | Toast از قبل نصب بود. پشت `notify` قرار گرفت |
+| React-Toastify 11.1.0 | نصب شد | مسیر واحد Toast با RTL، light/dark، وزیرمتن، حالت‌های معنایی و lifecycle loading/update |
+| Sonner | حذف شد | دو کتابخانه Toast موازی نگه داشته نمی‌شود |
 | clsx، tailwind-merge، CVA | مانده | variant دکمه و کلاس شرطی |
 | Inertia React 3.9.1 و React 19.3.0 | مانده | معماری پنل |
 | shadcn/ui و Radix | نصب نشد | Drawer موبایل با همان لینک‌های Sidebar و از لبه فیزیکی راست باز می‌شود. Dialog و Select واقعی هنوز صفحه ندارند. Sheet فقط برای همین منو نصب نشد |
@@ -16,6 +17,6 @@
 | React Hook Form، Zod، resolver | نصب نشد | دو فرم فعلی ساده هستند و `useForm` اینرسی خطای ۴۲۲ لاراول را به فیلد می‌دهد. دو کتابخانه فرم موازی ممنوع است |
 | Motion | نصب نشد | باز و بسته شدن منو با CSS کافی است. `prefers-reduced-motion` در `app.css` است |
 
-اثر build فعلی، بدون Recharts و date picker: chunk اصلی `350.98 KiB` خام و `110.06 KiB` gzip، chunk مشترک لوگو `32.57 KiB` خام و `10.92 KiB` gzip، فونت `111.15 KiB`، و CSS `34.01 KiB` خام و `7.21 KiB` gzip است. برندینگ package تازه‌ای اضافه نکرده و assetهای SVG/PNG مستقیماً از `public/` سرو می‌شوند. صفحات با `import.meta.glob` بدون `eager` جدا شده‌اند.
+اثر build فعلی، بدون Recharts و date picker: chunk اصلی `350.97 KiB` خام و `110.05 KiB` gzip، chunk مشترک Toast/پوسته `21.30 KiB` خام و `8.63 KiB` gzip، chunk مشترک لوگو `32.57 KiB` خام و `10.92 KiB` gzip، فونت `111.15 KiB`، و CSS `52.31 KiB` خام و `10.21 KiB` gzip است. CSS پایه React-Toastify در خروجی CSS قرار دارد و entrypoint `react-toastify/unstyled` از تزریق دوباره style در runtime جلوگیری می‌کند. صفحات با `import.meta.glob` بدون `eager` جدا شده‌اند.
 
 جایگزین ردشده برای تاریخ نمایشی، الگوریتم دست‌نویس جلالی بود. مشخصات آن را ممنوع کرده است.

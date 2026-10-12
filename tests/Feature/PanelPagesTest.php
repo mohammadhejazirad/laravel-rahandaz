@@ -166,7 +166,8 @@ class PanelPagesTest extends TestCase
         $this->actingAs($owner)
             ->from(route('notifications.index'))
             ->post(route('notifications.read', $notification))
-            ->assertRedirect(route('notifications.index'));
+            ->assertRedirect(route('notifications.index'))
+            ->assertSessionHas('status', 'اعلان به‌عنوان خوانده‌شده علامت خورد.');
 
         $this->assertNotNull($notification->fresh()->read_at);
     }

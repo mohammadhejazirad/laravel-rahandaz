@@ -75,7 +75,7 @@
 | ورود با نام کاربری یا ایمیل، بدون ثبت‌نام عمومی | آماده | `GET/POST /rahandaz/login` |
 | اجبار تعویض رمز در ورود اول | آماده | `GET/PUT /rahandaz/password` |
 | پوسته روشن، تیره و سیستم؛ وزیرمتن محلی؛ RTL | آماده | بدون CDN |
-| Toast فقط برای پیام واقعی نشست | آماده | Sonner پشت flash |
+| Toast برای پیام واقعی سیستم و خطای فرم | آماده | React-Toastify پشت `notify` و flash |
 | نمایش تاریخ ذخیره‌شده با تقویم جلالی | آماده | `Intl`، منطقه زمانی پیش‌فرض `Asia/Tehran`، ذخیره UTC |
 | نقش‌های owner، admin، operator، viewer | در حال ساخت | عضویت و Policy هست. ماتریس کامل مشخصات هنوز به عمل میزبان وصل نیست |
 | MFA و بازیابی رمز | برنامه‌ریزی‌شده | صفحه تنظیمات فقط نمایه را نشان می‌دهد |
@@ -153,7 +153,7 @@ flowchart LR
 | رابط | React و TypeScript سخت‌گیر | React ۱۹٫۳٫۰، TypeScript ۶٫۰٫۳ |
 | CSS | Tailwind CSS | ۴٫۳٫۳ |
 | Build | Vite | ۸٫۳٫۴. فقط توسعه و CI. اجرای production پنل به Node نیاز ندارد |
-| آیکون و اعلان | Lucide، Sonner | Lucide ۱٫۵۵٫۰، Sonner ۲٫۰٫۸ |
+| آیکون و اعلان | Lucide، React-Toastify | Lucide ۱٫۵۵٫۰، React-Toastify ۱۱٫۱٫۰ |
 | پایگاه | PostgreSQL | image توسعه ۱۶ |
 | صف و cache | Redis | image توسعه ۷، دو سرویس جدا |
 | ORM و صف | Eloquent، Laravel Queue، Scheduler | Horizon نصب نشده |

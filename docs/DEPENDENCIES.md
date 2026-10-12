@@ -27,7 +27,7 @@
 | tailwindcss | 4.3.3 | MIT |
 | laravel-vite-plugin | 3.2.0 | MIT |
 | lucide-react | 1.55.0 | ISC |
-| sonner | 2.0.8 | MIT |
+| react-toastify | 11.1.0 | MIT |
 | class-variance-authority | 0.7.1 | Apache-2.0 |
 | clsx | 2.1.1 | MIT |
 | tailwind-merge | 3.7.0 | MIT |

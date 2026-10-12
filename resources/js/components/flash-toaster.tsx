@@ -1,26 +1,35 @@
 import { usePage } from '@inertiajs/react';
+import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Toaster } from 'sonner';
+import { Slide, ToastContainer, type CloseButtonProps } from 'react-toastify/unstyled';
 import { notify } from '@/lib/notify';
 import type { SharedProps } from '@/types';
 
 export function FlashToaster() {
     const { flash } = usePage<SharedProps>().props;
-    const [theme, setTheme] = useState<'light' | 'dark'>('light');
+    const [theme, setTheme] = useState<'light' | 'dark'>(readCurrentTheme);
 
     useEffect(() => {
         if (flash.status) {
-            notify.success(flash.status);
+            notify.success(flash.status, { toastId: flashToastId('status', flash.status) });
         }
 
         if (flash.error) {
-            notify.error(flash.error);
+            notify.error(flash.error, { toastId: flashToastId('error', flash.error) });
         }
-    }, [flash.status, flash.error]);
+
+        if (flash.warning) {
+            notify.warning(flash.warning, { toastId: flashToastId('warning', flash.warning) });
+        }
+
+        if (flash.info) {
+            notify.info(flash.info, { toastId: flashToastId('info', flash.info) });
+        }
+    }, [flash.status, flash.error, flash.warning, flash.info]);
 
     useEffect(() => {
         const root = document.documentElement;
-        const read = () => setTheme(root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+        const read = () => setTheme(readCurrentTheme());
         read();
         const observer = new MutationObserver(read);
         observer.observe(root, { attributes: true, attributeFilter: ['data-theme'] });
@@ -29,16 +38,50 @@ export function FlashToaster() {
     }, []);
 
     return (
-        <Toaster
-            dir="rtl"
+        <ToastContainer
+            aria-label="پیام‌های موقت سیستم"
+            className="rahandaz-toast-container"
+            closeButton={ToastCloseButton}
+            closeOnClick={false}
+            draggable="touch"
+            limit={3}
+            newestOnTop
+            pauseOnFocusLoss
+            pauseOnHover
             position="top-center"
-            closeButton
+            rtl
             theme={theme}
-            visibleToasts={3}
-            containerAriaLabel="پیام‌های موقت"
-            offset={{ top: '4.75rem', right: '16px', bottom: '16px', left: '16px' }}
-            mobileOffset={{ top: '4.75rem', right: '12px', bottom: '12px', left: '12px' }}
-            toastOptions={{ className: 'font-sans' }}
+            transition={Slide}
         />
+    );
+}
+
+function readCurrentTheme(): 'light' | 'dark' {
+    return document.documentElement.getAttribute('data-theme') === 'dark'
+        ? 'dark'
+        : 'light';
+}
+
+function flashToastId(type: string, message: string): string {
+    let hash = 2166136261;
+
+    for (let index = 0; index < message.length; index += 1) {
+        hash ^= message.charCodeAt(index);
+        hash = Math.imul(hash, 16777619);
+    }
+
+    return `flash:${type}:${(hash >>> 0).toString(36)}`;
+}
+
+function ToastCloseButton({ closeToast }: CloseButtonProps) {
+    return (
+        <button
+            type="button"
+            className="rahandaz-toast-close"
+            aria-label="بستن پیام"
+            onClick={closeToast}
+        >
+            <X aria-hidden="true" />
+        </button>
     );
 }

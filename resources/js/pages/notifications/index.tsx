@@ -5,6 +5,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Pagination, type PageMeta } from "@/components/ui/pagination";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { AppLayout } from "@/layouts/app-layout";
+import { notify } from "@/lib/notify";
 import type { SharedProps } from "@/types";
 
 interface NotificationRow {
@@ -29,7 +30,15 @@ export default function NotificationsIndex({
         <AppLayout title="اعلان‌ها" description="پیام‌های پایدار ثبت‌شده در پایگاه؛ Toastهای موقت جایگزین این فهرست نیستند.">
             <Head title="اعلان‌ها" />
             {unread > 0 ? (
-                <Button type="button" variant="secondary" onClick={() => router.post(`${base}/notifications/read-all`)}>
+                <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() =>
+                        router.post(`${base}/notifications/read-all`, {}, {
+                            onError: () => notify.error("علامت‌زدن اعلان‌ها انجام نشد."),
+                        })
+                    }
+                >
                     علامت‌زدن همه به‌عنوان خوانده‌شده
                 </Button>
             ) : null}
@@ -51,7 +60,15 @@ export default function NotificationsIndex({
                                         خوانده‌شده در <PersianDate iso={item.read_at} />
                                     </span>
                                 ) : (
-                                    <Button type="button" variant="ghost" onClick={() => router.post(`${base}/notifications/${item.uuid}/read`)}>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        onClick={() =>
+                                            router.post(`${base}/notifications/${item.uuid}/read`, {}, {
+                                                onError: () => notify.error("علامت‌زدن اعلان انجام نشد."),
+                                            })
+                                        }
+                                    >
                                         خواندم
                                     </Button>
                                 )}

@@ -1,33 +1,109 @@
 <!doctype html>
 <html lang="fa" dir="rtl">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="color-scheme" content="light dark">
-    <meta name="theme-color" content="#0B1120">
-    <title>راه‌انداز آماده است</title>
-    <style>
-        :root { color-scheme: light dark; font-family: Vazirmatn, system-ui, sans-serif; background: #0b1120; color: #f8fafc; }
-        * { box-sizing: border-box; }
-        body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at 80% 12%, #252d52 0, transparent 30rem), #0b1120; }
-        main { width: min(100%, 760px); padding: clamp(28px, 6vw, 64px); border: 1px solid #334155; border-radius: 28px; background: #111827; box-shadow: 0 28px 80px rgb(0 0 0 / 28%); }
-        img { display: block; width: 64px; height: 64px; }
-        h1 { margin: 28px 0 8px; font-size: clamp(32px, 7vw, 56px); line-height: 1.25; }
-        p { margin: 0; color: #cbd5e1; line-height: 1.9; }
-        .status { display: inline-flex; align-items: center; gap: 8px; margin-top: 28px; padding: 7px 12px; border: 1px solid #34d39955; border-radius: 999px; color: #34d399; font-size: 14px; }
-        .status::before { width: 7px; height: 7px; border-radius: 50%; background: currentColor; content: ''; }
-        a { display: inline-flex; margin-top: 32px; padding: 11px 18px; border-radius: 12px; background: #818cf8; color: #1e1b4b; font-weight: 700; text-decoration: none; }
-        code { direction: ltr; unicode-bidi: isolate; font-family: ui-monospace, monospace; }
-    </style>
-</head>
-<body data-health-marker="{{HEALTH_MARKER}}">
-    <main>
-        <img src="/branding/logo-symbol-dark.svg" width="64" height="64" alt="">
-        <h1>راه‌انداز آماده است</h1>
-        <p>مسیر وب و Nginx این میزبان پس از راه‌اندازی تایید شده‌اند. برای مدیریت سرور وارد کنترل‌پنل شوید.</p>
-        <span class="status">{{SETUP_STATUS_LABEL}}</span>
-        <br>
-        <a href="{{PANEL_URL}}">ورود به کنترل‌پنل</a>
-    </main>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="color-scheme" content="light dark" />
+        <meta name="theme-color" content="#0B1120" />
+        <title>راه‌انداز آماده است</title>
+        <style>
+            :root {
+                color-scheme: light dark;
+                font-family: Vazirmatn, system-ui, sans-serif;
+                background: #0b1120;
+                color: #f8fafc;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                min-height: 100vh;
+                margin: 0;
+                display: grid;
+                place-items: center;
+                padding: 24px;
+                background:
+                    radial-gradient(
+                        circle at 80% 12%,
+                        #252d52 0,
+                        transparent 30rem
+                    ),
+                    #0b1120;
+            }
+            main {
+                width: min(100%, 760px);
+                padding: clamp(28px, 6vw, 64px);
+                border: 1px solid #334155;
+                border-radius: 28px;
+                background: #111827;
+                box-shadow: 0 28px 80px rgb(0 0 0 / 28%);
+            }
+            img {
+                display: block;
+                width: 64px;
+                height: 64px;
+            }
+            h1 {
+                margin: 28px 0 8px;
+                font-size: clamp(32px, 7vw, 56px);
+                line-height: 1.25;
+            }
+            p {
+                margin: 0;
+                color: #cbd5e1;
+                line-height: 1.9;
+            }
+            .status {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                margin-top: 28px;
+                padding: 7px 12px;
+                border: 1px solid #34d39955;
+                border-radius: 999px;
+                color: #34d399;
+                font-size: 14px;
+            }
+            .status::before {
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                background: currentColor;
+                content: "";
+            }
+            a {
+                display: inline-flex;
+                margin-top: 32px;
+                padding: 11px 18px;
+                border-radius: 12px;
+                background: #818cf8;
+                color: #1e1b4b;
+                font-weight: 700;
+                text-decoration: none;
+            }
+            code {
+                direction: ltr;
+                unicode-bidi: isolate;
+                font-family: ui-monospace, monospace;
+            }
+        </style>
+    </head>
+    <body data-health-marker="{{HEALTH_MARKER}}">
+        <main>
+            <img
+                src="/branding/logo-symbol-dark.svg"
+                width="64"
+                height="64"
+                alt=""
+            />
+            <h1>راه‌انداز آماده است</h1>
+            <p>
+                مسیر وب و Nginx این میزبان پس از راه‌اندازی تایید شده‌اند. برای
+                مدیریت سرور وارد کنترل‌پنل شوید.
+            </p>
+            <span class="status">{{SETUP_STATUS_LABEL}}</span>
+            <br />
+            <a href="{{PANEL_URL}}">ورود به کنترل‌پنل</a>
+        </main>
+    </body>
 </html>

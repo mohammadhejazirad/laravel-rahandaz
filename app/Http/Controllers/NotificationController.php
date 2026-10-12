@@ -59,7 +59,7 @@ class NotificationController extends Controller
             $notification->forceFill(['read_at' => now()])->save();
         }
 
-        return back();
+        return back()->with('status', 'اعلان به‌عنوان خوانده‌شده علامت خورد.');
     }
 
     public function readAll(Request $request): RedirectResponse

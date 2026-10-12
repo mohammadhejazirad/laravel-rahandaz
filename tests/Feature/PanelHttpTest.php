@@ -76,7 +76,8 @@ class PanelHttpTest extends TestCase
         $this->post(route('login.store'), [
             'identifier' => strtoupper($user->username),
             'password' => 'Password-test-123',
-        ])->assertRedirect(route('password.edit'));
+        ])->assertRedirect(route('password.edit'))
+            ->assertSessionHas('status', 'ورود موفق بود. اکنون گذرواژه اولیه را تغییر دهید.');
 
         $this->actingAs($user)->get(route('dashboard'))->assertRedirect(route('password.edit'));
 
@@ -92,6 +93,37 @@ class PanelHttpTest extends TestCase
             ->component('setup/index')
             ->where('holding', false)
             ->where('facts.compatibility', 'untested'));
+    }
+
+    public function test_all_supported_flash_messages_are_shared_with_inertia(): void
+    {
+        $this->withSession([
+            'status' => 'موفق',
+            'error' => 'خطا',
+            'warning' => 'هشدار',
+            'info' => 'اطلاع',
+        ])->get(route('login'))->assertInertia(fn (Assert $page) => $page
+            ->where('flash.status', 'موفق')
+            ->where('flash.error', 'خطا')
+            ->where('flash.warning', 'هشدار')
+            ->where('flash.info', 'اطلاع'));
+    }
+
+    public function test_login_and_logout_set_success_messages(): void
+    {
+        [$user] = $this->panelAccount(setupComplete: true);
+
+        $this->post(route('login.store'), [
+            'identifier' => $user->username,
+            'password' => 'Password-test-123',
+        ])->assertRedirect(route('dashboard'))
+            ->assertSessionHas('status', 'با موفقیت وارد شدید.');
+
+        $this->post(route('logout'))
+            ->assertRedirect(route('login'))
+            ->assertSessionHas('status', 'با موفقیت از حساب خارج شدید.');
+
+        $this->assertGuest();
     }
 
     public function test_suspended_user_with_the_right_password_is_distinct_from_a_miss(): void

@@ -24,6 +24,8 @@ export type SharedProps = PageProps & {
     flash: {
         status: string | null;
         error: string | null;
+        warning: string | null;
+        info: string | null;
     };
     execution: {
         mode: string;

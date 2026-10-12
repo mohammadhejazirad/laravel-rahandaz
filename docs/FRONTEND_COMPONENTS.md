@@ -17,10 +17,10 @@
 | Pagination | `resources/js/components/ui/pagination.tsx` | قبلی/بعدی سمت سرور و شمار کل | Inertia Link | در استفاده |
 | PersianDate | `resources/js/components/dates/persian-date.tsx` | نمایش جلالی و tooltip از ISO | Intl | در استفاده |
 | ThemeToggle | `resources/js/components/theme-toggle.tsx` | روشن / تیره / سیستم | Lucide | در استفاده |
-| FlashToaster | `resources/js/components/flash-toaster.tsx` | Toast نشست | Sonner، notify | در استفاده |
+| FlashToaster | `resources/js/components/flash-toaster.tsx` | Toast سراسری flash و همگام‌سازی پوسته | React-Toastify، notify | در استفاده |
 | AppLayout | `resources/js/layouts/app-layout.tsx` | سایدبار راست دسکتاپ و Drawer راست موبایل با همان لینک‌ها، focus trap، skip link، عنوان و زنگ اعلان | Lucide | در استفاده |
 | AuthLayout | `resources/js/layouts/auth-layout.tsx` | پوسته responsive ورود و گذرواژه | AppLogo، Lucide | در استفاده |
-| notify | `resources/js/lib/notify.ts` | success / error / info / queued | Sonner | success و error در استفاده |
+| notify | `resources/js/lib/notify.ts` | default / info / warning / success / error / queued / loading / update / dismiss / formErrors | React-Toastify | در استفاده |
 
 Props صفحه‌بندی: `current_page`، `last_page`، `per_page`، `total`، `prev_url`، `next_url`.
 

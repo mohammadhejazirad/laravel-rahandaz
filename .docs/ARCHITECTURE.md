@@ -31,7 +31,7 @@ flowchart LR
 | `app/Infrastructure/Operations/` | کاتالوگ، اعتبارسنجی ورودی، تجزیه JSON و Process با argv. dispatcher تا باز شدن دروازه فرآیندی نمی‌سازد |
 | `infrastructure/operations/` | موتور Bash نسخه‌دار. apply زنده روی میزبان توسعه `LIVE_MUTATION_BLOCKED` است |
 | `infrastructure/privilege_helper/` | قرارداد CLI محدود. سوکت root و نصب daemon هنوز وجود ندارد |
-| `resources/js/` | صفحات TSX، layout RTL، type-safe props، theme، Sonner Toast و UI shadcn/Radix گزینشی، Lucide و assets محلی |
+| `resources/js/` | صفحات TSX، layout RTL، type-safe props، theme، React-Toastify و UI shadcn/Radix گزینشی، Lucide و assets محلی |
 | `public/build/` | assetهای Vite آماده؛ Node runtime برای سرویس production پنل لازم نیست |
 
 ## هویت‌ها و مجوزها
@@ -57,7 +57,7 @@ PostgreSQL منبع نهایی وضعیت است. dispatcher ردیف‌های O
 
 ## Frontend
 
-صفحات Inertia در `resources/js/pages` هستند و هر صفحه یک chunk جدا می‌گیرد. Layout مهمان و پنل جداست. `AppLayout` عنوان/شرح مشترک، سایدبار desktop، Drawer تبلت/موبایل با focus trap، skip link و اعلان را فراهم می‌کند؛ `AuthLayout` ورود و تغییر گذرواژه را بدون افشای اطلاعات میزبان پوشش می‌دهد. هویت بصری از assetهای ثابت `public/branding` و کامپوننت‌های `AppLogo`/`AppLogoSymbol` می‌آید؛ favicon و Open Graph بدون runtime جاوااسکریپت از `public/` سرو می‌شوند. navigation خطای Inertia صفحه React دارد، اما درخواست مستقیم ۴۰۳/۴۰۴/۴۱۹/۵۰۰/۵۰۳ با Blade و CSS عمومی مستقل از bundle پاسخ می‌گیرد تا خرابی JavaScript متن خطا را پنهان نکند. داده از controller با allowlist می‌آید و `id` عددی در props عمومی نیست. فرم‌های ساده ورود و گذرواژه از `useForm` خود Inertia استفاده می‌کنند. Toast فقط پیام session را نشان می‌دهد و موفقیت نصب را از روی کلیک اعلام نمی‌کند. نمودار و تقویم انتخابی تا وقتی داده یا فرم واقعی نباشد بارگذاری نمی‌شوند. جزئیات در `docs/UI_GUIDELINES.md` و `docs/BRAND_GUIDELINES.md`.
+صفحات Inertia در `resources/js/pages` هستند و هر صفحه یک chunk جدا می‌گیرد. Layout مهمان و پنل جداست. `AppLayout` عنوان/شرح مشترک، سایدبار desktop، Drawer تبلت/موبایل با focus trap، skip link و اعلان را فراهم می‌کند؛ `AuthLayout` ورود و تغییر گذرواژه را بدون افشای اطلاعات میزبان پوشش می‌دهد. هویت بصری از assetهای ثابت `public/branding` و کامپوننت‌های `AppLogo`/`AppLogoSymbol` می‌آید؛ favicon و Open Graph بدون runtime جاوااسکریپت از `public/` سرو می‌شوند. navigation خطای Inertia صفحه React دارد، اما درخواست مستقیم ۴۰۳/۴۰۴/۴۱۹/۵۰۰/۵۰۳ با Blade و CSS عمومی مستقل از bundle پاسخ می‌گیرد تا خرابی JavaScript متن خطا را پنهان نکند. داده از controller با allowlist می‌آید و `id` عددی در props عمومی نیست. فرم‌های ساده ورود و گذرواژه از `useForm` خود Inertia استفاده می‌کنند. Toast پیام‌های flash، خطای فرم و شکست درخواست رابط را از مسیر مشترک `notify` نشان می‌دهد و موفقیت نصب را از روی کلیک اعلام نمی‌کند. نمودار و تقویم انتخابی تا وقتی داده یا فرم واقعی نباشد بارگذاری نمی‌شوند. جزئیات در `docs/UI_GUIDELINES.md` و `docs/BRAND_GUIDELINES.md`.
 
 ## Deployment بدون Docker
 

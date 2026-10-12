@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AuthLayout } from "@/layouts/auth-layout";
+import { notify } from "@/lib/notify";
 import type { SharedProps } from "@/types";
 
 export default function Password() {
@@ -15,7 +16,9 @@ export default function Password() {
 
     function submit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        form.put(`${app.base_path}/password`);
+        form.put(`${app.base_path}/password`, {
+            onError: (errors) => notify.formErrors(errors),
+        });
     }
 
     return (

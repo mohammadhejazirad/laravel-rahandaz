@@ -1,3 +1,4 @@
+@import 'react-toastify/dist/ReactToastify.css';
 @import 'tailwindcss';
 
 @source '../js/**/*.{ts,tsx}';
@@ -151,27 +152,143 @@
     }
 }
 
-/* Sonner injects a later RTL rule that pulls the toaster to a negative left offset. */
-@media (max-width: 600px) {
-    html [data-sonner-toaster][dir='rtl'] {
-        right: 12px;
-        left: 12px;
-        width: auto;
-        transform: none;
-    }
-
-    html [data-sonner-toaster][dir='rtl'] [data-sonner-toast] {
-        left: 0;
-        right: 0;
-        width: 100%;
-    }
+:root {
+    --toastify-color-light: var(--color-surface);
+    --toastify-color-dark: var(--color-surface-raised);
+    --toastify-color-info: var(--color-info);
+    --toastify-color-success: var(--color-success);
+    --toastify-color-warning: var(--color-warning);
+    --toastify-color-error: var(--color-danger);
+    --toastify-icon-color-info: var(--color-info);
+    --toastify-icon-color-success: var(--color-success);
+    --toastify-icon-color-warning: var(--color-warning);
+    --toastify-icon-color-error: var(--color-danger);
+    --toastify-toast-width: min(28rem, calc(100vw - 1.5rem));
+    --toastify-toast-top: max(4.75rem, calc(env(safe-area-inset-top) + 0.75rem));
+    --toastify-toast-padding: 0.875rem 1rem;
+    --toastify-toast-min-height: 4rem;
+    --toastify-toast-bd-radius: 0.875rem;
+    --toastify-toast-shadow: 0 20px 45px color-mix(in srgb, var(--color-ink) 15%, transparent);
+    --toastify-font-family: var(--font-sans);
+    --toastify-text-color-light: var(--color-ink);
+    --toastify-text-color-dark: var(--color-ink);
+    --toastify-spinner-color: var(--color-accent);
+    --toastify-spinner-color-empty-area: var(--color-line);
+    --toastify-color-progress-light: var(--color-accent);
+    --toastify-color-progress-dark: var(--color-accent);
+    --toastify-color-progress-info: var(--color-info);
+    --toastify-color-progress-success: var(--color-success);
+    --toastify-color-progress-warning: var(--color-warning);
+    --toastify-color-progress-error: var(--color-danger);
+    --toastify-z-index: 80;
 }
 
-html [data-sonner-toaster] {
-    font-family: var(--font-sans);
+.rahandaz-toast-container {
+    direction: rtl;
+    max-width: calc(100vw - 1.5rem);
 }
 
-html [data-sonner-toast] [data-title],
-html [data-sonner-toast] [data-description] {
+.rahandaz-toast-container .Toastify__toast {
+    border: 1px solid var(--color-line);
+    border-inline-start-width: 4px;
+    background: var(--color-surface-raised);
+    color: var(--color-ink);
+    line-height: 1.75;
+}
+
+.rahandaz-toast-container .Toastify__toast--default {
+    border-inline-start-color: var(--color-accent);
+}
+
+.rahandaz-toast-container .Toastify__toast--info {
+    border-inline-start-color: var(--color-info);
+    background: color-mix(in srgb, var(--color-info-soft) 52%, var(--color-surface-raised));
+}
+
+.rahandaz-toast-container .Toastify__toast--success {
+    border-inline-start-color: var(--color-success);
+    background: color-mix(in srgb, var(--color-success-soft) 52%, var(--color-surface-raised));
+}
+
+.rahandaz-toast-container .Toastify__toast--warning {
+    border-inline-start-color: var(--color-warning);
+    background: color-mix(in srgb, var(--color-warning-soft) 52%, var(--color-surface-raised));
+}
+
+.rahandaz-toast-container .Toastify__toast--error {
+    border-inline-start-color: var(--color-danger);
+    background: color-mix(in srgb, var(--color-danger-soft) 52%, var(--color-surface-raised));
+}
+
+.rahandaz-toast-container .Toastify__toast-body {
+    margin: 0;
+    padding: 0;
+    padding-inline-end: 3rem;
+    white-space: pre-line;
     overflow-wrap: anywhere;
+}
+
+.rahandaz-toast-container .Toastify__toast-icon {
+    margin-inline: 0 0.75rem;
+    width: 1.25rem;
+}
+
+.rahandaz-toast-container .Toastify__progress-bar--wrp {
+    height: 3px;
+}
+
+.rahandaz-toast-container .Toastify__progress-bar--bg {
+    background: var(--color-line);
+}
+
+.rahandaz-toast-close {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-end: 0.625rem;
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    color: var(--color-muted);
+    background: transparent;
+    border: 0;
+    border-radius: 0.5rem;
+    place-items: center;
+    transform: translateY(-50%);
+    transition: color 150ms ease, background-color 150ms ease;
+}
+
+.rahandaz-toast-close:hover {
+    color: var(--color-ink);
+    background: color-mix(in srgb, var(--color-line) 58%, transparent);
+}
+
+.rahandaz-toast-close svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+@media (max-width: 480px) {
+    .rahandaz-toast-container.Toastify__toast-container {
+        top: max(4.25rem, calc(env(safe-area-inset-top) + 0.5rem));
+        right: 0.75rem;
+        left: 0.75rem;
+        width: auto;
+        max-width: none;
+    }
+
+    .rahandaz-toast-container .Toastify__toast {
+        width: 100%;
+        margin-block-end: 0.625rem;
+        border-radius: var(--toastify-toast-bd-radius);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rahandaz-toast-container .Toastify--animate,
+    .rahandaz-toast-container .Toastify--animate-icon,
+    .rahandaz-toast-container .Toastify__spinner {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
 }

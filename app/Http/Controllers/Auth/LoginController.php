@@ -35,10 +35,14 @@ class LoginController extends Controller
         }
 
         if ($request->user()?->profile?->force_password_change) {
-            return redirect()->route('password.edit');
+            return redirect()
+                ->route('password.edit')
+                ->with('status', 'ورود موفق بود. اکنون گذرواژه اولیه را تغییر دهید.');
         }
 
-        return redirect()->route('dashboard');
+        return redirect()
+            ->route('dashboard')
+            ->with('status', 'با موفقیت وارد شدید.');
     }
 
     public function destroy(Request $request): RedirectResponse
@@ -47,6 +51,8 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login');
+        return redirect()
+            ->route('login')
+            ->with('status', 'با موفقیت از حساب خارج شدید.');
     }
 }
