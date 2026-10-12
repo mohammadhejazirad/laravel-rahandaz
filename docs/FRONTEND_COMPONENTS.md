@@ -11,7 +11,7 @@
 | Card | `resources/js/components/ui/card.tsx` | سطح محتوا | — | در استفاده |
 | Alert | `resources/js/components/ui/alert.tsx` | پیام وضعیت، toneهای neutral / info / warning / danger | — | در استفاده |
 | Badge | `resources/js/components/ui/badge.tsx` | برچسب کوچک | — | در استفاده |
-| StatusBadge | `resources/js/components/ui/status-badge.tsx` | وضعیت با متن فارسی | Badge، labels | در استفاده |
+| StatusBadge | `resources/js/components/ui/status-badge.tsx` | وضعیت با متن فارسی | Badge، enum_labels | در استفاده |
 | EmptyState | `resources/js/components/ui/empty-state.tsx` | فهرست خالی | — | در استفاده |
 | TableFrame | `resources/js/components/ui/table-frame.tsx` | جدول با اسکرول افقی، label و ناحیه قابل فوکوس | — | در استفاده |
 | Pagination | `resources/js/components/ui/pagination.tsx` | قبلی/بعدی سمت سرور و شمار کل | Inertia Link | در استفاده |

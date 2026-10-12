@@ -35,6 +35,7 @@ export type SharedProps = PageProps & {
     notifications: {
         unread: number;
     };
+    enum_labels: Record<string, string>;
 };
 
 export interface HostFacts {

@@ -6,6 +6,7 @@ namespace Tests\Feature;
 
 use App\Domain\Accounts\Enums\MembershipRole;
 use App\Domain\Jobs\Data\RecordOperationData;
+use App\Domain\Jobs\Enums\JobStatus;
 use App\Domain\Jobs\RecordOperation;
 use App\Models\LocalHost;
 use App\Models\MirrorEndpoint;
@@ -81,10 +82,14 @@ class PanelPagesTest extends TestCase
 
         $this->actingAs($owner)->get(route('servers.show', $foreignHost))->assertNotFound();
 
+        $storedStatus = ($job->fresh() ?? $job)->status->value;
+
         $this->actingAs($owner)->get(route('jobs.index'))->assertOk()->assertInertia(fn (Assert $page) => $page
             ->component('jobs/index')
             ->where('jobs.data.0.uuid', $job->uuid)
             ->where('jobs.data.0.type', 'host.noop')
+            ->where('jobs.data.0.status', $storedStatus)
+            ->where('enum_labels.'.$storedStatus, JobStatus::from($storedStatus)->label())
             ->missing('jobs.data.0.id')
             ->missing('jobs.data.0.plan'));
 
@@ -119,6 +124,10 @@ class PanelPagesTest extends TestCase
             ->component('settings/profile')
             ->where('mfa_available', false)
             ->where('profile.username', $owner->username)
+            ->where('profile.theme', $owner->theme->value)
+            ->where('auth.user.role', 'owner')
+            ->where('enum_labels.owner', 'مالک')
+            ->where('enum_labels.'.$owner->theme->value, $owner->theme->label())
             ->missing('profile.id'));
     }
 

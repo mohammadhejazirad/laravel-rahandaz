@@ -2,6 +2,7 @@ import { Head, Link, usePage } from "@inertiajs/react";
 import { Alert } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
 import { AppLayout } from "@/layouts/app-layout";
+import { labelOf } from "@/lib/labels";
 import type { SharedProps } from "@/types";
 
 export default function ProfileSettings({
@@ -22,7 +23,8 @@ export default function ProfileSettings({
     };
     mfa_available: false;
 }) {
-    const base = usePage<SharedProps>().props.app.base_path;
+    const { app, enum_labels: labels } = usePage<SharedProps>().props;
+    const base = app.base_path;
 
     return (
         <AppLayout title="تنظیمات" description="تنظیمات نمایشی حساب، منطقه زمانی و پوسته رابط.">
@@ -54,9 +56,7 @@ export default function ProfileSettings({
                     </div>
                     <div>
                         <dt className="text-sm text-muted">پوسته ذخیره‌شده</dt>
-                        <dd className="font-mono" dir="ltr">
-                            {profile.theme}
-                        </dd>
+                        <dd>{labelOf(profile.theme, labels)}</dd>
                     </div>
                 </dl>
                 <p className="mt-4 text-sm text-muted">پوسته را از نوار بالا عوض کنید. تاریخ‌های صفحه با همین منطقه زمانی به جلالی تبدیل می‌شوند.</p>

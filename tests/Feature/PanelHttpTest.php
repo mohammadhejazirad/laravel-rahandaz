@@ -63,7 +63,10 @@ class PanelHttpTest extends TestCase
     {
         [$user] = $this->panelAccount(forcePasswordChange: true);
 
-        $this->get(route('login'))->assertInertia(fn (Assert $page) => $page->component('auth/login'));
+        $this->get(route('login'))->assertInertia(fn (Assert $page) => $page
+            ->component('auth/login')
+            ->where('enum_labels.queued', 'در صف')
+            ->where('enum_labels.light', 'روشن'));
 
         $this->post(route('login.store'), [
             'identifier' => strtoupper($user->username),

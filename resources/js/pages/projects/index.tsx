@@ -25,7 +25,8 @@ export default function ProjectsIndex({
     projects: { data: ProjectRow[]; meta: PageMeta };
     create_available: false;
 }) {
-    const base = usePage<SharedProps>().props.app.base_path;
+    const { app, enum_labels: labels } = usePage<SharedProps>().props;
+    const base = app.base_path;
 
     return (
         <AppLayout title="پروژه‌ها" description="پروژه‌های ثبت‌شده در فضای کاری و محیط‌های مستقل آن‌ها.">
@@ -57,8 +58,8 @@ export default function ProjectsIndex({
                                         {project.slug}
                                     </div>
                                 </td>
-                                <td className="px-3 py-2 font-mono" dir="ltr">
-                                    {labelOf(project.declared_type)}
+                                <td className="px-3 py-2" dir="auto">
+                                    {labelOf(project.declared_type, labels)}
                                 </td>
                                 <td className="px-3 py-2">
                                     <StatusBadge value={project.status} />

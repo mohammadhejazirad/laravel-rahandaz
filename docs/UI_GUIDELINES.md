@@ -74,4 +74,4 @@ PostgreSQL مقدار را UTC نگه می‌دارد. props تاریخ ISO 8601
 
 ## نام‌گذاری
 
-کامپوننت رابط در `components/ui`. صفحه در `pages/<area>`. برچسب وضعیت از `lib/labels.ts`. شناسه در URL همان `uuid` است.
+کامپوننت رابط در `components/ui`. صفحه در `pages/<area>`. برچسب فارسی هر Enum از `label()` همان Enum می‌آید و با `enum_labels` به رابط می‌رسد؛ مقدار ذخیره‌شده در پایگاه عوض نمی‌شود. شناسه در URL همان `uuid` است.

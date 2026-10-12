@@ -1,42 +1,4 @@
-const labels: Record<string, string> = {
-    queued: "در صف",
-    running: "در حال اجرا",
-    waiting_retry: "منتظر تلاش دوباره",
-    succeeded: "موفق",
-    failed: "ناموفق",
-    failure: "شکست",
-    denied: "ردشده",
-    interrupted: "قطع‌شده",
-    cancelling: "در حال لغو",
-    cancelled: "لغوشده",
-    reconciling: "در حال تطبیق",
-    draft: "پیش‌نویس",
-    active: "فعال",
-    disabled: "غیرفعال",
-    archived: "بایگانی",
-    pending_probe: "منتظر بررسی",
-    compatible: "سازگار",
-    degraded: "ناپایدار",
-    unsupported: "پشتیبانی‌نشده",
-    untested: "آزموده‌نشده",
-    supported: "پشتیبانی‌شده",
-    trusted: "مورد اعتماد",
-    candidate: "نامزد",
-    web: "وب",
-    runtime: "زمان اجرا",
-    database: "دیتابیس",
-    cache: "کش",
-    tool: "ابزار",
-    security: "امنیت",
-    other: "سایر",
-    info: "اطلاع",
-    success: "موفق",
-    warning: "هشدار",
-    danger: "خطر",
-    eol: "پایان عمر",
-};
-
-export function labelOf(value: string): string {
+export function labelOf(value: string, labels: Record<string, string>): string {
     return labels[value] ?? value;
 }
 

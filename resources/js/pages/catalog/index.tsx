@@ -1,4 +1,4 @@
-import { Head } from "@inertiajs/react";
+import { Head, usePage } from "@inertiajs/react";
 import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Pagination, type PageMeta } from "@/components/ui/pagination";
@@ -6,6 +6,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { TableFrame } from "@/components/ui/table-frame";
 import { AppLayout } from "@/layouts/app-layout";
 import { labelOf } from "@/lib/labels";
+import type { SharedProps } from "@/types";
 
 interface PackageRow {
     uuid: string;
@@ -23,6 +24,8 @@ export default function CatalogIndex({
     packages: { data: PackageRow[]; meta: PageMeta };
     install_available: false;
 }) {
+    const labels = usePage<SharedProps>().props.enum_labels;
+
     return (
         <AppLayout title="نرم‌افزارها" description="تعریف‌های نسخه‌دار کاتالوگ؛ نمایش در این صفحه به‌معنی پشتیبانی یا امکان نصب نیست.">
             <Head title="نرم‌افزارها" />
@@ -50,7 +53,7 @@ export default function CatalogIndex({
                                         {item.key}
                                     </div>
                                 </td>
-                                <td className="px-3 py-2">{labelOf(item.service_kind)}</td>
+                                <td className="px-3 py-2">{labelOf(item.service_kind, labels)}</td>
                                 <td className="px-3 py-2 font-mono" dir="ltr">
                                     {item.version_count}
                                 </td>

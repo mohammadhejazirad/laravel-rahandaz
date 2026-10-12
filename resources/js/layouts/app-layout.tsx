@@ -24,14 +24,8 @@ import { AppLogo } from "@/components/branding/app-logo";
 import { FlashToaster } from "@/components/flash-toaster";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Alert } from "@/components/ui/alert";
+import { labelOf } from "@/lib/labels";
 import type { SharedProps } from "@/types";
-
-const roleLabels: Record<string, string> = {
-    owner: "مالک",
-    admin: "مدیر",
-    operator: "اپراتور",
-    viewer: "مشاهده‌گر",
-};
 
 interface NavLink {
     href: string;
@@ -270,7 +264,8 @@ function Sidebar({
     onNavigate?: () => void;
     hideBrand?: boolean;
 }) {
-    const user = usePage<SharedProps>().props.auth.user;
+    const { auth, enum_labels: labels } = usePage<SharedProps>().props;
+    const user = auth.user;
 
     return (
         <aside className={`border-e border-line bg-surface/95 ${className}`}>
@@ -279,7 +274,7 @@ function Sidebar({
                 {user ? (
                     <div className="rounded-xl border border-line bg-surface-muted/70 px-3 py-2.5">
                         <p className="truncate text-sm font-semibold text-ink">{user.display_name || user.username}</p>
-                        <p className="text-xs text-muted">{roleLabels[user.role ?? ""] ?? "بدون نقش"}</p>
+                        <p className="text-xs text-muted">{user.role ? labelOf(user.role, labels) : "بدون نقش"}</p>
                     </div>
                 ) : null}
             </div>

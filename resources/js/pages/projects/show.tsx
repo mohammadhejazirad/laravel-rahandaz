@@ -33,7 +33,8 @@ export default function ProjectShow({
     environments: EnvironmentRow[];
     deploy_available: false;
 }) {
-    const base = usePage<SharedProps>().props.app.base_path;
+    const { app, enum_labels: labels } = usePage<SharedProps>().props;
+    const base = app.base_path;
 
     return (
         <AppLayout title={project.name} description="مشخصات ثبت‌شده پروژه و محیط‌های مستقل آن؛ استقرار هنوز از این صفحه آغاز نمی‌شود." eyebrow="پروژه‌ها">
@@ -56,9 +57,7 @@ export default function ProjectShow({
                 <dl className="mt-4 grid gap-3 sm:grid-cols-2">
                     <div>
                         <dt className="text-sm text-muted">نوع اعلام‌شده</dt>
-                        <dd className="font-mono" dir="ltr">
-                            {labelOf(project.declared_type)}
-                        </dd>
+                        <dd dir="auto">{labelOf(project.declared_type, labels)}</dd>
                     </div>
                     <div>
                         <dt className="text-sm text-muted">شاخه پیش‌فرض</dt>

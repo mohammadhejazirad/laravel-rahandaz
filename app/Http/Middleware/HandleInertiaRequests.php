@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use App\Models\PanelNotification;
+use App\Support\EnumLabelCatalog;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -62,6 +63,7 @@ class HandleInertiaRequests extends Middleware
                     ->whereNull('read_at')
                     ->count(),
             ],
+            'enum_labels' => EnumLabelCatalog::all(),
         ];
     }
 }
