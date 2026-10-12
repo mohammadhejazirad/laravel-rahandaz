@@ -10,7 +10,7 @@
 | Sonner | حذف شد | دو کتابخانه Toast موازی نگه داشته نمی‌شود |
 | clsx، tailwind-merge، CVA | مانده | variant دکمه و کلاس شرطی |
 | Inertia React 3.9.1 و React 19.3.0 | مانده | معماری پنل |
-| shadcn/ui گزینشی + Radix | نصب شد | پیکربندی `components.json` با RTL فعال است. فقط Sheet، Dropdown Menu، Tooltip، Avatar، Separator، Breadcrumb و Slot موردنیاز فعلی اضافه شدند؛ Toast همچنان React-Toastify است و Select/Dialog فرم تا نیاز واقعی اضافه نمی‌شود |
+| shadcn/ui گزینشی + Radix | نصب شد | پیکربندی `components.json` با RTL فعال است. فقط Sheet، Modal، Dropdown Menu، Tooltip، Avatar، Separator، Breadcrumb و Slot موردنیاز فعلی اضافه شدند؛ Toast همچنان React-Toastify است و Select تا نیاز واقعی اضافه نمی‌شود |
 | Recharts | نصب نشد | سری زمانی تجمیعی از backend نمی‌آید. نمودار ساختگی ممنوع است. شمارش نمونه متریک متنی است |
 | react-multi-date-picker | نصب نشد | فرم زمان‌بندی وجود ندارد. بسته سنگین است و تقویم را در همه صفحه‌ها می‌کشید. نمایش فقط-خواندنی با `Intl` تقویم `persian` انجام شد |
 | date-fns-jalali | نصب نشد | `Intl` در Node 22 و مرورگر همین ماشین تقویم فارسی و timezone را دارد. آزمون مرز ۱۴۰۳ بدون بسته اضافه پاس شد. اگر بعداً ورودی شمسی لازم شد، این گزینه دوباره سنجیده می‌شود |
@@ -19,6 +19,6 @@
 
 Primitiveهای Radix به‌صورت بسته‌های مستقل Avatar، Dialog، Dropdown Menu، Separator، Slot و Tooltip نصب شده‌اند؛ بسته تجمیعی `radix-ui` نصب نیست. این انتخاب سطح وابستگی را به قابلیت‌های واقعاً مصرف‌شده محدود می‌کند. فایل‌های shadcn با tokenهای معنایی راه‌انداز تطبیق داده شده‌اند و default theme شادسی‌ان جایگزین هویت محصول نشده است.
 
-اثر build فعلی، بدون Recharts و date picker: chunk مشترک اصلی `373.83 KiB` خام و `116.67 KiB` gzip، AppLayout برابر `23.81 KiB` خام و `8.27 KiB` gzip، chunk مشترک پوسته/Dropdown برابر `65.67 KiB` خام و `23.10 KiB` gzip، فونت `111.15 KiB`، و CSS `66.42 KiB` خام و `12.01 KiB` gzip است. CSS پایه React-Toastify در خروجی CSS قرار دارد و entrypoint `react-toastify/unstyled` از تزریق دوباره style در runtime جلوگیری می‌کند. صفحات با `import.meta.glob` بدون `eager` جدا شده‌اند.
+اثر build فعلی، بدون Recharts و date picker: chunk مشترک اصلی `373.88 KiB` خام و `116.68 KiB` gzip، AppLayout برابر `26.81 KiB` خام و `8.94 KiB` gzip، chunk مشترک پوسته/Dropdown برابر `65.67 KiB` خام و `23.10 KiB` gzip، فونت `111.15 KiB`، و CSS `68.12 KiB` خام و `12.29 KiB` gzip است. CSS پایه React-Toastify در خروجی CSS قرار دارد و entrypoint `react-toastify/unstyled` از تزریق دوباره style در runtime جلوگیری می‌کند. صفحات با `import.meta.glob` بدون `eager` جدا شده‌اند.
 
 جایگزین ردشده برای تاریخ نمایشی، الگوریتم دست‌نویس جلالی بود. مشخصات آن را ممنوع کرده است.

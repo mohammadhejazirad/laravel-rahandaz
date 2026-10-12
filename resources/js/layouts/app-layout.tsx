@@ -44,6 +44,15 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+    Modal,
+    ModalClose,
+    ModalContent,
+    ModalDescription,
+    ModalFooter,
+    ModalHeader,
+    ModalTitle,
+} from "@/components/ui/modal";
 import { cn } from "@/lib/cn";
 import { labelOf } from "@/lib/labels";
 import { notify } from "@/lib/notify";
@@ -330,69 +339,131 @@ export function AppLayout({
 
 function UserMenu({ user, base }: { user: AuthUser; base: string }) {
     const displayName = user.display_name || user.username;
+    const [logoutOpen, setLogoutOpen] = useState(false);
+    const [loggingOut, setLoggingOut] = useState(false);
+
+    function logout() {
+        setLoggingOut(true);
+        router.post(
+            `${base}/logout`,
+            {},
+            {
+                onSuccess: () => setLogoutOpen(false),
+                onError: () => notify.error("خروج از حساب انجام نشد."),
+                onFinish: () => setLoggingOut(false),
+            },
+        );
+    }
 
     return (
-        <DropdownMenu dir="rtl">
-            <DropdownMenuTrigger asChild>
-                <button
-                    type="button"
-                    className="flex h-11 max-w-48 items-center gap-2 rounded-xl border border-line bg-surface px-1.5 pe-2.5 text-start shadow-sm hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-                    aria-label="باز کردن منوی حساب"
-                >
-                    <Avatar>
-                        <AvatarFallback>{initialOf(displayName)}</AvatarFallback>
-                    </Avatar>
-                    <span className="hidden min-w-0 sm:block">
-                        <span className="block truncate text-xs font-semibold text-ink">
+        <>
+            <DropdownMenu dir="rtl">
+                <DropdownMenuTrigger asChild>
+                    <button
+                        type="button"
+                        className="flex h-11 max-w-48 items-center gap-2 rounded-xl border border-line bg-surface px-1.5 pe-2.5 text-start shadow-sm hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                        aria-label="باز کردن منوی حساب"
+                    >
+                        <Avatar>
+                            <AvatarFallback>{initialOf(displayName)}</AvatarFallback>
+                        </Avatar>
+                        <span className="hidden min-w-0 sm:block">
+                            <span className="block truncate text-xs font-semibold text-ink">
+                                {displayName}
+                            </span>
+                            <span className="block truncate text-[11px] text-muted">
+                                {user.username}
+                            </span>
+                        </span>
+                        <ChevronDown
+                            className="hidden size-3.5 text-muted sm:block"
+                            aria-hidden="true"
+                        />
+                    </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>
+                        <span className="block truncate text-sm font-semibold text-ink">
                             {displayName}
                         </span>
-                        <span className="block truncate text-[11px] text-muted">
+                        <span
+                            className="mt-0.5 block font-mono text-[11px] font-normal text-muted"
+                            dir="ltr"
+                        >
                             {user.username}
                         </span>
-                    </span>
-                    <ChevronDown
-                        className="hidden size-3.5 text-muted sm:block"
-                        aria-hidden="true"
-                    />
-                </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <DropdownMenuLabel>
-                    <span className="block truncate text-sm font-semibold text-ink">
-                        {displayName}
-                    </span>
-                    <span className="mt-0.5 block font-mono text-[11px] font-normal text-muted" dir="ltr">
-                        {user.username}
-                    </span>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                    <DropdownMenuItem asChild>
-                        <Link href={`${base}/settings/profile`}>
-                            <Settings aria-hidden="true" />
-                            تنظیمات حساب
-                        </Link>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                        <DropdownMenuItem asChild>
+                            <Link href={`${base}/settings/profile`}>
+                                <Settings aria-hidden="true" />
+                                تنظیمات حساب
+                            </Link>
+                        </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                        variant="destructive"
+                        onSelect={() => setLogoutOpen(true)}
+                    >
+                        <LogOut aria-hidden="true" />
+                        خروج از حساب
                     </DropdownMenuItem>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                    variant="destructive"
-                    onSelect={() =>
-                        router.post(
-                            `${base}/logout`,
-                            {},
-                            {
-                                onError: () =>
-                                    notify.error("خروج از حساب انجام نشد."),
-                            },
-                        )
+                </DropdownMenuContent>
+            </DropdownMenu>
+            <Modal
+                open={logoutOpen}
+                onOpenChange={(open) => {
+                    if (!loggingOut) {
+                        setLogoutOpen(open);
                     }
+                }}
+            >
+                <ModalContent
+                    showCloseButton={false}
+                    onEscapeKeyDown={(event) => {
+                        if (loggingOut) {
+                            event.preventDefault();
+                        }
+                    }}
+                    onPointerDownOutside={(event) => {
+                        if (loggingOut) {
+                            event.preventDefault();
+                        }
+                    }}
                 >
-                    <LogOut aria-hidden="true" />
-                    خروج از حساب
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
+                    <ModalHeader className="pe-0">
+                        <span
+                            className="mb-3 grid size-12 place-items-center rounded-2xl bg-danger-soft text-danger"
+                            aria-hidden="true"
+                        >
+                            <LogOut className="size-5" />
+                        </span>
+                        <ModalTitle>از حساب خارج می‌شوید؟</ModalTitle>
+                        <ModalDescription>
+                            نشست فعلی بسته می‌شود و برای ورود دوباره باید نام
+                            کاربری و گذرواژه خود را وارد کنید.
+                        </ModalDescription>
+                    </ModalHeader>
+                    <ModalFooter>
+                        <ModalClose asChild>
+                            <Button variant="secondary" disabled={loggingOut}>
+                                خیر، بمان
+                            </Button>
+                        </ModalClose>
+                        <Button
+                            variant="danger"
+                            loading={loggingOut}
+                            loadingLabel="در حال خروج"
+                            onClick={logout}
+                        >
+                            بله، خارج شو
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+        </>
     );
 }
 

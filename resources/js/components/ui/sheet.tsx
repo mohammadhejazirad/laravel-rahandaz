@@ -52,6 +52,7 @@ function SheetContent({
                     className,
                 )}
                 {...props}
+                aria-modal="true"
             >
                 {children}
                 {showCloseButton ? (

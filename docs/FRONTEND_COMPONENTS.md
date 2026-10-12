@@ -16,6 +16,7 @@
 | TableFrame | `resources/js/components/ui/table-frame.tsx` | جدول با اسکرول افقی، label و ناحیه قابل فوکوس | — | در استفاده |
 | Pagination | `resources/js/components/ui/pagination.tsx` | قبلی/بعدی سمت سرور و شمار کل | Inertia Link | در استفاده |
 | Sheet | `resources/js/components/ui/sheet.tsx` | منوی موبایل راست با focus trap، Escape، overlay، scroll lock و بازگردانی فوکوس | Radix Dialog | در استفاده |
+| Modal | `resources/js/components/ui/modal.tsx` | پنجره عمومی controlled/uncontrolled با overlay، عنوان، توضیح، footer و close؛ تأیید خروج اولین مصرف | Radix Dialog | در استفاده |
 | DropdownMenu | `resources/js/components/ui/dropdown-menu.tsx` | منوی حساب و خروج در Header | Radix Dropdown Menu | در استفاده |
 | Tooltip | `resources/js/components/ui/tooltip.tsx` | توضیح کنترل آیکونی تغییر پوسته | Radix Tooltip | در استفاده |
 | Avatar | `resources/js/components/ui/avatar.tsx` | شناسه بصری کاربر در Header، Sidebar و تنظیمات | Radix Avatar | در استفاده |
@@ -24,7 +25,7 @@
 | PersianDate | `resources/js/components/dates/persian-date.tsx` | نمایش جلالی و tooltip از ISO | Intl | در استفاده |
 | ThemeToggle | `resources/js/components/theme-toggle.tsx` | یک دکمه با منوی سه‌حالته روشن / تیره / سیستم، نمایش انتخاب فعلی، ذخیره و rollback | Button، DropdownMenu، Tooltip، Lucide | در استفاده |
 | FlashToaster | `resources/js/components/flash-toaster.tsx` | Toast سراسری flash و همگام‌سازی پوسته | React-Toastify، notify | در استفاده |
-| AppLayout | `resources/js/layouts/app-layout.tsx` | سایدبار گروه‌بندی‌شده، Sheet موبایل، منوی حساب، skip link، عنوان و زنگ اعلان | Sheet، DropdownMenu، Avatar، Lucide | در استفاده |
+| AppLayout | `resources/js/layouts/app-layout.tsx` | سایدبار گروه‌بندی‌شده، Sheet موبایل، منوی حساب، تأیید خروج، skip link، عنوان و زنگ اعلان | Sheet، Modal، DropdownMenu، Avatar، Lucide | در استفاده |
 | AuthLayout | `resources/js/layouts/auth-layout.tsx` | پوسته responsive ورود و گذرواژه | AppLogo، Lucide | در استفاده |
 | notify | `resources/js/lib/notify.ts` | default / info / warning / success / error / queued / loading / update / dismiss / formErrors | React-Toastify | در استفاده |
 
@@ -36,4 +37,4 @@ Props صفحه‌بندی: `current_page`، `last_page`، `per_page`، `total`،
 
 `AppLogo` پراپ‌های `variant`، `theme`، `size`، `decorative`، `ariaLabel` و `showTagline` را می‌پذیرد. حالت `auto` تغییر `data-theme` ریشه را مشاهده می‌کند تا انتخاب دستی پوسته با رنگ نشان ناسازگار نشود.
 
-نمونه‌هایی که ساخته نشدند، چون صفحه یا primitive واقعی‌شان هنوز نیست: Dialog عمومی، Tabs، Combobox، SecretField، ConfirmDialog، CopyButton، نمودار Recharts، DatePicker، Skeleton مستقل و فرم React Hook Form.
+نمونه‌هایی که ساخته نشدند، چون صفحه یا primitive واقعی‌شان هنوز نیست: Tabs، Combobox، SecretField، ConfirmDialog تخصصی عملیات میزبان، CopyButton، نمودار Recharts، DatePicker، Skeleton مستقل و فرم React Hook Form.
