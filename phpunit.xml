@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         colors="true"
+>
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory>tests/Feature</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>app</directory>
+        </include>
+    </source>
+    <php>
+        <env name="APP_ENV" value="testing" force="true"/>
+        <env name="APP_KEY" value="base64:YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=" force="true"/>
+        <env name="APP_MAINTENANCE_DRIVER" value="file" force="true"/>
+        <env name="BCRYPT_ROUNDS" value="4" force="true"/>
+        <env name="BROADCAST_CONNECTION" value="null" force="true"/>
+        <env name="CACHE_STORE" value="array" force="true"/>
+        <env name="DB_CONNECTION" value="pgsql" force="true"/>
+        <env name="DB_HOST" value="192.0.2.1" force="true"/>
+        <env name="DB_PORT" value="5432" force="true"/>
+        <env name="DB_DATABASE" value="rahandaz_test" force="true"/>
+        <env name="DB_USERNAME" value="rahandaz" force="true"/>
+        <env name="DB_PASSWORD" value="replace-local-only" force="true"/>
+        <env name="DB_URL" value="" force="true"/>
+        <env name="MAIL_MAILER" value="array" force="true"/>
+        <env name="QUEUE_CONNECTION" value="sync" force="true"/>
+        <env name="SESSION_DRIVER" value="database" force="true"/>
+        <env name="SESSION_PATH" value="/rahandaz" force="true"/>
+        <env name="RAHANDAZ_EXECUTION_MODE" value="disabled" force="true"/>
+        <env name="RAHANDAZ_BASE_PATH" value="/rahandaz" force="true"/>
+        <env name="RAHANDAZ_MASTER_KEY_FILE" value="/tmp/rahandaz-phpunit/master.key" force="true"/>
+        <env name="RAHANDAZ_CANARY_FILE" value="/tmp/rahandaz-phpunit/canary.json" force="true"/>
+        <env name="REDIS_QUEUE_HOST" value="192.0.2.1" force="true"/>
+        <env name="REDIS_QUEUE_PORT" value="6379" force="true"/>
+        <env name="REDIS_CACHE_HOST" value="192.0.2.1" force="true"/>
+        <env name="REDIS_CACHE_PORT" value="6380" force="true"/>
+        <env name="PULSE_ENABLED" value="false" force="true"/>
+        <env name="TELESCOPE_ENABLED" value="false" force="true"/>
+        <env name="NIGHTWATCH_ENABLED" value="false" force="true"/>
+    </php>
+</phpunit>

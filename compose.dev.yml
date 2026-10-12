@@ -1,0 +1,72 @@
+# Development dependencies only.
+# The Rahandaz control plane (PHP-FPM, queue workers, Vite) is not run here.
+# Production does not use Docker. Do not add the application to this file.
+
+name: rahandaz-dev
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: rahandaz
+      POSTGRES_PASSWORD: replace-local-only
+      POSTGRES_DB: rahandaz
+    ports:
+      # 127.0.0.1 serves host-native PHP. 192.0.2.1 is lerd0, the only
+      # address the Lerd/Podman PHP container can use to reach the host.
+      - "127.0.0.1:5432:5432"
+      - "192.0.2.1:5432:5432"
+    volumes:
+      - rahandaz-pg:/var/lib/postgresql/data
+      - ./infrastructure/docker/postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rahandaz -d rahandaz"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis-queue:
+    image: redis:7-alpine
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --save
+      - "60"
+      - "1"
+      - --maxmemory
+      - 64mb
+      - --maxmemory-policy
+      - noeviction
+    ports:
+      - "127.0.0.1:6379:6379"
+      - "192.0.2.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis-cache:
+    image: redis:7-alpine
+    command:
+      - redis-server
+      - --save
+      - ""
+      - --appendonly
+      - "no"
+      - --maxmemory
+      - 32mb
+      - --maxmemory-policy
+      - allkeys-lru
+    ports:
+      - "127.0.0.1:6380:6379"
+      - "192.0.2.1:6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  rahandaz-pg:

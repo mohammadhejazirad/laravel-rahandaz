@@ -1,0 +1,71 @@
+# توسعه راه‌انداز — Laravel + Inertia + React/TypeScript
+
+> راهنمای هدف برای مخزن Laravel بعد از مهاجرت. صرف وجود این دستورها به معنی آن نیست که در مخزن فعلی اسکریپت/کد پیاده‌سازی شده باشد؛ نام دقیق Composer/NPM scriptها باید هنگام bootstrap تثبیت شود.
+
+## پیش‌نیازها
+
+- PHP **8.3+** و extensionهای موردنیاز **Laravel 13** مطابق نسخه pin شده؛ برای development ترجیحاً PHP 8.4/8.5 آزموده، Composer و Git.
+- Node.js نسخه LTS سازگار با Vite و React، npm با lockfile. Node فقط در development/CI برای build پنل؛ runtime production کنترل‌پلین به Node وابسته نیست.
+- PostgreSQL برای business data و `JobOutbox`؛ دو Redis مجزا برای queue و cache (یا اتصال به نمونه محلی جدا با ACL/DB و policy آزموده در development).
+- Docker/Compose فقط **اختیاری** برای dependencyهای development؛ **هیچ web/worker/frontend راه‌انداز داخل Compose رسمی نیست**. Production نیز Docker-based نیست.
+- برای mutation APT/Nginx/systemd تنها VM disposable مجزا؛ روی لپ‌تاپ/سرور واقعی development به‌صورت پیش‌فرض `RAHANDAZ_EXECUTION_MODE=disabled`.
+
+## شروع سریع پس از ایجاد مخزن Laravel
+
+```bash
+cp .env.example .env
+composer install
+npm ci
+# یکی از دو روش: PostgreSQL و Redisهای محلی از قبل روشن باشند
+# یا Compose صرفاً dependencyهای db/redis-queue/redis-cache را بالا بیاورد:
+# docker compose -f compose.dev.yml up -d
+php artisan key:generate
+# ساخت master key محلی مستقل از APP_KEY مطابق command طراحی‌شده پروژه:
+# php artisan rahandaz:keys:init --local-only
+# قبل از migrate، config/database.php و config/queue.php را مطابق .env ست کنید.
+php artisan migrate
+# تنها پس از پیاده‌سازی command مربوطه:
+# php artisan rahandaz:bootstrap-owner --credentials-file=./var/initial-owner.txt
+npm run dev
+php artisan serve --host=127.0.0.1 --port=8000
+```
+
+`rahandaz:keys:init` و `rahandaz:bootstrap-owner` نام قراردادی **برای پیاده‌سازی** هستند و نباید قبل از ساخته‌شدن commandها اجراشده فرض شوند. `APP_KEY` کلید master عملیاتی راه‌انداز نیست. داده production با کلید local باز نشود.
+
+## Worker و scheduler — terminalهای جدا
+
+```bash
+php artisan queue:work redis --queue=control --sleep=2 --tries=3 --timeout=60
+php artisan queue:work redis --queue=provision,deploy,backup --sleep=2 --tries=3 --timeout=90
+php artisan schedule:run
+```
+
+در `config/queue.php`، `retry_after` باید از timeout worker بلندتر باشد؛ در هر task، timeout واقعی OS process جدا با `ExecutionLease` و reconciler مدیریت می‌شود. این دستورهای نمونه بدون آماده‌بودن integration logic، نصب/استقرار واقعی انجام نمی‌دهند. در production این فرایندها با systemd workerها و scheduler timer تعریف می‌شوند. Horizon فقط پس از تصمیم profile/benchmark و بدون تکرار مصرف همان queue فعال شود.
+
+## Frontend و تجربه فارسی
+
+- صفحات در `resources/js/pages/*.tsx` یا فولدر متناظر، `resources/js/layouts`, `resources/js/components`؛ بدون Django Templates، Alpine یا SPA router دوم.
+- Laravel route + Inertia page + typed page props؛ shared props داده حساس را افشا نکنند. FormRequest/Policy سمت سرور مبنای authorization/validation هستند.
+- Tailwind CSS 4 با CSS tokens، Vazirmatn محلی، Lucide React، shadcn/ui/Radix در حد componentهای موردنیاز، Sonner برای اعلان Toast. از CDN و بارگذاری تمام chart/UI dependencies روی همه صفحه‌ها خودداری شود.
+- Toast هنگام ارسال Job فقط «ثبت شد» می‌گوید؛ موفقیت نصب/استقرار تنها بعد از `Job.status=succeeded` تاییدشده از backend نمایش داده می‌شود. برای log/status، incremental polling با backoff در tab مخفی.
+- برای calendar جلالی، کتابخانه نسخه‌دار معتبر و تست leap-year/timezone؛ همه timestamps PostgreSQL/JSON همچنان UTC ISO 8601 هستند.
+
+## Build / Tests
+
+```bash
+npm run build
+npx tsc --noEmit
+php artisan test
+# پس از اضافه‌کردن ابزارهای مربوط به composer.json:
+# vendor/bin/pint --test
+# vendor/bin/phpstan analyse
+# npm run lint
+```
+
+Test suite شامل PostgreSQL واقعی برای migrations/index/locking/outbox، Redis جدا برای Queue integration، mock/fake local executor برای unit/feature، Playwright برای E2E و VM آزمایشی Ubuntu 22.04/24.04/26.04 برای تغییرات Nginx/systemd/SSH/UFW و installer است. **SQLite جایگزین آزمون invariantهای PostgreSQL نمی‌شود.** قرارداد HTTPS، reverse proxy و base path `/rahandaz/` باید در VM پشت Nginx + PHP-FPM جدا از `artisan serve` آزمایش شود.
+
+## Release و محیط production
+
+پکیج نصب باید code/vendor و assets ساخته‌شده Vite را به شکل **artifact تاییدشده** همراه داشته باشد؛ در production برای UI به `npm install` نیازی نیست. `APP_DEBUG=false`، Nginx/PHP-FPM و PHP/extension pin‌شده، Redis broker/cache مجزا، Laravel scheduler/queue workers با systemd، credentialهای root-owned خارج repository، backup قبل از migration و command `doctor` الزامی‌اند. installer نباید site یا سرویس موجود را بی‌رضایت تغییر دهد.
+
+**مرجع اصلی:** `docs/PROJECT_SPEC.md` فصل‌های 3، 4، 6، 7، 13، 22 و 23.

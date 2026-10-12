@@ -1,0 +1,60 @@
+@import 'tailwindcss';
+
+@source '../js/**/*.{ts,tsx}';
+@source '../views/**/*.blade.php';
+
+@font-face {
+    font-family: Vazirmatn;
+    src: url('../fonts/vazirmatn/Vazirmatn-Variable.woff2') format('woff2');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@theme {
+    --font-sans: Vazirmatn, ui-sans-serif, system-ui, sans-serif;
+    --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+    --color-canvas: #f8fafc;
+    --color-surface: #ffffff;
+    --color-surface-muted: #f1f5f9;
+    --color-line: #e2e8f0;
+    --color-ink: #0f172a;
+    --color-muted: #475569;
+    --color-accent: #4f46e5;
+    --color-accent-foreground: #ffffff;
+    --color-success: #047857;
+    --color-warning: #92400e;
+    --color-danger: #b91c1c;
+}
+
+@layer base {
+    [data-theme='dark'] {
+        --color-canvas: #0b1120;
+        --color-surface: #111827;
+        --color-surface-muted: #1e293b;
+        --color-line: #334155;
+        --color-ink: #f8fafc;
+        --color-muted: #cbd5e1;
+        --color-accent: #818cf8;
+        --color-accent-foreground: #1e1b4b;
+        --color-success: #34d399;
+        --color-warning: #fbbf24;
+        --color-danger: #f87171;
+    }
+
+    html {
+        background: var(--color-canvas);
+    }
+
+    body {
+        background: var(--color-canvas);
+        color: var(--color-ink);
+        font-size: 15px;
+        line-height: 1.7;
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 2px;
+    }
+}
