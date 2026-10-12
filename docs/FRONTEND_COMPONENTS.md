@@ -23,6 +23,7 @@
 | Separator | `resources/js/components/ui/separator.tsx` | جداسازی معنایی فرم ورود | Radix Separator | در استفاده |
 | Breadcrumb | `resources/js/components/ui/breadcrumb.tsx` | مسیر بازگشت در جزئیات سرور، پروژه و عملیات | Radix Slot، Lucide | در استفاده |
 | PersianDate | `resources/js/components/dates/persian-date.tsx` | نمایش جلالی و tooltip از ISO | Intl | در استفاده |
+| ArchiveUpload | `resources/js/components/projects/archive-upload.tsx` | انتخاب environment، file picker و drag-and-drop ZIP، progress، خطای فرم و توضیح وضعیت اجرای میزبان | Inertia useForm، Button، Card، Alert، Badge، Lucide، notify | در استفاده |
 | ThemeToggle | `resources/js/components/theme-toggle.tsx` | یک دکمه با منوی سه‌حالته روشن / تیره / سیستم، نمایش انتخاب فعلی، ذخیره و rollback | Button، DropdownMenu، Tooltip، Lucide | در استفاده |
 | FlashToaster | `resources/js/components/flash-toaster.tsx` | Toast سراسری flash و همگام‌سازی پوسته | React-Toastify، notify | در استفاده |
 | AppLayout | `resources/js/layouts/app-layout.tsx` | سایدبار گروه‌بندی‌شده، Sheet موبایل، منوی حساب، تأیید خروج، skip link، عنوان و زنگ اعلان | Sheet، Modal، DropdownMenu، Avatar، Lucide | در استفاده |
@@ -36,5 +37,7 @@ Props صفحه‌بندی: `current_page`، `last_page`، `per_page`، `total`،
 `AppLayout` علاوه بر `title`، متن اختیاری `description` و `eyebrow` می‌گیرد. سایدبار ثابت از عرض `lg` (۱۰۲۴px) و چسبیده به لبه فیزیکی راست فعال می‌شود تا در ۷۶۸px محتوا فشرده نشود. زیر `lg`، دکمه همبرگری Sheet را از سمت راست باز می‌کند. لینک Desktop و Mobile از یک `Sidebar` می‌آیند.
 
 `AppLogo` پراپ‌های `variant`، `theme`، `size`، `decorative`، `ariaLabel` و `showTagline` را می‌پذیرد. حالت `auto` تغییر `data-theme` ریشه را مشاهده می‌کند تا انتخاب دستی پوسته با رنگ نشان ناسازگار نشود.
+
+`ArchiveUpload` از File API و drag/drop بومی مرورگر استفاده می‌کند و بسته upload جدا ندارد. validation مرورگر فقط UX است؛ FormRequest و `ArchiveInspector` مرجع امنیت‌اند.
 
 نمونه‌هایی که ساخته نشدند، چون صفحه یا primitive واقعی‌شان هنوز نیست: Tabs، Combobox، SecretField، ConfirmDialog تخصصی عملیات میزبان، CopyButton، نمودار Recharts، DatePicker، Skeleton مستقل و فرم React Hook Form.

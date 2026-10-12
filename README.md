@@ -97,6 +97,7 @@
 | قابلیت | وضعیت | امروز |
 | --- | --- | --- |
 | فهرست پروژه و برگه محیط‌ها | آماده | ساخت پروژه از رابط نیست |
+| آپلود ZIP با انتخاب فایل یا drag-and-drop | آماده | بررسی امنیتی، ذخیره خصوصی، SHA-256، deployment/job/outbox/audit واقعی؛ extraction و build هنوز اجرا نمی‌شود |
 | GitHub، GitLab و GitLab خودمیزبان | برنامه‌ریزی‌شده | جدول‌ها و بررسی امضای وب‌هوک در کد هست. کنترلر HTTP وب‌هوک نیست |
 | انتخاب مخزن و شاخه، deploy key، استقرار خودکار | برنامه‌ریزی‌شده | |
 | دامنه، Nginx، TLS و تمدید گواهی | برنامه‌ریزی‌شده | اسکیما هست. UI و اعمال فایل نیست |
@@ -194,7 +195,7 @@ Helper ممتاز در طرح، یک برنامه root-owned با اسکیمای
 
 این مسیر برای کارکردن روی خود مخزن است. Compose فقط PostgreSQL و دو Redis را بالا می‌آورد و پنل را داخل Docker اجرا نمی‌کند.
 
-پیش‌نیاز: PHP 8.3 یا جدیدتر با `pdo_pgsql`، `redis` و `sodium`، Composer، Node.js سازگار با Vite 8، npm، و Docker فقط اگر پایگاه را از Compose می‌خواهید. PHP بدون درایور PostgreSQL به پایگاه وصل نمی‌شود.
+پیش‌نیاز: PHP 8.3 یا جدیدتر با `pdo_pgsql`، `redis`، `sodium`، `zip` و `fileinfo`، Composer، Node.js سازگار با Vite 8، npm، و Docker فقط اگر پایگاه را از Compose می‌خواهید. PHP بدون درایور PostgreSQL به پایگاه وصل نمی‌شود و بدون `ext-zip` upload پروژه بررسی نمی‌شود.
 
 ```bash
 docker compose -f compose.dev.yml up -d
@@ -235,7 +236,9 @@ php artisan serve --host=127.0.0.1 --port=8000
 <a id="deployment"></a>
 ## استقرار پروژه‌ها
 
-این بخش طرح [.docs/PROJECT_SPEC.md](.docs/PROJECT_SPEC.md) است. runner فعلی deployment را موفق نمی‌کند و وب‌هوک HTTP وصل نیست.
+این بخش ترکیبی از قابلیت آماده و طرح [.docs/PROJECT_SPEC.md](.docs/PROJECT_SPEC.md) است. runner فعلی deployment را موفق نمی‌کند و وب‌هوک HTTP وصل نیست.
+
+برای پروژه‌ای که از قبل environment دارد، صفحه جزئیات اکنون فایل ZIP را با file picker یا drag-and-drop می‌پذیرد. فایل در disk خصوصی ذخیره، با SHA-256 deduplicate و به deployment دستی و `operation_jobs` متصل می‌شود. ZIP در درخواست HTTP extract یا build نمی‌شود و پیام UI فقط ثبت workflow را تأیید می‌کند. کنترل‌های مسیر، symlink، entry رمز‌شده، سقف حجم/تعداد و compression bomb در [docs/PROJECT_ARCHIVE_UPLOADS.md](docs/PROJECT_ARCHIVE_UPLOADS.md) مستند است.
 
 سناریوی هدف: یک مخزن Laravel با شاخه‌های `main` و `beta` روی همین سرور، با دو دامنه جدا مثل `example.com` و `beta.example.com`. هر environment شاخه، runtime، متغیر محیط، دیتابیس، دامنه، release، لاگ و سیاست استقرار خودش را دارد. دامنه و UID یکی نیستند و کد مخزن با هویت وب پنل اجرا نمی‌شود.
 
@@ -246,7 +249,7 @@ php artisan serve --host=127.0.0.1 --port=8000
 <a id="database"></a>
 ## پایگاه داده
 
-PostgreSQL وضعیت پایدار است. گروه‌های اصلی: کاربر و workspace، فراداده میزبان، اتصال Git، پروژه و environment، deployment، job و outbox، فراداده credential، backup، و audit.
+PostgreSQL وضعیت پایدار است. گروه‌های اصلی: کاربر و workspace، فراداده میزبان، اتصال Git، پروژه و environment، آرشیو منبع پروژه، deployment، job و outbox، فراداده credential، backup، و audit.
 
 قرارداد شناسه در کد و migrationهای تازه اعمال شده است، نه فقط هدف بعدی:
 
@@ -395,6 +398,7 @@ backup پایگاه به‌تنهایی credential رمزشده را برنمی�
 | `Refusing to overwrite an existing master key` | کلید قبلاً ساخته شده. فایل را پاک نکنید |
 | `vite: not found` یا `multiplex: not found` | `npm ci` را دوباره اجرا کنید تا `node_modules/.bin` ساخته شود |
 | worker job را موفق نمی‌کند | `RAHANDAZ_EXECUTION_MODE=disabled` است و این رفتار خواستهٔ فعلی است |
+| ZIP پروژه آپلود نمی‌شود | وجود `ext-zip`/`fileinfo`، سقف‌های `RAHANDAZ_ARCHIVE_*` و محدودیت Nginx/PHP upload را بررسی کنید؛ ZIP خطرناک عمداً با خطای فرم رد می‌شود |
 | webhook یا SSL یا دامنه کار نمی‌کند | مسیر HTTP و اعمال Nginx برنامه‌ریزی‌شده‌اند |
 | ورود پنل ۴۰۴ است | مسیر `/rahandaz/login` است، نه `/login` و نه `/` |
 
@@ -417,6 +421,7 @@ php artisan rahandaz:doctor
 | پیشرفت پیاده‌سازی | [docs/IMPLEMENTATION_PROGRESS.md](docs/IMPLEMENTATION_PROGRESS.md) |
 | طرح پایگاه و ERD | [docs/DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md)، [docs/DATABASE_ERD.md](docs/DATABASE_ERD.md) |
 | امنیت داده | [docs/DATABASE_SECURITY.md](docs/DATABASE_SECURITY.md) |
+| آپلود امن ZIP پروژه | [docs/PROJECT_ARCHIVE_UPLOADS.md](docs/PROJECT_ARCHIVE_UPLOADS.md) |
 | وابستگی‌های قفل‌شده | [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md) |
 | تصمیم بسته رابط | [docs/FRONTEND_DEPENDENCIES.md](docs/FRONTEND_DEPENDENCIES.md) |
 | هویت بصری و لوگو | [docs/BRAND_GUIDELINES.md](docs/BRAND_GUIDELINES.md) |

@@ -21,8 +21,9 @@
 | `/mirrors/<software_kind>/` | — | — | — | آماده نیست |
 | `/services/<uuid>/` | — | — | — | آماده نیست |
 | `/projects/` و `/projects/new/` | `GET /rahandaz/projects` | `pages/projects/index.tsx` | App | فهرست واقعی. ساخت پروژه نیست |
-| `/projects/<uuid>/` | `GET /rahandaz/projects/{uuid}` | `pages/projects/show.tsx` | App | مرور و محیط‌ها. `Accept: application/json` همان قرارداد شناسه را JSON می‌دهد |
-| settings پروژه، environment، deployment | — | — | — | آماده نیست |
+| `/projects/<uuid>/` | `GET /rahandaz/projects/{uuid}` | `pages/projects/show.tsx` | App | مرور پروژه/محیط، انتخاب environment، dropzone ZIP و تاریخچه آرشیو/عملیات. `Accept: application/json` همان قرارداد شناسه را JSON می‌دهد |
+| upload منبع ZIP | `POST /rahandaz/projects/{project}/environments/{environment}/source-archives` | `components/projects/archive-upload.tsx` | App | واقعی برای Owner/Admin/Operator؛ private store + inspect + deployment/job/outbox/audit. extraction/build آماده نیست |
+| ساخت پروژه، settings پروژه، صفحه مستقل environment/deployment | — | — | — | آماده نیست |
 | `/jobs/` و `/jobs/<uuid>/` | `GET /rahandaz/jobs` و `/{uuid}` | `pages/jobs/index.tsx` و `show.tsx` | App | وضعیت و لاگ ذخیره‌شده، صفحه‌بندی. لغو و polling نیست |
 | `/domains/`، `/databases/`، `/backups/`، `/monitoring/` | — | — | — | آماده نیست |
 | `/users/` | — | — | — | آماده نیست |
@@ -31,6 +32,6 @@
 | `/settings/profile/` | `GET /rahandaz/settings/profile` | `pages/settings/profile.tsx` | App | نمایش timezone، locale، پوسته. MFA نیست |
 | members، system، route | — | — | — | آماده نیست |
 
-مجوز: عضویت workspace برای صفحه‌های پنل. گزارش فعالیت فقط `owner` و `admin`. اعلان فقط `recipient` همان workspace. شناسه عددی در props این صفحات نیست.
+مجوز: عضویت workspace برای صفحه‌های پنل. upload/deploy پروژه برای `owner`، `admin` و `operator` است و Viewer رد می‌شود. گزارش فعالیت فقط `owner` و `admin`. اعلان فقط `recipient` همان workspace. شناسه عددی و path آرشیو در props این صفحات نیست.
 
-آزمون: `tests/Feature/PanelPagesTest.php`، بخش داشبورد `tests/Feature/PanelHttpTest.php` و asset/metadata برند در `tests/Feature/BrandAssetsTest.php`. smoke تصویری Chrome headless برای ورود و راه‌اندازی واقعی در عرض‌های ۳۶۰، ۷۶۸، ۱۲۸۰ و ۱۴۴۰ و پوسته روشن/تیره، پوسته system و صفحه خطای ۴۰۴ انجام شده است. Playwright/E2E جریان‌های عملیاتی و visual regression همه صفحه‌ها هنوز وجود ندارد.
+آزمون: `tests/Feature/PanelPagesTest.php`، `tests/Feature/ProjectArchiveUploadTest.php`، بخش داشبورد `tests/Feature/PanelHttpTest.php` و asset/metadata برند در `tests/Feature/BrandAssetsTest.php`. smoke تصویری Chrome headless برای ورود و راه‌اندازی واقعی در عرض‌های ۳۶۰، ۷۶۸، ۱۲۸۰ و ۱۴۴۰ و پوسته روشن/تیره، پوسته system و صفحه خطای ۴۰۴ انجام شده است. dropzone تازه build/typecheck شده ولی smoke مرورگر احراز هویت‌شده یا Playwright/E2E و visual regression همه صفحه‌ها هنوز وجود ندارد.

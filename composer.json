@@ -6,6 +6,8 @@
     "keywords": ["rahandaz", "laravel"],
     "require": {
         "php": "^8.3",
+        "ext-fileinfo": "*",
+        "ext-zip": "*",
         "inertiajs/inertia-laravel": "^3.0",
         "laravel/framework": "^13.17",
         "laravel/tinker": "^3.0"

@@ -22,6 +22,8 @@ class DoctorCommand extends Command
         $failed = false;
 
         $failed = ! $this->report('app_key', $this->appKeyIsPresent()) || $failed;
+        $failed = ! $this->report('extension_zip', extension_loaded('zip')) || $failed;
+        $failed = ! $this->report('extension_fileinfo', extension_loaded('fileinfo')) || $failed;
         $failed = ! $this->report('master_key', $this->masterKeyIsUsable()) || $failed;
         $failed = ! $this->report('canary', $canary->verify((string) config('rahandaz.canary_file'))) || $failed;
         $failed = ! $this->report('database', $this->databaseResponds()) || $failed;

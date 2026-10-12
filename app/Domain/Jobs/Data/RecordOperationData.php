@@ -16,5 +16,7 @@ final readonly class RecordOperationData
         public string $idempotencyKey,
         public array $plan,
         public bool $mutatesHost,
+        public ?string $resourceType = null,
+        public int|string|null $resourceId = null,
     ) {}
 }

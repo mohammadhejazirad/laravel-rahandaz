@@ -4,7 +4,7 @@
 
 ## پیش‌نیازها
 
-- PHP **8.3+** و extensionهای موردنیاز **Laravel 13** مطابق نسخه pin شده؛ برای development ترجیحاً PHP 8.4/8.5 آزموده، Composer و Git.
+- PHP **8.3+** و extensionهای موردنیاز **Laravel 13** مطابق نسخه pin شده؛ `ext-zip` و `fileinfo` برای بررسی upload پروژه الزامی‌اند؛ برای development ترجیحاً PHP 8.4/8.5 آزموده، Composer و Git.
 - Node.js نسخه LTS سازگار با Vite و React، npm با lockfile. Node فقط در development/CI برای build پنل؛ runtime production کنترل‌پلین به Node وابسته نیست.
 - PostgreSQL برای business data و `JobOutbox`؛ دو Redis مجزا برای queue و cache (یا اتصال به نمونه محلی جدا با ACL/DB و policy آزموده در development).
 - Docker/Compose فقط **اختیاری** برای dependencyهای development؛ **هیچ web/worker/frontend راه‌انداز داخل Compose رسمی نیست**. Production نیز Docker-based نیست.
@@ -46,6 +46,7 @@ php artisan schedule:run
 - Tailwind CSS 4 با CSS tokens، Vazirmatn محلی، Lucide React، و React-Toastify برای اعلان Toast. shadcn/ui فقط به‌صورت گزینشی مصرف می‌شود؛ Sheet موبایل، Modal عمومی، Dropdown حساب، Tooltip، Avatar، Separator و Breadcrumb فعلی روی Primitiveهای مستقل Radix هستند. پوسته پنل edge-to-edge است و سایدبار دسکتاپ به همان لبه می‌چسبد. از CDN، نصب component بدون مصرف و بارگذاری chart/UI dependencies روی همه صفحه‌ها خودداری شود.
 - هویت بصری فقط از `public/branding` و `resources/js/components/branding` مصرف می‌شود. favicon و PNGهای عمومی از همان Symbol تولید می‌شوند؛ SVG تازه باید بدون script، event handler، `foreignObject` و منبع خارجی باشد.
 - Toast هنگام ارسال Job فقط «ثبت شد» می‌گوید؛ موفقیت نصب/استقرار تنها بعد از `Job.status=succeeded` تاییدشده از backend نمایش داده می‌شود. برای log/status، incremental polling با backoff در tab مخفی.
+- آپلود پروژه از `ArchiveUpload` و FormRequest استفاده می‌کند. فایل ZIP در HTTP فقط inspect و روی disk خصوصی ذخیره می‌شود؛ extraction، framework detection و build در request ممنوع است. تست امنیتی آن در `ArchiveInspectorTest` و `ProjectArchiveUploadTest` اجباری است.
 - برای calendar جلالی، کتابخانه نسخه‌دار معتبر و تست leap-year/timezone؛ همه timestamps PostgreSQL/JSON همچنان UTC ISO 8601 هستند.
 
 ## مدل و migration جدید
@@ -82,6 +83,7 @@ npx tsc --noEmit
 npm run lint
 node --experimental-strip-types --test tests/js/datetime.test.ts
 php artisan test
+php artisan test tests/Unit/ArchiveInspectorTest.php tests/Feature/ProjectArchiveUploadTest.php
 bash infrastructure/operations/tests/run.sh
 # پس از اضافه‌کردن ابزارهای مربوط به composer.json:
 # vendor/bin/pint --test

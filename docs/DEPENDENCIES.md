@@ -1,6 +1,8 @@
 # وابستگی‌های قفل‌شده
 
-نسخه‌ها از `composer.lock` و `package-lock.json` در تاریخ 2026-10-12 خوانده شده‌اند. محدوده `composer.json` و `package.json` منبع نصب بعدی است؛ عدد زیر همان چیزی است که الان نصب شده.
+نسخه‌ها از `composer.lock` و `package-lock.json` در تاریخ 2026-10-13 خوانده شده‌اند. محدوده `composer.json` و `package.json` منبع نصب بعدی است؛ عدد زیر همان چیزی است که الان نصب شده.
+
+قابلیت آپلود منبع پروژه بسته Composer یا npm تازه‌ای اضافه نکرده است؛ PHP extensionهای `zip` و `fileinfo` پیش‌نیاز runtime آن هستند و باید در installer/doctor آینده بررسی شوند.
 
 ## Backend
 
@@ -13,7 +15,7 @@
 | phpunit/phpunit | 12.5.38 | آزمون |
 | laravel/pint | v1.32.1 | سبک PHP |
 
-افزونه‌های PHP که این محیط دارد و کد به آن‌ها تکیه می‌کند: `pdo_pgsql`، `redis`، `sodium`.
+افزونه‌های PHP که این محیط دارد و کد به آن‌ها تکیه می‌کند: `pdo_pgsql`، `redis`، `sodium`، `zip` و `fileinfo`.
 
 ## Frontend
 

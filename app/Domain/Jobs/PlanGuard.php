@@ -25,6 +25,8 @@ final class PlanGuard
             'actor_id' => (string) $data->actorId,
             'mutates_host' => $data->mutatesHost,
             'plan' => $data->plan,
+            'resource_id' => $data->resourceId === null ? null : (string) $data->resourceId,
+            'resource_type' => $data->resourceType,
             'type' => $data->type,
             'workspace_id' => (string) $data->workspaceId,
         ];

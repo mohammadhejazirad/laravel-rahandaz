@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\MirrorController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ProjectArchiveController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ServerController;
 use App\Http\Controllers\SettingsController;
@@ -47,6 +48,9 @@ Route::prefix(trim((string) config('rahandaz.base_path'), '/'))->group(function 
                 Route::get('/mirrors', [MirrorController::class, 'index'])->name('mirrors.index');
                 Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
                 Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
+                Route::post('/projects/{project}/environments/{environment}/source-archives', [ProjectArchiveController::class, 'store'])
+                    ->middleware('throttle:5,1')
+                    ->name('projects.source-archives.store');
                 Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
                 Route::get('/jobs/{job}', [JobController::class, 'show'])->name('jobs.show');
                 Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');

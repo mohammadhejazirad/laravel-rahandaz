@@ -25,6 +25,9 @@ erDiagram
     Workspace ||--o{ Project : contains
     LocalHost ||--o{ Project : places
     Project ||--o{ Environment : splits
+    Project ||--o{ ProjectSourceArchive : uploads
+    User ||--o{ ProjectSourceArchive : submits
+    ProjectSourceArchive ||--o{ Deployment : supplies
     Environment ||--o{ EnvironmentVariable : configures
     Environment ||--o{ Domain : exposes
     Environment ||--o{ Release : builds
@@ -47,7 +50,7 @@ erDiagram
 
 یک workspace در نسخه اول همان میزبان محلی مشترک است و ایزوله‌سازی چندمستاجری مستقل نیست. با این حال credential، Git، پروژه و audit با `workspace_id` و FK مرکب از هم جدا شده‌اند تا policy لاراول scope داشته باشد.
 
-یک Git connection چند repository دارد. یک repository می‌تواند به چند پروژه برسد. هر پروژه چند environment دارد. branch محیط متغیر است و `deployments.commit_sha` بعد از ثبت تغییر نمی‌کند.
+یک Git connection چند repository دارد. یک repository می‌تواند به چند پروژه برسد. هر پروژه چند environment و چند snapshot ZIP immutable دارد. در منبع Git، branch محیط متغیر است و `deployments.commit_sha` بعد از ثبت تغییر نمی‌کند؛ در منبع archive، digest SHA-256 و `source_archive_id` جای commit را می‌گیرند.
 
 `environments.active_release_id` با FK مرکب به release همان environment اشاره می‌کند. فقط یک release با state برابر `active` برای هر environment مجاز است. این FK به‌تنهایی ثابت نمی‌کند که سوئیچ فقط بعد از healthcheck انجام شده است. چک موفقیت deployment health را الزام می‌کند، ولی runner هنوز وضعیت `succeeded` نمی‌نویسد.
 

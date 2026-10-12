@@ -2,6 +2,10 @@
 
 این سند قرارداد پیاده‌سازی فعلی است. هدف محصول در `.docs/PROJECT_SPEC.md` فصل ۱۵ است. صفحه‌ای که اینجا یا در `docs/UI_PAGE_INVENTORY.md` نیامده، ساخته نشده است.
 
+## آپلود فایل پروژه
+
+dropzone فقط یک روش کمکی است و همیشه input فایل keyboard-accessible با label دارد. نام، اندازه، progress، خطای field و environment مقصد پیش از ارسال قابل مشاهده‌اند. حالت drag با border/background token تغییر می‌کند و motion دائمی ندارد. موفقیت upload با موفقیت deployment یکی نیست؛ پیام باید «فایل پذیرفته و عملیات ثبت شد» بگوید. جزئیات امنیتی backend در `docs/PROJECT_ARCHIVE_UPLOADS.md` است.
+
 ## Tokenها
 
 رنگ‌ها در `resources/css/app.css` با `@theme` و override برای `[data-theme='dark']` هستند.

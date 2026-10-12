@@ -25,6 +25,8 @@
 
 Payload صف فقط `operation_job_id` دارد. `PlanGuard` کلیدهای شبیه secret و مقدارهای Bearer یا URL دارای userinfo را پیش از insert در plan، پاسخ setup و متن تنظیم رد می‌کند.
 
+فایل ZIP پروژه blob پایگاه نیست و در disk خصوصی بیرون `public/` قرار دارد. جدول فقط path داخلی، نام نمایشی پالایش‌شده، MIME تشخیص‌داده‌شده، SHA-256 و اندازه‌ها را دارد. این path به Inertia/API فرستاده نمی‌شود. `project_source_archives` با FK مرکب به project همان workspace محدود است و trigger deployment، archive را به project همان environment و digest ثبت‌شده bind می‌کند.
+
 ## شناسه و افشا
 
 `id` عددی در Inertia و JSON عمومی نیست. Route مدل با `uuid` resolve می‌شود. مقدار غیر v7 پیش از مقایسه با ستون `uuid` رد می‌شود تا خطای cast پستگرس تراکنش را نشکند. دانستن `uuid` یک منبع در workspace دیگر مجوز دیدن آن را نمی‌دهد؛ Policy عضویت را جدا بررسی می‌کند. payload صف فقط `operation_job_id` را به‌صورت رشته دهدهی دارد، نه عدد JSON. شناسه GitHub/GitLab در ستون provider جدا ذخیره می‌شود و با `id` یا `uuid` یکی گرفته نمی‌شود.
@@ -45,6 +47,8 @@ Grantها با FK مرکب membership و workspace و trigger `rahandaz_grant_sa
 
 یک environment همزمان فقط یک deployment در وضعیت‌های تغییردهنده دارد. نقض ایندکس جزئی `DeploymentLockConflict` است. lease منقضی دزدیده نمی‌شود و به‌تنهایی دلیل توقف پروسه قبلی نیست. reconciliation هنوز پیاده‌سازی نشده است.
 
+ZIP در HTTP استخراج نمی‌شود. central directory برای Zip Slip، absolute path، backslash، symlink/reparse/special entry، رمزگذاری و بودجه entry/expanded bytes/compression ratio بررسی می‌شود. این کنترل جای sandbox worker آینده یا اسکن malware را نمی‌گیرد؛ ClamAV integration هنوز وجود ندارد.
+
 ## نگهداری و پشتیبان
 
 Audit و رویداد دسترسی credential حذف معمولی ندارند. بکاپ فایل را در پایگاه نمی‌گذارد. مسیر artifact باید زیر `/var/backups/rahandaz/` باشد و `..` نداشته باشد. وضعیت `succeeded` بدون checksum و `retention_until` رد می‌شود. restore وضعیت تایید جدا دارد و job فقط بعد از `approved` مجاز است. job اجرای restore هنوز وجود ندارد.
@@ -61,6 +65,7 @@ Retention متریک و لاگ سیاست هدف است و job پاکسازی ن
 | دو deploy همزمان | ایندکس جزئی | runner هنوز deploy واقعی نمی‌کند |
 | وب‌هوک تکراری یا امضای بد | یکتایی delivery و رد امضا | کنترلر و rate limit HTTP نیست |
 | URL خصوصی GitLab | تابع URL عمومی | DNS rebinding حل نشده |
+| Zip Slip، symlink و compression bomb | inspect قبل از private store، سقف‌های قابل تنظیم، بدون extraction در HTTP | extraction worker، ClamAV و retention هنوز ساخته نشده |
 | راز داخل plan یا پاسخ setup | PlanGuard | همه ورودی‌های آینده باید از همین گارد بگذرند |
 | سوپرنقش یا RLS اشتباه | RLS خاموش است | نقش runtime هنوز حداقل‌سازی نشده است |
 

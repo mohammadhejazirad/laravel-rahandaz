@@ -68,4 +68,9 @@ class Project extends Model
     {
         return $this->hasMany(DeployKey::class);
     }
+
+    public function sourceArchives(): HasMany
+    {
+        return $this->hasMany(ProjectSourceArchive::class);
+    }
 }

@@ -1,5 +1,12 @@
 # گزارش بازنگری اسناد راه‌انداز
 
+## 2026-10-13 — منبع ZIP پروژه
+
+- قرارداد منبع پروژه از Git-only به Git یا ZIP immutable گسترش یافت.
+- سند `docs/PROJECT_ARCHIVE_UPLOADS.md` برای route، storage خصوصی، محدودیت‌ها، threat controls، مدل داده، وضعیت اجرای واقعی و آزمون‌ها اضافه شد.
+- مشخصات، معماری، roadmap، README، توسعه، inventory رابط، dependency frontend، schema/ERD/security پایگاه و اسناد عملیات با این قابلیت همگام شدند.
+- همه اسناد تصریح می‌کنند upload/job عملیاتی است، اما extraction/build/activation هنوز اجرا نمی‌شود و موفقیت deployment اعلام نمی‌گردد.
+
 **تاریخ:** 2026-10-12  
 **مبنای ویرایش:** چهار فایل ارسالی `PROJECT_SPEC(2).md`، `ARCHITECTURE.md`، `DEVELOPMENT.md` و `ROADMAP.md`.  
 **خروجی:** نسخه هدف `PROJECT_SPEC.md` 2.0 و سه سند همسو؛ مستندات طراحی‌اند و هیچ پیاده‌سازی/نصب/CI در سرور واقعی انجام نشده است.

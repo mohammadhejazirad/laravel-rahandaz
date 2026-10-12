@@ -23,4 +23,13 @@ return [
 
     'default_timezone' => env('RAHANDAZ_DEFAULT_TIMEZONE', 'Asia/Tehran'),
 
+    'project_archives' => [
+        'disk' => 'project_archives',
+        'max_upload_bytes' => (int) env('RAHANDAZ_ARCHIVE_MAX_UPLOAD_BYTES', 104857600),
+        'max_entries' => (int) env('RAHANDAZ_ARCHIVE_MAX_ENTRIES', 20000),
+        'max_entry_bytes' => (int) env('RAHANDAZ_ARCHIVE_MAX_ENTRY_BYTES', 268435456),
+        'max_uncompressed_bytes' => (int) env('RAHANDAZ_ARCHIVE_MAX_UNCOMPRESSED_BYTES', 1073741824),
+        'max_compression_ratio' => (float) env('RAHANDAZ_ARCHIVE_MAX_COMPRESSION_RATIO', 100),
+    ],
+
 ];

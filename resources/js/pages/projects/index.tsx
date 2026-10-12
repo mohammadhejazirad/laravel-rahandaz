@@ -33,7 +33,7 @@ export default function ProjectsIndex({
         <AppLayout title="پروژه‌ها" description="پروژه‌های ثبت‌شده در فضای کاری و محیط‌های مستقل آن‌ها.">
             <Head title="پروژه‌ها" />
             {create_available ? null : (
-                <Alert tone="neutral">ساخت پروژه از این صفحه انجام نمی‌شود. فرم استقرار هنوز به عملیات واقعی وصل نیست.</Alert>
+                <Alert tone="neutral">ساخت پروژه از این صفحه هنوز آماده نیست؛ برای پروژه‌های موجود می‌توانید از صفحه جزئیات، فایل ZIP را انتخاب یا drag-and-drop کنید.</Alert>
             )}
             {projects.data.length === 0 ? (
                 <EmptyState title="پروژه‌ای ثبت نشده است">وقتی پروژه‌ای در این فضای کاری ساخته شود، اینجا با شناسه عمومی دیده می‌شود.</EmptyState>

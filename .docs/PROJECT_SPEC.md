@@ -8,8 +8,8 @@
 | نام فارسی                | راه‌انداز                                                    |
 | نام انگلیسی / شناسه فنی  | Rahandaz / `rahandaz`                                        |
 | محل سند                  | `docs/PROJECT_SPEC.md`                                       |
-| نسخه سند                 | 2.0                                                          |
-| تاریخ                    | 2026-10-12                                                   |
+| نسخه سند                 | 2.1                                                          |
+| تاریخ                    | 2026-10-13                                                   |
 | نوع محصول                | پنل فارسی خودمیزبان برای مدیریت سرور، سرویس و استقرار پروژه  |
 | معماری                   | Laravel modular monolith + Laravel Queue + local executor   |
 | سیستم‌عامل مرجع نسخه اول | Ubuntu Server 22.04، 24.04 و 26.04 با systemd                |
@@ -272,7 +272,8 @@ rahandaz/
 | RemoteRepository    | connection، provider id، full_name، clone URL، default branch، visibility، archived، last_seen      |
 | RemoteBranch        | repository، name، immutable head SHA، protected، observed_at؛ unique repository/name                |
 | DeployKey           | project/repository، public key، fingerprint، private credential_ref، provider state، read_only       |
-| Project             | workspace، slug، declared/detected type، repository، branch، credential_ref، deploy policy           |
+| Project             | workspace، slug، declared/detected type، repository اختیاری، branch، credential_ref، deploy policy    |
+| ProjectSourceArchive | workspace، project، uploader، path خصوصی، SHA-256، اندازه فشرده/بازشده، تعداد entry، status          |
 | Environment         | project، name، local_host، mode، paths، runtime، active_release؛ pair یکتا                           |
 | EnvironmentVariable | environment، key، secret_ref یا value، is_secret؛ key یکتا و export امن                             |
 | Deployment          | environment، immutable commit/digest، trigger، state، previous_release، plan hash، job              |
@@ -568,7 +569,7 @@ roleها idempotent باشند؛ اجرای دوم نباید سرویس سال�
 
 انواع هدف نسخه اول: Laravel همراه stackهای Vite/Livewire/Inertia؛ Node.js عمومی، Express، Vue، React، Nuxt، Next، Nest و Adonis؛ Python عمومی، Django، Flask و FastAPI؛ و static site. هر framework در UI یک brand asset/لوگوی محلی نسخه‌دار با مجوز مشخص دارد؛ asset خارجی یا CDN مجاز نیست. Vue/React ممکن است frontend یک backend دیگر باشند، پس detector نتیجه را به‌صورت primary framework + stack/addon ثبت می‌کند. حالت Docker/Compose در استقرار پروژه نسخه اول استفاده نمی‌شود؛ مدیریت package موتور Docker (بدون ارائه container recipe) اختیاری است و با مرز privilege جدا انجام می‌شود. Nuxt/Next نوع‌های مستقل با تشخیص SSR/SSG، build/start command و healthcheck مشخص‌اند.
 
-هر پروژه دارای repository URL، credential محدود repo، branch پیش‌فرض، environments، runtime، domain، secretها، build recipe، healthcheck، deployment policy و release retention است.
+هر پروژه می‌تواند منبع Git یا snapshot آرشیوی ZIP داشته باشد و دارای repository URL اختیاری، credential محدود repo، branch پیش‌فرض، environments، runtime، domain، secretها، build recipe، healthcheck، deployment policy و release retention است.
 
 - environmentهای `production` و `staging` با DB، path، secret و port جدا.
 - credential Git read-only ترجیح داده شود؛ clone URL حاوی token در log نباشد.
@@ -579,8 +580,19 @@ roleها idempotent باشند؛ اجرای دوم نباید سرویس سال�
 - Node از lockfile، Python از lockfile و Laravel از composer.lock استفاده کند؛ رفتار missing lockfile policy صریح دارد.
 - build در کاربر بدون privilege و محیط محدود؛ روی تک‌سرور با سقف CPU/RAM/IO. build خطا نباید process سروینگ را OOM کند.
 - اتصال GitHub/GitLab، sync مخزن/شاخه و webhook استقرار خودکار در دامنه نسخه اول‌اند؛ signature، replay protection، delivery id، rate limit و branch policy الزامی است.
+- آپلود ZIP از file picker و drag-and-drop برای deployment دستی مجاز است؛ فایل باید خارج `public/` ذخیره شود، SHA-256 و metadata محدود در PostgreSQL بماند، و HTTP هرگز archive را extract/build نکند.
+- ZIP باید absolute path، `..`، backslash مبهم، null byte، symlink/reparse/special entry، entry رمز‌شده، تعداد/حجم بازشده بیش از سقف و compression bomb را رد کند. استخراج worker آینده فقط در workspace موقت non-serving و با همان کنترل‌ها انجام می‌شود.
+- موفقیت upload فقط پذیرش منبع و ثبت workflow را می‌گوید؛ موفقیت deployment تنها پس از build، healthcheck و switch واقعی ثبت می‌شود.
 
-### 10.1 اتصال GitHub/GitLab، repository و deploy key
+### 10.1 منبع ZIP و استقرار دستی
+
+- مسیر عمومی upload فقط UUIDv7 پروژه و environment را می‌گیرد و Policy نقش Owner/Admin/Operator و تعلق هر دو منبع به همان workspace را سمت سرور بررسی می‌کند.
+- آرشیو پذیرفته‌شده یک موجودیت immutable با digest یکتا در هر پروژه است. آپلود دوباره همان digest فایل را تکثیر نمی‌کند، ولی می‌تواند deployment تازه بسازد.
+- `deployments.source_type` منبع `git` و `archive` را جدا می‌کند. deployment آرشیوی `source_archive_id` و `artifact_digest` دارد و `commit_sha` ندارد؛ deployment Git همچنان commit ثابت دارد.
+- نام client فقط برای نمایش پالایش‌شده است و در path ذخیره‌سازی مصرف نمی‌شود. path خصوصی از UUIDهای workspace/project/archive ساخته می‌شود و به Inertia/API فرستاده نمی‌شود.
+- محدودیت‌ها، lifecycle و وضعیت پیاده‌سازی در `docs/PROJECT_ARCHIVE_UPLOADS.md` ثبت می‌شود.
+
+### 10.2 اتصال GitHub/GitLab، repository و deploy key
 
 - کاربر GitHub.com یا GitLab.com را با OAuth App نسخه‌دار یا access token محدود متصل می‌کند. scope درخواستی حداقلی، قابل مشاهده و revoke است؛ token فقط در Credential رمزشده و هرگز در query string/log نیست. GitLab self-managed بعد از allowlist host و SSRF policy قابل فعال‌سازی است.
 - sync مخزن‌ها و branchها job فقط‌خواندنی با pagination، timeout، rate-limit handling و cache دارد. UI وضعیت stale را نشان می‌دهد و داده قدیمی را live نمی‌نامد.
@@ -588,20 +600,20 @@ roleها idempotent باشند؛ اجرای دوم نباید سرویس سال�
 - راه‌انداز برای هر repository/environment کلید Ed25519 مستقل تولید می‌کند؛ public key و fingerprint قابل copy است و private key به‌صورت encrypted-at-rest می‌ماند. در GitHub/GitLab کلید حتماً read-only است؛ هم در provider API و هم پس از ثبت verification می‌شود و write-enabled key block می‌شود. OAuth ترجیحاً GitHub App installation flow با دسترسی repository-granular (در صورت پیاده‌سازی ایمن) و GitLab OAuth یا token حداقلی است؛ اتصال باید قابلیت انتخاب repository و revoke شفاف داشته باشد.
 - revoke/rotate deploy key، disconnect provider و حذف token با impact preview انجام می‌شود. disconnect نباید release فعال را پاک کند، ولی deploy بعدی را تا credential معتبر block می‌کند.
 
-### 10.2 تشخیص framework و policy استقرار
+### 10.3 تشخیص framework و policy استقرار
 
 - در اولین deploy، source دقیقاً روی commit ثبت‌شده و در workspace موقت بدون secret build دریافت می‌شود. detector فقط manifest/fileهای allowlistشده مانند `composer.json`، `artisan`، `package.json`، lockfileها، `manage.py`، `pyproject.toml`، `requirements*.txt` و configهای framework را می‌خواند؛ برای تشخیص هیچ کد repository اجرا نمی‌شود.
 - نتیجه شامل primary framework، stack/addonها، confidence، evidence پالایش‌شده و detector version است. اگر نوع انتخابی کاربر با نتیجه ناسازگار باشد، build شروع نمی‌شود و UI مثلاً «این مخزن Laravel تشخیص داده شد» را با دلیل نشان می‌دهد.
 - نتیجه unknown، چند framework متعارض، manifest نامعتبر یا فریم‌ورک خارج catalog استقرار را با error code پایدار block می‌کند؛ override بدون recipe آزموده مجاز نیست.
 - policy پروژه شامل `auto_deploy`، branch دقیق، `zero_downtime_requested`، healthcheck، migration policy و release retention است. webhook فقط push/merge منتهی به همان branch را می‌پذیرد، commit SHA را ثبت و event تکراری را با delivery id بی‌اثر می‌کند.
 
-### 10.3 دامنه الزامی یا آدرس موقت
+### 10.4 دامنه الزامی یا آدرس موقت
 
 - هر environment پیش از switch ترافیک به یک route یکتا نیاز دارد. کاربر می‌تواند domain واقعی بدهد یا آدرس موقت یکتا با شکل `<slug>-<env>-<short-id>.local.rahandaz.invalid` بگیرد. suffix `.invalid` عمداً DNS عمومی نیست و UI نباید آن را domain منتشرشده بنامد.
 - برای دسترسی تا زمان ثبت DNS، route موقت روی IP میزبان و path یکتای `/sites/<slug>-<short-id>/` ارائه می‌شود. healthcheck با Host/path واقعی همان route انجام می‌شود.
 - تغییر به domain واقعی workflow اتمیک Nginx/DNS observation/TLS/healthcheck است. route موقت تا تایید route جدید حذف نمی‌شود.
 
-### 10.4 ساخت پروژه، دامنه و nginx همان پروژه
+### 10.5 ساخت پروژه، دامنه و nginx همان پروژه
 
 کاربر اول پروژه را می‌سازد و می‌تواند همان لحظه دامنه را وصل کند. اتصال دامنه یک پنجره است و دقیقاً یکی از این چهار گزینه را می‌گیرد:
 

@@ -61,7 +61,7 @@ PostgreSQL منبع نهایی وضعیت است. dispatcher ردیف‌های O
 
 ## Deployment بدون Docker
 
-هر Project چند Environment مستقل دارد. برای هر Environment: UID، path release/shared، port یا FPM pool، secret، database role، domain و Nginx site مستقل ذخیره می‌شود. repo GitHub/GitLab و branch/tag انتخابی به commit SHA ثابت resolve می‌شود؛ webhook فقط branch مطلوب و delivery id امضاشده را می‌پذیرد. static release از symlink، Laravel از release + PHP-FPM/OPcache policy، Next/Nuxt از blue-green روی portهای مستقل استفاده می‌کنند. healthcheck از route واقعی، release marker و rollout/rollback برای هر deployment ثبت می‌شوند. zero downtime **مشروط** به capacity، migration سازگار و drain است و تضمین مطلق نیست.
+هر Project چند Environment مستقل دارد. برای هر Environment: UID، path release/shared، port یا FPM pool، secret، database role، domain و Nginx site مستقل ذخیره می‌شود. منبع deployment یا Git است که branch/tag آن به commit SHA ثابت resolve می‌شود، یا ZIP خصوصی immutable که SHA-256 آن هویت artifact است. upload ZIP فقط inspect/store/job را در HTTP انجام می‌دهد و extraction/build به worker محدود می‌ماند. webhook فقط branch مطلوب و delivery id امضاشده را می‌پذیرد. static release از symlink، Laravel از release + PHP-FPM/OPcache policy، Next/Nuxt از blue-green روی portهای مستقل استفاده می‌کنند. healthcheck از route واقعی، release marker و rollout/rollback برای هر deployment ثبت می‌شوند. zero downtime **مشروط** به capacity، migration سازگار و drain است و تضمین مطلق نیست. جزئیات ZIP در `docs/PROJECT_ARCHIVE_UPLOADS.md` است.
 
 ## نصب، سلامت و مصرف
 

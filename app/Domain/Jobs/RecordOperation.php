@@ -41,6 +41,8 @@ final class RecordOperation
                 'workspace_id' => $data->workspaceId,
                 'actor_id' => $data->actorId,
                 'type' => $data->type,
+                'resource_type' => $data->resourceType,
+                'resource_id' => $data->resourceId,
                 'status' => JobStatus::Queued,
                 'idempotency_key' => $data->idempotencyKey,
                 'request_hash' => $hash,

@@ -32,6 +32,7 @@
 - کاتالوگ fixture با `verification` برابر `vm-passed` به mock دستور apt رسید. کاتالوگ تولید این مقدار را ندارد و آن mock آزمون VM نیست
 - drop پایگاه غیرمحافظ بدون approval به psql نرسید
 - تعویض symlink استقرار داخل sandbox
+- archive extraction آینده: Zip Slip، symlink/reparse، inode/disk budget، digest mismatch و cleanup staging؛ هنوز در registry/VM اجرا نشده است
 - اسکریپت سفارشی با UID 1000 و رد همان عملیات وقتی helper تأیید شده باشد
 - checkout بدون شبکه
 - `LocalOperationProcess` روی `/usr/bin/php` برای `host.facts` فقط‌خواندنی

@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Domain\Projects\Enums\DeploymentStatus;
 use App\Domain\Projects\Enums\DeploymentTrigger;
 use App\Domain\Projects\Enums\PhaseStatus;
+use App\Domain\Projects\Enums\ProjectSourceType;
 use App\Domain\Projects\Enums\RollbackStatus;
 use App\Models\Concerns\BelongsToWorkspace;
 use App\Models\Concerns\HasPublicUuid;
@@ -18,7 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['environment_id', 'workspace_id', 'remote_repository_id', 'commit_sha', 'trigger_type', 'actor_id', 'status', 'previous_release_id', 'target_release_id', 'artifact_digest', 'build_status', 'health_status', 'rollback_status', 'rollback_of_deployment_id', 'operation_job_id', 'failure_code', 'plan_hash', 'started_at', 'finished_at'])]
+#[Fillable(['environment_id', 'workspace_id', 'remote_repository_id', 'source_type', 'source_archive_id', 'commit_sha', 'trigger_type', 'actor_id', 'status', 'previous_release_id', 'target_release_id', 'artifact_digest', 'build_status', 'health_status', 'rollback_status', 'rollback_of_deployment_id', 'operation_job_id', 'failure_code', 'plan_hash', 'started_at', 'finished_at'])]
 class Deployment extends Model
 {
     /** @use HasFactory<DeploymentFactory> */
@@ -30,6 +31,7 @@ class Deployment extends Model
     protected function casts(): array
     {
         return [
+            'source_type' => ProjectSourceType::class,
             'trigger_type' => DeploymentTrigger::class,
             'status' => DeploymentStatus::class,
             'build_status' => PhaseStatus::class,
@@ -48,6 +50,11 @@ class Deployment extends Model
     public function repository(): BelongsTo
     {
         return $this->belongsTo(RemoteRepository::class);
+    }
+
+    public function sourceArchive(): BelongsTo
+    {
+        return $this->belongsTo(ProjectSourceArchive::class, 'source_archive_id');
     }
 
     public function actor(): BelongsTo

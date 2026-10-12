@@ -7,6 +7,7 @@ namespace Database\Factories;
 use App\Domain\Projects\Enums\DeploymentStatus;
 use App\Domain\Projects\Enums\DeploymentTrigger;
 use App\Domain\Projects\Enums\PhaseStatus;
+use App\Domain\Projects\Enums\ProjectSourceType;
 use App\Domain\Projects\Enums\RollbackStatus;
 use App\Models\Deployment;
 use App\Models\Environment;
@@ -22,6 +23,7 @@ class DeploymentFactory extends Factory
     {
         return [
             'commit_sha' => str_repeat('ab', 20),
+            'source_type' => ProjectSourceType::Git,
             'trigger_type' => DeploymentTrigger::Manual,
             'status' => DeploymentStatus::Queued,
             'build_status' => PhaseStatus::Pending,

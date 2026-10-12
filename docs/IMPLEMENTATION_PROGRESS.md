@@ -18,13 +18,13 @@
 - صفحات واقعی: ورود، تغییر گذرواژه، راه‌اندازی فقط-خواندنی، داشبورد شمارش عملیات، خطای Inertia.
 - پوسته روشن/تیره/سیستم، Vazirmatn محلی، RTL، Lucide، React-Toastify برای flash واقعی، خطای فرم و شکست درخواست رابط.
 - هویت بصری رسمی: مونوگرام هندسی اختصاصی، lockup فارسی، نسخه‌های روشن/تیره/تک‌رنگ، faviconهای SVG/ICO/PNG، Apple Touch Icon، تصویر Open Graph و کامپوننت‌های مشترک `AppLogo`/`AppLogoSymbol`. جزئیات در `docs/BRAND_GUIDELINES.md`.
-- اسکیمای نسخه اول: میزبان، کاتالوگ، میرور، Git، پروژه و محیط، deployment، دامنه و Nginx، دیتابیس کاربر، بکاپ، زمان‌بندی، متریک، اعلان پنل، تنظیم، setup، audit و دسترسی. جزئیات در `docs/DATABASE_SCHEMA.md`، `docs/DATABASE_ERD.md` و `docs/DATABASE_SECURITY.md`.
+- اسکیمای نسخه اول: میزبان، کاتالوگ، میرور، Git، پروژه و محیط، آرشیو منبع پروژه، deployment، دامنه و Nginx، دیتابیس کاربر، بکاپ، زمان‌بندی، متریک، اعلان پنل، تنظیم، setup، audit و دسترسی. جزئیات در `docs/DATABASE_SCHEMA.md`، `docs/DATABASE_ERD.md` و `docs/DATABASE_SECURITY.md`.
 - گاردهای کوچک دامنه: ثبت deployment با قفل محیط، ثبت delivery وب‌هوک بدون payload، بررسی URL عمومی، زنجیره hash حسابرسی، و `CredentialStore::openFor()` با رویداد دسترسی.
 - Seeder کاتالوگ بسته با lifecycle `untested` و میرور candidate. کاربر یا توکن نمونه ساخته نمی‌شود.
 - ورود موفق `last_login_at` و `last_activity_at` را با `forceFill` می‌نویسد. این ستون‌ها fillable نیستند.
 - مسیر `GET /rahandaz/projects/{project}` مدل را با `uuid` resolve می‌کند، `id` عددی را در JSON نمی‌گذارد، شناسه غیر v7 را ۴۰۴ می‌کند و عضویت workspace دیگر را ۴۰۳ می‌کند.
 - Inertia کاربر و workspace فیلد `uuid` می‌فرستد. نوع عمومی TypeScript برند `PublicUuid` است.
-- پوسته‌های واقعی پنل: داشبورد، راه‌اندازی فقط-خواندنی، فهرست سرور محلی، کاتالوگ، میرور، پروژه، عملیات و لاگ ذخیره‌شده، اعلان، گزارش فعالیت برای مالک و مدیر، و تنظیمات نمایه. جزئیات و مسیرهای ساخته‌نشده در `docs/UI_PAGE_INVENTORY.md`. هیچ دکمه نصب، اعمال میرور، استقرار یا لغو جعلی اضافه نشده است.
+- پوسته‌های واقعی پنل: داشبورد، راه‌اندازی فقط-خواندنی، فهرست سرور محلی، کاتالوگ، میرور، پروژه، آپلود ZIP و ثبت workflow استقرار دستی، عملیات و لاگ ذخیره‌شده، اعلان، گزارش فعالیت برای مالک و مدیر، و تنظیمات نمایه. جزئیات و مسیرهای ساخته‌نشده در `docs/UI_PAGE_INVENTORY.md`. هیچ موفقیت نصب، build یا فعال‌سازی release جعلی اضافه نشده است.
 - بازطراحی foundation رابط: برند رسمی مشترک، سطح‌های soft معنایی، AuthLayout دوپنله در desktop، AppLayout با عنوان/شرح مشترک، skip link، Sheet دارای focus trap و بازگردانی فوکوس، breakpoint تبلت روی `lg`، جدول قابل پیمایش با keyboard، loading واقعی فرم و rollback پوسته در خطای ذخیره. shadcn/ui به‌صورت گزینشی با Primitiveهای مستقل Radix برای نیازهای واقعی نصب شد.
 
 ## هویت بصری — 2026-10-12
@@ -60,6 +60,16 @@ AAD پاکت credential از id دهدهی workspace استفاده می‌کن�
 - اندازه‌گیری RAM/CPU. هدف ۵۱۲MiB و ۰.۵ vCPU هنوز benchmark نشده است.
 - PHPStan اجرا نشده است.
 
+## منبع ZIP پروژه — 2026-10-13
+
+صفحه جزئیات پروژه اکنون برای Owner/Admin/Operator یک dropzone دسترس‌پذیر، file picker، انتخاب environment، progress آپلود و تاریخچه آرشیوهای امن دارد. Viewer فقط پیام عدم مجوز می‌بیند. مسیر `POST /rahandaz/projects/{project}/environments/{environment}/source-archives` با UUIDv7، FormRequest، Policy، current workspace و scope پروژه/environment محافظت می‌شود.
+
+`ArchiveInspector` بدون extraction فایل را بازبینی می‌کند و Zip Slip، absolute/Windows path، backslash، مسیر تکراری، symlink/reparse/special entry، entry رمزگذاری‌شده، سقف entry، حجم یک entry، مجموع expanded size و compression bomb را رد می‌کند. فایل معتبر با نام UUID در disk غیرعمومی `storage/app/project-archives` می‌ماند. path و BIGINT id در props اینرسی نیست.
+
+جدول `project_source_archives` با BIGINT `id` و UUIDv7، FKهای عددی workspace/project/uploader، SHA-256 و metadata محدود اضافه شد. deployment اکنون `source_type=git|archive` و `source_archive_id` دارد؛ منبع آرشیوی `commit_sha` ندارد و digest آن به `artifact_digest` bind می‌شود. trigger پایگاه archive را به project همان environment محدود می‌کند. digest تکراری در یک پروژه فایل تازه نمی‌سازد.
+
+آپلود موفق یک deployment دستی، `operation_jobs` از نوع `deploy.archive`، outbox و audit می‌سازد. اجرای میزبان همچنان `disabled` است؛ extraction/build/healthcheck/switch انجام نشده و UI موفقیت deployment نشان نمی‌دهد. جزئیات در `docs/PROJECT_ARCHIVE_UPLOADS.md` است.
+
 ## تصمیم
 
 `docs/adr/0001-laravel-modular-monolith.md` و برای شناسه `docs/adr/0004-bigint-primary-key-uuidv7-public-identifier.md`. بند شناسه ADR 0001 منسوخ شده و متن تاریخی‌اش مانده است.
@@ -68,10 +78,10 @@ AAD پاکت credential از id دهدهی workspace استفاده می‌کن�
 
 | فرمان | نتیجه |
 | --- | --- |
-| `XDEBUG_MODE=off php artisan test --compact --display-warnings` | خروج ۰؛ ۶۵ آزمون، ۶۴ موفق، یک skip و ۲۶۲۵ assertion روی `rahandaz_test` |
+| `php artisan test --compact` | خروج ۰؛ ۷۹ آزمون، ۷۸ موفق، یک skip و ۲۷۹۹ assertion روی `rahandaz_test`؛ شامل امنیت و workflow آپلود ZIP و بررسی extensionها در doctor |
 | `node --experimental-strip-types --test tests/js/datetime.test.ts` | ۳ آزمون جلالی، از جمله مرز سال کبیسه ۱۴۰۳ |
 | `npx tsc --noEmit` و `npm run lint` | خروج ۰ و بدون warning پس از تغییر layout و componentهای مشترک |
-| `npm run build` | خروج ۰. chunk مشترک اصلی `373.88KiB` و gzip `116.68KiB`، AppLayout برابر `26.81KiB` و gzip `8.94KiB`، chunk پوسته/Dropdown برابر `65.67KiB` و gzip `23.10KiB`، CSS برابر `68.12KiB` و gzip `12.29KiB`، و فونت `111.15KiB` است |
+| `npm run build` | خروج ۰. chunk مشترک اصلی `373.88KiB` و gzip `116.68KiB`، AppLayout برابر `26.81KiB` و gzip `8.94KiB`، صفحه جزئیات پروژه/آپلود `14.15KiB` و gzip `4.78KiB`، CSS برابر `72.09KiB` و gzip `12.75KiB`، و فونت `111.15KiB` است |
 | Chrome headless visual smoke | ورود واقعی در ۳۹۰، ۷۶۸، ۱۲۸۰ و ۱۴۴۰ بدون overflow؛ RTL و Vazirmatn تایید شد. Dropdown پوسته هر سه گزینه روشن، تیره و سیستم را با cursor pointer و انتخاب فعلی نشان داد؛ انتخاب تیره DOM و localStorage را تغییر داد و هیچ exception مرورگر ثبت نشد. صفحه‌های احراز هویت‌شده با نشست واقعی مرور نشدند چون credential معتبر در اختیار این اجرا نبود |
 | `npm audit --omit=dev --audit-level=high` | صفر vulnerability |
 | `php artisan migrate --force` | forward روی `rahandaz`؛ اول جدول‌ها از ۱۸ به ۷۲ رسیدند، بعد `120000` و `120100` همان ۷۲ جدول را به کلید `bigint` بردند. `migrations` اکنون ۱۶ ردیف است. `migrate:fresh` روی این پایگاه اجرا نشد |

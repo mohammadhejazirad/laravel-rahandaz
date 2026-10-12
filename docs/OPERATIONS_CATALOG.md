@@ -2,6 +2,8 @@
 
 منبع فهرست `infrastructure/operations/contracts/registry.json` است. schema کاتالوگ `1.0` و نسخه هر عملیات `1` است. ۱۲۱ عملیات ثبت شده‌اند: ۸۵ مورد helper، ۱۴ مورد project و ۲۲ مورد read. ۹۹ عملیات mutating هستند.
 
+عملیات archive extraction هنوز به registry اضافه نشده است. `deploy.checkout` قرارداد Git موجود را جایگزین نمی‌کند و نباید برای ZIP با ورودی path آزاد reuse شود؛ قرارداد مستقل و آزمون sandbox/Zip Slip پیش از اتصال worker لازم است.
+
 | گروه | تعداد | نکته ایمنی |
 | --- | ---: | --- |
 | account | 4 | حساب `rahandaz` بدون sudo و با `nologin`. کاربر پروژه فقط `rhproj_` به‌علاوه ۶ تا ۱۶ نویسه کوچک یا رقم |

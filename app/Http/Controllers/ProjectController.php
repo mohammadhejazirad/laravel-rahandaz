@@ -8,6 +8,7 @@ use App\Http\CurrentWorkspace;
 use App\Http\PaginatorPayload;
 use App\Models\Environment;
 use App\Models\Project;
+use App\Models\ProjectSourceArchive;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -60,6 +61,15 @@ class ProjectController extends Controller
         abort_unless((string) $project->workspace_id === (string) $workspace->id, 404);
 
         $environments = $project->environments()->orderBy('name')->get();
+        $archives = ProjectSourceArchive::query()
+            ->where('project_id', $project->id)
+            ->with([
+                'latestDeployment.environment',
+                'latestDeployment.operationJob',
+            ])
+            ->orderByDesc('id')
+            ->limit(10)
+            ->get();
 
         return Inertia::render('projects/show', [
             'project' => [
@@ -79,6 +89,31 @@ class ProjectController extends Controller
                 'branch_name' => $environment->branch_name,
                 'status' => $environment->status->value,
             ])->all(),
+            'source_archives' => $archives->map(function (ProjectSourceArchive $archive): array {
+                $deployment = $archive->latestDeployment;
+
+                return [
+                    'uuid' => $archive->uuid,
+                    'original_name' => $archive->original_name,
+                    'sha256' => $archive->sha256,
+                    'size_bytes' => $archive->size_bytes,
+                    'entry_count' => $archive->entry_count,
+                    'uncompressed_bytes' => $archive->uncompressed_bytes,
+                    'status' => $archive->status->value,
+                    'created_at' => $archive->created_at?->utc()->toIso8601ZuluString(),
+                    'deployment' => $deployment === null ? null : [
+                        'uuid' => $deployment->uuid,
+                        'status' => $deployment->status->value,
+                        'environment_name' => $deployment->environment?->name,
+                        'operation_job_uuid' => $deployment->operationJob?->uuid,
+                    ],
+                ];
+            })->all(),
+            'archive_upload' => [
+                'available' => $request->user()?->can('deploy', $project) === true,
+                'max_bytes' => (int) config('rahandaz.project_archives.max_upload_bytes'),
+                'execution_mode' => (string) config('rahandaz.execution_mode'),
+            ],
             'deploy_available' => false,
         ]);
     }

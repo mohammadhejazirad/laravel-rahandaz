@@ -104,6 +104,8 @@ class SecretsAndBootstrapTest extends TestCase
         $this->assertStringContainsString('database: ok', $healthy);
         $this->assertStringContainsString('redis_queue: ok', $healthy);
         $this->assertStringContainsString('redis_cache: ok', $healthy);
+        $this->assertStringContainsString('extension_zip: ok', $healthy);
+        $this->assertStringContainsString('extension_fileinfo: ok', $healthy);
         $this->assertStringContainsString('execution_mode: ok disabled', $healthy);
         $this->assertStringNotContainsString(trim((string) file_get_contents((string) config('rahandaz.master_key_file'))), $healthy);
 

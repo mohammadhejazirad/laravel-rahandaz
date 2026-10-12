@@ -27,7 +27,7 @@ PostgreSQL منبع وضعیت پایدار است. Redis فقط صف، cache، 
 | کاتالوگ | `package_definitions`، `package_versions`، `managed_services` |
 | میرور | `mirror_endpoints`، `mirror_health_checks`، `mirror_configurations`، `mirror_configuration_revisions` |
 | Git | `git_connections`، `remote_repositories`، `remote_branches`، `git_webhooks`، `git_webhook_deliveries`، `deploy_keys` |
-| پروژه | `projects`، `environments`، `environment_variables`، `releases`، `deployments`، `deployment_health_checks` |
+| پروژه | `projects`، `environments`، `environment_variables`، `project_source_archives`، `releases`، `deployments`، `deployment_health_checks` |
 | لبه | `domains`، `certificates`، `certificate_renewals`، `nginx_sites`، `server_policies` |
 | دیتابیس کاربر | `database_instances`، `database_users`، `project_databases`، `database_user_grants` |
 | پشتیبان | `backups`، `restore_operations` |
@@ -49,7 +49,7 @@ PostgreSQL منبع وضعیت پایدار است. Redis فقط صف، cache، 
 
 `environment_variables` یا مقدار غیرمحرمانه دارد یا `credential_id`. هر دو با هم مجاز نیست.
 
-`deployments.commit_sha` پس از insert با trigger ثابت می‌ماند. `plan_hash` و digestها sha256 هستند. موفقیت فقط وقتی مجاز است که health برابر `succeeded` و build برابر `succeeded` یا `skipped` باشد.
+`project_source_archives` فقط metadata آرشیو خصوصی را نگه می‌دارد، نه blob؛ `(project_id, sha256)` یکتا است و path فقط روی disk `project_archives` پذیرفته می‌شود. `deployments.source_type` بین Git و archive تفکیک می‌کند. در Git، `commit_sha` اجباری و immutable است؛ در archive، `source_archive_id` و `artifact_digest` اجباری، `commit_sha` تهی و repository تهی است. trigger پروژه آرشیو را با پروژه environment و digest deployment یکسان نگه می‌دارد. `plan_hash` و digestها sha256 هستند. موفقیت فقط وقتی مجاز است که health برابر `succeeded` و build برابر `succeeded` یا `skipped` باشد.
 
 `database_users` گذرواژه ندارد. `backups` فایل را نگه نمی‌دارد و فقط مسیر زیر `/var/backups/rahandaz/` را ثبت می‌کند.
 
@@ -69,6 +69,7 @@ PostgreSQL منبع وضعیت پایدار است. Redis فقط صف، cache، 
 - یک متغیر محیطی برای هر `(environment_id, key)`
 - یک release فعال برای هر environment
 - یک deployment تغییردهنده برای هر environment وقتی وضعیت `queued`، `running`، `verifying` یا `rolling_back` است
+- یک فایل آرشیوی برای هر digest در هر پروژه؛ deploymentهای تاریخی متعدد می‌توانند همان artifact immutable را مصرف کنند
 - یک lease فعال برای هر `resource_key`
 - یک setup در حال انجام برای هر workspace
 - fingerprint فعال credential در `(workspace_id, type, fingerprint)`
@@ -104,6 +105,6 @@ FK در Laravel ایندکس جدا نمی‌سازد. بعضی ایندکس‌�
 
 `2026_10_12_120000` تابع `IdentityCutover::apply()` را صدا می‌زند. اگر `users.id` از قبل `bigint` باشد هیچ کاری نمی‌کند. در غیر این صورت مقدار uuid قبلی را در ستون `uuid` کپی می‌کند، `id` جدید می‌سازد، کلیدهای خارجی را با نگاشت بازنویسی می‌کند و constraintها را برمی‌گرداند. UUID موجود regenerate نمی‌شود. `down()` استثنا می‌دهد؛ برگشت به کلید uuid فقط از backup است. نصب تازه از migrationهای بازنویسی‌شده مستقیم `bigint` می‌سازد و همین migration بی‌اثر برمی‌گردد.
 
-Factoryهای گراف اصلی (میزبان، پروژه، محیط، Git، deployment، credential، کاتالوگ و میرور) داده معتبر می‌سازند. بقیه factoryها هنوز بدنه خالی دارند و در seeder تولید استفاده نمی‌شوند.
+Factoryهای گراف اصلی (میزبان، پروژه، محیط، آرشیو منبع، Git، deployment، credential، کاتالوگ و میرور) داده معتبر می‌سازند. بقیه factoryها هنوز بدنه خالی دارند و در seeder تولید استفاده نمی‌شوند.
 
 Seeder فقط کاتالوگ بسته با lifecycle `untested` و میرور با `trust_status=candidate` می‌سازد. کاربر، توکن و میزبان نمونه نمی‌سازد.
