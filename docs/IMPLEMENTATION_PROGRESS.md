@@ -156,6 +156,14 @@ CSS کتابخانه یک‌بار از `app.css` وارد می‌شود و entr
 
 سندهای وضعیت: `docs/OPERATIONS.md`، `docs/OPERATIONS_CATALOG.md`، `docs/BASH_SCRIPT_STANDARDS.md`، `docs/PRIVILEGED_HELPER_CONTRACT.md`، `docs/OPERATIONS_SECURITY.md`، `docs/OPERATIONS_TEST_MATRIX.md`، `docs/CUSTOM_SCRIPT_EXECUTION.md`، `docs/INSTALLATION.md`، `docs/SECURITY_MODEL.md` و `docs/DEPLOYMENT_STRATEGIES.md`. این‌ها جایگزین مشخصات `.docs/PROJECT_SPEC.md` نیستند.
 
+## آزمایشگاه Ubuntu — 2026-10-13
+
+`tests/infrastructure/ubuntu-lab/` موتور `infrastructure/operations/bin/rahandaz-ops` را داخل ایمیج رسمی `ubuntu:22.04`، `ubuntu:24.04` و `ubuntu:26.04` اجرا کرد. production همچنان native است. `RAHANDAZ_OPS_LAB=1` به‌تنهایی روی میزبان توسعه کافی نیست. کاتالوگ lab مقدار `container-lab` دارد و خانه‌های `docs/OPERATIONS_TEST_MATRIX.md` همچنان `untested` هستند.
+
+خروج هر سه `lab-test.sh` برابر ۰ بود. 22.04: ۷۶ passed، ۰ failed، ۸ skipped، ۱۰ unsupported، ۷ requires_vm، ۳ blocked. 24.04 و 26.04: ۷۷ passed، ۰ failed، ۸ skipped، ۹ unsupported، ۷ requires_vm، ۳ blocked. تفاوت 22.04 این است که PHP توزیع 8.1 زیر نیاز پنل 8.3 است و `PHP_TOO_OLD` ثبت شد. 24.04 برابر PHP 8.3 و 26.04 برابر PHP 8.5 است. پنل Laravel و reconciliation صف اجرا نشدند. workflow گیت‌هاب اجرا نشد.
+
+اصلاح موتور که این اجرا نشان داد: کد خروج فرمان در حالت lab دیگر دور ریخته نمی‌شود؛ خطای کاتالوگ پشت «بسته در کاتالوگ نیست» پنهان نمی‌شود؛ مسیر خانهٔ حساب و ریشهٔ deploy وقتی sandbox برابر `/` است اسلش اضافه نمی‌گیرد؛ postgres فقط با traverse روی `/run/rahandaz-lab` به SQL می‌رسد؛ کلید مشاهدهٔ تغییر نقش `material_logged` است تا اسکنر secret نتیجه را رد نکند. کاتالوگ lab به‌خاطر حالت `0777` روی دیسک میزبان، داخل کانتینر با حالت `0644` کپی می‌شود و بررسی world-writable حذف نشده است.
+
 ## کار بعدی
 
 صفحه‌های فهرست و جزئیات داده‌دار را با fixture معتبر در viewportهای مرجع و حالت‌های empty/error مرور کن. بعد از آن، فقط یک انتقال صریح و قابل بازگشت برای `setup_completed_at` طراحی شود که هیچ probe را «سازگار» اعلام نکند.

@@ -46,15 +46,18 @@ ops_service_action() {
     fi
     ops_require_sandbox_apply
     case "$action" in
+        install | remove | verify)
+            ops_fail PACKAGE_UNTESTED "Service install and removal stay untested."
+            ;;
+    esac
+    ops_refuse_without_systemd
+    case "$action" in
         start) ops_exec systemctl start -- "$unit" ;;
         stop) ops_exec systemctl stop -- "$unit" ;;
         restart) ops_exec systemctl restart -- "$unit" ;;
         reload) ops_exec systemctl reload -- "$unit" ;;
         enable) ops_exec systemctl enable -- "$unit" ;;
         disable) ops_exec systemctl disable -- "$unit" ;;
-        install | remove | verify)
-            ops_fail PACKAGE_UNTESTED "Service install and removal stay untested."
-            ;;
         *)
             ops_fail INVALID_INPUT "Unknown service action."
             ;;

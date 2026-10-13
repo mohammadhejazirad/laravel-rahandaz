@@ -1,0 +1,56 @@
+# Rahandaz Ubuntu test lab. Production stays native. This file never runs the panel.
+name: rahandaz-ubuntu-lab
+
+x-lab: &lab
+  init: false
+  privileged: false
+  stdin_open: true
+  tty: false
+  cpus: ${LAB_CPUS:-1.0}
+  mem_limit: ${LAB_MEMORY:-2g}
+  mem_reservation: ${LAB_MEMORY_RESERVATION:-256m}
+  pids_limit: ${LAB_PIDS:-512}
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+  volumes:
+    - ../../../infrastructure/operations:/opt/rahandaz-src/infrastructure/operations:ro
+    - ./catalog:/opt/rahandaz-lab/catalog:ro
+    - ./fixtures:/opt/rahandaz-lab/fixtures:ro
+    - ./scripts/inside:/opt/rahandaz-lab/scripts:ro
+    - ../../../app/Domain/Git/WebhookSignature.php:/opt/rahandaz-lab/webhook/WebhookSignature.php:ro
+
+services:
+  ubuntu-22:
+    <<: *lab
+    image: rahandaz-ubuntu-lab:22.04
+    build:
+      context: ./docker
+      dockerfile: Dockerfile.ubuntu-22.04
+    networks: [lab22]
+
+  ubuntu-24:
+    <<: *lab
+    image: rahandaz-ubuntu-lab:24.04
+    build:
+      context: ./docker
+      dockerfile: Dockerfile.ubuntu-24.04
+    networks: [lab24]
+
+  ubuntu-26:
+    <<: *lab
+    image: rahandaz-ubuntu-lab:26.04
+    build:
+      context: ./docker
+      dockerfile: Dockerfile.ubuntu-26.04
+    networks: [lab26]
+
+networks:
+  lab22:
+    name: rahandaz-ubuntu-lab-22
+  lab24:
+    name: rahandaz-ubuntu-lab-24
+  lab26:
+    name: rahandaz-ubuntu-lab-26

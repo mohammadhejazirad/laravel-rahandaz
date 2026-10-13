@@ -1,0 +1,7 @@
+{
+  "name": "rahandaz/lab-laravel-fixture",
+  "description": "Marker only. This is not the Rahandaz panel and it is not installed by the lab.",
+  "require": {
+    "php": ">=8.3"
+  }
+}

@@ -85,6 +85,7 @@ node --experimental-strip-types --test tests/js/datetime.test.ts
 php artisan test
 php artisan test tests/Unit/ArchiveInspectorTest.php tests/Feature/ProjectArchiveUploadTest.php
 bash infrastructure/operations/tests/run.sh
+./tests/infrastructure/ubuntu-lab/scripts/lab-test.sh 24.04
 # پس از اضافه‌کردن ابزارهای مربوط به composer.json:
 # vendor/bin/pint --test
 # vendor/bin/phpstan analyse

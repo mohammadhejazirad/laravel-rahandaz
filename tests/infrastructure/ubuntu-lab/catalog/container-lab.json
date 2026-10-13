@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "verification": "container-lab",
+  "note": "Container lab catalog only. Observed compatibility is container-lab, never supported or vm-passed. The production catalog stays untested.",
+  "packages": {
+    "nginx": {"apt": "nginx", "unit": "nginx", "reload": true},
+    "postgresql": {"apt": "postgresql", "unit": "postgresql", "reload": true},
+    "mysql": {"apt": "mysql-server", "unit": "mysql", "reload": false, "conflicts": ["mariadb"]},
+    "mariadb": {"apt": "mariadb-server", "unit": "mariadb", "reload": false, "conflicts": ["mysql"]},
+    "mongodb": {"apt": null, "unit": "mongod", "reload": false, "note": "No official Ubuntu archive package is declared."},
+    "redis": {"apt": "redis-server", "unit": "redis-server", "reload": false},
+    "php-fpm": {"apt": "php-fpm", "unit": null, "note": "Distro metapackage. It is not a pinned side-by-side panel runtime."},
+    "php-cli": {"apt": "php-cli", "unit": null},
+    "php-pgsql": {"apt": "php-pgsql", "unit": null},
+    "php-redis": {"apt": "php-redis", "unit": null},
+    "composer": {"apt": "composer", "unit": null},
+    "git": {"apt": "git", "unit": null},
+    "openssl": {"apt": "openssl", "unit": null},
+    "nodejs": {"apt": null, "unit": null, "note": "The distro Node package is not an approved project runtime."},
+    "python": {"apt": null, "unit": null, "note": "Project Python uses a venv. /usr/bin/python3 from the lab image is not this package."},
+    "ffmpeg": {"apt": "ffmpeg", "unit": null},
+    "clamav": {"apt": "clamav", "unit": "clamav-daemon"},
+    "clamav-freshclam": {"apt": "clamav-freshclam", "unit": "clamav-freshclam"},
+    "docker": {"apt": "docker.io", "unit": "docker", "optional": true, "note": "Not installed by the default lab profile."},
+    "ufw": {"apt": "ufw", "unit": "ufw"},
+    "supervisor": {"apt": "supervisor", "unit": "supervisor"},
+    "openssh": {"apt": "openssh-server", "unit": "ssh", "reload": true, "stop": false},
+    "fail2ban": {"apt": "fail2ban", "unit": "fail2ban"},
+    "memcached": {"apt": "memcached", "unit": "memcached"}
+  }
+}

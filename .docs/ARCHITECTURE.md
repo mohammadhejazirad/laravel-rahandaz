@@ -31,6 +31,7 @@ flowchart LR
 | `app/Infrastructure/Operations/` | کاتالوگ، اعتبارسنجی ورودی، تجزیه JSON و Process با argv. dispatcher تا باز شدن دروازه فرآیندی نمی‌سازد |
 | `infrastructure/operations/` | موتور Bash نسخه‌دار. apply زنده روی میزبان توسعه `LIVE_MUTATION_BLOCKED` است |
 | `infrastructure/privilege_helper/` | قرارداد CLI محدود. سوکت root و نصب daemon هنوز وجود ندارد |
+| `tests/infrastructure/ubuntu-lab/` | آزمایشگاه Docker برای Ubuntu 22.04/24.04/26.04. production این مسیر را اجرا نمی‌کند و نتیجه‌اش `supported` نیست |
 | `resources/js/` | صفحات TSX، layout RTL، type-safe props، theme، React-Toastify و UI shadcn/Radix گزینشی، Lucide و assets محلی |
 | `public/build/` | assetهای Vite آماده؛ Node runtime برای سرویس production پنل لازم نیست |
 

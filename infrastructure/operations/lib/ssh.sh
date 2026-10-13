@@ -1,13 +1,7 @@
 #!/usr/bin/env bash
 
 ops_ssh_install_server() {
-    local package="openssh"
-    local plan='{"action":"install","package":"openssh","stop":false}'
-    if ! ops_wants_apply; then
-        ops_preview "$plan"
-    fi
-    ops_require_sandbox_apply
-    ops_fail PACKAGE_UNTESTED "OpenSSH install is untested and sshd must not be stopped."
+    ops_package_apply_named install openssh
 }
 
 ops_ssh_key_file() {
@@ -25,7 +19,7 @@ ops_ssh_key_file() {
 }
 
 ops_ssh_install_key() {
-    local plan='{"action":"install_public_key","stores_private_key":false}'
+    local plan='{"action":"install_public_key","stores_private_material":false}'
     if ! ops_wants_apply; then
         ops_preview "$plan"
     fi
@@ -82,6 +76,7 @@ EOF
         ops_restore_snapshot "$snapshot" "$config"
         ops_fail VERIFICATION_FAILED "sshd -t failed. The previous file was restored."
     fi
+    ops_refuse_without_systemd
     ops_exec systemctl reload ssh
     ops_succeed "$plan" '{"password_authentication":false,"permit_root_login":false,"sshd_stopped":false}' true
 }

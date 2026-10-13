@@ -1,11 +1,7 @@
 #!/usr/bin/env bash
 
 ops_nginx_install() {
-    local plan='{"action":"install","package":"nginx","verification":"untested"}'
-    if ! ops_wants_apply; then
-        ops_preview "$plan"
-    fi
-    ops_fail PACKAGE_UNTESTED "Nginx install has no passing VM test."
+    ops_package_apply_named install nginx
 }
 
 ops_nginx_site_name() {
@@ -34,10 +30,14 @@ ops_nginx_apply_site() {
     ops_require_sandbox_apply
     ops_nginx_paths "$name"
     mkdir -p "$(dirname "$NGINX_AVAILABLE")" "$(dirname "$NGINX_ENABLED")"
-    ops_check inside "$OPS_SANDBOX" "$NGINX_AVAILABLE"
+    ops_sandbox_path "$NGINX_AVAILABLE" >/dev/null
     local snapshot temp
     snapshot="$(ops_snapshot_file "$NGINX_AVAILABLE")"
-    temp="$(mktemp "$OPS_SANDBOX/nginx.XXXXXX")"
+    local temp_root="$OPS_SANDBOX"
+    if [[ "${OPS_LAB:-}" == "1" ]]; then
+        temp_root=/run/rahandaz-lab/tmp
+    fi
+    temp="$(mktemp "$temp_root/nginx.XXXXXX")"
     printf '%s\n' "$content" >"$temp"
     mv "$temp" "$NGINX_AVAILABLE"
     chmod 0644 "$NGINX_AVAILABLE"
@@ -116,6 +116,7 @@ ops_nginx_reload() {
     if ! ops_exec nginx -t -c "$NGINX_AVAILABLE"; then
         ops_fail NGINX_TEST_FAILED "Reload was not attempted because nginx -t failed."
     fi
+    ops_refuse_without_systemd
     ops_exec systemctl reload nginx
     ops_succeed "$plan" '{"reloaded":true}' true
 }

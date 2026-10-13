@@ -54,3 +54,5 @@ stderr تشخیص است و پیش از برگرداندن به لاراول ا�
 کاتالوگ `packages/catalog/ubuntu.json` برای هر بسته `verification` برابر `untested` دارد. نصب، حذف و به‌روزرسانی این کاتالوگ `PACKAGE_UNTESTED` برمی‌گرداند و `apt-get` را صدا نمی‌زند. گواهی `CERTIFICATE_UNTESTED` است. checkout شبکه باز نمی‌کند. reboot بعد از چک تأییدها `REBOOT_NOT_EXECUTED` می‌دهد و دستور reboot را اجرا نمی‌کند. flush فایروال عملیات ثبت‌شده نیست.
 
 آزمون رفتاری در `infrastructure/operations/tests/run.sh` با mock و sandbox گذشته است. آزمون VM روی Ubuntu 22.04، 24.04 و 26.04 اجرا نشده است.
+
+`RAHANDAZ_OPS_LAB=1` به‌تنهایی درِ میزبان را باز نمی‌کند. apply آزمایشگاهی فقط بعد از نشانگر root-only داخل کانتینر، فایل معمولی `/.dockerenv`، نبود سوکت Docker و pid 1 غیر از systemd یا init ادامه پیدا می‌کند. کاتالوگ `container-lab` بیرون از این دروازه به apt نمی‌رسد. این حالت آزمون امنیت یا نسخه Ubuntu را حذف نمی‌کند و نتیجه را `supported` نمی‌کند.

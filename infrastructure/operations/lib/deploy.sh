@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 
 ops_deploy_root() {
-    local root="$OPS_SANDBOX/srv/projects"
+    local root
+    if [[ "$OPS_SANDBOX" == "/" ]]; then
+        root=/srv/projects
+    else
+        root="$OPS_SANDBOX/srv/projects"
+    fi
     mkdir -p "$root"
     chmod 0750 "$root"
     printf '%s' "$root"
@@ -53,6 +58,9 @@ ops_deploy_build() {
     fi
     ops_require_sandbox_apply
     ops_reject_root_uid "${RAHANDAZ_OPS_PROJECT_UID:-}"
+    if [[ "${OPS_LAB:-}" == "1" ]]; then
+        ops_fail UNSUPPORTED_IN_CONTAINER "Project builds use systemd-run limits and were not started without a VM systemd."
+    fi
     ops_exec systemd-run --uid="${RAHANDAZ_OPS_PROJECT_UID}" --property=CPUQuota=50% --property=MemoryMax=512M --property=TasksMax=128 --property=RuntimeMaxSec="${OPS_TIMEOUT}" --property=NoNewPrivileges=yes echo build
     ops_succeed "$plan" '{"built":true,"privileged_helper":false}' true
 }

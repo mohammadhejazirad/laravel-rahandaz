@@ -24,6 +24,24 @@ PUBLIC_KEY = re.compile(
 PROJECT_USER = re.compile(r"^rhproj_[a-z0-9]{6,16}$")
 SHA = re.compile(r"^[0-9a-f]{40}$")
 PACKAGE = re.compile(r"^[a-z0-9][a-z0-9+.-]{0,62}$")
+LAB_TOKEN = re.compile(r"^[0-9a-f]{32,}$")
+LAB_PREFIXES = (
+    Path("/etc/nginx"),
+    Path("/etc/ssh/sshd_config.d"),
+    Path("/var/lib/rahandaz"),
+    Path("/srv/projects"),
+    Path("/run/rahandaz-lab"),
+    Path("/var/backups/rahandaz"),
+)
+LAB_EXACT_FILES = {
+    Path("/root/rahandaz-account.secret"),
+    Path("/root/rahandaz-account-rotated.secret"),
+}
+LAB_CATALOG_DIRS = {
+    Path("/opt/rahandaz-lab/catalog"),
+    Path("/opt/rahandaz-src/tests/infrastructure/ubuntu-lab/catalog"),
+    Path("/run/rahandaz-lab/catalog"),
+}
 
 PROTECTED_DATABASES = {
     "postgresql": {"postgres", "template0", "template1", "rahandaz"},
@@ -121,8 +139,8 @@ def sandbox_ok(path: str) -> Path:
     return real
 
 
-def inside(root: Path, candidate: str) -> Path:
-    if candidate == "" or "\x00" in candidate or candidate.startswith("/") is False and ".." in Path(candidate).parts:
+def contained(root: Path, candidate: str) -> Path:
+    if candidate == "" or "\x00" in candidate:
         fail("PATH_ESCAPE", "Path is empty or traverses upward.")
     if ".." in Path(candidate).parts:
         fail("PATH_ESCAPE", "Path traversal was rejected.")
@@ -144,6 +162,135 @@ def inside(root: Path, candidate: str) -> Path:
     if real != real_root and real_root not in real.parents:
         fail("PATH_ESCAPE", "The path escapes its root.")
     return real
+
+
+def inside(root: Path, candidate: str) -> Path:
+    return contained(root, candidate)
+
+
+def lab_ok() -> None:
+    token = os.environ.get("RAHANDAZ_OPS_LAB_TOKEN", "")
+    if not LAB_TOKEN.fullmatch(token):
+        fail("LIVE_MUTATION_BLOCKED", "Container lab token was rejected.")
+    marker = Path("/run/rahandaz-lab/marker")
+    if marker.is_symlink() or not marker.is_file():
+        fail("LIVE_MUTATION_BLOCKED", "Container lab marker is not a regular file.")
+    try:
+        info = marker.stat()
+    except OSError:
+        fail("LIVE_MUTATION_BLOCKED", "Container lab marker could not be read.")
+    if stat.S_IMODE(info.st_mode) != 0o600 or info.st_uid != 0:
+        fail("LIVE_MUTATION_BLOCKED", "Container lab marker mode is not root-owned 0600.")
+    try:
+        lines = marker.read_text(encoding="utf-8").splitlines()
+    except (OSError, UnicodeError):
+        fail("LIVE_MUTATION_BLOCKED", "Container lab marker could not be read.")
+    if len(lines) < 2 or lines[0] != "rahandaz-lab-v1":
+        fail("LIVE_MUTATION_BLOCKED", "Container lab marker version was rejected.")
+    try:
+        matched = secrets.compare_digest(lines[1], token)
+    except (TypeError, ValueError):
+        matched = False
+    if not matched:
+        fail("LIVE_MUTATION_BLOCKED", "Container lab marker was rejected.")
+    dockerenv = Path("/.dockerenv")
+    if dockerenv.is_symlink() or not dockerenv.is_file():
+        fail("LIVE_MUTATION_BLOCKED", "Container lab requires a regular /.dockerenv.")
+    for sock in (Path("/var/run/docker.sock"), Path("/run/docker.sock")):
+        if sock.exists() or sock.is_symlink():
+            fail("LIVE_MUTATION_BLOCKED", "Container lab refuses a Docker socket.")
+    try:
+        sched = Path("/proc/1/sched").read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        fail("LIVE_MUTATION_BLOCKED", "Container lab could not read pid 1.")
+    name = sched.split(None, 1)[0].split("(", 1)[0] if sched.strip() else ""
+    if name in {"systemd", "init"}:
+        fail("LIVE_MUTATION_BLOCKED", "Container lab refuses pid 1 systemd or init.")
+
+
+def accept_lab_root(path: str) -> Path:
+    if path == "" or "\x00" in path or not path.startswith("/"):
+        fail("PATH_ESCAPE", "Lab root must be absolute.")
+    candidate = Path(path)
+    if candidate.is_symlink():
+        fail("SYMLINK_REJECTED", "Lab root must not be a symlink.")
+    try:
+        real = candidate.resolve(strict=True)
+    except OSError:
+        fail("PATH_ESCAPE", "Lab root does not exist.")
+    if not real.is_dir() or real.is_symlink() or real == Path("/"):
+        fail("PATH_ESCAPE", "Lab root is too broad.")
+    if not any(real == prefix or prefix in real.parents for prefix in LAB_PREFIXES):
+        fail("PATH_ESCAPE", "Lab root is outside the allowlist.")
+    return real
+
+
+def lab_path(candidate: str) -> Path:
+    lab_ok()
+    if candidate == "" or "\x00" in candidate or not candidate.startswith("/") or ".." in Path(candidate).parts:
+        fail("PATH_ESCAPE", "Lab path was rejected.")
+    target = Path(candidate)
+    if target.is_symlink() or target.parent.is_symlink():
+        fail("SYMLINK_REJECTED", "Lab path must not use a symlink.")
+    try:
+        if target.exists():
+            real = target.resolve(strict=True)
+        else:
+            real = target.parent.resolve(strict=True) / target.name
+    except OSError:
+        fail("PATH_ESCAPE", "Lab path cannot be resolved.")
+    if real in LAB_EXACT_FILES:
+        return real
+    if any(real == prefix or prefix in real.parents for prefix in LAB_PREFIXES):
+        return real
+    fail("PATH_ESCAPE", "Lab path is outside the allowlist.")
+    raise AssertionError("unreachable")
+
+
+def lab_catalog(path: str) -> Path:
+    lab_ok()
+    file = Path(path)
+    if file.name != "container-lab.json" or file.is_symlink() or not file.is_file():
+        fail("INVALID_INPUT", "Lab catalog must be a regular container-lab.json file.")
+    if stat.S_IMODE(file.stat().st_mode) & 0o002:
+        fail("INVALID_INPUT", "Lab catalog must not be world-writable.")
+    try:
+        real = file.resolve(strict=True)
+    except OSError:
+        fail("PATH_ESCAPE", "Lab catalog cannot be resolved.")
+    if real.parent not in LAB_CATALOG_DIRS:
+        fail("PATH_ESCAPE", "Lab catalog directory was rejected.")
+    return real
+
+
+def write_role_password(role: str, material: str, dest: str) -> None:
+    if not IDENT.fullmatch(role):
+        fail("INVALID_INPUT", "Identifier is not allowed.")
+    source = Path(material)
+    if source.is_symlink() or not source.is_file():
+        fail("INVALID_INPUT", "Credential file must be a regular file.")
+    if stat.S_IMODE(source.stat().st_mode) != 0o600:
+        fail("INVALID_INPUT", "Credential file mode must be 0600.")
+    raw = source.read_bytes()
+    if raw.endswith(b"\n"):
+        raw = raw[:-1]
+    if raw == b"" or b"\n" in raw or b"\x00" in raw or b"PRIVATE KEY" in raw:
+        fail("INVALID_INPUT", "Credential material was rejected.")
+    password = raw.decode("utf-8")
+    delimiter = "rahandazpwd"
+    while delimiter in password:
+        delimiter += "x"
+    sql = f'ALTER ROLE "{role}" PASSWORD ${delimiter}${password}${delimiter}$;\n'
+    destination = Path(dest)
+    if destination.is_symlink() or ".." in destination.parts:
+        fail("SYMLINK_REJECTED", "SQL file must not be a symlink.")
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW
+    fd = os.open(destination, flags, 0o600)
+    try:
+        os.write(fd, sql.encode())
+        os.fchmod(fd, 0o600)
+    finally:
+        os.close(fd)
 
 
 def quote_ident(value: str) -> str:
@@ -237,7 +384,24 @@ def main() -> None:
         print(sandbox_ok(sys.argv[2]))
         return
     if command == "inside":
+        if os.environ.get("RAHANDAZ_OPS_LAB") == "1":
+            lab_ok()
+            print(contained(accept_lab_root(sys.argv[2]), sys.argv[3]))
+            return
         print(inside(sandbox_ok(sys.argv[2]), sys.argv[3]))
+        return
+    if command == "lab-ok":
+        lab_ok()
+        sys.stdout.write("ok\n")
+        return
+    if command == "lab-path":
+        print(lab_path(sys.argv[2]))
+        return
+    if command == "lab-catalog":
+        print(lab_catalog(sys.argv[2]))
+        return
+    if command == "write-role-password":
+        write_role_password(sys.argv[2], sys.argv[3], sys.argv[4])
         return
     if command == "quote-ident":
         sys.stdout.write(quote_ident(sys.argv[2]))

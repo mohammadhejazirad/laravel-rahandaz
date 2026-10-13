@@ -1,0 +1,15 @@
+FROM ubuntu:26.04@sha256:f144425ff09be612d6d9ad965196e9cdc23dae1f42110a8a11a3e9a8198759f7
+ENV DEBIAN_FRONTEND=noninteractive \
+    TZ=UTC \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    TMPDIR=/run/rahandaz-lab/tmp
+RUN mkdir -p /run/rahandaz-lab/tmp /tmp \
+    && TMPDIR=/tmp apt-get update \
+    && TMPDIR=/tmp apt-get install -y --no-install-recommends python3 ca-certificates curl passwd \
+    && rm -rf /var/lib/apt/lists/* \
+    && printf '%s\n' '#!/bin/sh' 'exit 101' > /usr/sbin/policy-rc.d \
+    && chmod 0755 /usr/sbin/policy-rc.d
+COPY entrypoint.sh /usr/local/bin/rahandaz-lab-entrypoint
+RUN chmod 0755 /usr/local/bin/rahandaz-lab-entrypoint
+ENTRYPOINT ["/usr/local/bin/rahandaz-lab-entrypoint"]

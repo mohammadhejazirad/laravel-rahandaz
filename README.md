@@ -186,6 +186,14 @@ Helper ممتاز در طرح، یک برنامه root-owned با اسکیمای
 
 نسخه ۱ چند سرور را مدیریت نمی‌کند. اتصال SSH مدیریتی، Ansible و agent راه دور برای نسخه ۲ و ۳ مانده‌اند. پروژه کاربر هم روی همان میزبان و بدون Docker استقرار نسخه ۱ طراحی شده است.
 
+آزمایش نصب موتور روی ایمیج رسمی Ubuntu جدا از این جدول است و گواهی production نیست. اجرای ۲۰۲۶-۱۰-۱۳ هر سه نسخه را در آزمایشگاه گذراند و ستون «وضعیت» همین جدول را تغییر نمی‌دهد:
+
+```bash
+./tests/infrastructure/ubuntu-lab/scripts/lab-test.sh 24.04
+```
+
+راهنمای کامل در [tests/infrastructure/ubuntu-lab/README.md](tests/infrastructure/ubuntu-lab/README.md) است.
+
 <a id="install"></a>
 ## نصب
 

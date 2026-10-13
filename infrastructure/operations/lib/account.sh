@@ -11,17 +11,24 @@ ops_account_create_rahandaz() {
         ops_preview "$plan"
     fi
     ops_require_sandbox_apply
-    local home="$OPS_SANDBOX/var/lib/rahandaz"
-    local secret="$OPS_SANDBOX/root/rahandaz-account.secret"
+    local home secret
+    if [[ "$OPS_SANDBOX" == "/" ]]; then
+        home=/var/lib/rahandaz
+        secret=/root/rahandaz-account.secret
+    else
+        home="$OPS_SANDBOX/var/lib/rahandaz"
+        secret="$OPS_SANDBOX/root/rahandaz-account.secret"
+    fi
     mkdir -p "$OPS_SANDBOX/root" "$home"
     chmod 0700 "$OPS_SANDBOX/root"
-    if [[ ! -e "$OPS_SANDBOX/var/lib/rahandaz/account.stamp" ]]; then
-        ops_exec useradd --create-home --home-dir "$home" --shell /usr/sbin/nologin --user-group --comment "Rahandaz orchestration" rahandaz
-        ops_py_value password-file "$secret" >/dev/null
-        ops_exec passwd --lock rahandaz >/dev/null
-        printf '%s\n' 'created' >"$OPS_SANDBOX/var/lib/rahandaz/account.stamp"
-        chmod 0600 "$OPS_SANDBOX/var/lib/rahandaz/account.stamp"
+    if [[ -f "$OPS_SANDBOX/var/lib/rahandaz/account.stamp" && ! -L "$OPS_SANDBOX/var/lib/rahandaz/account.stamp" ]]; then
+        ops_succeed "$plan" '{"account":"rahandaz","login":"locked","sudo":false,"idempotent":true}' false
     fi
+    ops_exec useradd --create-home --home-dir "$home" --shell /usr/sbin/nologin --user-group --comment "Rahandaz orchestration" rahandaz
+    ops_py_value password-file "$secret" >/dev/null
+    ops_exec passwd --lock rahandaz >/dev/null
+    printf '%s\n' 'created' >"$OPS_SANDBOX/var/lib/rahandaz/account.stamp"
+    chmod 0600 "$OPS_SANDBOX/var/lib/rahandaz/account.stamp"
     ops_succeed "$plan" '{"account":"rahandaz","login":"locked","sudo":false}' true
 }
 

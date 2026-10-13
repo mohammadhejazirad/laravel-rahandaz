@@ -23,4 +23,17 @@ Laravel Boost را نصب نکن. حالت اجرای پیش‌فرض `disabled`
 9. عملیات باید آزمون و audit داشته باشد. موفقیتی که آزمون واقعی ندارد production-ready نیست.
 10. سازگاری Ubuntu در `docs/OPERATIONS_TEST_MATRIX.md` ثبت می‌شود. نسخه نیازموده `supported` اعلام نمی‌شود.
 
+قواعد آزمایشگاه Ubuntu:
+
+1. هر Bash Script تازه باید روی Ubuntuهای پشتیبانی‌شده آزمایش شود.
+2. تست Docker فقط در `tests/infrastructure/ubuntu-lab/` قرار می‌گیرد.
+3. تست مخرب روی Docker Host ممنوع است.
+4. Docker فقط محیط Development و Testing است.
+5. Production بدون Docker می‌ماند.
+6. هیچ تستی بدون اجرا `passed` گزارش نمی‌شود.
+7. محدودیت Container باید صریح ثبت شود.
+8. تست نیازمند Kernel، Systemd یا Reboot واقعی به VM منتقل می‌شود.
+9. عملیات نصب باید Idempotency و بازیابی شکست داشته باشند.
+10. Agent باید نتیجه Matrix را پیش از اعلام تکمیل گزارش کند.
+
 تمام محل‌های نمایش هویت بصری Rahandaz باید از assetهای `public/branding` و کامپوننت‌های رسمی `resources/js/components/branding` استفاده کنند. ساخت لوگوی مستقل در صفحه، استفاده از placeholder یا آیکون پکیج به‌جای نشان برند، تغییر خودسرانه رنگ برند و افزودن favicon متفاوت بدون تصمیم مستند ممنوع است.

@@ -154,6 +154,17 @@ else
 fi
 
 rm -f "$tmp/account.mark"
+account_again="$(RAHANDAZ_OPS_APPLY=1 RAHANDAZ_OPS_HELPER_CONFIRMED=1 RAHANDAZ_OPS_SANDBOX="$tmp" RAHANDAZ_OPS_BIN_DIR="$tmp/bin" run_op account.create_rahandaz_user "$tmp/input-account.json")"
+assert_eq "account rerun status" "succeeded" "$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["status"])' "$account_again")"
+assert_eq "account rerun mutated" "False" "$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["mutated"])' "$account_again")"
+if [[ -e "$tmp/account.mark" ]]; then
+    fail "account rerun invoked useradd"
+else
+    pass "account rerun did not invoke useradd"
+fi
+unset secret
+
+rm -f "$tmp/account.mark"
 set +e
 live="$(RAHANDAZ_OPS_APPLY=1 RAHANDAZ_OPS_HELPER_CONFIRMED=1 RAHANDAZ_OPS_BIN_DIR="$tmp/bin" run_op account.create_rahandaz_user "$tmp/input-account.json" 2>"$tmp/live.err")"
 live_rc=$?
@@ -165,6 +176,24 @@ if [[ -e "$tmp/account.mark" ]]; then
 else
     pass "live mutation did not invoke useradd"
 fi
+
+rm -f "$tmp/account.mark"
+set +e
+lab_fake="$(RAHANDAZ_OPS_APPLY=1 RAHANDAZ_OPS_LAB=1 RAHANDAZ_OPS_LAB_TOKEN=0123456789abcdef0123456789abcdef RAHANDAZ_OPS_HELPER_CONFIRMED=1 RAHANDAZ_OPS_BIN_DIR="$tmp/bin" run_op account.create_rahandaz_user "$tmp/input-account.json" 2>"$tmp/lab-fake.err")"
+lab_fake_rc=$?
+set -e
+assert_eq "fake lab exit" "1" "$lab_fake_rc"
+assert_eq "fake lab code" "LIVE_MUTATION_BLOCKED" "$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["error_code"])' "$lab_fake")"
+if [[ -e "$tmp/account.mark" ]]; then
+    fail "fake lab invoked useradd"
+else
+    pass "fake lab did not invoke useradd"
+fi
+set +e
+python3 "$ROOT/lib/opsjson.py" lab-ok >/dev/null 2>"$tmp/lab-ok.err"
+lab_ok_rc=$?
+set -e
+assert_eq "lab-ok refuses host" "3" "$lab_ok_rc"
 
 cat >"$tmp/input-drop.json" <<EOF
 {"execution_id":"$EXECUTION_ID","database":"rahandaz"}
@@ -319,6 +348,41 @@ if [[ -e "$tmp/apt.mark" ]]; then
     pass "fixture catalog reached the apt mock"
 else
     fail "fixture catalog did not reach the apt mock"
+fi
+
+cat >"$tmp/catalog-container.json" <<'EOF'
+{"verification":"container-lab","packages":{"nginx":{"apt":"nginx"}}}
+EOF
+rm -f "$tmp/apt.mark"
+set +e
+container_catalog="$(RAHANDAZ_OPS_APPLY=1 RAHANDAZ_OPS_HELPER_CONFIRMED=1 RAHANDAZ_OPS_SANDBOX="$tmp" RAHANDAZ_OPS_BIN_DIR="$tmp/bin" RAHANDAZ_OPS_CATALOG="$tmp/catalog-container.json" run_op package.install "$tmp/input-package.json" 2>"$tmp/container-catalog.err")"
+container_catalog_rc=$?
+set -e
+assert_eq "container catalog outside lab exit" "1" "$container_catalog_rc"
+assert_eq "container catalog outside lab code" "PACKAGE_UNTESTED" "$(json_field "$container_catalog" error_code)"
+if [[ -e "$tmp/apt.mark" ]]; then
+    fail "container-lab catalog called apt outside the lab"
+else
+    pass "container-lab catalog did not call apt outside the lab"
+fi
+
+cat >"$tmp/bin/dpkg-query" <<'EOF'
+#!/bin/sh
+printf '%s\n' "deinstall ok config-files"
+exit 0
+EOF
+chmod 755 "$tmp/bin/dpkg-query"
+cat >"$tmp/input-remove.json" <<EOF
+{"execution_id":"$EXECUTION_ID","package":"nginx","approval":true}
+EOF
+rm -f "$tmp/apt.mark"
+removed="$(RAHANDAZ_OPS_APPLY=1 RAHANDAZ_OPS_HELPER_CONFIRMED=1 RAHANDAZ_OPS_SANDBOX="$tmp" RAHANDAZ_OPS_BIN_DIR="$tmp/bin" RAHANDAZ_OPS_CATALOG="$tmp/catalog.json" run_op package.remove "$tmp/input-remove.json")"
+assert_eq "remove status" "succeeded" "$(json_field "$removed" status)"
+assert_eq "remove absent" "True" "$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["observed_state"]["absent"])' "$removed")"
+if [[ -e "$tmp/apt.mark" ]]; then
+    pass "remove reached the apt mock"
+else
+    fail "remove did not reach the apt mock"
 fi
 
 cat >"$tmp/input-drop-open.json" <<EOF

@@ -24,8 +24,11 @@ ops_automation_run_custom() {
     if [[ "${OPS_PRIVILEGE}" != "project" ]]; then
         ops_fail ROOT_SCRIPT_FORBIDDEN "Custom scripts stay on the project privilege level."
     fi
+    if [[ "${OPS_LAB:-}" == "1" ]]; then
+        ops_fail UNSUPPORTED_IN_CONTAINER "Custom scripts use systemd-run limits and were not started without a VM systemd."
+    fi
     local target
-    target="$(ops_py_value inside "$OPS_SANDBOX" "$script")"
+    target="$(ops_sandbox_path "$script")"
     if [[ ! -f "$target" || -L "$target" ]]; then
         ops_fail INVALID_INPUT "Custom script must be a regular file inside the sandbox."
     fi

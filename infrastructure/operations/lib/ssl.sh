@@ -50,7 +50,7 @@ ops_ssl_remove() {
         ops_fail PRECONDITION_FAILED "A shared certificate cannot be removed before a dependency check."
     fi
     local path="$OPS_SANDBOX/etc/rahandaz/certs/$domain"
-    ops_check inside "$OPS_SANDBOX" "$path"
+    ops_sandbox_path "$path" >/dev/null
     rm -rf "$path"
     ops_succeed "$plan" '{"private_key_logged":false,"revocation":"not-requested"}' true
 }

@@ -5,12 +5,15 @@ ops_fw_plan() {
 }
 
 ops_fw_install() {
-    local plan
-    plan="$(ops_fw_plan install)"
-    if ! ops_wants_apply; then
-        ops_preview "$plan"
+    ops_package_apply_named install ufw
+}
+
+ops_fw_rules_file() {
+    if [[ "${OPS_LAB:-}" == "1" ]]; then
+        printf '%s' /run/rahandaz-lab/ufw.rules
+        return 0
     fi
-    ops_fail PACKAGE_UNTESTED "UFW install has no passing VM test."
+    printf '%s' "$OPS_SANDBOX/ufw.rules"
 }
 
 ops_fw_status() {
@@ -41,8 +44,10 @@ ops_fw_add() {
     fi
     ops_require_sandbox_apply
     ops_require_approval
-    printf '%s/%s\n' "$port" "$proto" >>"$OPS_SANDBOX/ufw.rules"
-    chmod 0600 "$OPS_SANDBOX/ufw.rules"
+    local rules
+    rules="$(ops_fw_rules_file)"
+    printf '%s/%s\n' "$port" "$proto" >>"$rules"
+    chmod 0600 "$rules"
     ops_succeed "$plan" '{"added":true}' true
 }
 
@@ -69,6 +74,9 @@ ops_fw_enable() {
     fi
     ops_require_sandbox_apply
     ops_require_approval
+    if [[ "${OPS_LAB:-}" == "1" ]] || ! ops_systemd_running; then
+        ops_fail REQUIRES_VM "Enabling UFW needs a real VM. The firewall was not changed."
+    fi
     printf '%s\n' 'enabled' >"$OPS_SANDBOX/ufw.state"
     ops_succeed "$plan" '{"enabled":true,"flushed":false}' true
 }
@@ -84,6 +92,9 @@ ops_fw_disable() {
     fi
     ops_require_sandbox_apply
     ops_require_approval
+    if [[ "${OPS_LAB:-}" == "1" ]] || ! ops_systemd_running; then
+        ops_fail REQUIRES_VM "Disabling UFW needs a real VM. The firewall was not changed."
+    fi
     printf '%s\n' 'disabled' >"$OPS_SANDBOX/ufw.state"
     ops_succeed "$plan" '{"disabled":true,"flushed":false}' true
 }

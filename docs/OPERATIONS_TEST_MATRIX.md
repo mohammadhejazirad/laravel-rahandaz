@@ -21,6 +21,8 @@
 
 ## آنچه روی همین ماشین اجرا شد
 
+نتیجه `container-lab` در `tests/infrastructure/ubuntu-lab/docs/TEST_MATRIX.md` ثبت می‌شود و خانه‌های این جدول را `supported` نمی‌کند. اجرای ۲۰۲۶-۱۰-۱۳ همان آزمایشگاه است، نه آزمون VM.
+
 `bash infrastructure/operations/tests/run.sh` خروج ۰ داشت. این آزمون مخرب نیست:
 
 - `bash -n` برای هر اسکریپت درخت عملیات
