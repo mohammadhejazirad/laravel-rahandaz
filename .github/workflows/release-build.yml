@@ -1,0 +1,19 @@
+name: Release build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Refuse an unsigned publication
+        run: |
+          echo "This workflow does not publish a release and does not invent a signing key."
+          echo "Assemble and sign only after built assets, vendor, and an operator key exist."
+          test ! -f installer/trust/rahandaz-release.pub
+          bash installer/tests/run.sh

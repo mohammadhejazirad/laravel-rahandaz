@@ -56,3 +56,7 @@ stderr تشخیص است و پیش از برگرداندن به لاراول ا�
 آزمون رفتاری در `infrastructure/operations/tests/run.sh` با mock و sandbox گذشته است. آزمون VM روی Ubuntu 22.04، 24.04 و 26.04 اجرا نشده است.
 
 `RAHANDAZ_OPS_LAB=1` به‌تنهایی درِ میزبان را باز نمی‌کند. apply آزمایشگاهی فقط بعد از نشانگر root-only داخل کانتینر، فایل معمولی `/.dockerenv`، نبود سوکت Docker و pid 1 غیر از systemd یا init ادامه پیدا می‌کند. کاتالوگ `container-lab` بیرون از این دروازه به apt نمی‌رسد. این حالت آزمون امنیت یا نسخه Ubuntu را حذف نمی‌کند و نتیجه را `supported` نمی‌کند.
+
+## نصب‌کننده
+
+`installer/` ورودی اپراتور پیش از وجود پنل است. پنل و worker را به این موتور وصل نمی‌کند، `RAHANDAZ_OPS_LAB` را تنظیم نمی‌کند، و `rahandaz-ops apply` را صدا نمی‌زند. `ExecutionGate` همچنان `false` است. وضعیت آزمون نصب در `docs/INSTALLER_TEST_MATRIX.md` است و این سند را به `supported` تغییر نمی‌دهد.

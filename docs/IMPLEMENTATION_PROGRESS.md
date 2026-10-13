@@ -33,7 +33,7 @@
 
 assetهای رسمی در `public/branding` هستند. تمام faviconها، Apple Touch Icon و `public/og-image.png` از همان Symbol تولید شده‌اند. `resources/views/app.blade.php` metadata روشن/تیره، Open Graph و fallbackهای مرورگر را دارد. README، layout ورود، سایدبار/Drawer، setup فقط‌خواندنی و صفحه خطا از برند رسمی استفاده می‌کنند. درخواست مستقیم خطا با `resources/views/errors/show.blade.php` و CSS عمومی بدون وابستگی به Vite/JavaScript پاسخ می‌گیرد؛ navigation اینرسی همچنان صفحه React دارد.
 
-`assets/welcome-site/index.html` فقط منبع template installer آینده است و route یا publish نشده است. متن وضعیت و URL آن placeholder می‌مانند تا installer واقعی پس از موفقیت setup مقداردهی کند؛ وجود این فایل به‌معنی موفقیت نصب نیست. پروژه PWA نیست، بنابراین manifest، service worker و iconهای ۱۹۲/۵۱۲ اضافه نشده‌اند.
+`assets/welcome-site/index.html` منبع قالب خوشامد است و کپی آن در `installer/templates/welcome/index.html` است. route فعلی `/` هنوز آن را سرو نمی‌کند. placeholderها می‌مانند تا healthcheck واقعی مقدار بدهد. وجود این فایل به‌معنی موفقیت نصب نیست. پروژه PWA نیست، بنابراین manifest، service worker و iconهای ۱۹۲/۵۱۲ اضافه نشده‌اند.
 
 `tests/Feature/BrandAssetsTest.php` وجود و غیرخالی‌بودن خروجی‌ها، parsing امن XML، نبود script/event handler/منبع remote، ابعاد PNG، ساختار ICO، metadata Blade و placeholderهای welcome را پوشش می‌دهد. هیچ dependency frontend تازه‌ای نصب نشد.
 
@@ -56,7 +56,7 @@ AAD پاکت credential از id دهدهی workspace استفاده می‌کن�
 - بازبینی تصویری همه صفحه‌های داده‌دار و مسیرهای empty/error در چهار viewport. ورود و راه‌اندازی در ۳۶۰، ۷۶۸، ۱۲۸۰ و ۱۴۴۰ روشن/تیره بازبینی شده‌اند؛ کنتراست به‌صورت اندازه‌گیری‌شده با ابزار WCAG ثبت نشده است.
 - Wizard چندمرحله‌ای، Git، دامنه، دیتابیس، پشتیبان، نمودار مانیتورینگ، کاربران و کنسول فقط-خواندنی. این‌ها در منو «آماده نیست» هستند.
 - قرارداد امن برای علامت‌زدن پایان راه‌اندازی. دکمه موفقیت ساختگی اضافه نشده است.
-- reconciliation، سوکت root برای helper، systemd واحدهای نصب، installer، میرورها، جلالی. قرارداد CLI موتور و helper در مخزن است و به runner وصل نیست.
+- reconciliation، سوکت root برای helper، فعال‌سازی واقعی systemd، Release امضاشدهٔ نصب‌کننده، و جلالی. درخت `installer/` و قالب unitها در مخزن است و به runner وصل نیست. نصب production تأیید نشده است.
 - اندازه‌گیری RAM/CPU. هدف ۵۱۲MiB و ۰.۵ vCPU هنوز benchmark نشده است.
 - PHPStan اجرا نشده است.
 
@@ -164,6 +164,24 @@ CSS کتابخانه یک‌بار از `app.css` وارد می‌شود و entr
 
 اصلاح موتور که این اجرا نشان داد: کد خروج فرمان در حالت lab دیگر دور ریخته نمی‌شود؛ خطای کاتالوگ پشت «بسته در کاتالوگ نیست» پنهان نمی‌شود؛ مسیر خانهٔ حساب و ریشهٔ deploy وقتی sandbox برابر `/` است اسلش اضافه نمی‌گیرد؛ postgres فقط با traverse روی `/run/rahandaz-lab` به SQL می‌رسد؛ کلید مشاهدهٔ تغییر نقش `material_logged` است تا اسکنر secret نتیجه را رد نکند. کاتالوگ lab به‌خاطر حالت `0777` روی دیسک میزبان، داخل کانتینر با حالت `0644` کپی می‌شود و بررسی world-writable حذف نشده است.
 
+## نصب‌کننده — 2026-10-13
+
+درخت `installer/` اضافه شد. پیاده‌سازی مرحله‌ها در `lib/engine.sh` است. پنل به `OperationRunner` وصل نشد و `RAHANDAZ_EXECUTION_MODE` برابر `disabled` ماند.
+
+`bash installer/tests/run.sh` خروج ۰ داشت: ۶۳ مورد و ۰ شکست. apply آفلاین زیر `/tmp` خروج ۱۰ و `incomplete` بود. کلید اصلی ۳۲ بایت ماند، اجرای دوم همان هش را نگه داشت، خوشامد نوشته نشد، و لاگ هش کلید را نداشت.
+
+`bash installer/tests/container-plan.sh` روی کانتینرهای موجود آزمایشگاه: 22.04 خروج ۱ با `PHP_BASELINE_UNAVAILABLE`؛ 24.04 و 26.04 خروج ۰ با `RESULT plan`. هر سه تصویر تعارض nginx، postgresql، redis-server، php-fpm و php-cli را چاپ کردند و سرویس را حذف نکردند. pid 1 برابر `sleep` بود. بسته‌ای نصب نشد، `/up` زده نشد، مالک ساخته نشد، و صف و scheduler فعال نشدند.
+
+علت طرح اولیهٔ ناموفق این بود که `/etc/os-release` در Ubuntu symlink به `/usr/lib/os-release` است. نصب‌کننده فقط همین هدف را می‌پذیرد. الحاق مسیر وقتی ریشه `/` است دیگر `//usr/lib/os-release` نمی‌سازد.
+
+PHPUnit فیلتر `test_installer_master_key_is_created_once_and_not_printed` اجرا شد و پیش از assertion با رد اتصال به `192.0.2.1:5432` پایگاه `rahandaz_test` ایستاد. وضعیت آن `not_run` است. `migrate:fresh` اجرا نشد.
+
+Mirrorهای APT که InRelease آن‌ها با keyring اوبونتو تأیید شد در `docs/IRANIAN_MIRRORS.md` هستند. Runflare، Megan Hub و `mirror.arvancloud.com` انتخاب نشدند. آزمون ایران فقط fixture بود.
+
+workflowهای `installer-test.yml` و `release-build.yml` اجرا نشدند. کلید اعتماد Release در مخزن نیست. آمادگی انتشار عمومی: آماده نیست.
+
+`docs/PROJECT_SPEC.md`، `docs/ARCHITECTURE.md`، `docs/DEVELOPMENT.md` و `docs/ROADMAP.md` نیستند. نسخهٔ معتبر زیر `.docs/` است.
+
 ## کار بعدی
 
-صفحه‌های فهرست و جزئیات داده‌دار را با fixture معتبر در viewportهای مرجع و حالت‌های empty/error مرور کن. بعد از آن، فقط یک انتقال صریح و قابل بازگشت برای `setup_completed_at` طراحی شود که هیچ probe را «سازگار» اعلام نکند.
+صفحه‌های فهرست و جزئیات داده‌دار را با fixture معتبر در viewportهای مرجع و حالت‌های empty/error مرور کن. بعد از آن، فقط یک انتقال صریح و قابل بازگشت برای `setup_completed_at` طراحی شود که هیچ probe را «سازگار» اعلام نکند. نصب عمومی منتظر کلید اعتماد، artifact امضاشده، healthcheck واقعی و آزمون VM است.

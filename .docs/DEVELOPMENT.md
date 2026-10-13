@@ -1,6 +1,6 @@
 # توسعه راه‌انداز — Laravel + Inertia + React/TypeScript
 
-> راهنمای توسعه همین مخزن Laravel. فرمان‌های Artisan و npm زیر با کد فعلی جورند. نصب‌کننده production و اسکریپت‌های `scripts/` هنوز وجود ندارند. موتور میزبان در `infrastructure/operations/` است و آزمونش `bash infrastructure/operations/tests/run.sh` است. این آزمون بسته را روی میزبان واقعی نصب نمی‌کند.
+> راهنمای توسعه همین مخزن Laravel. فرمان‌های Artisan و npm زیر با کد فعلی جورند. درخت نصب‌کننده در `installer/` است و Release امضاشده ندارد. `scripts/install.sh` نیست. آزمون منطقی نصب‌کننده `bash installer/tests/run.sh` است و بسته را روی میزبان واقعی نصب نمی‌کند. موتور میزبان در `infrastructure/operations/` است و آزمونش `bash infrastructure/operations/tests/run.sh` است.
 
 ## پیش‌نیازها
 
@@ -101,6 +101,6 @@ Test suite شامل PostgreSQL واقعی برای migrations/index/locking/outb
 
 ## Release و محیط production
 
-پکیج نصب باید code/vendor و assets ساخته‌شده Vite را به شکل **artifact تاییدشده** همراه داشته باشد؛ در production برای UI به `npm install` نیازی نیست. `APP_DEBUG=false`، Nginx/PHP-FPM و PHP/extension pin‌شده، Redis broker/cache مجزا، Laravel scheduler/queue workers با systemd، credentialهای root-owned خارج repository، backup قبل از migration و command `doctor` الزامی‌اند. installer نباید site یا سرویس موجود را بی‌رضایت تغییر دهد.
+پکیج نصب باید code/vendor و assets ساخته‌شده Vite را به شکل **artifact تاییدشده** همراه داشته باشد؛ در production برای UI به `npm install` نیازی نیست. `APP_DEBUG=false`، Nginx/PHP-FPM و PHP/extension pin‌شده، Redis broker/cache مجزا، Laravel scheduler/queue workers با systemd، credentialهای root-owned خارج repository، backup قبل از migration و command `doctor` الزامی‌اند. installer نباید site یا سرویس موجود را بی‌رضایت تغییر دهد. قرارداد فعلی و حد آزمون در `docs/INSTALLER_ARCHITECTURE.md` و `docs/INSTALLER_TEST_MATRIX.md` است. تا انتشار امضاشده، فرمان نصب عمومی در README نیست.
 
-**مرجع اصلی:** `docs/PROJECT_SPEC.md` فصل‌های 3، 4، 6، 7، 13، 22 و 23.
+**مرجع اصلی:** `.docs/PROJECT_SPEC.md` فصل‌های 3، 4، 6، 7، 13، 22 و 23. `docs/PROJECT_SPEC.md` در این مخزن نیست.

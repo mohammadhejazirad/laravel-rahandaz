@@ -13,14 +13,17 @@ use Illuminate\Console\Command;
 
 class InitMasterKeyCommand extends Command
 {
-    protected $signature = 'rahandaz:keys:init {--local-only : Create a development master key} {--path= : Master key path}';
+    protected $signature = 'rahandaz:keys:init {--local-only : Create a development master key} {--installer : Create the production master key during installation} {--path= : Master key path}';
 
     protected $description = 'Create the Rahandaz master key when it does not already exist';
 
     public function handle(): int
     {
-        if (! $this->option('local-only')) {
-            $this->error('Refusing to create a master key without --local-only. Production keys belong to the installer.');
+        $local = (bool) $this->option('local-only');
+        $installer = (bool) $this->option('installer');
+
+        if ($local === $installer) {
+            $this->error('Pass exactly one of --local-only or --installer.');
 
             return self::FAILURE;
         }
@@ -29,6 +32,22 @@ class InitMasterKeyCommand extends Command
         $canaryPath = (string) config('rahandaz.canary_file');
 
         if (is_file($path) && filesize($path) > 0) {
+            if (! is_file($canaryPath) || filesize($canaryPath) === 0) {
+                try {
+                    $canary = new KeyCanary(new EnvelopeCipher(new MasterKey($path)));
+                    $canary->write($canaryPath);
+                } catch (SecretFilePermissionException $exception) {
+                    $this->error($exception->getMessage());
+
+                    return self::FAILURE;
+                }
+
+                $this->info('Canary created for the existing master key.');
+                $this->line('The key was not printed.');
+
+                return self::SUCCESS;
+            }
+
             $this->error('Refusing to overwrite an existing master key.');
 
             return self::FAILURE;

@@ -1,0 +1,19 @@
+name: Installer tests
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "installer/**"
+      - ".github/workflows/installer-test.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  installer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax and installer logic
+        run: bash installer/tests/run.sh

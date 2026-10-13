@@ -1,0 +1,220 @@
+#!/usr/bin/env bash
+# Rahandaz production installer. Plan is the default. Apply requires a verified release.
+set -euo pipefail
+
+INSTALLER_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=../lib/common.sh
+source "${INSTALLER_HOME}/lib/common.sh"
+# shellcheck source=../lib/state.sh
+source "${INSTALLER_HOME}/lib/state.sh"
+# shellcheck source=../lib/os.sh
+source "${INSTALLER_HOME}/lib/os.sh"
+# shellcheck source=../lib/verify.sh
+source "${INSTALLER_HOME}/lib/verify.sh"
+# shellcheck source=../lib/download.sh
+source "${INSTALLER_HOME}/lib/download.sh"
+# shellcheck source=../lib/mirror.sh
+source "${INSTALLER_HOME}/lib/mirror.sh"
+# shellcheck source=../lib/gate.sh
+source "${INSTALLER_HOME}/lib/gate.sh"
+# shellcheck source=../lib/render.sh
+source "${INSTALLER_HOME}/lib/render.sh"
+# shellcheck source=../lib/runtime.sh
+source "${INSTALLER_HOME}/lib/runtime.sh"
+# shellcheck source=../lib/engine.sh
+source "${INSTALLER_HOME}/lib/engine.sh"
+
+MODE="plan"
+PREFER_IRANIAN=0
+APPROVE_MIGRATIONS=0
+HTTP_PORT="80"
+SERVER_NAME="_"
+PUBLIC_URL="http://127.0.0.1"
+INSTALLER_ARTIFACT=""
+INSTALLER_MANIFEST=""
+INSTALLER_SIGNATURE=""
+INSTALLER_PUBLIC_KEY=""
+INSTALLER_STATE_DIR=""
+INSTALLER_ACKNOWLEDGE=""
+INSTALLER_MIRROR_PIN=""
+INSTALLER_RESULT=""
+
+usage() {
+    cat <<EOF
+Rahandaz installer $(cat "${INSTALLER_HOME}/VERSION")
+
+Usage:
+  rahandaz-install --plan
+  rahandaz-install --apply --artifact FILE --manifest FILE --signature FILE --public-key FILE
+  rahandaz-install --resume|--repair|--upgrade [same release arguments]
+  rahandaz-install --doctor
+
+--plan is the default and does not change the server.
+--apply installs only after the manifest signature and checksum verify.
+There is no curl|bash entry and no default GitHub URL.
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --plan) MODE="plan" ;;
+        --apply) MODE="apply" ;;
+        --resume) MODE="resume" ;;
+        --repair) MODE="repair" ;;
+        --upgrade) MODE="upgrade" ;;
+        --doctor) MODE="doctor" ;;
+        --prefer-iranian-mirrors) PREFER_IRANIAN=1 ;;
+        --approve-migrations) APPROVE_MIGRATIONS=1 ;;
+        --artifact) INSTALLER_ARTIFACT="$2"; shift ;;
+        --manifest) INSTALLER_MANIFEST="$2"; shift ;;
+        --signature) INSTALLER_SIGNATURE="$2"; shift ;;
+        --public-key) INSTALLER_PUBLIC_KEY="$2"; shift ;;
+        --state-dir) INSTALLER_STATE_DIR="$2"; shift ;;
+        --acknowledge-existing) INSTALLER_ACKNOWLEDGE="${INSTALLER_ACKNOWLEDGE},$2"; shift ;;
+        --mirror) INSTALLER_MIRROR_PIN="$2"; shift ;;
+        --server-name) SERVER_NAME="$2"; shift ;;
+        --http-port) HTTP_PORT="$2"; shift ;;
+        --public-url) PUBLIC_URL="$2"; shift ;;
+        --help | -h) usage; exit 0 ;;
+        *)
+            installer_error INVALID_INPUT "Unknown argument."
+            usage >&2
+            exit 2
+            ;;
+    esac
+    shift
+done
+
+if [[ ! "$HTTP_PORT" =~ ^[0-9]+$ ]] || ((HTTP_PORT < 1 || HTTP_PORT > 65535)); then
+    installer_error INVALID_INPUT "HTTP port is invalid."
+    exit 2
+fi
+
+if [[ -z "$INSTALLER_STATE_DIR" ]]; then
+    if [[ "$MODE" == "doctor" ]]; then
+        INSTALLER_STATE_DIR="$(installer_sysroot)/var/lib/rahandaz/installer"
+        if [[ ! -f "${INSTALLER_STATE_DIR}/state" ]]; then
+            installer_say "RESULT not_installed"
+            exit 1
+        fi
+    elif [[ "$MODE" == "plan" ]]; then
+        INSTALLER_STATE_DIR="$(mktemp -d /tmp/rahandaz-installer-plan.XXXXXX)"
+    else
+        INSTALLER_STATE_DIR="$(installer_sysroot)/var/lib/rahandaz/installer"
+    fi
+fi
+
+installer_state_init
+INSTALLER_LOG="${INSTALLER_STATE_DIR}/installer.log"
+if [[ ! -f "$INSTALLER_LOG" ]]; then
+    : >"$INSTALLER_LOG"
+fi
+chmod 0600 "$INSTALLER_LOG"
+
+if [[ "$MODE" == "doctor" ]]; then
+    installer_say "Rahandaz installer doctor"
+    missing=0
+    for id in \
+        01-preflight 02-repository-setup 03-system-packages 04-runtime-installation \
+        05-operational-account 06-application-release 07-postgresql-setup 08-redis-setup \
+        09-laravel-configuration 10-database-migration 11-nginx-php-fpm 12-systemd-services \
+        13-first-boot 14-health-verification; do
+        state="$(installer_state_get "stage.${id}")"
+        installer_say "STAGE ${id} ${state:-not_run}"
+        [[ "$state" == "succeeded" ]] || missing=1
+    done
+    if [[ "$missing" -eq 0 ]]; then
+        installer_say "RESULT success"
+        exit 0
+    fi
+    installer_say "RESULT not_installed"
+    exit 1
+fi
+
+installer_detect_os || exit 1
+
+if [[ "$MODE" != "plan" ]]; then
+    installer_mutation_allowed || exit 1
+    if [[ -z "$INSTALLER_ARTIFACT" || -z "$INSTALLER_MANIFEST" || -z "$INSTALLER_SIGNATURE" ]]; then
+        installer_error UNVERIFIED_ARTIFACT "Apply requires --artifact, --manifest, and --signature."
+        exit 1
+    fi
+    key="$(installer_public_key "$INSTALLER_PUBLIC_KEY")" || exit 1
+    installer_verify_manifest "$INSTALLER_MANIFEST" "$INSTALLER_SIGNATURE" "$key" "$INSTALLER_ARTIFACT" || exit 1
+    installer_say "Release ${INSTALLER_RELEASE_VERSION} verified."
+fi
+
+run_stage() {
+    local id="$1"
+    local fn="$2"
+    local repair="$3"
+    local current status
+    current="$(installer_state_get "stage.${id}")"
+    if [[ "$current" == "succeeded" && "$MODE" != "repair" ]]; then
+        installer_say "[SKIP] ${id}"
+        return 0
+    fi
+    if [[ "$current" == "succeeded" && "$MODE" == "repair" && "$repair" != "yes" ]]; then
+        installer_say "[SKIP] ${id}"
+        return 0
+    fi
+    set +e
+    (
+        set -euo pipefail
+        "$fn"
+    )
+    status=$?
+    set -e
+    if [[ "$MODE" == "plan" ]]; then
+        if [[ "$status" -ne 0 ]]; then
+            installer_state_set "stage.${id}" failed
+            if [[ -z "$(installer_state_get error_code)" ]]; then
+                installer_state_set error_code STAGE_FAILED
+            fi
+            installer_say "[FAILED] ${id}"
+            return 1
+        fi
+        installer_state_set "stage.${id}" planned
+        installer_say "[PLAN] ${id}"
+        return 0
+    fi
+    if [[ "$status" -eq 0 ]]; then
+        installer_state_set "stage.${id}" succeeded
+        installer_say "[OK] ${id}"
+        return 0
+    fi
+    if [[ "$status" -eq 2 ]]; then
+        installer_state_set "stage.${id}" not_run
+        installer_say "[NOT_RUN] ${id}"
+        return 0
+    fi
+    installer_state_set "stage.${id}" failed
+    if [[ -z "$(installer_state_get error_code)" ]]; then
+        installer_state_set error_code STAGE_FAILED
+    fi
+    installer_say "[FAILED] ${id}"
+    installer_say "RECOVERY fix $(installer_state_get error_code) and run --resume. Completed stages are kept."
+    return 1
+}
+
+run_stage 01-preflight stage_01_preflight no
+run_stage 02-repository-setup stage_02_repository_setup yes
+run_stage 03-system-packages stage_03_system_packages no
+run_stage 04-runtime-installation stage_04_runtime_installation no
+run_stage 05-operational-account stage_05_operational_account no
+run_stage 06-application-release stage_06_application_release no
+run_stage 07-postgresql-setup stage_07_postgresql_setup no
+run_stage 08-redis-setup stage_08_redis_setup yes
+run_stage 09-laravel-configuration stage_09_laravel_configuration yes
+run_stage 10-database-migration stage_10_database_migration no
+run_stage 11-nginx-php-fpm stage_11_nginx_php_fpm yes
+run_stage 12-systemd-services stage_12_systemd_services yes
+run_stage 13-first-boot stage_13_first_boot no
+run_stage 14-health-verification stage_14_health_verification yes
+run_stage 15-installation-summary stage_15_installation_summary yes
+
+case "$(installer_state_get result)" in
+    success | plan) exit 0 ;;
+    incomplete) exit 10 ;;
+    *) exit 1 ;;
+esac

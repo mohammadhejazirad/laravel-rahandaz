@@ -12,9 +12,9 @@
 
 راه‌انداز یک کنترل‌پنل خودمیزبان است تا مدیر همان سرور، نصب نرم‌افزار، اتصال Git، استقرار پروژه، دامنه، گواهی، دیتابیس، پشتیبان و وضعیت سرویس‌ها را از یک رابط فارسی انجام دهد. نسخه ۱ فقط میزبان محلی را می‌بیند. مدیریت چند سرور، عامل راه دور و اجرای پنل داخل Docker در این نسخه نیست.
 
-این مخزن هنوز نصب‌کننده عمومی، Release امضاشده و مجوز OSI ندارد. حالت پیش‌فرض `RAHANDAZ_EXECUTION_MODE=disabled` است. در این حالت پنل دستور میزبان اجرا نمی‌کند و هیچ عملیات یا deployment را موفق اعلام نمی‌کند. جدول وضعیت پایین، قابلیت آماده را از طرح محصول جدا می‌کند. جزئیات پیشرفت در [docs/IMPLEMENTATION_PROGRESS.md](docs/IMPLEMENTATION_PROGRESS.md) و مشخصات در [.docs/PROJECT_SPEC.md](.docs/PROJECT_SPEC.md) است.
+درخت `installer/` در مخزن است، ولی نصب‌کنندهٔ عمومی و Release امضاشده منتشر نشده و مجوز OSI هم نیست. حالت پیش‌فرض `RAHANDAZ_EXECUTION_MODE=disabled` است. در این حالت پنل دستور میزبان اجرا نمی‌کند و هیچ عملیات یا deployment را موفق اعلام نمی‌کند. جدول وضعیت پایین، قابلیت آماده را از طرح محصول جدا می‌کند. جزئیات پیشرفت در [docs/IMPLEMENTATION_PROGRESS.md](docs/IMPLEMENTATION_PROGRESS.md) و مشخصات در [.docs/PROJECT_SPEC.md](.docs/PROJECT_SPEC.md) است.
 
-نشان‌های بالا فقط نسخه قفل‌شده Laravel و محدودیت PHP را می‌گویند. تصویر PostgreSQL به image توسعه `postgres:16-alpine` در `compose.dev.yml` اشاره دارد، نه به یک نسخه production آزموده‌شده روی Ubuntu. نشان License، Release و CI ساخته نشده، چون فایل مجوز، Release عمومی و گردش GitHub Actions در مخزن نیستند.
+نشان‌های بالا فقط نسخه قفل‌شده Laravel و محدودیت PHP را می‌گویند. تصویر PostgreSQL به image توسعه `postgres:16-alpine` در `compose.dev.yml` اشاره دارد، نه به یک نسخه production آزموده‌شده روی Ubuntu. نشان License، Release و CI ساخته نشده است. فایل مجوز و Release عمومی نیستند. فایل‌های workflow در `.github/workflows/` هستند و در این مخزن اجرا نشده‌اند، پس نشان سبز CI معنا ندارد.
 
 ## فهرست
 
@@ -179,9 +179,9 @@ Helper ممتاز در طرح، یک برنامه root-owned با اسکیمای
 
 | سیستم‌عامل | معماری | نصب تولید | وضعیت |
 | --- | --- | --- | --- |
-| Ubuntu Server 22.04 LTS | x86_64 | نصب‌کننده هنوز نیست | Not yet verified |
-| Ubuntu Server 24.04 LTS | x86_64 | نصب‌کننده هنوز نیست | Not yet verified |
-| Ubuntu Server 26.04 LTS | x86_64 | نصب‌کننده هنوز نیست | Not yet verified |
+| Ubuntu Server 22.04 LTS | x86_64 | PHP توزیع برای پنل کافی نیست | Not yet verified |
+| Ubuntu Server 24.04 LTS | x86_64 | فقط طرح در کانتینر آزمایشگاه | Not yet verified |
+| Ubuntu Server 26.04 LTS | x86_64 | فقط طرح در کانتینر آزمایشگاه | Not yet verified |
 | ARM64 و توزیع‌های دیگر | — | خارج از نسخه ۱ | Unsupported |
 
 نسخه ۱ چند سرور را مدیریت نمی‌کند. اتصال SSH مدیریتی، Ansible و agent راه دور برای نسخه ۲ و ۳ مانده‌اند. پروژه کاربر هم روی همان میزبان و بدون Docker استقرار نسخه ۱ طراحی شده است.
@@ -197,7 +197,17 @@ Helper ممتاز در طرح، یک برنامه root-owned با اسکیمای
 <a id="install"></a>
 ## نصب
 
-نصب تولید هنوز منتشر نشده است. اسکریپت `scripts/install.sh`، بسته Release، امضا و checksum در مخزن نیستند. برای همین اینجا فرمان دانلود یا `curl | bash` نیست. وقتی Release واقعی ساخته شود، نصب باید نسخه‌دار باشد، قبل از هر تغییر امضا و SHA-256 را بررسی کند، قابل ادامه باشد، سایت و سرویس موجود را بی‌اجازه عوض نکند، SSH جاری را نبندد، و حساب لینوکسی `rahandaz` را بدون sudo و بدون shell ورود بسازد. عملیات ممتاز بعد از آن فقط از helper می‌گذرد. تا آن Release، سلامت نصب تولید را نمی‌توان از روی این فایل اجرا کرد.
+نصب تولید هنوز منتشر نشده است. اینجا فرمان دانلود یا `curl | bash` نیست، چون Release امضاشده و کلید عمومی `installer/trust/rahandaz-release.pub` وجود ندارند و URL انتشار حدس زده نمی‌شود.
+
+کد نصب‌کننده در `installer/` است. پیش‌فرض آن طرح است و سرور را تغییر نمی‌دهد:
+
+```bash
+bash installer/bin/rahandaz-install --plan --state-dir /tmp/rahandaz-plan
+```
+
+اعمال بعدی باید نسخه‌دار باشد، قبل از هر تغییر امضا و SHA-256 را بررسی کند، قابل ادامه باشد، سایت و سرویس موجود را بی‌اجازه عوض نکند، SSH جاری را نبندد، و حساب لینوکسی `rahandaz` را بدون sudo و بدون shell ورود بسازد. عملیات ممتاز بعد از بالا آمدن پنل فقط از helper می‌گذرد و امروز آن سوکت نصب نیست. سلامت نصب تولید از روی این فایل تأیید نمی‌شود.
+
+پیش‌نیاز هدف: Ubuntu Server 24.04 یا 26.04 روی x86_64، حداقل ۱ GiB RAM و ۵ GiB دیسک آزاد، و دسترسی root برای اعمال. 22.04 با PHP توزیع 8.1 پنل را میزبانی نمی‌کند. Node.js برای اجرای پنل لازم نیست. راهنمای کامل در [docs/INSTALLATION.md](docs/INSTALLATION.md) است.
 
 ### بالا آوردن محیط توسعه
 
@@ -239,7 +249,7 @@ php artisan serve --host=127.0.0.1 --port=8000
 
 منوی استقرار، دامنه، دیتابیس، پشتیبان و پایش با برچسب «آماده نیست» است و لینک مرده ندارد.
 
-طرح نسخه ۱ بعد از نصب تولید این مرحله‌ها را می‌خواهد: بررسی میزبان، انتخاب میرور، انتخاب PHP و Node، انتخاب دیتابیس، سرویس اختیاری، کلید SSH، و سلامت Nginx. سرویس خود کنترل‌پلین با نرم‌افزار پروژه‌های کاربر یکی نیست. صفحه خوشامد ایستا، در طرح، فقط نشان می‌دهد مسیریابی اولیه سالم است و اگر مجاز باشد حذف می‌شود. این صفحه در مخزن ساخته نشده. نشانی `/` امروز متن `Not found` و مسیر ورود پنل را برمی‌گرداند. موفقیت نصب تولید باید از healthcheck بیاید، نه از باز شدن یک صفحه.
+طرح نسخه ۱ بعد از نصب تولید این مرحله‌ها را می‌خواهد: بررسی میزبان، انتخاب میرور، انتخاب PHP و Node، انتخاب دیتابیس، سرویس اختیاری، کلید SSH، و سلامت Nginx. سرویس خود کنترل‌پلین با نرم‌افزار پروژه‌های کاربر یکی نیست. قالب خوشامد در `assets/welcome-site/index.html` و `installer/templates/welcome/index.html` است و placeholderهای `{{PANEL_URL}}`، `{{HEALTH_MARKER}}` و `{{SETUP_STATUS_LABEL}}` را نگه می‌دارد. مسیر `/` امروز متن `Not found` و مسیر ورود پنل را برمی‌گرداند. نصب‌کننده این قالب را فقط بعد از موفقیت `/up` و `/rahandaz/login` منتشر می‌کند. آن healthcheck هنوز اجرا نشده است.
 
 <a id="deployment"></a>
 ## استقرار پروژه‌ها
@@ -274,7 +284,7 @@ PostgreSQL وضعیت پایدار است. گروه‌های اصلی: کارب�
 <a id="security"></a>
 ## امنیت
 
-طرح نسخه ۱ حساب لینوکسی `rahandaz` را بدون root، بدون sudo و بدون shell ورود می‌خواهد. فرآیند وب و worker هم root نیستند. این حساب‌ها را نصب‌کننده می‌سازد و آن نصب‌کننده هنوز در مخزن نیست.
+طرح نسخه ۱ حساب لینوکسی `rahandaz` را بدون root، بدون sudo و بدون shell ورود می‌خواهد. فرآیند وب و worker هم root نیستند. قرارداد همین حساب در نصب‌کننده هست و روی این میزبان توسعه `useradd` نشده است.
 
 آنچه امروز در کد هست:
 
@@ -360,7 +370,8 @@ rahandaz/
 │   └── seeders/
 ├── docs/                     # طرح پایگاه، UI، پیشرفت، ADR
 ├── .docs/                    # مشخصات، معماری، توسعه، نقشه
-├── infrastructure/docker/    # فقط init تصویر PostgreSQL توسعه
+├── infrastructure/           # عملیات، helper، init پایگاه توسعه
+├── installer/                # نصب‌کننده؛ Release امضاشده ندارد
 ├── public/
 ├── resources/
 │   ├── css/
@@ -375,7 +386,7 @@ rahandaz/
 └── README.md
 ```
 
-این‌ها در ریشه نیستند: `scripts/`، واحد systemd، `LICENSE`، `SECURITY.md`، `CHANGELOG.md` و `CONTRIBUTING.md`. `infrastructure/operations/` و قرارداد `infrastructure/privilege_helper/` در مخزن هستند. daemon سوکت نصب نشده است. معماری هدف در [.docs/ARCHITECTURE.md](.docs/ARCHITECTURE.md) است.
+این‌ها در ریشه نیستند: `scripts/`، `LICENSE`، `SECURITY.md`، `CHANGELOG.md` و `CONTRIBUTING.md`. واحدهای systemd فقط قالب داخل `installer/templates/systemd/` هستند و روی میزبان نصب نشده‌اند. `infrastructure/operations/` و قرارداد `infrastructure/privilege_helper/` در مخزن هستند. daemon سوکت نصب نشده است. معماری هدف در [.docs/ARCHITECTURE.md](.docs/ARCHITECTURE.md) است.
 
 <a id="updates"></a>
 ## به‌روزرسانی
@@ -399,8 +410,8 @@ backup پایگاه به‌تنهایی credential رمزشده را برنمی�
 | نشانه | بررسی |
 | --- | --- |
 | سیستم‌عامل غیر از Ubuntu هدف | نسخه ۱ آن را پشتیبانی نمی‌کند. وضعیت آزمون در [جدول سازگاری](#compatibility) است |
-| کمبود RAM در نصب آینده | هدف پروفایل در [اجرا بدون Docker](#runtime) است. installer هنوز این پیش‌بررسی را اجرا نمی‌کند |
-| قفل APT یا میرور بد | اعمال میرور ساخته نشده. کاتالوگ پنل فقط خواندنی است |
+| کمبود RAM در نصب | نصب‌کننده زیر ۱ GiB را رد می‌کند و زیر ۲ GiB هشدار می‌دهد. این آستانه روی میزبان توسعه به‌صورت اعمال زنده اجرا نشده |
+| قفل APT یا میرور بد | کاتالوگ پنل فقط خواندنی است. نصب‌کننده mirror APT امضاشده را در [docs/IRANIAN_MIRRORS.md](docs/IRANIAN_MIRRORS.md) دارد و در شکست امضا مسیر ناامن را ادامه نمی‌دهد |
 | PHP به PostgreSQL وصل نمی‌شود | `pdo_pgsql` باید باشد. میزبان در `.env` باید از دید همان فرایند PHP قابل دسترس باشد |
 | `rahandaz:doctor` برای Redis یا پایگاه fail می‌دهد | Compose یا سرویس محلی را ببینید. پورت صف ۶۳۷۹ و cache در نمونه توسعه ۶۳۸۰ است |
 | `Refusing to overwrite an existing master key` | کلید قبلاً ساخته شده. فایل را پاک نکنید |
@@ -427,6 +438,14 @@ php artisan rahandaz:doctor
 | نقشه راه | [.docs/ROADMAP.md](.docs/ROADMAP.md) |
 | بازنگری خود اسناد | [.docs/CHANGELOG_DOCUMENTATION.md](.docs/CHANGELOG_DOCUMENTATION.md) |
 | پیشرفت پیاده‌سازی | [docs/IMPLEMENTATION_PROGRESS.md](docs/IMPLEMENTATION_PROGRESS.md) |
+| نصب | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
+| معماری نصب‌کننده | [docs/INSTALLER_ARCHITECTURE.md](docs/INSTALLER_ARCHITECTURE.md) |
+| امنیت نصب | [docs/INSTALLER_SECURITY.md](docs/INSTALLER_SECURITY.md) |
+| بازیابی نصب | [docs/INSTALLER_RECOVERY.md](docs/INSTALLER_RECOVERY.md) |
+| Mirrorهای بررسی‌شده | [docs/IRANIAN_MIRRORS.md](docs/IRANIAN_MIRRORS.md) |
+| سازگاری Ubuntu نصب‌کننده | [docs/UBUNTU_COMPATIBILITY.md](docs/UBUNTU_COMPATIBILITY.md) |
+| ماتریس آزمون نصب | [docs/INSTALLER_TEST_MATRIX.md](docs/INSTALLER_TEST_MATRIX.md) |
+| موتور عملیات | [docs/OPERATIONS.md](docs/OPERATIONS.md) |
 | طرح پایگاه و ERD | [docs/DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md)، [docs/DATABASE_ERD.md](docs/DATABASE_ERD.md) |
 | امنیت داده | [docs/DATABASE_SECURITY.md](docs/DATABASE_SECURITY.md) |
 | آپلود امن ZIP پروژه | [docs/PROJECT_ARCHIVE_UPLOADS.md](docs/PROJECT_ARCHIVE_UPLOADS.md) |
@@ -438,7 +457,7 @@ php artisan rahandaz:doctor
 | ADR مونولیت | [docs/adr/0001-laravel-modular-monolith.md](docs/adr/0001-laravel-modular-monolith.md) |
 | ADR شناسه | [docs/adr/0004-bigint-primary-key-uuidv7-public-identifier.md](docs/adr/0004-bigint-primary-key-uuidv7-public-identifier.md) |
 
-راهنمای نصب تولید، عملیات، مدل تهدید مستقل، استراتژی استقرار، کارایی، changelog محصول، مشارکت جدا، و `SECURITY.md` هنوز فایل ندارند. changelog محصول با گزارش بازنگری اسناد یکی نیست.
+مدل تهدید مستقل، استراتژی استقرار، کارایی، changelog محصول، مشارکت جدا، و `SECURITY.md` هنوز فایل ندارند. changelog محصول با گزارش بازنگری اسناد یکی نیست. راهنمای نصب و موتور عملیات در جدول بالا هستند و نصب production را تأیید نمی‌کنند.
 
 <a id="roadmap"></a>
 ## نقشه راه

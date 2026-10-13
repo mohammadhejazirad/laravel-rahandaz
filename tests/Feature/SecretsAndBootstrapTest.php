@@ -95,6 +95,33 @@ class SecretsAndBootstrapTest extends TestCase
         $this->assertSame(1, Artisan::call('rahandaz:keys:init', ['--local-only' => true]));
     }
 
+    public function test_installer_master_key_is_created_once_and_not_printed(): void
+    {
+        $directory = sys_get_temp_dir().'/rahandaz-installer-keys-'.bin2hex(random_bytes(4));
+        mkdir($directory, 0700, true);
+        config([
+            'rahandaz.master_key_file' => $directory.'/master.key',
+            'rahandaz.canary_file' => $directory.'/canary.json',
+        ]);
+        $this->forgetSecrets();
+
+        $this->assertSame(1, Artisan::call('rahandaz:keys:init', [
+            '--local-only' => true,
+            '--installer' => true,
+        ]));
+        $this->assertFileDoesNotExist($directory.'/master.key');
+
+        $this->assertSame(0, Artisan::call('rahandaz:keys:init', ['--installer' => true]));
+        $output = Artisan::output();
+        $encoded = trim((string) file_get_contents($directory.'/master.key'));
+
+        $this->assertStringNotContainsString($encoded, $output);
+        $this->assertTrue(app(KeyCanary::class)->verify($directory.'/canary.json'));
+
+        $this->assertSame(1, Artisan::call('rahandaz:keys:init', ['--installer' => true]));
+        $this->assertSame($encoded, trim((string) file_get_contents($directory.'/master.key')));
+    }
+
     public function test_doctor_fails_closed_when_the_master_key_is_missing(): void
     {
         $this->assertSame(0, Artisan::call('rahandaz:doctor'));
