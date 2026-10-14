@@ -25,3 +25,5 @@ SSH امن، inventory، مدیریت چند میزبان مورد اعتماد 
 Agent/worker توزیع‌شده، providerهای cloud، API اتوماسیون و telemetry گسترده پس از تثبیت امنیت و مصرف واقعی نسخه ۱.
 
 **Definition of Done و چک‌لیست انتشار تفصیلی:** `docs/PROJECT_SPEC.md`، فصل‌های 24، 25 و 29.
+
+برش ۲۰۲۶-۱۰-۱۴: صفحات درخواست/وضعیت پنج حوزه اصلی و آموزش‌ها ساخته و کنترل‌پلین آزموده شد؛ مرحله‌های host/runtime/Git/installer/Boot تکمیل نشده‌اند. ترتیب بعدی: authorization دقیق منابع، executor/helper قرارداددار در VM، deployment و datastore/edge/backup واقعی، Git/runtime، سپس certification/benchmark/signing. هیچ مرحله صرفاً با گزارش یا UI complete محسوب نمی‌شود. gateها در `docs/V1_RELEASE_READINESS.md` هستند.

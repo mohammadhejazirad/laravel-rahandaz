@@ -1,5 +1,7 @@
 # امنیت لایه داده راه‌انداز
 
+به‌روزرسانی ۲۰۲۶-۱۰-۱۴: props صفحات جدید allowlist دارند و credential/envelope/password/path خصوصی عرضه نمی‌شود. درخواست چهار engine با رمز مستقل و protected/workspace guards آزموده شد. تعویض رمز و تأیید restore بدون اعمال/فایل واقعی بسته‌اند؛ verified_at به‌تنهایی گواهی artifact نیست. bookmark فقط user_id نشست را می‌گیرد و pair یکتا است؛ pivot عمومی UUID ندارد. ResourceGrant کامل هنوز blocker است؛ PostgreSQL scoping جای آن نیست. جزئیات در `V1_SECURITY_AUDIT.md`.
+
 اولویت این لایه: محرمانگی راز، بعد یکپارچگی ارجاع، بعد دوام وضعیت. شناسه عمومی `uuid` ترتیب `id` عددی را در URL پنهان می‌کند و به‌تنهایی مجوز دسترسی نیست. `workspace_id` عددی هم مجوز نیست. RLS فعال نشده است و جایگزین policy لاراول نیست.
 
 ## رمزنگاری

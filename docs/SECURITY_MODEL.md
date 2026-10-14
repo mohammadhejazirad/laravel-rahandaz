@@ -12,6 +12,6 @@
 - SSH بدون recovery سخت نمی‌شود و sshd متوقف نمی‌شود.
 - reboot اجرا نمی‌شود.
 
-audit این عملیات‌ها هنوز به `audit_events` متصل نیست. سوکت helper، آزمون VM، و تحویل راز به اسکریپت پروژه مانده‌اند. جزئیات در `docs/OPERATIONS_SECURITY.md` است.
+ثبت درخواست صفحات جدید و آغاز/شکست worker به `audit_events` متصل است؛ اجرای OS خود موتور هنوز به audit پنل متصل نیست. سوکت helper، آزمون VM و تحویل راز به اسکریپت پروژه مانده‌اند. ResourceGrant جامع نیز blocker است. جزئیات در `docs/OPERATIONS_SECURITY.md` و `docs/V1_SECURITY_AUDIT.md` است.
 
 استثنای تازه: پذیرش منبع ZIP پروژه audit واقعی `project.archive_upload` دارد. فایل خارج `public/` ذخیره و پیش از ذخیره از نظر ساختار archive بررسی می‌شود؛ محتوا در HTTP اجرا یا extract نمی‌شود. این قابلیت برای کد پروژه تیم مورد اعتماد است و به‌تنهایی sandbox در برابر کد خصمانه، malware scan یا ایزوله‌سازی VM فراهم نمی‌کند.

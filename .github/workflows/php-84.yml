@@ -9,7 +9,14 @@ on:
       - "composer.lock"
       - "installer/**"
       - "resources/**"
-      - "tests/Unit/UpdateSystemTest.php"
+      - "tests/**"
+      - "database/**"
+      - "routes/**"
+      - "bootstrap/**"
+      - "config/**"
+      - "phpunit.xml"
+      - "package.json"
+      - "package-lock.json"
       - ".github/workflows/php-84.yml"
 
 permissions:
@@ -18,6 +25,32 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: rahandaz_test
+          POSTGRES_USER: rahandaz
+          POSTGRES_PASSWORD: replace-local-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U rahandaz -d rahandaz_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      redis-queue:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+      redis-cache:
+        image: redis:7-alpine
+        ports:
+          - 6380:6379
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DB_HOST: 127.0.0.1
+      REDIS_QUEUE_HOST: 127.0.0.1
+      REDIS_CACHE_HOST: 127.0.0.1
     steps:
       - uses: actions/checkout@v4
       - name: Install PHP 8.4
@@ -30,13 +63,24 @@ jobs:
         run: composer install --no-interaction --prefer-dist --no-progress
       - name: Check the declared platform
         run: composer check-platform-reqs --no-interaction
-      - name: Run the update unit tests
-        run: vendor/bin/phpunit tests/Unit/UpdateSystemTest.php
+      - name: Run all PHP tests against isolated PostgreSQL and Redis
+        run: php artisan test
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
       - name: Install and check the panel
         run: |
           npm ci
           npm run lint
           npm run typecheck
           npm run build
+          node --experimental-strip-types --test tests/js/datetime.test.ts
+      - name: Audit locked dependencies
+        run: |
+          composer audit --locked --no-interaction
+          npm audit --audit-level=high
+      - name: Run operation contract tests
+        run: bash infrastructure/operations/tests/run.sh
       - name: Run the installer logic suite
         run: bash installer/tests/run.sh

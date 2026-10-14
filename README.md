@@ -12,6 +12,16 @@
 
 راه‌انداز یک پنل مدیریت خودمیزبان است تا مدیر همان سرور، نصب نرم‌افزار، اتصال Git، استقرار پروژه، دامنه، گواهی، دیتابیس، پشتیبان و وضعیت سرویس‌ها را از یک رابط فارسی انجام دهد. نسخه ۱ فقط میزبان محلی را می‌بیند. مدیریت چند سرور، عامل راه دور و اجرای پنل داخل Docker در این نسخه نیست.
 
+## نصب سریع و وضعیت نسخه اول
+
+نسخه فعلی `1.0.0-development` است، نه Release پایدار. نصب تک‌دستوری عمومی تا وجود artifact امضاشده، کلید اعتماد و آزمون VM منتشر نمی‌شود. برای بررسی امن طرح نصب، بدون تغییر میزبان:
+
+```bash
+bash installer/bin/rahandaz-install --plan --state-dir /tmp/rahandaz-plan
+```
+
+صفحات استقرار، دامنه، دیتابیس، پشتیبان‌گیری و پایش اکنون به Backend و PostgreSQL متصل‌اند؛ درخواست‌های عملیاتی Job/Outbox/Audit واقعی دارند، ولی executor میزبان هنوز بسته است. مرکز آموزش‌ها جست‌وجو و نشان‌گذاری واقعی دارد. [گیت‌های انتشار](docs/V1_RELEASE_READINESS.md) و [گزارش آزمون](docs/V1_TEST_REPORT.md) محدوده تأییدشده و مانع‌ها را مشخص می‌کنند. این مخزن هنوز Production-ready نیست.
+
 درخت `installer/` در مخزن است، ولی نصب‌کنندهٔ عمومی و Release امضاشده منتشر نشده و مجوز OSI هم نیست. حالت پیش‌فرض `RAHANDAZ_EXECUTION_MODE=disabled` است. در این حالت پنل دستور میزبان اجرا نمی‌کند و هیچ عملیات یا deployment را موفق اعلام نمی‌کند. جدول وضعیت پایین، قابلیت آماده را از طرح محصول جدا می‌کند. جزئیات پیشرفت در [docs/IMPLEMENTATION_PROGRESS.md](docs/IMPLEMENTATION_PROGRESS.md) و مشخصات در [.docs/PROJECT_SPEC.md](.docs/PROJECT_SPEC.md) است.
 
 نشان‌های بالا فقط نسخه قفل‌شده Laravel و محدودیت PHP را می‌گویند. تصویر PostgreSQL به image توسعه `postgres:16-alpine` در `compose.dev.yml` اشاره دارد، نه به یک نسخه production آزموده‌شده روی Ubuntu. نشان License، Release و CI ساخته نشده است. فایل مجوز و Release عمومی نیستند. فایل‌های workflow در `.github/workflows/` هستند و در این مخزن اجرا نشده‌اند، پس نشان سبز CI معنا ندارد.
@@ -90,7 +100,7 @@
 | کاتالوگ و میرور | آماده | فقط خواندن. اعمال میرور و نصب بسته نیست |
 | اطلاعات زنده Ubuntu، systemd، UFW، کلید SSH | در حال ساخت | اسکریپت facts هست و سازگاری را `untested` می‌گذارد. پنل آن را اجرا نمی‌کند. کنسول آزاد root نیست |
 | نصب PHP، Node، Python، Nginx و سرویس‌ها روی میزبان | برنامه‌ریزی‌شده | اجرا خاموش است |
-| نمودار پایش | برنامه‌ریزی‌شده | داشبورد فقط شمارش job، پروژه، سرور و نمونه متریک است |
+| صفحه پایش | در حال ساخت | نمونه و سلامت ذخیره‌شده، timestamp، stale و polling فقط در صفحه فعال؛ collector و نمودار زنده نیست |
 
 ### پروژه، Git و استقرار
 
@@ -100,7 +110,7 @@
 | آپلود ZIP با انتخاب فایل یا drag-and-drop | آماده | بررسی امنیتی، ذخیره خصوصی، SHA-256، deployment/job/outbox/audit واقعی؛ extraction و build هنوز اجرا نمی‌شود |
 | GitHub، GitLab و GitLab خودمیزبان | برنامه‌ریزی‌شده | جدول‌ها و بررسی امضای وب‌هوک در کد هست. کنترلر HTTP وب‌هوک نیست |
 | انتخاب مخزن و شاخه، deploy key، استقرار خودکار | برنامه‌ریزی‌شده | |
-| دامنه، Nginx، TLS و تمدید گواهی | برنامه‌ریزی‌شده | اسکیما هست. UI و اعمال فایل نیست |
+| دامنه، Nginx، TLS و تمدید گواهی | در حال ساخت | فهرست/جزئیات و ثبت درخواست دامنه/گواهی؛ اعمال Nginx و ACME واقعی نیست |
 | Rollback و استقرار با کمترین وقفه | برنامه‌ریزی‌شده | تضمین صفر شدن وقفه در مشخصات هم مطلق نیست |
 | لاگ deployment | در حال ساخت | لاگ job ذخیره‌شده خوانده می‌شود. استقرار واقعی لاگ تولید نمی‌کند |
 
@@ -110,9 +120,10 @@
 | --- | --- | --- |
 | PostgreSQL راه‌انداز و دو Redis توسعه | آماده | صف `control` و cache جدا |
 | ثبت job، idempotency، outbox و lease | در حال ساخت | lease منقضی دزدیده نمی‌شود. runner موفقیت نمی‌نویسد |
-| لغو، تلاش مجدد و پیشرفت زنده | برنامه‌ریزی‌شده | صفحه job صفحه‌بندی و متن لاگ ذخیره‌شده دارد |
-| PostgreSQL، MySQL، MariaDB و MongoDB برای پروژه کاربر | برنامه‌ریزی‌شده | جدول instance و کاربر هست. ساخت دیتابیس اجرا نمی‌شود |
-| Backup و restore | برنامه‌ریزی‌شده | مسیر artifact و وضعیت تایید در اسکیما هست. job اجرا نیست |
+| ثبت استقرار، لغو و تلاش مجدد | در حال ساخت | SHA ثابت، جلوگیری از تعارض محیط، retry و لغو پیش از اجرا؛ build/health/switch/rollback زنده نیست |
+| PostgreSQL، MySQL، MariaDB و MongoDB برای پروژه کاربر | در حال ساخت | درخواست دیتابیس/کاربر رمز‌شده و Job واقعی؛ SQL/engine executor نیست |
+| پشتیبان‌گیری و بازیابی | در حال ساخت | فهرست/جزئیات/زمان‌بندی خواندنی و ثبت درخواست؛ artifact و بازیابی واقعی تأیید نشده |
+| آموزش‌ها | آماده در محدوده فعلی | ۲۲ مقاله فارسی در ۸ دسته، جست‌وجو، صفحه‌بندی، نشان کاربر در PostgreSQL و راهنمای زمینه‌ای؛ پوشش محتوای همه قابلیت‌های هدف هنوز کامل نیست |
 | اعلان داخل پنل | آماده | فهرست گیرنده، خواندن یکی و خواندن همه |
 | گزارش فعالیت | آماده | فقط owner و admin. بدون metadata، hash و IP در صفحه |
 | پاکت رمز راز | آماده | HKDF-SHA256 و XChaCha20-Poly1305. چرخش کلید هنوز workflow ندارد |
@@ -247,7 +258,7 @@ php artisan serve --host=127.0.0.1 --port=8000
 - فهرست سرور، کاتالوگ، میرور، پروژه، job، اعلان و نمایه.
 - گزارش فعالیت برای owner و admin.
 
-منوی استقرار، دامنه، دیتابیس، پشتیبان و پایش با برچسب «آماده نیست» است و لینک مرده ندارد.
+منوی استقرار، دامنه، دیتابیس، پشتیبان‌گیری، پایش و آموزش‌ها فعال است. ثبت درخواست جای موفقیت میزبان نیست؛ هشدار حالت خاموش در صفحه باقی می‌ماند. جست‌وجو و نشان آموزش به نشست و PostgreSQL واقعی متصل است.
 
 طرح نسخه ۱ بعد از نصب تولید این مرحله‌ها را می‌خواهد: بررسی میزبان، انتخاب میرور، انتخاب PHP و Node، انتخاب دیتابیس، سرویس اختیاری، کلید SSH، و سلامت Nginx. سرویس خود راه‌انداز با نرم‌افزار پروژه‌های کاربر یکی نیست. قالب خوشامد در `assets/welcome-site/index.html` و `installer/templates/welcome/index.html` است و placeholderهای `{{PANEL_URL}}`، `{{HEALTH_MARKER}}` و `{{SETUP_STATUS_LABEL}}` را نگه می‌دارد. مسیر `/` امروز متن `Not found` و مسیر ورود پنل را برمی‌گرداند. نصب‌کننده این قالب را فقط بعد از موفقیت `/up` و `/rahandaz/login` منتشر می‌کند. آن healthcheck هنوز اجرا نشده است.
 
@@ -297,11 +308,11 @@ PostgreSQL وضعیت پایدار است. گروه‌های اصلی: کارب�
 - بررسی امضای وب‌هوک GitHub با HMAC و GitLab با مقایسه هم‌طول، در تابع دامنه. نرخ‌محدودیت HTTP این مسیر هنوز نیست.
 - RLS روشن نیست و جایگزین Policy نیست. نقش migration از نقش اجرای برنامه جدا نشده است.
 
-آنچه هنوز ساخته نشده: helper allowlist، واحدهای systemd سخت‌شده، تأیید مالکیت دامنه، اعمال Nginx از قالب، و جلوگیری از DNS rebinding برای GitLab خودمیزبان. دانستن `uuid` یک منبع دسترسی نمی‌دهد، ولی ایزوله یونیکس جای مرز یک VM در برابر کد مخرب پروژه را نمی‌گیرد.
+آنچه هنوز تأیید نشده: سوکت helper، واحدهای systemd روی VM، تأیید مالکیت دامنه و اعمال Nginx. گارد خروجی HTTPS نشانی‌های ویژه و DNS غیرعمومی را رد می‌کند؛ اتصال کامل GitLab خودمیزبان هنوز آماده نیست. ResourceGrant در همه query/actionها اعمال نمی‌شود و مانع امنیتی انتشار است. دانستن `uuid` مجوز نیست و ایزوله یونیکس جای VM در برابر کد مخرب را نمی‌گیرد.
 
 بکاپ پایگاه بدون نسخه جداگانه کلید اصلی، credentialهای رمزشده را برنمی‌گرداند. عوض کردن فایل کلید بدون workflow چرخش، رازهای موجود را ناخوانا می‌کند.
 
-این متن امنیت مطلق ادعا نمی‌کند. فایل `SECURITY.md` هنوز نیست، پس مسیر رسمی گزارش آسیب‌پذیری منتشر نشده است. جزئیات لایه داده در [docs/DATABASE_SECURITY.md](docs/DATABASE_SECURITY.md) است.
+این متن امنیت مطلق ادعا نمی‌کند. [سیاست گزارش امنیتی](SECURITY.md)، [یافته‌های ممیزی](docs/V1_SECURITY_AUDIT.md) و [امنیت داده](docs/DATABASE_SECURITY.md) محدودیت‌ها را توضیح می‌دهند. کانال خصوصی رسمی هنوز نیازمند تصمیم مالک است.
 
 <a id="runtime"></a>
 ## اجرا بدون Docker
@@ -347,7 +358,7 @@ npm run build
 node --experimental-strip-types --test tests/js/datetime.test.ts
 ```
 
-`php artisan test` از PostgreSQL جداگانه `rahandaz_test` استفاده می‌کند. SQLite جای قیدهای PostgreSQL را نمی‌گیرد. PHPStan در وابستگی‌ها نیست. نتیجه آخرین اجرای ثبت‌شده آزمون‌ها در سند پیشرفت است. این README اجرای تازه‌ای را گزارش نمی‌کند.
+`php artisan test` از PostgreSQL جداگانه `rahandaz_test` استفاده می‌کند. SQLite جای قیدهای PostgreSQL را نمی‌گیرد. PHPStan نصب نیست. نتیجه آزمون‌های واقعی این برش در [گزارش آزمون](docs/V1_TEST_REPORT.md) ثبت می‌شود؛ CI جدید برای PHP 8.4 هنوز در GitHub اجرا نشده است.
 
 <a id="layout"></a>
 ## ساختار مخزن
@@ -418,7 +429,7 @@ backup پایگاه به‌تنهایی credential رمزشده را برنمی�
 | `vite: not found` یا `multiplex: not found` | `npm ci` را دوباره اجرا کنید تا `node_modules/.bin` ساخته شود |
 | worker job را موفق نمی‌کند | `RAHANDAZ_EXECUTION_MODE=disabled` است و این رفتار خواستهٔ فعلی است |
 | ZIP پروژه آپلود نمی‌شود | وجود `ext-zip`/`fileinfo`، سقف‌های `RAHANDAZ_ARCHIVE_*` و محدودیت Nginx/PHP upload را بررسی کنید؛ ZIP خطرناک عمداً با خطای فرم رد می‌شود |
-| webhook یا SSL یا دامنه کار نمی‌کند | مسیر HTTP و اعمال Nginx برنامه‌ریزی‌شده‌اند |
+| webhook یا SSL کار نمی‌کند | وب‌هوک HTTP/worker و اعمال ACME/Nginx هنوز کامل نیستند؛ ثبت درخواست دامنه به‌معنی فعال‌شدن سایت نیست |
 | ورود پنل ۴۰۴ است | مسیر `/rahandaz/login` است، نه `/login` و نه `/` |
 
 فرمان تشخیص وابستگی توسعه:
@@ -457,7 +468,35 @@ php artisan rahandaz:doctor
 | ADR مونولیت | [docs/adr/0001-laravel-modular-monolith.md](docs/adr/0001-laravel-modular-monolith.md) |
 | ADR شناسه | [docs/adr/0004-bigint-primary-key-uuidv7-public-identifier.md](docs/adr/0004-bigint-primary-key-uuidv7-public-identifier.md) |
 
-مدل تهدید مستقل، استراتژی استقرار، کارایی، changelog محصول، مشارکت جدا، و `SECURITY.md` هنوز فایل ندارند. changelog محصول با گزارش بازنگری اسناد یکی نیست. راهنمای نصب و موتور عملیات در جدول بالا هستند و نصب production را تأیید نمی‌کنند.
+اسناد تکمیلی: [آمادگی انتشار](docs/V1_RELEASE_READINESS.md)، [ممیزی قابلیت‌ها](docs/V1_FEATURE_INVENTORY.md)، [آزمون‌ها](docs/V1_TEST_REPORT.md)، [معماری آموزش‌ها](docs/TUTORIALS_ARCHITECTURE.md)، [CLI](docs/CLI_REFERENCE.md)، [استراتژی استقرار](docs/DEPLOYMENT_STRATEGIES.md)، [امنیت](SECURITY.md)، [مشارکت](CONTRIBUTING.md) و [تغییرات](CHANGELOG.md). Benchmark منابع VM هنوز اجرا نشده است.
+
+## تصاویر واقعی محیط آزمایشی
+
+این تصاویر از Chrome، نشست واقعی Laravel و PostgreSQL ایزوله در ۲۰۲۶-۱۰-۱۴ گرفته شده‌اند؛ mockup نیستند. اجرای میزبان خاموش است؛ استقرار شکست‌خورده واقعاً توسط worker ثبت شده و نبود متریک با حالت خالی نمایش داده می‌شود. تصاویر تأیید نصب Production نیستند و اطلاعات کاربر واقعی ندارند.
+
+| داشبورد | سرورها |
+| --- | --- |
+| ![داشبورد آزمایشی](docs/screenshots/dashboard.webp) | ![سرور آزمایشی](docs/screenshots/servers.webp) |
+| پروژه‌ها | استقرارها |
+| ![پروژه آزمایشی](docs/screenshots/projects.webp) | ![استقرار شکست‌خورده در حالت خاموش](docs/screenshots/deployments.webp) |
+| دیتابیس‌ها | پایش |
+| ![درخواست دیتابیس؛ بدون نمونه نصب‌شده](docs/screenshots/databases.webp) | ![پایش؛ بدون داده ساختگی](docs/screenshots/monitoring.webp) |
+
+![مرکز آموزش‌ها](docs/screenshots/tutorials.webp)
+
+## CLI موجود
+
+در checkout از `bash installer/bin/rahandaz` استفاده کنید؛ نصب فرمان سراسری هنوز در VM تأیید نشده است. این‌ها فرمان واقعی‌اند، اما آزمون منطق به‌معنی موفقیت apply روی میزبان نیست.
+
+| فرمان | محدوده تأیید |
+| --- | --- |
+| `rahandaz --help`، `rahandaz version` | خروجی محلی |
+| `rahandaz status`، `rahandaz doctor` | تشخیص؛ doctor نبود dependency/نصب را شکست می‌دهد |
+| `rahandaz update check`، `rahandaz update history` | metadata/history؛ fixture، نه انتشار زنده |
+| `rahandaz update --dry-run` همراه ورودی‌های Release معتبر | قرارداد manifest/امضا/checksum؛ harness |
+| `rahandaz update rollback`، `rahandaz repair` | منطق کنترل‌شده؛ بازیابی DB خودکار نیست و VM تأیید نشده |
+
+فرمان‌های PHP/install/service/reboot عمومی CLI هنوز ارائه نمی‌شوند. گزینه‌ها و محدودیت‌ها در [CLI_REFERENCE](docs/CLI_REFERENCE.md) هستند.
 
 <a id="roadmap"></a>
 ## نقشه راه
@@ -473,7 +512,7 @@ php artisan rahandaz:doctor
 <a id="contributing"></a>
 ## مشارکت
 
-`CONTRIBUTING.md` جداگانه نیست. پیش از تغییر، [.docs/PROJECT_SPEC.md](.docs/PROJECT_SPEC.md)، [.docs/ARCHITECTURE.md](.docs/ARCHITECTURE.md) و [docs/IMPLEMENTATION_PROGRESS.md](docs/IMPLEMENTATION_PROGRESS.md) را بخوانید. `AGENTS.md` قاعده شناسه و رابط را برای کار داخل مخزن خلاصه کرده است.
+راهنمای [CONTRIBUTING.md](CONTRIBUTING.md) را بخوانید. پیش از تغییر، [.docs/PROJECT_SPEC.md](.docs/PROJECT_SPEC.md)، [.docs/ARCHITECTURE.md](.docs/ARCHITECTURE.md) و [docs/IMPLEMENTATION_PROGRESS.md](docs/IMPLEMENTATION_PROGRESS.md) مرجع‌اند. `AGENTS.md` قواعد کار داخل مخزن را خلاصه کرده است.
 
 - باگ و پیشنهاد را با رفتار فعلی جدول وضعیت بسنجید. قابلیت برنامه‌ریزی‌شده را باگ نبود پیاده‌سازی ندانید.
 - تغییر میزبان، systemd و installer بدون قرارداد و آزمون ایمنی اضافه نشود. حالت اجرا پیش‌فرض `disabled` بماند.

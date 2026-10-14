@@ -8,7 +8,7 @@
 
 | بسته | نسخه | نقش |
 | --- | --- | --- |
-| php | 8.5.11 روی این ایستگاه | محدودیت بسته `^8.4`. باینری پنل `/usr/bin/php8.4` است و روی این میزبان نصب نیست. `composer check-platform-reqs` در ۲۰۲۶-۱۰-۱۴ برای بسته‌های vendor روی PHP میزبان و PHP لرد خروج ۰ داشت. `pdo_pgsql` در require کامپوزر نیست؛ میزبان آن را ندارد و PHP لرد دارد |
+| php | 8.5.11 روی این ایستگاه | محدودیت `^8.4`؛ باینری production `/usr/bin/php8.4` محلی نصب نیست. pdo_pgsql/redis/sodium/zip/fileinfo اکنون require هستند؛ platform check در PHP لرد خروج ۰، میزبان native pdo_pgsql ندارد |
 | laravel/framework | v13.35.0 | HTTP، Eloquent، Queue، Scheduler |
 | inertiajs/inertia-laravel | v3.5.1 | پل Inertia |
 | ramsey/uuid | 4.9.4 | زیرساخت `Str::uuid7()` |

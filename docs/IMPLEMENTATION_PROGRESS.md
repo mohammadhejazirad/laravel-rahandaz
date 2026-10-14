@@ -2,6 +2,23 @@
 
 این فایل گزارش واقعیت مخزن است. نقشه در `.docs/ROADMAP.md` و مشخصات در `.docs/PROJECT_SPEC.md` است.
 
+## آخرین برش — نهایی‌سازی نسخه اول، ۲۰۲۶-۱۰-۱۴
+
+مأموریت کامل نسخه اول تمام نشده؛ انتشار blocked است. گزارش‌های پایین snapshot تاریخی‌اند. وضعیت کنونی در V1_FEATURE_INVENTORY، V1_RELEASE_READINESS، V1_TEST_REPORT و V1_SECURITY_AUDIT است.
+
+- ۱۲ صفحه React، ۶ controller و ۴ FormRequest برای پنج حوزه اصلی و آموزش‌ها به HTTP/PG واقعی متصل شدند؛ scoped lookup و allowlist props دارند. host executor/helper نیست و success جعلی نمایش داده نمی‌شود.
+- استقرار دستی با SHA ثابت/idempotency، فیلتر، retry/cancel پیش از شروع؛ شکست worker به deployment/restore منتقل و قفل محیط آزاد می‌شود. rollback ناسازگار و password replacement بدون host confirmation بسته‌اند.
+- درخواست دامنه/گواهی و DB/user چهار engine با encrypted credential/protected guard، پشتیبان‌گیری بدون artifact جعلی، schedules/history خواندنی؛ approval restore از metadata بسته شد. ACME، SQL execution و recovery واقعی هنوز نیستند.
+- آموزش‌ها: ۲۲ مقاله/۸ دسته، search و pagination ۱۲تایی/shareable query، related و bookmark خصوصی PG. migration/model جدید فقط tutorial_bookmarks/TutorialBookmark است؛ BIGINT/FK pivot بدون UUID عمومی مستقل با ADR. همه ۴۴ موضوع/FAQ مستقل تمام نشده‌اند.
+- HTTPS guard نشانی ویژه/mapped/tunnel/DNS غیرعمومی را رد می‌کند؛ حساب تعلیق‌شده logout/deny می‌شود؛ audit/notification شروع و شکست Job یکتا و بدون success است. ResourceGrant جامع blocker باقی است.
+- نمونه‌های میزبان مستقل/stale، polling tab فعال و retention روزانه هفت روز با batch/dry-run؛ collector/aggregation/alert evaluator نیست.
+- Header عنوان بلند در 320px اصلاح، Chrome واقعی login/search/bookmark و ۲۱ مسیر × ۹ عرض × دو پوسته (۳۷۸ بررسی) بدون overflow/exception گذشت؛ Drawer راست/Escape تأیید شد. هفت screenshot واقعی WebP بدون راز در README اضافه شد.
+- suite: ۱۱۴ passed، ۱ skipped، ۳۲۳۵ assertion روی PHP توسعه 8.5.11/PG/Redis. lint/typecheck/build و operations Bash گذشتند؛ installer ۶۹/۰ و updater زیرمجموعه ۲۱/۰. PHP 8.4 محلی و CI remote تأیید نشده‌اند.
+- Composer اکنون pdo_pgsql/redis/sodium را require می‌کند؛ lock hash/validate/platform توسعه موفق با license/ownership warning، بدون تغییر git global config. npm audit صفر advisory؛ Composer advisory timeout/blocked. scan محدود ۲۰ commit محلی بدون match پر‌اطمینان؛ اسکن تخصصی کامل نیست.
+- CI PHP 8.4 به full PG/Redis/frontend/audit گسترش یافت؛ workflow/tag/push/Release اجرا نشد. LICENSE/کلید signing/artifact معتبر نیستند. نصب/Update/Boot/SSH/ACME/provider/restore روی سه VM و benchmark not_run/requires_vm باقی‌اند. عملیات مخرب میزبان واقعی انجام نشد.
+
+فهرست فایل‌ها در V1_CHANGESET است. قدم بعدی authorization منابع و executor/helper قرارداددار در VM است، نه بازکردن Gate با env.
+
 ## مرحله فعلی
 
 مرحله ۰ (هسته) پیاده‌سازی و تست شده است. بخش قابل آزمون مرحله ۱ (ورود، پوسته، probe فقط-خواندنی) هم ساخته شده است. صفحه ورود و راه‌اندازی در viewportهای مرجع و هر دو پوسته بازبینی شده‌اند، ولی visual regression همه صفحه‌های داده‌دار و Wizard عملیاتی هنوز وجود ندارد و بنابراین مرحله ۱ بسته نیست.

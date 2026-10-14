@@ -1,0 +1,51 @@
+{
+  "status": "passed",
+  "checked_at": "2026-10-14T10:25:29.688Z",
+  "drawer": {
+    "right": 390,
+    "width": 335.390625
+  },
+  "runtime_errors": 0,
+  "fixture": "isolated PostgreSQL; host execution disabled; no synthetic metrics",
+  "bookmark": "search/detail/write/refresh/list passed",
+  "check_count": 378,
+  "paths": [
+    "dashboard",
+    "servers",
+    "servers/01a139cf-0acf-7313-bd54-ac65011a6dad",
+    "projects",
+    "projects/01a139cf-0ad2-706b-be94-acb76a038afd",
+    "deployments",
+    "deployments/01a139cf-0adf-7266-bd57-a2b19fe82e56",
+    "domains",
+    "databases",
+    "backups",
+    "backups/schedules",
+    "monitoring",
+    "tutorials",
+    "tutorials/installation",
+    "jobs",
+    "notifications",
+    "catalog",
+    "mirrors",
+    "audit",
+    "settings/profile",
+    "settings/updates"
+  ],
+  "widths": [
+    320,
+    360,
+    390,
+    430,
+    768,
+    1024,
+    1280,
+    1440,
+    1920
+  ],
+  "themes": [
+    "light",
+    "dark"
+  ],
+  "overflow_count": 0
+}

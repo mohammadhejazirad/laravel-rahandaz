@@ -24,7 +24,7 @@ function BreadcrumbItem({ className, ...props }: ComponentProps<"li">) {
     return (
         <li
             data-slot="breadcrumb-item"
-            className={cn("inline-flex items-center gap-1.5", className)}
+            className={cn("inline-flex min-w-0 max-w-full items-center gap-1.5 break-words", className)}
             {...props}
         />
     );

@@ -6,8 +6,11 @@ namespace App\Domain\Jobs;
 
 use App\Domain\Jobs\Enums\JobStatus;
 use App\Domain\Jobs\Enums\StepStatus;
+use App\Domain\Projects\Enums\DeploymentStatus;
 use App\Infrastructure\Executor\ExecutionGate;
+use App\Models\Deployment;
 use App\Models\OperationJob;
+use App\Models\RestoreOperation;
 use Illuminate\Support\Facades\DB;
 
 final class OperationRunner
@@ -15,6 +18,7 @@ final class OperationRunner
     public function __construct(
         private readonly ExecutionGate $gate,
         private readonly JobLogger $logger,
+        private readonly JobLifecycleRecorder $lifecycle,
     ) {}
 
     public function run(int|string $operationJobId): void
@@ -38,6 +42,8 @@ final class OperationRunner
                 'started_at' => now(),
             ])->save();
 
+            $this->lifecycle->record($job, 'started');
+
             $finishedAt = now();
             $job->forceFill([
                 'status' => JobStatus::Failed,
@@ -57,6 +63,16 @@ final class OperationRunner
             }
 
             $this->logger->append($job, 'error', $this->gate->denialMessage(), 'gate');
+            $this->lifecycle->record($job, 'failed');
+
+            // Failure of the transport operation must release the domain mutation lock.
+            Deployment::query()->where('operation_job_id', $job->id)->mutating()->update([
+                'status' => DeploymentStatus::Failed->value,
+                'failure_code' => $job->error_code,
+                'finished_at' => $finishedAt,
+            ]);
+            RestoreOperation::query()->where('operation_job_id', $job->id)
+                ->where('status', 'queued')->update(['status' => 'failed', 'failure_code' => $job->error_code, 'finished_at' => $finishedAt, 'updated_at' => $finishedAt]);
         });
     }
 }

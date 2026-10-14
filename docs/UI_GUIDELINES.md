@@ -91,3 +91,5 @@ PostgreSQL مقدار را UTC نگه می‌دارد. props تاریخ ISO 8601
 ## نام‌گذاری
 
 کامپوننت رابط در `components/ui`. صفحه در `pages/<area>`. برچسب فارسی هر Enum از `label()` همان Enum می‌آید و با `enum_labels` به رابط می‌رسد؛ مقدار ذخیره‌شده در پایگاه عوض نمی‌شود. شناسه در URL همان `uuid` است.
+
+نام بخش Backup در navigation/title/actions «پشتیبان‌گیری» است؛ نام artifact می‌تواند «نسخه پشتیبان» بماند. identifierهای Backup و مسیر داخلی عوض نمی‌شوند. آموزش‌ها تنها برای محتوای repository از slug پایدار استفاده می‌کنند؛ bookmark pivot شناسه عمومی ندارد. راهنمای زمینه‌ای از HelpLink مشترک می‌آید. Header عنوان بلند و کنترل‌های حساب را در 320px داخل viewport نگه می‌دارد. ۳۷۸ viewport/theme check واقعی در `V1_TEST_REPORT.md` ثبت شده؛ coverage همه dialogs و WCAG کامل ادعا نمی‌شود.

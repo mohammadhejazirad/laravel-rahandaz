@@ -6,6 +6,8 @@
 
 رابط و کنترلر فقط درخواست را اعتبارسنجی می‌کنند و job را در PostgreSQL ثبت می‌کنند. Redis کار را بیدار می‌کند. worker امروز از `OperationRunner` می‌گذرد و به‌خاطر `ExecutionGate` هیچ فرمانی اجرا نمی‌کند. job موفق نمی‌شود.
 
+از ۲۰۲۶-۱۰-۱۴ ثبت درخواست deployment/domain/database/backup از صفحات اصلی واقعی است. آغاز/شکست Job audit و notification یکتا دارد؛ failure code و finished_at به استقرار/restore مرتبط منتقل می‌شود. commit ثابت حفظ می‌شود و retry/cancel پیش از شروع پیاده شده‌اند؛ approval restore از metadata به‌تنهایی بسته است. این‌ها engine executor یا certification نیستند. آزمون‌ها و blockerها در `V1_TEST_REPORT.md` و `V1_RELEASE_READINESS.md` هستند.
+
 مسیر بعدی، وقتی دروازه و سوکت helper هر دو حاضر باشند:
 
 ```text

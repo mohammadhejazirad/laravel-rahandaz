@@ -21,6 +21,10 @@ final class RecordOperation
         $hash = $this->plans->hash($data);
 
         return DB::transaction(function () use ($data, $hash): OperationJob {
+            // Serialize the absent-row case as well as existing requests.
+            DB::select('select pg_advisory_xact_lock(hashtextextended(?, 0))', [
+                json_encode([$data->workspaceId, $data->actorId, $data->type, $data->idempotencyKey], JSON_THROW_ON_ERROR),
+            ]);
             $existing = OperationJob::query()
                 ->where('workspace_id', $data->workspaceId)
                 ->where('actor_id', $data->actorId)

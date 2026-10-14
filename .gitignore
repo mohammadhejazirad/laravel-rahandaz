@@ -3,6 +3,10 @@
 .env
 .env.backup
 .env.production
+.env.*
+!.env.example
+__pycache__/
+*.pyc
 .phpactor.json
 .phpunit.result.cache
 /.codex

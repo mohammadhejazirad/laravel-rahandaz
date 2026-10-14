@@ -59,7 +59,7 @@ PostgreSQL منبع وضعیت پایدار است. Redis فقط صف، cache، 
 
 ## کلید، یکتایی و بررسی
 
-کلید اصلی دامنه `id` از نوع bigint است. هر جدول دامنه با هویت مستقل ستون `uuid` یکتا دارد. Pivot بی‌هویت در این اسکیما نیست؛ `memberships` و `resource_grants` چرخه مستقل دارند و هر دو شناسه را نگه می‌دارند. FKهای حساس به workspace مرکب هستند: `(credential_id, workspace_id)`، `(local_host_id, workspace_id)` و مانند آن. PostgreSQL با `MATCH SIMPLE` اگر یکی از ستون‌ها تهی باشد بررسی را رد می‌کند. برای همین تنظیم installation نمی‌تواند به credential اشاره کند.
+کلید اصلی دامنه `id` از نوع bigint است. هر جدول دامنه با هویت مستقل ستون `uuid` یکتا دارد. Pivot بدون هویت مستقل `tutorial_bookmarks` است؛ `memberships` و `resource_grants` چرخه مستقل دارند و هر دو شناسه را نگه می‌دارند. FKهای حساس به workspace مرکب هستند: `(credential_id, workspace_id)`، `(local_host_id, workspace_id)` و مانند آن. PostgreSQL با `MATCH SIMPLE` اگر یکی از ستون‌ها تهی باشد بررسی را رد می‌کند. برای همین تنظیم installation نمی‌تواند به credential اشاره کند.
 
 یکتایی‌های مهم:
 
@@ -97,7 +97,9 @@ FK در Laravel ایندکس جدا نمی‌سازد. بعضی ایندکس‌�
 
 ## نگهداری
 
-سیاست هدف، هنوز job ندارد: نمونه خام متریک حدود هفت روز، لاگ job محدود، delivery و factها snapshot هستند نه جریان هر ثانیه. داده قدیمی وضعیت لحظه‌ای نیست. `host_facts` موجودی کند است و `metric_samples` سری زمانی جداست.
+نمونه خام متریک با `rahandaz:metrics:prune` روزانه و پیش‌فرض هفت روز حذف دسته‌ای دارد؛ هر اجرا حداکثر ۱۰۰ هزار ردیف و batchهای ۱۰۰۰تایی، با dry-run و validation سخت. collector و aggregation هنوز نیستند. نگهداری لاگ job/delivery/fact/backup artifact هنوز job کامل ندارد. داده قدیمی وضعیت لحظه‌ای نیست؛ host facts موجودی کند و metric samples سری زمانی جداست.
+
+Migration افزایشی `2026_10_14_010000_create_tutorial_bookmarks_table` یک جدول جدید می‌سازد؛ شمارش خوانده‌شده از public در پایگاه E2E پس از همه migrationها ۷۵ جدول، شامل migrations است (archive و release_checks نیز پس از snapshot قدیمی اضافه شده بودند). bookmark شامل id BIGINT، user_id BIGINT FK، slug سند repository و timestamps است؛ pair کاربر/slug یکتا و بدون UUID عمومی، چون pivot است. migration روی پایگاه E2E تازه و suite آزمون اجرا شد، نه داده production. استثنا در ADR 0004 و معماری در `TUTORIALS_ARCHITECTURE.md` ثبت شده است.
 
 ## مدل
 

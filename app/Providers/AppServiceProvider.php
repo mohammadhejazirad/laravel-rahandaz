@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Infrastructure\Host\AllowlistedHostFileReader;
 use App\Infrastructure\Host\HostFileReader;
+use App\Infrastructure\Http\DnsHostAddressResolver;
+use App\Infrastructure\Http\HostAddressResolver;
 use App\Infrastructure\Secrets\EnvelopeCipher;
 use App\Infrastructure\Secrets\KeyCanary;
 use App\Infrastructure\Secrets\MasterKey;
@@ -26,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(EnvelopeCipher::class);
         $this->app->singleton(KeyCanary::class);
         $this->app->bind(HostFileReader::class, AllowlistedHostFileReader::class);
+        $this->app->bind(HostAddressResolver::class, DnsHostAddressResolver::class);
     }
 
     public function boot(): void

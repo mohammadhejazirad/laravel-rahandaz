@@ -1,5 +1,7 @@
 # ماتریس آزمون نصب‌کننده
 
+آخرین تکرار harness در برش صفحات نسخه اول: ۶۹ passed/۰ failed، شامل updater با ۲۱ passed/۰ failed. full application suite روی PG/Redis توسعه نیز اجرا شد؛ این نتیجه نصب fresh یا PHP 8.4/Boot در VM نیست. شواهد و محدودیت در V1_TEST_REPORT و V1_RELEASE_READINESS.
+
 تاریخ اجرا: ۲۰۲۶-۱۰-۱۳. ابزاری که در محیط نبود اجرا نشده است: `shellcheck`، `shfmt`، `bats`. workflowهای `.github/workflows/installer-test.yml` و `release-build.yml` نوشته شده‌اند و اجرا نشده‌اند. `release-build.yml` انتشار را عمداً انجام نمی‌دهد و نبود `installer/trust/rahandaz-release.pub` را چک می‌کند.
 
 | آزمون | محیط | وضعیت | شاهد |

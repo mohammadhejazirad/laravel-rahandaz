@@ -1,0 +1,339 @@
+[
+  {
+    "slug": "getting-started",
+    "title": "آشنایی با راه‌انداز و وضعیت نسخه اول",
+    "category": "آشنایی و نصب",
+    "summary": "تفاوت قابلیت موجود، درخواست ثبت‌شده و عملیات تأییدشده را بشناسید.",
+    "tags": [
+      "داشبورد",
+      "نسخه اول"
+    ],
+    "order": 1,
+    "level": "کاربردی",
+    "reading_minutes": 4,
+    "updated_at": "2026-10-14T00:00:00Z"
+  },
+  {
+    "slug": "installation",
+    "title": "پیش‌نیاز و نصب امن روی Ubuntu",
+    "category": "آشنایی و نصب",
+    "summary": "چرا تا انتشار امضاشده فرمان نصب عمومی نداریم؟",
+    "tags": [
+      "Ubuntu",
+      "نصب",
+      "حساب اولیه"
+    ],
+    "order": 2,
+    "level": "کاربردی",
+    "reading_minutes": 4,
+    "updated_at": "2026-10-14T00:00:00Z"
+  },
+  {
+    "slug": "account-security",
+    "title": "ورود، رمز اولیه و مجوزها",
+    "category": "حساب و امنیت",
+    "summary": "حساب وب، Workspace و حفاظت نشست را مدیریت کنید.",
+    "tags": [
+      "ورود",
+      "کاربر",
+      "مجوز"
+    ],
+    "order": 3,
+    "level": "کاربردی",
+    "reading_minutes": 4,
+    "updated_at": "2026-10-14T00:00:00Z"
+  },
+  {
+    "slug": "server-management",
+    "title": "مشاهده سرور، SSH و فایروال",
+    "category": "حساب و امنیت",
+    "summary": "داده قدیمی را تشخیص دهید و از قطع دسترسی جلوگیری کنید.",
+    "tags": [
+      "SSH",
+      "Firewall",
+      "سرور"
+    ],
+    "order": 4,
+    "level": "کاربردی",
+    "reading_minutes": 4,
+    "updated_at": "2026-10-14T00:00:00Z"
+  },
+  {
+    "slug": "projects-environments",
+    "title": "پروژه، محیط و منبع کد",
+    "category": "پروژه و استقرار",
+    "summary": "چگونه پروژه و Environment را از هم جدا نگه داریم؟",
+    "tags": [
+      "پروژه",
+      "Environment",
+      "ZIP"
+    ],
+    "order": 5,
+    "level": "کاربردی",
+    "reading_minutes": 4,
+    "updated_at": "2026-10-14T00:00:00Z"
+  },
+  {
+    "slug": "deployments",
+    "title": "استقرار دستی، پیشرفت و سلامت",
+    "category": "پروژه و استقرار",
+    "summary": "وضعیت استقرار و خطای worker را درست پیگیری کنید.",
+    "tags": [
+      "Deployment",
+      "commit",
+      "Healthcheck"
+    ],
+    "order": 6,
+    "level": "کاربردی",
+    "reading_minutes": 4,
+    "updated_at": "2026-10-14T00:00:00Z"
+  },
+  {
+    "slug": "deployment-recovery",
+    "title": "تلاش دوباره، لغو و بازگشت استقرار",
+    "category": "پروژه و استقرار",
+    "summary": "چه زمانی retry یا rollback ایمن است؟",
+    "tags": [
+      "Rollback",
+      "Retry",
+      "خطای استقرار"
+    ],
+    "order": 7,
+    "level": "کاربردی",
+    "reading_minutes": 4,
+    "updated_at": "2026-10-14T00:00:00Z"
+  },
+  {
+    "slug": "github",
+    "title": "اتصال GitHub با کمترین دسترسی",
+    "category": "Git",
+    "summary": "توکن، مخزن و وب‌هوک چه مرزهایی دارند؟",
+    "tags": [
+      "GitHub",
+      "OAuth",
+      "webhook"
+    ],
+    "order": 8,
+    "level": "کاربردی",
+    "reading_minutes": 4,
+    "updated_at": "2026-10-14T00:00:00Z"
+  },
+  {
+    "slug": "gitlab",
+    "title": "GitLab.com و GitLab خودمیزبان",
+    "category": "Git",
+    "summary": "چگونه اتصال Self-Managed را در برابر SSRF ایمن نگه داریم؟",
+    "tags": [
+      "GitLab",
+      "Self-Managed",
+      "SSRF"
+    ],
+    "order": 9,
+    "level": "کاربردی",
+    "reading_minutes": 4,
+    "updated_at": "2026-10-14T00:00:00Z"
+  },
+  {
+    "slug": "domains-dns",
+    "title": "دامنه، DNS و تنظیم Nginx",
+    "category": "دامنه و TLS",
+    "summary": "چرا ثبت دامنه به معنی آماده‌بودن سایت نیست؟",
+    "tags": [
+      "Domain",
+      "DNS",
+      "Nginx"
+    ],
+    "order": 10,
+    "level": "کاربردی",
+    "reading_minutes": 4,
+    "updated_at": "2026-10-14T00:00:00Z"
+  },
+  {
+    "slug": "ssl-certificates",
+    "title": "گواهی SSL، صدور و تمدید",
+    "category": "دامنه و TLS",
+    "summary": "صدور عمومی را از CA آزمایشی و انتساب گواهی جدا کنید.",
+    "tags": [
+      "SSL",
+      "ACME",
+      "Certificate"
+    ],
+    "order": 11,
+    "level": "کاربردی",
+    "reading_minutes": 4,
+    "updated_at": "2026-10-14T00:00:00Z"
+  },
+  {
+    "slug": "databases",
+    "title": "نمونه دیتابیس، کاربر و مجوز",
+    "category": "داده و پشتیبان‌گیری",
+    "summary": "PostgreSQL، MySQL، MariaDB و MongoDB رفتار یکسان ندارند.",
+    "tags": [
+      "Database",
+      "PostgreSQL",
+      "MySQL",
+      "MariaDB",
+      "MongoDB"
+    ],
+    "order": 12,
+    "level": "کاربردی",
+    "reading_minutes": 4,
+    "updated_at": "2026-10-14T00:00:00Z"
+  },
+  {
+    "slug": "backups",
+    "title": "پشتیبان‌گیری واقعی و راستی‌آزمایی",
+    "category": "داده و پشتیبان‌گیری",
+    "summary": "یک Job موفق بدون artifact قابل بازیابی کافی نیست.",
+    "tags": [
+      "Backup",
+      "checksum",
+      "retention"
+    ],
+    "order": 13,
+    "level": "کاربردی",
+    "reading_minutes": 4,
+    "updated_at": "2026-10-14T00:00:00Z"
+  },
+  {
+    "slug": "restore-recovery",
+    "title": "بازیابی ایزوله و حفاظت داده فعلی",
+    "category": "داده و پشتیبان‌گیری",
+    "summary": "قبل از Restore چه شواهدی لازم است؟",
+    "tags": [
+      "Restore",
+      "Recovery",
+      "APP_KEY"
+    ],
+    "order": 14,
+    "level": "کاربردی",
+    "reading_minutes": 4,
+    "updated_at": "2026-10-14T00:00:00Z"
+  },
+  {
+    "slug": "monitoring",
+    "title": "پایش، داده قدیمی و هشدار",
+    "category": "پایش و عملیات",
+    "summary": "Timestamp و منبع متریک را قبل از قضاوت بررسی کنید.",
+    "tags": [
+      "Monitoring",
+      "CPU",
+      "RAM",
+      "Disk",
+      "Network",
+      "Alert"
+    ],
+    "order": 15,
+    "level": "کاربردی",
+    "reading_minutes": 4,
+    "updated_at": "2026-10-14T00:00:00Z"
+  },
+  {
+    "slug": "jobs-logs",
+    "title": "صف، لاگ و اعلان‌های عملیات",
+    "category": "پایش و عملیات",
+    "summary": "Job و transport queue چه تفاوتی دارند؟",
+    "tags": [
+      "Jobs",
+      "Queue",
+      "Logs",
+      "Notifications"
+    ],
+    "order": 16,
+    "level": "کاربردی",
+    "reading_minutes": 4,
+    "updated_at": "2026-10-14T00:00:00Z"
+  },
+  {
+    "slug": "php-runtimes",
+    "title": "PHP پنل، Runtime پروژه و Extensions",
+    "category": "نرم‌افزارها",
+    "summary": "چرا PHP 8.4 پنل مستقل از PHP پروژه است؟",
+    "tags": [
+      "PHP",
+      "Extensions",
+      "Composer",
+      "FPM"
+    ],
+    "order": 17,
+    "level": "کاربردی",
+    "reading_minutes": 4,
+    "updated_at": "2026-10-14T00:00:00Z"
+  },
+  {
+    "slug": "services-runtimes",
+    "title": "Nginx، Node.js، Redis و سرویس‌های پروژه",
+    "category": "نرم‌افزارها",
+    "summary": "سرویس پروژه را از سرویس پنل جدا نگه دارید.",
+    "tags": [
+      "Node.js",
+      "Nginx",
+      "Redis",
+      "systemd"
+    ],
+    "order": 18,
+    "level": "کاربردی",
+    "reading_minutes": 4,
+    "updated_at": "2026-10-14T00:00:00Z"
+  },
+  {
+    "slug": "cli-reference",
+    "title": "فرمان‌های موجود راه‌انداز",
+    "category": "پایش و عملیات",
+    "summary": "CLI موجود را از فرمان پیشنهادی جدا کنید.",
+    "tags": [
+      "CLI",
+      "doctor",
+      "status"
+    ],
+    "order": 19,
+    "level": "کاربردی",
+    "reading_minutes": 4,
+    "updated_at": "2026-10-14T00:00:00Z"
+  },
+  {
+    "slug": "updates",
+    "title": "بررسی نسخه، به‌روزرسانی و Repair",
+    "category": "آشنایی و نصب",
+    "summary": "به‌روزرسانی داده و کلید را چگونه حفظ می‌کند؟",
+    "tags": [
+      "Update",
+      "Release",
+      "Repair"
+    ],
+    "order": 20,
+    "level": "کاربردی",
+    "reading_minutes": 4,
+    "updated_at": "2026-10-14T00:00:00Z"
+  },
+  {
+    "slug": "custom-scripts-scheduling",
+    "title": "اسکریپت سفارشی و زمان‌بندی امن",
+    "category": "پایش و عملیات",
+    "summary": "چرا shell آزاد و اجرای root مجاز نیست؟",
+    "tags": [
+      "Custom Scripts",
+      "Scheduling",
+      "Security"
+    ],
+    "order": 21,
+    "level": "کاربردی",
+    "reading_minutes": 4,
+    "updated_at": "2026-10-14T00:00:00Z"
+  },
+  {
+    "slug": "troubleshooting",
+    "title": "عیب‌یابی نصب، عملیات و شبکه محدود",
+    "category": "آشنایی و نصب",
+    "summary": "خطای واقعی را با حفظ داده و مسیر Resume برطرف کنید.",
+    "tags": [
+      "Troubleshooting",
+      "Mirror",
+      "Recovery"
+    ],
+    "order": 22,
+    "level": "کاربردی",
+    "reading_minutes": 4,
+    "updated_at": "2026-10-14T00:00:00Z"
+  }
+]

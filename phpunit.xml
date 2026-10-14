@@ -25,7 +25,7 @@
         <env name="BROADCAST_CONNECTION" value="null" force="true"/>
         <env name="CACHE_STORE" value="array" force="true"/>
         <env name="DB_CONNECTION" value="pgsql" force="true"/>
-        <env name="DB_HOST" value="192.0.2.1" force="true"/>
+        <env name="DB_HOST" value="192.0.2.1"/>
         <env name="DB_PORT" value="5432" force="true"/>
         <env name="DB_DATABASE" value="rahandaz_test" force="true"/>
         <env name="DB_USERNAME" value="rahandaz" force="true"/>
@@ -39,9 +39,9 @@
         <env name="RAHANDAZ_BASE_PATH" value="/rahandaz" force="true"/>
         <env name="RAHANDAZ_MASTER_KEY_FILE" value="/tmp/rahandaz-phpunit/master.key" force="true"/>
         <env name="RAHANDAZ_CANARY_FILE" value="/tmp/rahandaz-phpunit/canary.json" force="true"/>
-        <env name="REDIS_QUEUE_HOST" value="192.0.2.1" force="true"/>
+        <env name="REDIS_QUEUE_HOST" value="192.0.2.1"/>
         <env name="REDIS_QUEUE_PORT" value="6379" force="true"/>
-        <env name="REDIS_CACHE_HOST" value="192.0.2.1" force="true"/>
+        <env name="REDIS_CACHE_HOST" value="192.0.2.1"/>
         <env name="REDIS_CACHE_PORT" value="6380" force="true"/>
         <env name="PULSE_ENABLED" value="false" force="true"/>
         <env name="TELESCOPE_ENABLED" value="false" force="true"/>

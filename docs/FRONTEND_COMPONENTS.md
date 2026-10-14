@@ -32,6 +32,18 @@
 
 Props صفحه‌بندی: `current_page`، `last_page`، `per_page`، `total`، `prev_url`، `next_url`.
 
+کامپوننت‌های تازه ۲۰۲۶-۱۰-۱۴:
+
+| کامپوننت | مسیر | قرارداد |
+| --- | --- | --- |
+| ResourceList | `components/resource-list.tsx` | جدول typed با technical/status/date و قاب اسکرول |
+| Select | `components/ui/select.tsx` | select بومی با label/error، بدون package جدید |
+| TutorialContent | `components/tutorial-content.tsx` | React text Markdown محدود و code LTR؛ بدون HTML خام |
+| HelpLink/ContextualHelp | `components/help-link.tsx` | slug واقعی repository و راهنمای مشترک Layout |
+| useVisiblePoll | `hooks/use-visible-poll.ts` | توقف tab مخفی/offline و cancellation درخواست؛ streaming نیست |
+
+Header برای عنوان بلند `min-w-0/flex-1` و actionها `shrink-0` دارد؛ breadcrumb محدود به قاب است. صفحات جدید AppLayout/CSS tokenهای موجود را مصرف می‌کنند. پوشش Chrome در `V1_TEST_REPORT.md` ثبت شده است.
+
 `PersianDate` فقط `iso: string | null` می‌گیرد و timezone را از کاربر مشترک Inertia می‌خواند.
 
 `AppLayout` علاوه بر `title`، متن اختیاری `description` و `eyebrow` می‌گیرد. سایدبار ثابت از عرض `lg` (۱۰۲۴px) و چسبیده به لبه فیزیکی راست فعال می‌شود تا در ۷۶۸px محتوا فشرده نشود. زیر `lg`، دکمه همبرگری Sheet را از سمت راست باز می‌کند. لینک Desktop و Mobile از یک `Sidebar` می‌آیند.

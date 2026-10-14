@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\AssignRequestId;
+use App\Http\Middleware\EnsureAccountActive;
 use App\Http\Middleware\EnsurePasswordIsCurrent;
 use App\Http\Middleware\EnsureSetupComplete;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -25,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             AssignRequestId::class,
             AuthenticateSession::class,
+            EnsureAccountActive::class,
             SecurityHeaders::class,
             HandleInertiaRequests::class,
         ]);

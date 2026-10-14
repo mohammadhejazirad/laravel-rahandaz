@@ -71,7 +71,7 @@ AAD پاکت credential و ایندکس کور از نمایش دهدهی `works
 این جدول‌ها شناسه دوتایی دامنه نمی‌گیرند و اسکیمای رسمی‌شان برای یکسان‌سازی عوض نشده است:
 
 - `sessions`، `cache`، `cache_locks`، `jobs`، `failed_jobs`، `job_batches`، `password_reset_tokens`
-- pivot بدون هویت مستقل. در اسکیمای فعلی چنین جدولی نیست. `memberships` و `resource_grants` هویت مستقل دارند و هر دو شناسه را دارند.
+- pivot بدون هویت مستقل: از ۲۰۲۶-۱۰-۱۴ `tutorial_bookmarks` فقط BIGINT id، FK کاربر و slug سند نسخه‌دار دارد. خود pivot URL عمومی/چرخه مستقل ندارد و `(user_id,tutorial_slug)` یکتا است، بنابراین uuid اضافی ندارد. مقاله سند repository است نه row دامنه؛ slug پایدار دارد. `memberships` و `resource_grants` هویت مستقل دارند و هر دو شناسه را دارند.
 - جدول داخلی package، اگر بعداً اضافه شود
 
 استثنای نوعی، نه استثنای حذف `uuid` عمومی:

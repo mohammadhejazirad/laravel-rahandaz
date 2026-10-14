@@ -1,6 +1,7 @@
 import { Link, router, usePage } from "@inertiajs/react";
 import {
     Activity,
+    BookOpen,
     ArchiveRestore,
     Bell,
     ChevronDown,
@@ -23,6 +24,7 @@ import {
 import { useEffect, useState, type ReactNode } from "react";
 import { AppLogo } from "@/components/branding/app-logo";
 import { FlashToaster } from "@/components/flash-toaster";
+import { ContextualHelp } from "@/components/help-link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Alert } from "@/components/ui/alert";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -103,6 +105,7 @@ export function AppLayout({
                     icon: LayoutDashboard,
                     enabled: true,
                 },
+                { href: `${base}/tutorials`, label: "آموزش‌ها", icon: BookOpen, enabled: true },
                 {
                     href: `${base}/setup`,
                     label: "راه‌اندازی",
@@ -139,10 +142,10 @@ export function AppLayout({
                     enabled: true,
                 },
                 {
-                    href: "",
+                    href: `${base}/deployments`,
                     label: "استقرارها",
                     icon: Rocket,
-                    enabled: false,
+                    enabled: true,
                 },
                 {
                     href: `${base}/jobs`,
@@ -155,15 +158,15 @@ export function AppLayout({
         {
             label: "زیرساخت",
             links: [
-                { href: "", label: "دامنه‌ها", icon: Globe2, enabled: false },
-                { href: "", label: "دیتابیس‌ها", icon: Database, enabled: false },
+                { href: `${base}/domains`, label: "دامنه‌ها", icon: Globe2, enabled: true },
+                { href: `${base}/databases`, label: "دیتابیس‌ها", icon: Database, enabled: true },
                 {
-                    href: "",
-                    label: "پشتیبان‌ها",
+                    href: `${base}/backups`,
+                    label: "پشتیبان‌گیری",
                     icon: ArchiveRestore,
-                    enabled: false,
+                    enabled: true,
                 },
-                { href: "", label: "پایش", icon: Activity, enabled: false },
+                { href: `${base}/monitoring`, label: "پایش", icon: Activity, enabled: true },
             ],
         },
         {
@@ -228,7 +231,7 @@ export function AppLayout({
                 <div className="min-w-0 flex-1">
                     <header className="sticky top-0 z-40 border-b border-line bg-canvas/88 backdrop-blur-xl">
                         <div className="flex min-h-[4.5rem] items-center justify-between gap-3 px-3 sm:px-5 md:px-7">
-                            <div className="flex min-w-0 items-center gap-3">
+                            <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
                                 <Sheet
                                     open={mobileNavigationOpen}
                                     onOpenChange={setMobileNavigationOpen}
@@ -264,7 +267,7 @@ export function AppLayout({
                                         />
                                     </SheetContent>
                                 </Sheet>
-                                <div className="min-w-0">
+                                <div className="min-w-0 flex-1">
                                     <p className="truncate text-xs text-muted">
                                         راه‌انداز / {title}
                                     </p>
@@ -273,7 +276,7 @@ export function AppLayout({
                                     </p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex shrink-0 items-center gap-2">
                                 <Link
                                     href={`${base}/notifications`}
                                     className={cn(
@@ -328,6 +331,7 @@ export function AppLayout({
                             </span>
                         </header>
                         <div className="space-y-5">
+                            <ContextualHelp path={path} />
                             {page.props.execution.mode === "disabled" ? (
                                 <Alert tone="warning">
                                     اجرای دستور میزبان خاموش است. ثبت یک درخواست

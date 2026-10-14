@@ -73,3 +73,7 @@ GitHub README یک دستور واحد برای دانلود **release امضا�
 به‌روزرسانی خود راه‌انداز از CLI `installer/bin/rahandaz` و کتابخانه `installer/lib/update.sh` می‌گذرد و به Laravel نسخه‌ای که در حال جایگزینی است وابسته نیست. پنل فقط وضعیت backend را نشان می‌دهد و فرمان root اجرا نمی‌کند. جزئیات در `docs/SELF_UPDATE.md` است.
 
 **منبع حقیقت درباره ماژول‌ها، گردش نصب، مجوزها، API و قیدهای آزمون:** `PROJECT_SPEC.md`. هر تغییر مهم مرز trust/queue/runtime باید ADR داشته باشد.
+
+## وضعیت برش ۲۰۲۶-۱۰-۱۴
+
+صفحات deployment/domain/database/backup/monitoring اکنون request/DB/Job/Audit واقعی دارند، نه host executor. شکست Job به deployment و restore مرتبط منتقل می‌شود و notification/audit واقعی یکتا ثبت می‌شود. نمودار/collector و نتیجه host ساخته نشده‌اند. آموزش‌ها Markdown نسخه‌دار و bookmark PG با pivot فاقد شناسه عمومی مستقل‌اند؛ ADR 0004 و `docs/TUTORIALS_ARCHITECTURE.md` قرارداد را ثبت کرده‌اند. retained metrics روزانه با batch محدود پاک می‌شوند. ResourceGrant جامع و مرز helper/socket همچنان blockerند. `docs/V1_RELEASE_READINESS.md` وضعیت اجرای واقعی را از معماری هدف جدا می‌کند.

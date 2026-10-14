@@ -28,6 +28,9 @@ final class DeploymentRecorder
         ?string $planHash = null,
         ?Deployment $rollbackOf = null,
     ): Deployment {
+        if (preg_match('/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/D', $commitSha) !== 1) {
+            throw new InvalidArgumentException('An immutable full commit SHA is required.');
+        }
         if ($trigger === DeploymentTrigger::Rollback && $rollbackOf === null) {
             throw new InvalidArgumentException('A rollback must name the deployment it reverses.');
         }

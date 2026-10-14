@@ -23,9 +23,20 @@
 | `/projects/` و `/projects/new/` | `GET /rahandaz/projects` | `pages/projects/index.tsx` | App | فهرست واقعی. ساخت پروژه نیست |
 | `/projects/<uuid>/` | `GET /rahandaz/projects/{uuid}` | `pages/projects/show.tsx` | App | مرور پروژه/محیط، انتخاب environment، dropzone ZIP و تاریخچه آرشیو/عملیات. `Accept: application/json` همان قرارداد شناسه را JSON می‌دهد |
 | upload منبع ZIP | `POST /rahandaz/projects/{project}/environments/{environment}/source-archives` | `components/projects/archive-upload.tsx` | App | واقعی برای Owner/Admin/Operator؛ private store + inspect + deployment/job/outbox/audit. extraction/build آماده نیست |
-| ساخت پروژه، settings پروژه، صفحه مستقل environment/deployment | — | — | — | آماده نیست |
+| ساخت پروژه، settings پروژه، صفحه مستقل environment | — | — | — | آماده نیست |
 | `/jobs/` و `/jobs/<uuid>/` | `GET /rahandaz/jobs` و `/{uuid}` | `pages/jobs/index.tsx` و `show.tsx` | App | وضعیت و لاگ ذخیره‌شده، صفحه‌بندی. لغو و polling نیست |
-| `/domains/`، `/databases/`، `/backups/`، `/monitoring/` | — | — | — | آماده نیست |
+| استقرارها | `GET/POST /rahandaz/deployments` | `pages/deployments/index.tsx` | App | فهرست/فیلتر و درخواست SHA ثابت با Job؛ executor نیست |
+| جزئیات استقرار | `GET /rahandaz/deployments/{uuid}` و `POST /{uuid}/{retry|cancel}` | `pages/deployments/show.tsx` | App | وضعیت DB، retry ثابت، لغو پیش از شروع، polling صفحه فعال؛ rollback بسته |
+| دامنه‌ها | `GET/POST /rahandaz/domains` | `pages/domains/index.tsx` | App | درخواست دامنه/Nginx؛ اعمال میزبان نیست |
+| جزئیات دامنه | `GET /rahandaz/domains/{uuid}` و `POST /{uuid}/certificate` | `pages/domains/show.tsx` | App | درخواست certificate؛ DNS/ACME تأیید نشده |
+| دیتابیس‌ها | `GET/POST /rahandaz/databases` | `pages/databases/index.tsx` | App | درخواست DB/user با encrypted credential؛ SQL executor نیست |
+| جزئیات دیتابیس | `GET /rahandaz/databases/{uuid}` | `pages/databases/show.tsx` | App | observed state/timestamp، بدون password/secret |
+| پشتیبان‌گیری | `GET/POST /rahandaz/backups` | `pages/backups/index.tsx` | App | ردیف artifact و ثبت job؛ artifact جعلی ساخته نمی‌شود |
+| جزئیات پشتیبان‌گیری | `GET /rahandaz/backups/{uuid}` | `pages/backups/show.tsx` | App | checksum/retention/history؛ restore/download/delete بسته |
+| زمان‌بندی پشتیبان‌گیری | `GET /rahandaz/backups/schedules` | `pages/backups/schedules.tsx` | App | جدول فقط خواندنی؛ اجرای backup schedule نیست |
+| پایش | `GET /rahandaz/monitoring` | `pages/monitoring/index.tsx` | App | samples/services/alerts ذخیره‌شده؛ collector/alert engine نیست |
+| آموزش‌ها / جست‌وجو / دسته / نشان‌شده | `GET /rahandaz/tutorials?q=&category=&bookmarked=&page=` | `pages/tutorials/index.tsx` | App | content repository، pagination و query shareable |
+| جزئیات و نشان آموزش | `GET /rahandaz/tutorials/{slug}` و `PUT /{slug}/bookmark` | `pages/tutorials/show.tsx` | App | bookmark خصوصی PostgreSQL و متن بدون HTML خام |
 | `/users/` | — | — | — | آماده نیست |
 | `/audit/` | `GET /rahandaz/audit` | `pages/audit/index.tsx` | App | فقط مالک و مدیر. بدون metadata و بدون export |
 | `/notifications/` | `GET /rahandaz/notifications` | `pages/notifications/index.tsx` | App | فهرست گیرنده. خواندن تک‌مورد و همه واقعی است |
@@ -35,4 +46,4 @@
 
 مجوز: عضویت workspace برای صفحه‌های پنل. upload/deploy پروژه برای `owner`، `admin` و `operator` است و Viewer رد می‌شود. گزارش فعالیت فقط `owner` و `admin`. اعلان فقط `recipient` همان workspace. شناسه عددی و path آرشیو در props این صفحات نیست.
 
-آزمون: `tests/Feature/PanelPagesTest.php`، `tests/Feature/ProjectArchiveUploadTest.php`، بخش داشبورد `tests/Feature/PanelHttpTest.php` و asset/metadata برند در `tests/Feature/BrandAssetsTest.php`. smoke تصویری Chrome headless برای ورود و راه‌اندازی واقعی در عرض‌های ۳۶۰، ۷۶۸، ۱۲۸۰ و ۱۴۴۰ و پوسته روشن/تیره، پوسته system و صفحه خطای ۴۰۴ انجام شده است. dropzone تازه build/typecheck شده ولی smoke مرورگر احراز هویت‌شده یا Playwright/E2E و visual regression همه صفحه‌ها هنوز وجود ندارد.
+آزمون‌های Backend: PanelPages، ProjectArchiveUpload، PanelHttp، BrandAssets، V1FeatureWorkflow و TutorialTest. در ۲۰۲۶-۱۰-۱۴، ۱۲ صفحه جدید بالا اضافه شد. Chrome واقعی با نشست و PG ایزوله، ۲۱ مسیر × ۹ عرض × دو پوسته (۳۷۸ بررسی) بدون overflow گذشت؛ Header با عنوان بلند در 320px اصلاح شد. drawer.right=390 و Escape تأیید شد. پوشش تمام حالت‌های غیرخالی/خطای فرم و visual regression جامع نداریم. `evidence/v1-browser.json` و `V1_TEST_REPORT.md` مرجع اجرای آخرند. ResourceGrant جامع هنوز blocker است؛ workspace scoping کافی برای انتشار نیست.

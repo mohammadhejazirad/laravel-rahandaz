@@ -11,3 +11,8 @@ Schedule::command('rahandaz:updates:check')
     ->everySixHours()
     ->withoutOverlapping()
     ->onOneServer();
+
+Schedule::command('rahandaz:metrics:prune')
+    ->daily()
+    ->withoutOverlapping()
+    ->onOneServer();

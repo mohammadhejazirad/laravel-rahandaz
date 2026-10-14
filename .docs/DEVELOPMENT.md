@@ -4,7 +4,7 @@
 
 ## پیش‌نیازها
 
-- PHP **8.4** برای خود راه‌انداز. محدودیت Composer `^8.4` است. ایستگاه توسعه‌ای که فقط PHP 8.5 دارد می‌تواند dependency را resolve کند، ولی باینری پنل `/usr/bin/php8.4` است و doctor در production اگر سری 8.4 نباشد شکست می‌خورد. `ext-zip` و `fileinfo` برای بررسی upload پروژه الزامی‌اند. `pdo_pgsql`، `redis` و `sodium` برای اجرا لازم‌اند حتی اگر در `require` کامپوزر نیامده باشند.
+- PHP **8.4** برای خود راه‌انداز. محدودیت Composer `^8.4` است. ایستگاه توسعه با PHP 8.5 می‌تواند dependency را resolve کند، ولی باینری production `/usr/bin/php8.4` است و doctor سری دیگر را رد می‌کند. `pdo_pgsql`، `redis`، `sodium`، `zip` و `fileinfo` در Composer الزامی‌اند؛ platform check نبود آن‌ها را پنهان نمی‌کند.
 - Node.js نسخه LTS سازگار با Vite و React، npm با lockfile. Node فقط در development/CI برای build پنل؛ runtime production راه‌انداز به Node وابسته نیست.
 - PostgreSQL برای business data و `JobOutbox`؛ دو Redis مجزا برای queue و cache (یا اتصال به نمونه محلی جدا با ACL/DB و policy آزموده در development).
 - Docker/Compose فقط **اختیاری** برای dependencyهای development؛ **هیچ web/worker/frontend راه‌انداز داخل Compose رسمی نیست**. Production نیز Docker-based نیست.
@@ -115,3 +115,11 @@ Test suite شامل PostgreSQL واقعی برای migrations/index/locking/outb
 پکیج نصب باید code/vendor و assets ساخته‌شده Vite را به شکل **artifact تاییدشده** همراه داشته باشد؛ در production برای UI به `npm install` نیازی نیست. `APP_DEBUG=false`، Nginx/PHP-FPM و PHP/extension pin‌شده، Redis broker/cache مجزا، Laravel scheduler/queue workers با systemd، credentialهای root-owned خارج repository، backup قبل از migration و command `doctor` الزامی‌اند. installer نباید site یا سرویس موجود را بی‌رضایت تغییر دهد. قرارداد فعلی و حد آزمون در `docs/INSTALLER_ARCHITECTURE.md` و `docs/INSTALLER_TEST_MATRIX.md` است. تا انتشار امضاشده، فرمان نصب عمومی در README نیست.
 
 **مرجع اصلی:** `.docs/PROJECT_SPEC.md` فصل‌های 3، 4، 6، 7، 13، 22 و 23. `docs/PROJECT_SPEC.md` در این مخزن نیست.
+
+## آزمون مرورگر و آموزش‌ها
+
+مرکز آموزش‌ها repository-backed و bookmarkها در PostgreSQL هستند؛ قرارداد در `docs/TUTORIALS_ARCHITECTURE.md` است. `tests/e2e/seed.php` فقط DB خالی با APP_ENV=testing و نام `rahandaz_v1_ui_*` را می‌پذیرد. credential تصادفی در فایل تازه خصوصی `/tmp` می‌نویسد و مقدار را چاپ نمی‌کند. `tests/e2e/server.php` باید با `php -S 127.0.0.1:8099 -t public tests/e2e/server.php` و همان DB/APP_KEY آزمایشی اجرا شود؛ built assets لازم دارد و public/hot کاربر را تغییر نمی‌دهد. seed و server دیتابیس development کاربر را قبول نمی‌کنند.
+
+Chrome/Node موجود و فایل credential خصوصی را با `RAHANDAZ_E2E_CREDENTIAL_FILE` و origin loopback با `RAHANDAZ_E2E_ORIGIN` به `node tests/e2e/responsive.mjs` بدهید. این runner test-only با `--no-sandbox` اجرا می‌شود؛ روی محتوا/سایت نامطمئن یا سرور production استفاده نشود. گزارش در temp output است؛ پروفایل و credential را به مخزن اضافه نکنید. هیچ Playwright dependency فعلاً نصب نیست. شواهد اجرای واقعی و محدودیت پوشش در `docs/V1_TEST_REPORT.md` ثبت است.
+
+CI `php-84.yml` اکنون full PG/Redis suite و Node checks/audits را تعریف می‌کند؛ اجرای remote تأیید نشده. فقط DB/Redis hosts از env قابل تنظیم‌اند؛ DB_DATABASE و APP_ENV و execution mode در phpunit.xml به test/disabled پین می‌مانند.

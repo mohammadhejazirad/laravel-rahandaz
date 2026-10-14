@@ -8,6 +8,7 @@
 | نام فارسی                | راه‌انداز                                                    |
 | نام انگلیسی / شناسه فنی  | Rahandaz / `rahandaz`                                        |
 | محل سند                  | `docs/PROJECT_SPEC.md`                                       |
+| محل واقعی فعلی مخزن      | `.docs/PROJECT_SPEC.md`                                      |
 | نسخه سند                 | 2.1                                                          |
 | تاریخ                    | 2026-10-13                                                   |
 | نوع محصول                | پنل فارسی خودمیزبان برای مدیریت سرور، سرویس و استقرار پروژه  |
@@ -413,6 +414,8 @@ stateDiagram-v2
 ### 7.6 وضعیت این برش در مخزن
 
 موتور فعلی در `infrastructure/operations/` و قرارداد PHP در `app/Infrastructure/Operations/` است. `ExecutionGate` بسته است و `OperationRunner` به این موتور وصل نیست، پس job میزبان `succeeded` نمی‌شود. جزئیات آزمون و محدودیت در `docs/OPERATIONS.md` است. این زیربخش وضعیت مخزن را می‌گوید و رفتار هدف همین فصل را عوض نمی‌کند.
+
+در ۲۰۲۶-۱۰-۱۴ مسیرهای صفحات اصلی تا Job/Outbox/Audit و انتقال شکست deployment تکمیل شدند؛ build/activate/ACME/datastore/backup host واقعی هنوز نیست. سیستم آموزش repository Markdown و bookmark خصوصی PG دارد. `docs/V1_FEATURE_INVENTORY.md` و `docs/V1_RELEASE_READINESS.md` وضعیت فعلی را با مانع‌های ResourceGrant/helper/VM/signing ثبت می‌کنند؛ این وضعیت تعهدهای هدف را کم نمی‌کند و نسخه پایدار اعلام نشده است.
 
 ## 8. مدیریت میزبان محلی و onboarding
 
