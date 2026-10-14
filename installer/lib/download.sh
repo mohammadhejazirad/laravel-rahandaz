@@ -26,7 +26,8 @@ installer_download() {
     mkdir -p "$(dirname "$dest")"
     while ((attempt <= 3)); do
         set +e
-        installer_curl --fail --location --show-error --silent \
+        installer_curl --proto '=https' --proto-redir '=https' --tlsv1.2 \
+            --fail --location --show-error --silent \
             --retry 0 \
             --continue-at - \
             --max-time 120 \

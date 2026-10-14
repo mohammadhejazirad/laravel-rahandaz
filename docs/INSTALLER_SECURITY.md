@@ -37,7 +37,9 @@ Checksum و فایل از یک منبع، به‌تنهایی اصالت نیس�
 
 کاربر `rahandaz` سیستمی، shell برابر `nologin`، قفل‌شده، و بدون گروه sudo است. فایل گذرواژهٔ سیستمی برای این حساب ساخته نمی‌شود. اعمال روی `/` بدون root کد `PRIVILEGE_REQUIRED` می‌دهد. sysroot بیرون از `/` فقط زیر `/tmp` یا `/run/rahandaz-installer-test` مجاز است. `RAHANDAZ_INSTALLER_REFUSE_LIVE=1` اعمال زنده را می‌بندد. آزمون میزبان این پرچم را برای apply آزمایشی روشن می‌کند.
 
-اعضای tar نباید مطلق، شامل `..`، یا symlink و hardlink باشند. `assemble.sh` درختی را که `.env`، `*.pem`، `id_rsa` یا `master.key` داشته باشد بسته‌بندی نمی‌کند.
+اعضای tar نباید مطلق، شامل `..`، یا symlink و hardlink باشند. `assemble.sh` اکنون درخت runtime allowlist شامل vendor/assets را با `assemble.py` می‌سازد؛ env واقعی، کلید خصوصی، dump/log و link رد می‌شوند و storage/var/.git/node_modules/cache محیطی وارد بسته نمی‌شوند.
+
+bootstrap GitHub فقط پس از امضای manifest، pin نسخه/نام، checksum و اعتبارسنجی همهٔ اعضای tar اجازهٔ اجرای installer می‌دهد. کلید داخل script pin شده و hash script در فرمان تولیدشده literal است؛ public key همراه دانلود ریشهٔ اعتماد مستقل نیست. HTTPS برای درخواست و redirect اجباری است. SHA256SUMS در workflow امضا می‌شود؛ tests با کلید موقت‌اند و به معنی کلید Production یا نصب VM نیستند. signing تنها در job جدا، اجرای دستی و Environment محافظت‌شده انجام می‌شود؛ workflow فقط Draft candidate می‌سازد.
 
 ## داده
 

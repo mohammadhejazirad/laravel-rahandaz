@@ -16,4 +16,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Syntax and installer logic
-        run: bash installer/tests/run.sh
+        run: |
+          bash installer/tests/run.sh
+          python3 installer/tests/release_test.py

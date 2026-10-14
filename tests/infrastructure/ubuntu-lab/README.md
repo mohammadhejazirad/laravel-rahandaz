@@ -17,6 +17,7 @@
 ./tests/infrastructure/ubuntu-lab/scripts/lab-down.sh 24.04
 ./tests/infrastructure/ubuntu-lab/scripts/lab-reset.sh 24.04
 ./tests/infrastructure/ubuntu-lab/scripts/lab-test-all.sh
+bash tests/infrastructure/ubuntu-lab/scripts/release-contracts.sh 24.04
 ```
 
 نسخه‌های مجاز فقط `22.04`، `24.04` و `26.04` هستند. `lab-test-all.sh` پیش‌فرض را پشت سر هم اجرا می‌کند. `RAHANDAZ_LAB_MODE=parallel` یا `--parallel` سه محیط را با هم بالا می‌آورد و اگر حافظه آزاد کمتر از حدود ۶GiB باشد `blocked_insufficient_resources` می‌دهد.
@@ -24,6 +25,8 @@
 `lab-reset.sh` فقط کانتینر همان نسخه از پروژه `rahandaz-ubuntu-lab` را حذف می‌کند. در پوسته تعاملی باید `reset` تایپ شود. در پوسته غیرتعاملی `RAHANDAZ_LAB_CONFIRM=reset` یا `--yes` لازم است.
 
 ## نصب واقعی
+
+`release-contracts.sh` آزمون بسته‌ساز و bootstrap امضاشده را در کانتینر آزمایشگاهِ از قبل روشن اجرا می‌کند. فقط درخت `installer/` به مسیر موقت کانتینر کپی می‌شود؛ نصب بسته، `sudo`، تغییر میزبان و تماس شبکه‌ای در این آزمون‌ها انجام نمی‌شود. گزارش در `reports/release-*` است. این آزمون جای نصب کامل و Boot در VM را نمی‌گیرد.
 
 آزمون `bin/rahandaz-ops` را صدا می‌زند. Installer جداگانه‌ای ساخته نشده است. `RAHANDAZ_OPS_LAB=1` به‌تنهایی روی میزبان توسعه کافی نیست. دروازه فقط وقتی باز می‌شود که نشانگر داخل کانتینر، `/.dockerenv`، نبود سوکت Docker و pid 1 غیر از systemd/init با هم درست باشند. توکن در argv و در گزارش نمی‌آید.
 

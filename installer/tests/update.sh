@@ -31,10 +31,13 @@ openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out "$key" >/dev/n
 openssl pkey -in "$key" -pubout -out "$pub" >/dev/null 2>&1
 
 app="${tmp}/application"
-mkdir -p "$app/public/build"
+mkdir -p "$app/public/build" "$app/vendor" "$app/installer/bin"
 printf '<?php\n' >"$app/artisan"
+printf '{}\n' >"$app/composer.json"
 printf '{}\n' >"$app/composer.lock"
 printf '{}\n' >"$app/public/build/manifest.json"
+printf '<?php\n' >"$app/vendor/autoload.php"
+printf '#!/usr/bin/env bash\nexit 10\n' >"$app/installer/bin/rahandaz-install"
 archive="$(bash "${INSTALLER_HOME}/release/assemble.sh" --from "$app" --version 1.2.3 --output "${tmp}/pack")"
 bash "${INSTALLER_HOME}/release/sign-manifest.sh" --key "$key" --artifact "$archive" --version 1.2.3 --output "${tmp}/signed" >/dev/null
 
@@ -209,16 +212,16 @@ set -e
 
 mkdir -p "$state"
 lock="${state}/update.lock"
-flock -n "$lock" -c 'sleep 30' &
-holder=$!
-sleep 0.3
+# Keep the lock in this shell. Killing a flock wrapper may leave its sleep child
+# holding the inherited descriptor in minimal containers and poison later cases.
+exec {test_lock_fd}>"$lock"
+flock -n "$test_lock_fd"
 set +e
 run_cli update "${common_args[@]}" >"${tmp}/locked.out" 2>"${tmp}/locked.err"
 locked_status=$?
 set -e
-child="$(ps -o pid= --ppid "$holder" 2>/dev/null | awk '{ print $1 }' || true)"
-kill "$holder" ${child:-} 2>/dev/null || true
-wait "$holder" 2>/dev/null || true
+flock -u "$test_lock_fd"
+exec {test_lock_fd}>&-
 [[ "$locked_status" -eq 1 ]] && grep -q UPDATE_LOCKED "${tmp}/locked.err" && [[ ! -d "$sysroot/var/lib/rahandaz/releases/1.2.3" ]] \
     && ok "a second update cannot start while the lock is held" || bad "a second update cannot start while the lock is held"
 
@@ -233,6 +236,9 @@ current_target="$(readlink "$sysroot/var/lib/rahandaz/current")"
     && [[ -f "$sysroot/var/lib/rahandaz/releases/1.2.3/artisan" ]] \
     && [[ "$current_target" == *"releases/1.0.0" ]] \
     && ok "offline update prepares the release and keeps the current symlink" || bad "offline update prepares the release and keeps the current symlink"
+if [[ "$apply_status" != 10 ]]; then
+    awk '/^ERROR / { print }' "${tmp}/apply.err"
+fi
 [[ "$resume_status" -eq 10 ]] && grep -q 'already prepared' "${tmp}/resume.err" \
     && ok "a repeated update resumes the prepared release" || bad "a repeated update resumes the prepared release"
 [[ "$(stat -c '%a' "${state}/history")" == "600" ]] && grep -q '1.2.3 incomplete' "${state}/history" \

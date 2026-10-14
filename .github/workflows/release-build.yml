@@ -1,19 +1,156 @@
-name: Release build
+name: Build release candidate
 
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing candidate tag, for example v1.0.0-rc.1 (stable publication is blocked)"
+        required: true
+        type: string
+      create_draft:
+        description: "Sign and create a private draft prerelease after environment approval"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
+concurrency:
+  group: release-candidate-${{ inputs.tag }}
+  cancel-in-progress: false
+
 jobs:
-  assemble:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-24.04
+    if: github.ref == 'refs/heads/main'
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: rahandaz_test
+          POSTGRES_USER: rahandaz
+          POSTGRES_PASSWORD: replace-local-only
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U rahandaz -d rahandaz_test" --health-interval 5s --health-timeout 5s --health-retries 10
+      redis-queue:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+      redis-cache:
+        image: redis:7-alpine
+        ports: ["6380:6379"]
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      RELEASE_TAG: ${{ inputs.tag }}
+      DB_HOST: 127.0.0.1
+      REDIS_QUEUE_HOST: 127.0.0.1
+      REDIS_CACHE_HOST: 127.0.0.1
     steps:
-      - uses: actions/checkout@v4
-      - name: Refuse an unsigned publication
+      - name: Accept candidate versions only
         run: |
-          echo "This workflow does not publish a release and does not invent a signing key."
-          echo "Assemble and sign only after built assets, vendor, and an operator key exist."
-          test ! -f installer/trust/rahandaz-release.pub
+          [[ "$RELEASE_TAG" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)-(alpha|beta|rc)\.(0|[1-9][0-9]*)$ ]] || {
+            echo 'Only alpha/beta/rc tags are allowed. Stable release gates are still blocked.' >&2
+            exit 1
+          }
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: bcmath, curl, fileinfo, gd, intl, mbstring, pdo_pgsql, redis, sodium, xml, zip
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Build and test the tagged application
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          composer check-platform-reqs --no-interaction
+          npm ci
+          npm run lint
+          npm run typecheck
+          npm run build
+          php artisan test --compact
+          node --experimental-strip-types --test tests/js/datetime.test.ts
           bash installer/tests/run.sh
+          python3 installer/tests/release_test.py
+          bash infrastructure/operations/tests/run.sh
+          composer audit --locked --no-interaction
+          npm audit --audit-level=high
+      - name: Bundle production dependencies and assets
+        run: |
+          composer install --no-dev --no-scripts --no-interaction --prefer-dist --classmap-authoritative
+          composer check-platform-reqs --no-dev --no-interaction
+          staging=$(mktemp -d)
+          mkdir -p "$staging/application"
+          git archive --format=tar HEAD | tar -x -C "$staging/application"
+          cp -a vendor "$staging/application/vendor"
+          cp -a public/build "$staging/application/public/build"
+          export SOURCE_DATE_EPOCH=$(git show -s --format=%ct HEAD)
+          bash installer/release/assemble.sh --from "$staging/application" --version "${RELEASE_TAG#v}" --output dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-${{ inputs.tag }}
+          path: dist/rahandaz-*.tar.gz
+          if-no-files-found: error
+          retention-days: 14
+
+  draft:
+    needs: build
+    if: inputs.create_draft && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    # Maintainer must configure required reviewers and branch restrictions for this environment.
+    environment: release-signing
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ inputs.tag }}
+    steps:
+      # Use reviewed tooling from main, not executable code from the candidate artifact.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: unsigned-${{ inputs.tag }}
+          path: unsigned
+      - name: Require a license and a separately pinned public key
+        run: |
+          test -s LICENSE
+          test -s installer/trust/rahandaz-release.pub
+          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 && {
+            echo 'Refusing to replace an existing release.' >&2
+            exit 1
+          }
+          # An authentication/network error must not be treated as proof of absence.
+          gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" >/dev/null
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Sign bundle and generate pinned installation assets
+        env:
+          RELEASE_SIGNING_KEY: ${{ secrets.RAHANDAZ_RELEASE_SIGNING_KEY }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$RELEASE_SIGNING_KEY"
+          key_dir=$(mktemp -d)
+          trap 'rm -rf -- "$key_dir"' EXIT
+          printf '%s\n' "$RELEASE_SIGNING_KEY" >"$key_dir/release.key"
+          unset RELEASE_SIGNING_KEY
+          openssl pkey -in "$key_dir/release.key" -pubout -out "$key_dir/release.pub"
+          cmp "$key_dir/release.pub" installer/trust/rahandaz-release.pub
+          version="${RELEASE_TAG#v}"
+          artifact="unsigned/rahandaz-${version}.tar.gz"
+          bash installer/release/sign-manifest.sh --key "$key_dir/release.key" --artifact "$artifact" --version "$version" --output signed
+          bash installer/release/prepare-github.sh --repository "$GITHUB_REPOSITORY" --manifest signed/release.manifest --signature signed/release.manifest.sig --public-key installer/trust/rahandaz-release.pub --artifact "signed/rahandaz-${version}.tar.gz" --output assets
+          openssl dgst -sha256 -sign "$key_dir/release.key" -out assets/SHA256SUMS.sig assets/SHA256SUMS
+          openssl dgst -sha256 -verify installer/trust/rahandaz-release.pub -signature assets/SHA256SUMS.sig assets/SHA256SUMS
+      - name: Create draft only (never publish or mark latest)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$RELEASE_TAG" assets/* --repo "$GITHUB_REPOSITORY" --verify-tag --draft --prerelease --latest=false --title "Rahandaz $RELEASE_TAG — test candidate" --notes-file assets/INSTALL.md

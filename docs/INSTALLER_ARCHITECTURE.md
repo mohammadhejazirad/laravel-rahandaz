@@ -12,6 +12,9 @@
 | `installer/bootstrap/download-release.sh` | دانلود HTTPS با ادامهٔ دانلود |
 | `installer/bootstrap/verify-release.sh` | بررسی امضا و SHA-256 |
 | `installer/bootstrap/install.sh` | تأیید، سپس `exec` نصب‌کننده |
+| `installer/bootstrap/github-install.sh.in` | template مستقل GitHub؛ کلید/نسخه هنگام ساخت pin می‌شوند |
+| `installer/release/assemble.py` | runtime آماده شامل vendor/assets، بدون داده و link |
+| `installer/release/prepare-github.sh` | تولید assets و فرمان یک‌خطی از bundle امضاشده؛ بدون انتشار |
 | `installer/lib/engine.sh` | پیاده‌سازی مرحله‌ها |
 | `installer/stages/01` تا `15` | پوشش نازک با شناسه پایدار |
 | `installer/manifests/mirrors.v1` | کاتالوگ APT که در ۲۰۲۶-۱۰-۱۳ بررسی شده |
@@ -70,4 +73,4 @@
 
 ## فایل‌های ناموجود در مسیرهای خواسته‌شده
 
-`docs/PROJECT_SPEC.md`، `docs/ARCHITECTURE.md`، `docs/DEVELOPMENT.md` و `docs/ROADMAP.md` نیستند. نسخهٔ معتبر همان فایل‌ها زیر `.docs/` است. ADR جدا برای نصب‌کننده نیست. `scripts/install.sh` نیست. `SECURITY.md`، `LICENSE`، `CHANGELOG.md` و `CONTRIBUTING.md` در ریشه نیستند.
+`docs/PROJECT_SPEC.md`، `docs/ARCHITECTURE.md`، `docs/DEVELOPMENT.md` و `docs/ROADMAP.md` نیستند؛ نسخهٔ معتبر زیر `.docs/` است. ADR جدا برای نصب‌کننده نیست. `scripts/install.sh` نیست. `LICENSE` هنوز نیست؛ SECURITY، CHANGELOG و CONTRIBUTING اکنون موجودند. bootstrap عمومی `install.sh` هنگام بسته‌سازی هر نسخه تولید می‌شود. قرارداد pipeline/trust در `RELEASE_MANAGEMENT.md` است.

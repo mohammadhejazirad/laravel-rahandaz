@@ -4,6 +4,8 @@
 
 درخت `installer/` در مخزن است و Release امضاشدهٔ عمومی نیست. `scripts/install.sh` وجود ندارد. فرمان `curl | bash` و URL دانلود GitHub در README نیست، چون کلید `installer/trust/rahandaz-release.pub` عمداً غایب است و artifact تأییدشده منتشر نشده است.
 
+زیرساخت GitHub Releases و bootstrap نسخه‌دار اضافه شده است. `install.sh` فایل **تولیدشده برای بستهٔ امضاشده** است، نه raw روی main. `INSTALL.md` فرمان قابل‌کپی با هش واقعی دارد. workflow تنها candidate/Draft است؛ دانلود anonymous از Draft ممکن نیست. تنظیم و شرایط اضافه‌شدن فرمان عمومی به README در [RELEASE_MANAGEMENT.md](RELEASE_MANAGEMENT.md) آمده است. نصب‌کننده هنوز TLS پنل یا executor پیاده‌سازی‌نشده را آماده نمی‌کند؛ HTTP اولیه فقط از tunnel/شبکه trusted استفاده شود.
+
 طرح بدون تغییر سرور:
 
 ```bash

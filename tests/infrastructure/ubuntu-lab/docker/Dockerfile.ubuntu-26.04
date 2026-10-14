@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     TMPDIR=/run/rahandaz-lab/tmp
 RUN mkdir -p /run/rahandaz-lab/tmp /tmp \
     && TMPDIR=/tmp apt-get update \
-    && TMPDIR=/tmp apt-get install -y --no-install-recommends python3 ca-certificates curl passwd \
+    && TMPDIR=/tmp apt-get install -y --no-install-recommends python3 ca-certificates curl passwd gnupg \
     && rm -rf /var/lib/apt/lists/* \
     && printf '%s\n' '#!/bin/sh' 'exit 101' > /usr/sbin/policy-rc.d \
     && chmod 0755 /usr/sbin/policy-rc.d

@@ -1,0 +1,155 @@
+#!/usr/bin/env bash
+# Generated per signed release. Never install from a moving branch or trust a downloaded key.
+set -euo pipefail
+umask 077
+
+release_version='@@VERSION@@'
+release_base='https://github.com/@@REPOSITORY@@/releases/download/v@@VERSION@@'
+mode=apply
+public_url=''
+forward=()
+
+fail() { printf '%s\n' "${1}: ${2}" >&2; exit 1; }
+usage() {
+    printf '%s\n' "Rahandaz ${release_version} signed GitHub installer" \
+        'Usage: sudo bash install.sh --public-url http://127.0.0.1' \
+        'Options: --plan | --verify-only | --resume, --public-url ORIGIN,' \
+        '         --server-name HOST, --http-port PORT, --acknowledge-existing SERVICE,' \
+        '         --approve-migrations, --prefer-iranian-mirrors' \
+        'Use an SSH tunnel for HTTP bootstrap. Public production access requires HTTPS.'
+}
+while (( $# )); do
+    case "$1" in
+        --help|-h) usage; exit 0 ;;
+        --plan) mode=plan ;;
+        --verify-only) mode=verify ;;
+        --resume) mode=resume ;;
+        --public-url)
+            (( $# >= 2 )) || fail INVALID_INPUT 'Missing public URL.'
+            public_url="$2"; shift ;;
+        --server-name|--http-port|--acknowledge-existing)
+            (( $# >= 2 )) || fail INVALID_INPUT 'Missing option value.'
+            case "$1" in
+                --server-name)
+                    [[ "$2" == _ || "$2" =~ ^[A-Za-z0-9][A-Za-z0-9.-]{0,252}$ ]] \
+                        || fail INVALID_INPUT 'Server name must be a hostname or _.' ;;
+                --http-port)
+                    [[ "$2" =~ ^[1-9][0-9]{0,4}$ ]] && (( $2 <= 65535 )) \
+                        || fail INVALID_INPUT 'HTTP port must be between 1 and 65535.' ;;
+                --acknowledge-existing)
+                    case "$2" in nginx|postgresql|redis-server|php8.4-fpm|php8.4-cli) ;;
+                        *) fail INVALID_INPUT 'Unknown service acknowledgement.' ;;
+                    esac ;;
+            esac
+            forward+=("$1" "$2"); shift ;;
+        --approve-migrations|--prefer-iranian-mirrors) forward+=("$1") ;;
+        *) fail INVALID_INPUT 'Unknown argument.' ;;
+    esac
+    shift
+done
+
+for binary in curl openssl sha256sum python3 mktemp; do
+    command -v "$binary" >/dev/null || fail BOOTSTRAP_DEPENDENCY_MISSING "Install ${binary} first."
+done
+if [[ "$mode" == apply || "$mode" == resume ]]; then
+    (( EUID == 0 )) || fail PRIVILEGE_REQUIRED 'Run the verified installer with sudo or as root.'
+    if [[ -z "$public_url" ]]; then
+        [[ -r /dev/tty ]] || fail INVALID_INPUT 'Provide --public-url; no interactive terminal is available.'
+        printf '%s\n' 'Panel origin (use http://127.0.0.1 with an SSH tunnel for initial setup):' >/dev/tty
+        IFS= read -r public_url </dev/tty || fail INVALID_INPUT 'Panel origin is required.'
+    fi
+fi
+if [[ -n "$public_url" ]]; then
+    python3 - "$public_url" <<'PY' || fail INVALID_INPUT 'URL must be an HTTP(S) origin without credentials, path, query or fragment.'
+import re, sys
+from urllib.parse import urlsplit
+value = sys.argv[1]
+try:
+    parsed = urlsplit(value)
+    valid = (re.fullmatch(r"https?://[A-Za-z0-9.-]+(?::[0-9]{1,5})?", value)
+             and parsed.hostname and not parsed.username and not parsed.password
+             and (parsed.port is None or 1 <= parsed.port <= 65535))
+except ValueError:
+    valid = False
+raise SystemExit(0 if valid else 1)
+PY
+    forward+=(--public-url "$public_url")
+    if [[ "$public_url" == http://* ]]; then
+        printf '%s\n' 'WARNING: HTTP is for trusted networks/SSH tunnels only. Do not expose panel credentials over public HTTP.' >&2
+    fi
+fi
+
+work="$(mktemp -d /tmp/rahandaz-github-install.XXXXXX)"
+# This directory is made by mktemp above, never supplied by the caller.
+trap 'rm -rf -- "$work"' EXIT
+
+download() {
+    local name="$1"
+    curl --proto '=https' --proto-redir '=https' --tlsv1.2 \
+        --fail --location --silent --show-error --connect-timeout 15 \
+        --max-time 900 --retry 3 --output "$work/$name" "$release_base/$name" \
+        || fail DOWNLOAD_FAILED 'Download failed. Retry the same version; TLS verification is never disabled.'
+}
+
+cat >"$work/release.pub" <<'RAHANDAZ_PINNED_RELEASE_KEY'
+@@PUBLIC_KEY@@
+RAHANDAZ_PINNED_RELEASE_KEY
+download release.manifest
+download release.manifest.sig
+openssl dgst -sha256 -verify "$work/release.pub" \
+    -signature "$work/release.manifest.sig" "$work/release.manifest" >/dev/null 2>&1 \
+    || fail SIGNATURE_INVALID 'Release manifest signature did not verify.'
+mapfile -t manifest <"$work/release.manifest"
+[[ "${#manifest[@]}" == 4 && "${manifest[0]}" == 'rahandaz-release-manifest 1' \
+    && "${manifest[1]}" == "version=$release_version" \
+    && "${manifest[2]}" == "artifact=rahandaz-${release_version}.tar.gz" \
+    && "${manifest[3]}" =~ ^sha256=[0-9a-f]{64}$ ]] \
+    || fail UNVERIFIED_ARTIFACT 'Manifest does not describe this exact release.'
+artifact="rahandaz-${release_version}.tar.gz"
+download "$artifact"
+actual="$(sha256sum "$work/$artifact")"
+[[ "${actual%% *}" == "${manifest[3]#sha256=}" ]] \
+    || fail CHECKSUM_MISMATCH 'Artifact checksum does not match the signed manifest.'
+
+# Validate every member before extraction. Reject links, devices, duplicate names and traversal.
+python3 - "$work/$artifact" "$work/application" <<'PY' || fail UNSAFE_ARTIFACT 'Release archive is unsafe or incomplete.'
+from pathlib import Path, PurePosixPath
+import sys, tarfile
+
+archive_path, destination = sys.argv[1:]
+required = {"artisan", "composer.json", "composer.lock", "vendor/autoload.php",
+            "public/build/manifest.json", "installer/bin/rahandaz-install"}
+seen = set()
+total = 0
+with tarfile.open(archive_path, "r:gz") as archive:
+    members = archive.getmembers()
+    if len(members) > 200000:
+        raise ValueError("Too many archive members")
+    for member in members:
+        path = PurePosixPath(member.name)
+        canonical = path.as_posix()
+        if (path.is_absolute() or ".." in path.parts or not path.parts or path.parts[0] != "rahandaz"
+                or "\\" in member.name or any(ord(c) < 32 for c in member.name)
+                or not (member.isfile() or member.isdir()) or member.mode & 0o7000 or canonical in seen):
+            raise ValueError("Unsafe archive member")
+        seen.add(canonical)
+        total += member.size
+        if total > 2 * 1024**3:
+            raise ValueError("Archive exceeds bootstrap size limit")
+        if member.isfile():
+            required.discard("/".join(path.parts[1:]))
+    if required:
+        raise ValueError("Release is incomplete")
+    Path(destination).mkdir(mode=0o700)
+    # No extraction occurs until all paths and types above are accepted (Python 3.10 compatible).
+    archive.extractall(destination, members=members)
+PY
+
+printf '%s\n' "Verified Rahandaz ${release_version} (signature, checksum, archive)."
+if [[ "$mode" == verify ]]; then
+    exit 0
+fi
+# The installer verifies again and preserves its own persistent stage journal on failure.
+bash "$work/application/rahandaz/installer/bin/rahandaz-install" \
+    "--$mode" --artifact "$work/$artifact" --manifest "$work/release.manifest" \
+    --signature "$work/release.manifest.sig" --public-key "$work/release.pub" "${forward[@]}"

@@ -51,7 +51,7 @@ Usage:
 
 --plan is the default and does not change the server.
 --apply installs only after the manifest signature and checksum verify.
-There is no curl|bash entry and no default GitHub URL.
+Public GitHub bootstraps are generated per signed release; there is no curl|bash entry.
 EOF
 }
 

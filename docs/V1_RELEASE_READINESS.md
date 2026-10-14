@@ -4,7 +4,7 @@
 
 | Area | Status | Tests | Evidence | Blockers |
 | --- | --- | --- | --- | --- |
-| Installer | requires_vm | harness ۶۹ موفق | `installer/tests/run.sh` | نصب fresh/health/login واقعی روی سه Ubuntu نیست |
+| Installer | requires_vm | harness ۷۰ و bootstrap ۲۶ موفق روی سه Ubuntu container-lab | `RELEASE_PIPELINE_TEST_REPORT.md` | نصب fresh/health/login واقعی روی سه Ubuntu نیست |
 | Updater | requires_vm | harness ۲۱ موفق، Unit update | `installer/tests/update.sh` | update زنده، dump/restore و حفظ پروژه‌ها گواهی نشده |
 | PHP 8.4 | blocked | قرارداد pin و dependency بررسی شده | `docs/PHP_84_RUNTIME.md` | اجرای suite محلی با 8.5.11 بود؛ نصب 8.4 در VM/CI تأیید نشده |
 | Authentication | passed | PanelHttp/Secrets/JobLifecycle + Chrome login | suite واقعی PostgreSQL | محدوده login/first-password/session؛ MFA/reset/user management هنوز نیست |
@@ -27,7 +27,7 @@
 | Performance | not_run | فقط اندازه bundle اندازه‌گیری شد | build output | idle/PSS/CPU/p95/peak روی 1vCPU/2GB اندازه‌گیری نشده |
 | Responsive UI | passed | ۲۱ مسیر × ۹ عرض × ۲ پوسته | `evidence/v1-browser.json` | overflow صفر؛ پوشش تمام فرم‌ها، dialogs، خطاها و WCAG کامل نیست |
 | Documentation | blocked | README/screenshots/guides/status به‌روز | README و inventoryها | راهنمای ویژگی‌های نساخته، مجوز و کانال امنیت خصوصی کامل نیست |
-| GitHub Repository | blocked | scan ۲۰ commit محلی، npm audit | repository-audit، V1_SECURITY_AUDIT | LICENSE/signing/trust/provenance/artifact و remote CI/release نیست |
+| GitHub Repository | blocked | scan قبلی، API عمومی، bootstrap fixture و workflow candidate محلی | RELEASE_PIPELINE_TEST_REPORT، V1_SECURITY_AUDIT | LICENSE/signing/trust/provenance/artifact عمومی و remote CI/release نیست |
 
 ## مانع‌های انتشار
 

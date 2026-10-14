@@ -2,7 +2,9 @@
 
 آخرین تکرار harness در برش صفحات نسخه اول: ۶۹ passed/۰ failed، شامل updater با ۲۱ passed/۰ failed. full application suite روی PG/Redis توسعه نیز اجرا شد؛ این نتیجه نصب fresh یا PHP 8.4/Boot در VM نیست. شواهد و محدودیت در V1_TEST_REPORT و V1_RELEASE_READINESS.
 
-تاریخ اجرا: ۲۰۲۶-۱۰-۱۳. ابزاری که در محیط نبود اجرا نشده است: `shellcheck`، `shfmt`، `bats`. workflowهای `.github/workflows/installer-test.yml` و `release-build.yml` نوشته شده‌اند و اجرا نشده‌اند. `release-build.yml` انتشار را عمداً انجام نمی‌دهد و نبود `installer/trust/rahandaz-release.pub` را چک می‌کند.
+تاریخ اجرای تاریخی: ۲۰۲۶-۱۰-۱۳. ابزاری که در محیط نبود اجرا نشده است: `shellcheck`، `shfmt`، `bats`. workflowهای `.github/workflows/installer-test.yml` و `release-build.yml` در GitHub اجرا نشده‌اند. در برش تازهٔ ۲۰۲۶-۱۰-۱۴، release-build به build candidate/Draft اختیاری تغییر کرد و stable/public نمی‌سازد. نبود کلید Production و مجوز ساخت Draft را متوقف می‌کند.
+
+آخرین نتیجه: installer **۷۰ passed/۰ failed** (updater زیرمجموعه ۲۱/۰)، bootstrap/release **۲۶ passed/۰ failed** روی میزبان و هر سه Ubuntu container-lab. جزئیات، شکست‌های اولیهٔ اصلاح‌شده و شواهد در [RELEASE_PIPELINE_TEST_REPORT.md](RELEASE_PIPELINE_TEST_REPORT.md). نصب fresh/health/boot در VM همچنان تأیید نشده است.
 
 | آزمون | محیط | وضعیت | شاهد |
 | --- | --- | --- | --- |

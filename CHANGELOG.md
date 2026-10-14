@@ -4,6 +4,9 @@
 
 این بخش یادداشت Release پایدار نیست. tag یا انتشار عمومی انجام نشده است.
 
+- بسته‌ساز runtime آماده با vendor/assets، bootstrap GitHub نسخه‌دار با pin کلید/امضا/checksum و فرمان یک‌خطی generated؛ workflow فقط candidate/Draft اختیاری و بدون انتشار stable.
+- آزمون release/bootstrap ۲۶ موفق و installer harness ۷۰ موفق روی هر سه Ubuntu container-lab؛ اصلاح fixture قفل updater و dependency GPG آزمایشگاه. نصب واقعی در VM همچنان تأیید نشده است.
+
 - صفحات Backend-connected استقرار، دامنه، دیتابیس، پشتیبان‌گیری و پایش با داده PostgreSQL، scoped queries و props محدود.
 - ثبت استقرار با SHA ثابت، idempotency و جلوگیری از تعارض؛ شکست worker به استقرار منتقل، retry و لغو پیش از اجرا اضافه شد؛ rollback زنده بسته است.
 - درخواست دامنه/گواهی، دیتابیس/کاربر رمز‌شده و پشتیبان‌گیری با Job/Outbox/Audit؛ اجرای واقعی میزبان هنوز نیست.

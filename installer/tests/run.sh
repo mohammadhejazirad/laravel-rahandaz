@@ -229,10 +229,13 @@ pub="${tmp}/release.pub"
 openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out "$key" >/dev/null 2>&1
 openssl pkey -in "$key" -pubout -out "$pub" >/dev/null 2>&1
 app="${tmp}/application"
-mkdir -p "$app/public/build"
+mkdir -p "$app/public/build" "$app/vendor" "$app/installer/bin"
 printf '<?php\n' >"$app/artisan"
+printf '{}\n' >"$app/composer.json"
 printf '{}\n' >"$app/composer.lock"
 printf '{}\n' >"$app/public/build/manifest.json"
+printf '<?php\n' >"$app/vendor/autoload.php"
+printf '#!/usr/bin/env bash\nexit 10\n' >"$app/installer/bin/rahandaz-install"
 archive="$(bash "${INSTALLER_HOME}/release/assemble.sh" --from "$app" --version 1.0.0-test --output "${tmp}/pack")"
 bash "${INSTALLER_HOME}/release/sign-manifest.sh" --key "$key" --artifact "$archive" --version 1.0.0-test --output "${tmp}/signed" >/dev/null
 if bash "${INSTALLER_HOME}/bootstrap/verify-release.sh" \
@@ -348,6 +351,7 @@ if [[ "$apply_status" -eq 10 ]]; then
     ok "offline apply is incomplete rather than success"
 else
     bad "offline apply is incomplete rather than success (${apply_status})"
+    awk '/^ERROR / { print }' "${tmp}/apply.err"
 fi
 key_file="${sysroot}/etc/rahandaz/master.key"
 if [[ -f "$key_file" ]]; then
@@ -387,7 +391,10 @@ set +e
 run_apply
 second_status=$?
 set -e
-second_hash="$(sha256sum "$key_file" | awk '{ print $1 }')"
+second_hash=""
+if [[ -f "$key_file" ]]; then
+    second_hash="$(sha256sum "$key_file" | awk '{ print $1 }')"
+fi
 if [[ "$second_status" -eq 10 && "$second_hash" == "$key_hash" ]] && grep -q '\[SKIP\] 06-application-release' "${tmp}/apply.err"; then
     ok "resume keeps the release and the master key"
 else
