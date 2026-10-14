@@ -8,6 +8,15 @@ export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
     const runsInsideLerd = Boolean(process.env.LERD_SITE);
     const appUrl = new URL(env.APP_URL || 'http://127.0.0.1:8000');
+    const appPort = appUrl.port ? `:${appUrl.port}` : '';
+    const allowedAppOrigins = [appUrl.origin];
+
+    if (['localhost', '127.0.0.1'].includes(appUrl.hostname)) {
+        allowedAppOrigins.push(
+            `${appUrl.protocol}//localhost${appPort}`,
+            `${appUrl.protocol}//127.0.0.1${appPort}`,
+        );
+    }
 
     return {
         plugins: [
@@ -30,6 +39,9 @@ export default defineConfig(({ mode }) => {
                       port: 5173,
                       strictPort: true,
                       origin: `${appUrl.protocol}//${appUrl.hostname}:5173`,
+                      cors: {
+                          origin: [...new Set(allowedAppOrigins)],
+                      },
                       hmr: {
                           host: appUrl.hostname,
                           clientPort: 5173,

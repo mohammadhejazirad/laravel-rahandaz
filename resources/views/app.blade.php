@@ -25,6 +25,7 @@
         <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}" sizes="180x180">
         <title inertia>راه‌انداز</title>
         <script src="{{ asset('assets/theme-init.js') }}"></script>
+        @viteReactRefresh
         @vite(['resources/css/app.css', 'resources/js/app.tsx'])
         @inertiaHead
     </head>
