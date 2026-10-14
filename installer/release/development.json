@@ -1,0 +1,14 @@
+{
+  "product": "Rahandaz",
+  "version": "1.0.0",
+  "channel": "development",
+  "release_id": "development",
+  "git_commit": "",
+  "installed_at": "",
+  "updated_at": "",
+  "manifest_digest": "",
+  "schema_version": "forward",
+  "installer_version": "1.0.0",
+  "updater_version": "1.0.0",
+  "php": "8.4"
+}

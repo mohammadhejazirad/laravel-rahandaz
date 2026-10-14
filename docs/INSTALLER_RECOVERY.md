@@ -27,7 +27,7 @@ upgrade کلید اصلی و حساب مالک را بازنویسی نمی‌ک
 | --- | --- |
 | `UNSUPPORTED_OS` | فقط Ubuntu 22.04 jammy، 24.04 noble و 26.04 resolute |
 | `UNSUPPORTED_ARCHITECTURE` | فقط `amd64` / `x86_64` در این نسخه آزمون شده |
-| `PHP_BASELINE_UNAVAILABLE` | 22.04 با PHP توزیع پنل را میزبانی نمی‌کند. مخزن PHP ثالث اضافه نکنید |
+| `PHP_BASELINE_UNAVAILABLE` | Ubuntu خارج از jammy و noble و resolute. برای این سه نسخه PHP 8.4 فقط از pin امضاشده Sury می‌آید. مخزن بی‌امضا یا `trusted=yes` اضافه نکنید |
 | `LOW_MEMORY` | کمتر از ۱ GiB. زیر ۲ GiB فقط هشدار است |
 | `DISK_FULL` | کمتر از ۵ GiB آزاد |
 | `EXISTING_SERVICE` | سرویس را پاک نکنید. یا کنار آن با `--acknowledge-existing` ادامه دهید، یا نصب را متوقف کنید |

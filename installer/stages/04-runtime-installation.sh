@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Stable id: 04-runtime-installation
-# Preconditions: PostgreSQL, Redis, Nginx, and PHP 8.3+ extensions are confirmed.
+# Preconditions: PostgreSQL, Redis, Nginx, and the pinned PHP 8.4 packages are confirmed.
 # Error codes: PHP_BASELINE_UNAVAILABLE PACKAGES_NOT_INSTALLED
 # Retry: a failed stage is retried by --resume. A succeeded stage is skipped.
 # Recovery: keep the state directory, fix the reported code, then resume.

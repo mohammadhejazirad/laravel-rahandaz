@@ -12,6 +12,7 @@ use App\Http\Controllers\ProjectArchiveController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ServerController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\SystemUpdateController;
 use App\Http\Controllers\SetupController;
 use App\Http\Controllers\ThemeController;
 use Illuminate\Support\Facades\Route;
@@ -58,6 +59,10 @@ Route::prefix(trim((string) config('rahandaz.base_path'), '/'))->group(function 
                 Route::post('/notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
                 Route::get('/audit', [AuditController::class, 'index'])->name('audit.index');
                 Route::get('/settings/profile', [SettingsController::class, 'profile'])->name('settings.profile');
+                Route::get('/settings/updates', [SystemUpdateController::class, 'show'])->name('settings.updates');
+                Route::post('/settings/updates/check', [SystemUpdateController::class, 'check'])
+                    ->middleware('throttle:6,1')
+                    ->name('settings.updates.check');
             });
         });
     });

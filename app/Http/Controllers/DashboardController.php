@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Domain\Jobs\Enums\JobStatus;
 use App\Http\CurrentWorkspace;
+use App\Infrastructure\Updates\UpdateStatusService;
 use App\Models\LocalHost;
 use App\Models\MetricSample;
 use App\Models\OperationJob;
@@ -16,7 +17,7 @@ use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function __invoke(Request $request): Response
+    public function __invoke(Request $request, UpdateStatusService $updates): Response
     {
         $workspace = CurrentWorkspace::get($request);
 
@@ -50,6 +51,7 @@ class DashboardController extends Controller
                     ->whereIn('local_host_id', LocalHost::query()->forWorkspace($workspace->id)->select('id'))
                     ->count(),
             ],
+            'release' => $updates->snapshot(),
         ]);
     }
 }

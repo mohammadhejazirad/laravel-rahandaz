@@ -13,4 +13,4 @@
 
 Workflow مربوط `.github/workflows/ubuntu-installation-matrix.yml` است. این workflow در این جلسه اجرا نشد. سبز بودن آن جایگزین آزمون VM و گواهی نصب production نیست.
 
-در ۲۰۲۶-۱۰-۱۳ هر سه نسخه داخل آزمایشگاه اجرا شدند و `lab-test.sh` خروج ۰ داشت. شمارش‌ها در [tests/infrastructure/ubuntu-lab/docs/TEST_MATRIX.md](../tests/infrastructure/ubuntu-lab/docs/TEST_MATRIX.md) است. PHP 8.1 روی 22.04 برای پنل `unsupported` ماند.
+در ۲۰۲۶-۱۰-۱۳ هر سه نسخه داخل آزمایشگاه اجرا شدند و `lab-test.sh` خروج ۰ داشت. شمارش‌ها در [tests/infrastructure/ubuntu-lab/docs/TEST_MATRIX.md](../tests/infrastructure/ubuntu-lab/docs/TEST_MATRIX.md) است. آن اجرا PHP توزیع را دید: 22.04 برابر 8.1 و برای نیاز آن روز `unsupported` ماند. در ۲۰۲۶-۱۰-۱۴ طرح نصب‌کننده PHP 8.4 را روی هر سه ایمیج قبول کرد، ولی بسته‌ای نصب نکرد. نتیجه آزمایشگاه عملیات بازنویسی نشده است.

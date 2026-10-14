@@ -12,6 +12,7 @@ import {
     LogOut,
     Menu,
     Package,
+    RefreshCw,
     Rocket,
     ScrollText,
     Server,
@@ -180,6 +181,12 @@ export function AppLayout({
                     icon: ScrollText,
                     enabled: true,
                     visible: canAudit,
+                },
+                {
+                    href: `${base}/settings/updates`,
+                    label: "به‌روزرسانی",
+                    icon: RefreshCw,
+                    enabled: true,
                 },
                 {
                     href: `${base}/settings/profile`,

@@ -6,6 +6,7 @@ namespace App\Console\Commands;
 
 use App\Infrastructure\Secrets\KeyCanary;
 use App\Infrastructure\Secrets\MasterKey;
+use App\Infrastructure\Updates\PhpRuntime;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
@@ -34,6 +35,13 @@ class DoctorCommand extends Command
         $mode = (string) config('rahandaz.execution_mode');
         $modeOk = in_array($mode, ['disabled', 'local'], true);
         $failed = ! $this->report('execution_mode', $modeOk, $mode) || $failed;
+
+        $phpOk = PhpRuntime::isRequiredSeries();
+        if (app()->environment('production')) {
+            $failed = ! $this->report('php_runtime', $phpOk, PHP_VERSION) || $failed;
+        } else {
+            $this->line('php_runtime: '.($phpOk ? 'ok' : 'warn').' '.PHP_VERSION);
+        }
 
         $masterKeyPath = (string) config('rahandaz.master_key_file');
         $masterKeyMode = is_file($masterKeyPath) ? fileperms($masterKeyPath) : false;

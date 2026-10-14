@@ -10,6 +10,14 @@ return [
     */
     'execution_mode' => env('RAHANDAZ_EXECUTION_MODE', 'disabled'),
 
+    'php_series' => '8.4',
+
+    'release_file' => env('RAHANDAZ_RELEASE_FILE', base_path('installer/release/development.json')),
+
+    'update_channel' => env('RAHANDAZ_UPDATE_CHANNEL', 'stable'),
+
+    'github_repository' => env('RAHANDAZ_GITHUB_REPOSITORY', ''),
+
     'base_path' => $basePath === '/' ? '/rahandaz' : $basePath,
 
     'master_key_file' => env('RAHANDAZ_MASTER_KEY_FILE', base_path('var/config/master.key')),

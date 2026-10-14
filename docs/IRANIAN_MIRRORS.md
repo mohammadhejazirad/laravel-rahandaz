@@ -30,6 +30,6 @@ Chabokan برای resolute: InRelease امضا داشت، تاریخ `Sun, 12 Ap
 
 ## چه چیزی mirror APT نیست
 
-یک mirror برای npm، Composer، Node.js، PostgreSQL شخص ثالث، MongoDB یا registry تصویر، mirror آرشیو Ubuntu نیست و در این جدول endpoint فعال ندارد. آن منابع برای کنترل‌پلین این نسخه لازم نیستند: asset رابط داخل Release است، PHP از متاپکیج همان Ubuntu می‌آید، و بستهٔ اختیاری پروژه کاربر از کاتالوگ پنل بعد از ورود مدیریت می‌شود.
+یک mirror برای npm، Composer، Node.js، PostgreSQL شخص ثالث، MongoDB یا registry تصویر، mirror آرشیو Ubuntu نیست و در این جدول endpoint فعال ندارد. آن منابع برای راه‌انداز این نسخه لازم نیستند: asset رابط داخل Release است، PHP 8.4 راه‌انداز از مخزن امضاشده packages.sury.org می‌آید و متاپکیج php توزیع را عوض نمی‌کند، و بستهٔ اختیاری پروژه کاربر از کاتالوگ پنل بعد از ورود مدیریت می‌شود.
 
 آزمون شبکهٔ محدود ایران که واقعاً اجرا شد، fixture داخل `installer/tests/run.sh` است: timeout آرشیو رسمی، انتخاب Liara با `prefer_iranian`، و ماندن روی `MIRROR_SIGNATURE_INVALID` وقتی امضا خراب است. شبیه‌سازی زندهٔ قطع GitHub، npm، DNS و HTTP 403/429 روی یک سرور واقعی `not_run` است. بدون ریشهٔ اعتماد Release، دانلود artifact از mirror جایگزین انجام نمی‌شود.

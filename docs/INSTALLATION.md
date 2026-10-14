@@ -10,7 +10,7 @@ bash installer/bin/rahandaz-install --plan --state-dir /tmp/rahandaz-plan
 
 اعمال فقط بعد از manifest، امضا و کلید عمومی از پیش مورد اعتماد است. جزئیات در [INSTALLER_ARCHITECTURE.md](INSTALLER_ARCHITECTURE.md)، [INSTALLER_SECURITY.md](INSTALLER_SECURITY.md)، [INSTALLER_RECOVERY.md](INSTALLER_RECOVERY.md)، [IRANIAN_MIRRORS.md](IRANIAN_MIRRORS.md)، [UBUNTU_COMPATIBILITY.md](UBUNTU_COMPATIBILITY.md) و [INSTALLER_TEST_MATRIX.md](INSTALLER_TEST_MATRIX.md) است.
 
-در ۲۰۲۶-۱۰-۱۳ آزمون منطقی میزبان ۶۳ مورد را بدون شکست گذراند. طرح داخل کانتینر آزمایشگاه برای 22.04 با `PHP_BASELINE_UNAVAILABLE` متوقف شد و برای 24.04 و 26.04 `RESULT plan` داد. healthcheck، ورود، صف و scheduler اجرا نشدند. این نتیجه نصب production نیست.
+در ۲۰۲۶-۱۰-۱۳ آزمون منطقی میزبان ۶۳ مورد را بدون شکست گذراند و طرح 22.04 با `PHP_BASELINE_UNAVAILABLE` متوقف شد. در ۲۰۲۶-۱۰-۱۴ همان harness پس از پین PHP 8.4 خروج ۰ داشت: ۶۹ مورد و ۰ شکست. طرح روی ایمیج‌های آزمایشگاه 22.04 و 24.04 و 26.04 هم خروج ۰ و `RESULT plan` داد و `php8.4` را از `/usr/bin/php8.4` نام برد. بسته‌ای نصب نشد، healthcheck و ورود و صف اجرا نشدند. این نتیجه نصب production نیست.
 
 حساب خود نصب‌کننده، وقتی apply زنده شود، کاربر `rahandaz` را بدون فایل گذرواژهٔ سیستمی می‌سازد. آن apply روی میزبان توسعه اجرا نشده است. مسیر جداگانهٔ موتور عملیات هنوز این است: اسکریپت `account.create_rahandaz_user`. روی میزبان واقعی، بدون sandbox تأییدشده، این اسکریپت `LIVE_MUTATION_BLOCKED` برمی‌گرداند و `useradd` را صدا نمی‌زند. داخل sandbox آزمون، حساب با shell برابر `/usr/sbin/nologin` و بدون گروه sudo ساخته می‌شود. گذرواژه تصادفی فقط در فایل root-only با حالت `0600` نوشته و سپس قفل می‌شود. این فایل به رابط فرستاده نمی‌شود. نگهداشتن آن بر عهده مالک است، ولی ورود تعاملی با آن گذرواژه فعال نیست و اتوماسیون از آن استفاده نمی‌کند.
 

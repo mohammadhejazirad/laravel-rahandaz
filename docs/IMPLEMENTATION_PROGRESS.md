@@ -178,6 +178,22 @@ PHPUnit فیلتر `test_installer_master_key_is_created_once_and_not_printed` �
 
 Mirrorهای APT که InRelease آن‌ها با keyring اوبونتو تأیید شد در `docs/IRANIAN_MIRRORS.md` هستند. Runflare، Megan Hub و `mirror.arvancloud.com` انتخاب نشدند. آزمون ایران فقط fixture بود.
 
+## PHP 8.4 و به‌روزرسانی خود راه‌انداز — 2026-10-14
+
+خود راه‌انداز به PHP 8.4 پین شد. محدودیت Composer از `^8.3` به `^8.4` رسید و فقط `content-hash` در `composer.lock` عوض شد. نسخه بسته‌ها تغییر نکرد. `composer update --lock` به‌خاطر timeout بسته‌های Packagist متوقف شد و هش با `Composer\Package\Locker::getContentHash` نوشته شد. `composer check-platform-reqs` روی `/usr/bin/php` و PHP لرد، هر دو 8.5.11، خروج ۰ داشت. این بررسی `pdo_pgsql` را نمی‌بیند چون در `composer.json` نیست. میزبان `pdo_pgsql` ندارد و PHP لرد دارد. باینری `php8.4` روی میزبان توسعه نیست. `--ignore-platform-reqs` و `config.platform.php` استفاده نشد.
+
+مخزن Ubuntu بسته `php8.4-*` ندارد. pin پذیرفته‌شده فقط `packages.sury.org` با اثرانگشت `15058500A0235D97F5D10063B188E2B695BD4743` است. این کلید، کلید انتشار راه‌انداز نیست. `installer/trust/rahandaz-release.pub` هنوز غایب است. PHP-FPM پنل فایل و سوکت خودش را دارد. `update-alternatives` در طرح نیست.
+
+`bash installer/tests/run.sh` خروج ۰ بود: ۶۹ passed و ۰ failed. داخل آن `installer/tests/update.sh` ۲۱ passed و ۰ failed بود. apply آفلاین خروج ۱۰ و `incomplete` ماند و `current` را عوض نکرد. rollback برنامه فقط symlink است. `--approve-database-recovery` پایگاه را برنمی‌گرداند و `manual_recovery_required` می‌دهد. `pg_dump` در آزمون `not_run` ماند.
+
+کانتینرهای نام‌دار آزمایشگاه Exited بودند. `docker start` به‌خاطر marker انحصاری entrypoint تصویر شکست خورد. منبع entrypoint اصلاح شد تا marker معمولی موجود را نگه دارد، ولی ایمیج دوباره ساخته نشد. طرح روی کانتینر موقت از همان ایمیج‌ها برای 22.04 و 24.04 و 26.04 خروج ۰ و `RESULT plan` داد. آن کانتینرها حذف شدند. بسته‌ای نصب نشد. این گواهی VM نیست. خانه‌های `docs/OPERATIONS_TEST_MATRIX.md` همچنان `untested` هستند. `shellcheck` نصب نبود.
+
+بررسی نسخه در `app/Infrastructure/Updates` است. زمان‌بند `rahandaz:updates:check` هر شش ساعت است. مخزن GitHub خالی یعنی هیچ درخواست HTTP نیست. Login این بررسی را صدا نمی‌زند. جدول `release_checks` migrate نشده است. `tests/Unit/UpdateSystemTest.php` با PHP 8.5.11 میزبان ۱۶ آزمون و ۵۱ assertion را گذراند. درخواست زنده GitHub نبود. آزمون‌های Feature که به `192.0.2.1` وصل می‌شوند `not_run` ماندند. Postgres روشن نشد.
+
+رابط داشبورد و `settings/updates` دستور را نشان می‌دهد و اجرا نمی‌کند. `npm run lint`، `npx tsc --noEmit` و `npm run build` خروج ۰ داشتند. مرورگر باز نشد. پکیج UI تازه نصب نشد.
+
+انتشار عمومی آماده نیست. workflowها اجرا نشدند.
+
 workflowهای `installer-test.yml` و `release-build.yml` اجرا نشدند. کلید اعتماد Release در مخزن نیست. آمادگی انتشار عمومی: آماده نیست.
 
 `docs/PROJECT_SPEC.md`، `docs/ARCHITECTURE.md`، `docs/DEVELOPMENT.md` و `docs/ROADMAP.md` نیستند. نسخهٔ معتبر زیر `.docs/` است.

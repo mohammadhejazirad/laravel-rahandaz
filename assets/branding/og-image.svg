@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
   <title id="title">راه‌انداز</title>
-  <desc id="description">تصویر معرفی راه‌انداز، کنترل‌پلین فارسی سرور محلی</desc>
+  <desc id="description">تصویر معرفی راه‌انداز، پنل مدیریت فارسی سرور محلی</desc>
   <defs>
     <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#0B1120"/>
@@ -20,7 +20,7 @@
     <path fill="#1E1B4B" d="M49 13H31c-10.493 0-19 8.507-19 19v4h11v-4a8 8 0 0 1 8-8h7v8c0 7.18-5.82 13-13 13H14v11h11c13.255 0 24-10.745 24-24V13Z"/>
   </g>
   <text x="850" y="245" direction="rtl" text-anchor="start" fill="#F8FAFC" font-family="Vazirmatn, Noto Sans Arabic, sans-serif" font-size="76" font-weight="700">راه‌انداز</text>
-  <text x="850" y="315" direction="rtl" text-anchor="start" fill="#CBD5E1" font-family="Vazirmatn, Noto Sans Arabic, sans-serif" font-size="27" font-weight="500">کنترل‌پلین فارسی و خودمیزبان برای همان سرور Ubuntu</text>
+  <text x="850" y="315" direction="rtl" text-anchor="start" fill="#CBD5E1" font-family="Vazirmatn, Noto Sans Arabic, sans-serif" font-size="27" font-weight="500">پنل مدیریت فارسی و خودمیزبان برای همان سرور Ubuntu</text>
   <line x1="115" y1="430" x2="850" y2="430" stroke="#334155" stroke-width="2"/>
   <text x="115" y="490" fill="#A5B4FC" font-family="ui-monospace, monospace" font-size="24" font-weight="600" letter-spacing="4">RAHANDAZ / LOCAL CONTROL PLANE</text>
   <text x="115" y="535" fill="#94A3B8" font-family="Vazirmatn, Noto Sans Arabic, sans-serif" font-size="20">Laravel · Inertia · React · PostgreSQL · Redis</text>

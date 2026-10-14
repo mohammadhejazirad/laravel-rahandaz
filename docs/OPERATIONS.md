@@ -17,6 +17,8 @@ Controller → PostgreSQL job/outbox → Redis → worker
 
 `OperationDispatcher` این Process را صدا نمی‌زند. تا `allowsHostMutation()` برابر `false` باشد استثنا `HostExecutionDenied` با کد `EXECUTION_DISABLED` می‌دهد. حتی اگر دروازه باز شود، سوکت helper نصب نیست و کد `EXECUTOR_NOT_CONFIGURED` می‌ماند.
 
+به‌روزرسانی خود راه‌انداز از این موتور عبور نمی‌کند و دروازه را باز نمی‌کند. CLI در `installer/bin/rahandaz` است. پنل فقط وضعیت را نشان می‌دهد. جزئیات در `docs/SELF_UPDATE.md` است.
+
 ## قرارداد نتیجه
 
 stdout یک شیء JSON است:

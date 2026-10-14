@@ -19,7 +19,7 @@ export function AppLogo({
     size = "md",
     className,
     decorative = false,
-    ariaLabel = "راه‌انداز، کنترل‌پلین سرور محلی",
+    ariaLabel = "راه‌انداز، پنل مدیریت سرور محلی",
     showTagline = true,
 }: {
     variant?: "full" | "symbol";
@@ -48,7 +48,7 @@ export function AppLogo({
             <span className="leading-tight" aria-hidden="true">
                 <span className={cn("block font-bold", textSize.title, textTheme.title)}>راه‌انداز</span>
                 {showTagline ? (
-                    <span className={cn("block font-medium", textSize.tagline, textTheme.tagline)}>کنترل‌پلین سرور محلی</span>
+                    <span className={cn("block font-medium", textSize.tagline, textTheme.tagline)}>پنل مدیریت سرور محلی</span>
                 ) : null}
             </span>
         </div>

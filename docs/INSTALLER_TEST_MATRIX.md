@@ -21,7 +21,13 @@
 | reboot و ماندگاری سرویس | — | requires_vm | |
 | نصب دوباره روی سرور واقعی | — | not_run | resume فقط در sysroot موقت harness دیده شد |
 | گردش GitHub | — | not_run | فایل workflow هست و job اجرا نشده |
+| منطق نصب‌کننده پس از PHP 8.4 | میزبان توسعه، ۲۰۲۶-۱۰-۱۴، `bash installer/tests/run.sh` | passed | ۶۹ مورد و ۰ شکست. شامل سوئیت به‌روزرسانی با ۲۱ مورد و ۰ شکست |
+| طرح 22.04 / 24.04 / 26.04 پس از پین Sury | کانتینر موقت از ایمیج `rahandaz-ubuntu-lab`، ۲۰۲۶-۱۰-۱۴ | passed به‌عنوان plan | هر سه خروج ۰، `RESULT plan`، مسیر `/usr/bin/php8.4`. بسته‌ای نصب نشد. کانتینر نام‌دار بازسازی نشد |
+| `tests/Unit/UpdateSystemTest.php` | PHP میزبان ۸٫۵٫۱۱ | passed | ۱۶ آزمون و ۵۱ assertion. `Http::fake`. درخواست زنده GitHub نبود |
+| `composer check-platform-reqs` | PHP میزبان و PHP لرد، هر دو ۸٫۵٫۱۱ | passed برای require کامپوزر | خروج ۰. `pdo_pgsql` در require نیست. میزبان آن extension را ندارد |
+| نصب زنده، health، صف، scheduler، VM | — | not_run / requires_vm | اعمال نشد |
+| workflow `php-84.yml` | GitHub Actions | not_run | فایل اضافه شد و job اجرا نشد |
 
-خروج ۱۰ در apply آفلاین خواستهٔ harness است: systemd و پایگاه و PHP و health در آن sysroot `not_run` می‌مانند. این خروج موفقیت نصب نیست.
+خروج ۱۰ در apply آفلاین خواستهٔ harness است: systemd و پایگاه و PHP و health در آن sysroot `not_run` می‌مانند. این خروج موفقیت نصب نیست. apply به‌روزرسانی آفلاین هم خروج ۱۰ و `incomplete` است و symlink `current` را عوض نمی‌کند.
 
-آمادگی Release عمومی: آماده نیست. کلید اعتماد منتشر نشده، artifact برنامه با vendor و asset ساخته‌شده امضا نشده، healthcheck اجرا نشده، و 22.04 برای PHP توزیع بسته است.
+آمادگی Release عمومی: آماده نیست. کلید اعتماد راه‌انداز منتشر نشده، artifact امضاشده ساخته نشده، healthcheck زنده اجرا نشده، و نصب PHP 8.4 روی Ubuntu هدف فقط در حد طرح است.

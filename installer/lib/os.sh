@@ -70,7 +70,10 @@ installer_detect_os() {
 }
 
 installer_php_baseline_available() {
-    # Distro PHP on jammy is 8.1. The lab run on 2026-10-13 observed that.
-    # No signed third-party PHP repository is approved, so 22.04 cannot host the panel.
-    [[ "${INSTALLER_OS_CODENAME:-}" != "jammy" ]]
+    # Rahandaz itself uses PHP 8.4 from the pinned repository.
+    # Ubuntu archive packages do not provide that series: jammy is 8.1, noble is 8.3, resolute is 8.5.
+    case "${INSTALLER_OS_CODENAME:-}" in
+        jammy | noble | resolute) return 0 ;;
+        *) return 1 ;;
+    esac
 }

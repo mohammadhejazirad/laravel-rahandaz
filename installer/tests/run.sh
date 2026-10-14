@@ -47,7 +47,7 @@ else
     ok "no insecure installer flag"
 fi
 
-if installer_package_allowed php-cli && ! installer_package_allowed nodejs && ! installer_package_allowed docker.io; then
+if installer_package_allowed php8.4-cli && ! installer_package_allowed php-cli && ! installer_package_allowed nodejs && ! installer_package_allowed docker.io; then
     ok "control-plane package allowlist"
 else
     bad "control-plane package allowlist"
@@ -81,10 +81,10 @@ else
     bad "noble baseline"
 fi
 INSTALLER_OS_RELEASE="$os_jammy"
-if installer_detect_os && ! installer_php_baseline_available; then
-    ok "jammy php baseline blocked"
+if installer_detect_os && installer_php_baseline_available; then
+    ok "jammy php 8.4 suite is available"
 else
-    bad "jammy php baseline blocked"
+    bad "jammy php 8.4 suite is available"
 fi
 
 os_link_root="${tmp}/os-link"
@@ -313,18 +313,19 @@ apply_env=(
     RAHANDAZ_INSTALLER_SYSROOT="$sysroot"
     RAHANDAZ_INSTALLER_REFUSE_LIVE=1
 )
-ack=(--acknowledge-existing nginx --acknowledge-existing postgresql --acknowledge-existing redis-server --acknowledge-existing php-fpm --acknowledge-existing php-cli)
+ack=(--acknowledge-existing nginx --acknowledge-existing postgresql --acknowledge-existing redis-server --acknowledge-existing php8.4-fpm --acknowledge-existing php8.4-cli)
 if "${apply_env[@]}" bash "${INSTALLER_HOME}/bin/rahandaz-install" --plan --state-dir "${tmp}/plan-state" >"${tmp}/plan.out" 2>"${tmp}/plan.err"; then
     grep -q '\[PLAN\] 14-health-verification' "${tmp}/plan.err" && ! grep -q '\[OK\]' "${tmp}/plan.err" && ok "plan does not mark work done" || bad "plan does not mark work done"
 else
     bad "plan does not mark work done"
 fi
-if ! "${apply_env[@]}" env INSTALLER_OS_RELEASE="$os_jammy" bash "${INSTALLER_HOME}/bin/rahandaz-install" --plan --state-dir "${tmp}/jammy-state" >"${tmp}/jammy.out" 2>"${tmp}/jammy.err"; then
-    grep -q PHP_BASELINE_UNAVAILABLE "${tmp}/jammy.err" \
-        && grep -q '^error_code PHP_BASELINE_UNAVAILABLE$' "${tmp}/jammy-state/state" \
-        && ok "jammy plan fails closed" || bad "jammy plan fails closed"
+if "${apply_env[@]}" env INSTALLER_OS_RELEASE="$os_jammy" bash "${INSTALLER_HOME}/bin/rahandaz-install" --plan --state-dir "${tmp}/jammy-state" >"${tmp}/jammy.out" 2>"${tmp}/jammy.err"; then
+    grep -q 'php8.4' "${tmp}/jammy.err" \
+        && ! grep -q PHP_BASELINE_UNAVAILABLE "${tmp}/jammy.err" \
+        && ! grep -q 'update-alternatives' "${tmp}/jammy.err" \
+        && ok "jammy plan keeps PHP 8.4 beside other runtimes" || bad "jammy plan keeps PHP 8.4 beside other runtimes"
 else
-    bad "jammy plan fails closed"
+    bad "jammy plan keeps PHP 8.4 beside other runtimes"
 fi
 
 signed_artifact="${tmp}/signed/$(basename "$archive")"
@@ -392,6 +393,22 @@ if [[ "$second_status" -eq 10 && "$second_hash" == "$key_hash" ]] && grep -q '\[
 else
     bad "resume keeps the release and the master key"
 fi
+php_source="${sysroot}/etc/apt/sources.list.d/rahandaz-php.sources"
+php_prefs="${sysroot}/etc/apt/preferences.d/rahandaz-php"
+if [[ -f "$php_source" && -f "$php_prefs" ]] \
+    && grep -q 'Signed-By: /usr/share/keyrings/rahandaz-php-sury.gpg' "$php_source" \
+    && grep -q 'packages.sury.org' "$php_source" \
+    && ! grep -q 'trusted=yes' "$php_source" \
+    && grep -q 'Pin-Priority: -1' "$php_prefs" \
+    && [[ -f "${sysroot}/etc/rahandaz/php/php-fpm.conf" ]] \
+    && [[ -f "${sysroot}/etc/rahandaz/php/pool.d/rahandaz.conf" ]] \
+    && [[ ! -e "${sysroot}/etc/php" ]] \
+    && grep -q '/usr/bin/php8.4' "${sysroot}/etc/systemd/system/rahandaz-queue.service" \
+    && grep -q '/usr/sbin/php-fpm8.4' "${sysroot}/etc/systemd/system/rahandaz-php-fpm.service"; then
+    ok "offline apply pins private PHP 8.4 and leaves distro pools untouched"
+else
+    bad "offline apply pins private PHP 8.4 and leaves distro pools untouched"
+fi
 
 RAHANDAZ_INSTALLER_SYSROOT="${tmp}/sys"
 if installer_mutation_allowed; then
@@ -410,6 +427,12 @@ if ! installer_mutation_allowed; then
     ok "unprivileged live apply is refused"
 else
     bad "unprivileged live apply is refused"
+fi
+
+if bash "${INSTALLER_HOME}/tests/update.sh"; then
+    ok "self-update suite"
+else
+    bad "self-update suite"
 fi
 
 printf 'passed %s\nfailed %s\n' "$pass" "$fail"

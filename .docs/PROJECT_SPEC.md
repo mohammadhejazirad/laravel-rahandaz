@@ -36,7 +36,7 @@
 
 راه‌انداز در نسخه اول به توسعه‌دهنده یا مدیر **همان سروری که پنل روی آن نصب است** کمک می‌کند بدون اجرای مکرر دستورات دستی، وضعیت میزبان را ببیند، نرم‌افزار نصب و به‌روزرسانی کند، سرویس‌ها را مدیریت کند، پروژه مستقر کند، لاگ ببیند، پشتیبان بگیرد و در شکست به نسخه سالم برگردد.
 
-دامنه قطعی نسخه اول تک‌سرور است: کنترل‌پنل، worker و پروژه‌های کاربر روی یک میزبان قرار دارند. هیچ سرور مقصد، inventory، کلید SSH مدیریتی، agent راه دور یا اتصال چندسروری در نسخه اول وجود ندارد. کنترل‌پنل در production مستقیماً با PHP-FPM، Nginx، systemd و Laravel Queue روی Ubuntu نصب می‌شود و اجرای پنل، worker یا scheduler داخل Docker در نسخه اول پشتیبانی نمی‌شود. محیط توسعه نیز برای خود برنامه PHP/Artisan/Vite را روی میزبان اجرا می‌کند؛ PostgreSQL و دو Redis توسعه را می‌توان مستقیم یا با Compose مخصوص dependencyها اجرا کرد. Docker برای استقرار پروژه‌ها در نسخه اول استفاده نمی‌شود؛ نصب اختیاری آن برای کاربری خارج از deployment پنل فقط با catalog امن ممکن است.
+دامنه قطعی نسخه اول تک‌سرور است: پنل مدیریت، worker و پروژه‌های کاربر روی یک میزبان قرار دارند. هیچ سرور مقصد، inventory، کلید SSH مدیریتی، agent راه دور یا اتصال چندسروری در نسخه اول وجود ندارد. پنل مدیریت در production مستقیماً با PHP-FPM، Nginx، systemd و Laravel Queue روی Ubuntu نصب می‌شود و اجرای پنل، worker یا scheduler داخل Docker در نسخه اول پشتیبانی نمی‌شود. محیط توسعه نیز برای خود برنامه PHP/Artisan/Vite را روی میزبان اجرا می‌کند؛ PostgreSQL و دو Redis توسعه را می‌توان مستقیم یا با Compose مخصوص dependencyها اجرا کرد. Docker برای استقرار پروژه‌ها در نسخه اول استفاده نمی‌شود؛ نصب اختیاری آن برای کاربری خارج از deployment پنل فقط با catalog امن ممکن است.
 
 نسخه اول یک نصب متعلق به یک مالک یا تیم مورد اعتماد، همراه کاربران و نقش‌های متعدد است. مدل Workspace از ابتدا وجود دارد، ولی هر Workspace در این نسخه همان میزبان محلی حفاظت‌شده را می‌بیند. SaaS چندمستاجری عمومی و اجرای کد مشتری ناشناس پشتیبانی نمی‌شود.
 
@@ -66,7 +66,7 @@
 
 ### 2.2 خارج از دامنه نسخه اول
 
-- Kubernetes، ساخت cloud provider، billing، email hosting و کنترل‌پنل عمومی هاست اشتراکی.
+- Kubernetes، ساخت cloud provider، billing، email hosting و پنل مدیریت عمومی هاست اشتراکی.
 - ترمینال آزاد root، اجرای shell دلخواه از مرورگر و playbook دلخواه آپلودشده توسط کاربر. کنسول نسخه ۱ فقط فهرست ثابت بررسی‌های فقط‌خواندنی است و فرمان دلخواه، نصب یا تغییر فایل را اجرا نمی‌کند.
 - پشتیبانی تضمینی از همه توزیع‌ها و همه نسخه‌های نرم‌افزار.
 - هر نوع مدیریت سرور دیگر با SSH، Ansible، agent یا API ابری.
@@ -79,13 +79,13 @@
 
 پروفایل آزمون حداقلی رسمی نسخه اول: **1 vCPU، 2GB RAM**، Ubuntu Server و فضای آزاد موردنیاز بسته؛ این حد به معنی ظرفیت تضمینی build چند Next/Nuxt یا چند دیتابیس سنگین نیست. راه‌انداز باید در کنار workloadهای واقعی کم‌مصرف بماند و preflight پیش از عملیات سنگین RAM آزاد، load، swap، disk و ریسک OOM را بسنجد.
 
-- **هدف طراحی (نه ادعای تضمین‌شده):** footprint افزوده کنترل‌پلین در حالت idle و پس از warm-up، شامل PHP-FPM راه‌انداز، workerهای ضروری، PostgreSQL/Redis اختصاصی و Nginx سهم‌پذیر، ترجیحاً **حداکثر 512MiB RAM** و متوسط مصرف CPU در وضعیت عادی **حداکثر 0.5 vCPU** روی بازه اندازه‌گیری‌شده. benchmark باید PSS/RSS و سهم سرویس‌های مشترک را تفکیک کند؛ جمع ساده RSS processهای اشتراکی موجب دوباره‌شماری است. هر محدودیت بالاتر فقط با اندازه‌گیری و ثبت در `docs/PERFORMANCE.md` پذیرفته می‌شود.
+- **هدف طراحی (نه ادعای تضمین‌شده):** footprint افزوده راه‌انداز در حالت idle و پس از warm-up، شامل PHP-FPM راه‌انداز، workerهای ضروری، PostgreSQL/Redis اختصاصی و Nginx سهم‌پذیر، ترجیحاً **حداکثر 512MiB RAM** و متوسط مصرف CPU در وضعیت عادی **حداکثر 0.5 vCPU** روی بازه اندازه‌گیری‌شده. benchmark باید PSS/RSS و سهم سرویس‌های مشترک را تفکیک کند؛ جمع ساده RSS processهای اشتراکی موجب دوباره‌شماری است. هر محدودیت بالاتر فقط با اندازه‌گیری و ثبت در `docs/PERFORMANCE.md` پذیرفته می‌شود.
 - **قید صداقت:** در لحظه نصب APT، Composer/npm build، migration، backup، restore یا راه‌اندازی چند runtime، مصرف CPU/RAM می‌تواند از هدف idle بیشتر باشد. «حداکثر 0.5 در تمام لحظات» بدون محدودکردن شدید سرعت یا خطر OOM قابل تضمین نیست؛ peak، p95، idle و مصرف پروژه‌های کاربر جدا گزارش می‌شوند. روی resource budget ناکافی عملیات سنگین به‌جای آسیب‌زدن به پروژه فعال block/queue می‌شود.
 - پروفایل `lite` پیش‌فرض یک worker کوتاه `control` و یک worker اجرایی با concurrency=1 دارد؛ تعداد PHP-FPM childها محدود است. Redis cache سقف `maxmemory` و eviction اختصاصی دارد؛ Redis queue با `noeviction` و persistence آزموده پیکربندی می‌شود. dashboard Horizon به‌عنوان ابزار تشخیصی اختیاری در پروفایل بزرگ‌تر است، نه process اجباری در lite.
 - Laravel scheduler از systemd timer دوره‌ای و `php artisan schedule:run` استفاده می‌کند؛ برای نسخه تک‌سرور daemon دائمی scheduler اجباری نیست. Dispatch و reconciler به‌صورت کوتاه و قابل recovery اجرا می‌شوند.
 - هر build/process پروژه با UID مستقل و `systemd` scope/cgroup دارای `MemoryMax`، `CPUQuota`، `TasksMax`، `IOWeight` و timeout است؛ capهای مصرف پروژه جدا از cap پنل هستند. تنها یک build سنگین در پروفایل حداقلی مجاز است؛ پنل و سایت فعال باید اولویت حفظ سرویس داشته باشند.
 - در صفحات قابل مشاهده polling تطبیقی و در tab پنهان backoff فعال است. PostgreSQL برای business state و durable job، Redis برای cache/queue/lock کوتاه‌عمر؛ metricها batch/retention و صفحه‌ها pagination/cursor دارند. WebSocket server و Node SSR daemon در MVP اجرا نمی‌شوند، مگر بعد از benchmark/ADR.
-- ساخت swap بزرگ بدون preview و تایید Owner ممنوع است. footprint دیسک متعلق به کنترل‌پلین پس از نصب تمیز هدفاً زیر 2GB و همراه log/cache/releaseهای نگهداری‌شده هدفاً زیر 5GB است؛ artifact/DB/backup پروژه‌ها جدا محاسبه شوند.
+- ساخت swap بزرگ بدون preview و تایید Owner ممنوع است. footprint دیسک متعلق به راه‌انداز پس از نصب تمیز هدفاً زیر 2GB و همراه log/cache/releaseهای نگهداری‌شده هدفاً زیر 5GB است؛ artifact/DB/backup پروژه‌ها جدا محاسبه شوند.
 - معیار پذیرش: ۳۰ دقیقه idle، ۱۵ دقیقه polling، یک deploy سبک، یک شکست worker و آزمایش بازگشت؛ مصرف CPU، RAM PSS/RSS، p95 درخواست، disk و موفقیت پروژه فعال ثبت شود. ادعای دستیابی به سقف قبل از VM benchmark ممنوع است.
 
 ### 2.4 انتشار عمومی و متن‌باز
@@ -103,7 +103,7 @@
 | بخش | تصمیم | دلیل / قید |
 | --- | --- | --- |
 | Backend | **Laravel 13.x**، نسخه patch امن و سازگار pin‌شده | modular monolith، Eloquent، Policy، FormRequest، Artisan و migration |
-| PHP پنل | PHP 8.3+ مطابق ماتریس رسمی Laravel 13 و اکستنشن‌های آزموده؛ **ترجیح PHP 8.4/8.5 پس از CI** | نسخه PHP پنل مستقل از PHP پروژه‌ها و CLI default سیستم؛ از مسیر `/usr/bin/php` متغیر استفاده نشود |
+| PHP پنل | PHP 8.4 برای خود راه‌انداز. محدودیت Composer `^8.4` است تا ۸٫۵ هم resolve شود، ولی باینری نصب‌شده پنل `/usr/bin/php8.4` و PHP-FPM اختصاصی `/usr/sbin/php-fpm8.4` است | نسخه PHP پنل مستقل از PHP پروژه‌ها است. `update-alternatives` سراسری و حذف PHP دیگر ممنوع است |
 | Frontend | **Inertia.js 3 + React 19 + TypeScript strict + Vite** | routing از Laravel؛ React pages؛ API صرفاً برای عملیات/stream لازم |
 | CSS/UI | Tailwind CSS 4 + tokenهای CSS + shadcn/ui به صورت selective + Radix primitives + Lucide React | نسخه دقیق dependencyها lock، bundle self-hosted، اجتناب از import سنگین |
 | فرم و اعلان | Inertia `useForm` یا فرم typed، Zod برای UX اختیاری؛ React-Toastify برای Toast | validation اصلی FormRequest/Policy سمت Laravel؛ toast از state واقعی Job |
@@ -211,7 +211,7 @@ rahandaz/
 - `ShouldQueue` handler فقط Job ID را می‌گیرد، claim معتبر را بررسی و orchestrator را صدا می‌زند. serialized secret یا object حجیم در payload صف ممنوع است.
 - transaction دیتابیس در طول دانلود/build/apt باز نماند؛ command اجراشده و desired/observed state جدا ثبت شود.
 - `resources/js/pages/` صفحه‌های TypeScript JSX هستند و SSR Blade صفحه‌ای ممنوع؛ React Router دوم یا API-only SPA جداگانه بی‌دلیل اضافه نشود.
-- برای migration از مخزن قدیم، `manage.py`، `pyproject.toml`، `uv.lock`، `apps/`، Django Templates و Celery code قدیمی **به عنوان ساختار کنترل‌پنل جدید منتقل نشوند**؛ هر فایل قبل از حذف با مالک پروژه/آزمون migration کد موجود بررسی شود. Python برای پروژه‌های *مشتریان* همچنان runtime مجاز است.
+- برای migration از مخزن قدیم، `manage.py`، `pyproject.toml`، `uv.lock`، `apps/`، Django Templates و Celery code قدیمی **به عنوان ساختار پنل مدیریت جدید منتقل نشوند**؛ هر فایل قبل از حذف با مالک پروژه/آزمون migration کد موجود بررسی شود. Python برای پروژه‌های *مشتریان* همچنان runtime مجاز است.
 
 ## 5. نقش‌ها و دسترسی
 
@@ -550,7 +550,7 @@ roleها idempotent باشند؛ اجرای دوم نباید سرویس سال�
 - دیتابیس‌ها و Redis پیش‌فرض loopback/private bind و بدون exposure عمومی باشند؛ remote access انتخاب جداگانه محدود به CIDR.
 - actionهای استاندارد هر سرویس، براساس capability واقعی، شامل install، status، start، stop، restart، reload، logs و uninstall است. action ناموجود در systemd به‌صورت disabled با علت نشان داده شود.
 - restart/reload/stop/start فقط برای unit ثبت‌شده در allowlist و متعلق به همان `ManagedService` مجاز است؛ arbitrary unit name و glob ممنوع.
-- سرویس‌های protected کنترل‌پنل قابل stop یا uninstall از workflow عمومی نیستند. stop سرویس SSH ممنوع است و فقط reload اعتبارسنجی‌شده مجاز خواهد بود. تغییر نسخه Nginx پس از onboarding workflow مستقل دارد؛ حذف آن فقط پس از نصب و healthcheck reverse proxy جایگزین و اثبات دسترسی پنل/پروژه‌ها مجاز است، نه حذف مستقیم dependency فعال.
+- سرویس‌های protected پنل مدیریت قابل stop یا uninstall از workflow عمومی نیستند. stop سرویس SSH ممنوع است و فقط reload اعتبارسنجی‌شده مجاز خواهد بود. تغییر نسخه Nginx پس از onboarding workflow مستقل دارد؛ حذف آن فقط پس از نصب و healthcheck reverse proxy جایگزین و اثبات دسترسی پنل/پروژه‌ها مجاز است، نه حذف مستقیم dependency فعال.
 - تغییر version دیتابیس یا حذف دارای data پیش از backup verified و تایید ممکن نیست؛ rollback package مساوی rollback data نیست.
 - uninstall سرویس stateful باید dependency، data path، backup verified، retention و اثر روی پروژه‌ها را نشان دهد؛ حذف package به معنی حذف خودکار data نیست.
 - config قبل از اعمال backup شود؛ validator مخصوص سرویس اجرا شود؛ atomic write و سپس reload.
@@ -690,7 +690,7 @@ healthcheck باید endpoint غیرحساس با status مورد انتظار،
 - release قبلی پنل و script recovery خارج از مسیر overwritten نگه داشته شود.
 - failure self-update امکان rollback کد را دارد، اما schema ناسازگار نیاز recovery برنامه‌ریزی‌شده دارد.
 - در قطع پنل، Nginx و process پروژه‌ها باید به سروینگ ادامه دهند؛ control plane شرط زنده ماندن application نیست.
-- حذف Nginx مشترک، reboot، stop کردن SSH یا دور زدن policyهای recovery ممنوع است. hardening SSH و مدیریت UFW فقط از workflowهای محدود بخش 8 و با حفاظت منابع کنترل‌پنل انجام می‌شود.
+- حذف Nginx مشترک، reboot، stop کردن SSH یا دور زدن policyهای recovery ممنوع است. hardening SSH و مدیریت UFW فقط از workflowهای محدود بخش 8 و با حفاظت منابع پنل مدیریت انجام می‌شود.
 
 ## 13. نصب، upgrade و uninstall
 
@@ -725,7 +725,7 @@ healthcheck باید endpoint غیرحساس با status مورد انتظار،
 2. `scripts/install.sh` با `set -Eeuo pipefail`، lock file root-owned، journal امن و state/checkpoint resumable اجرا می‌شود. preflight: Ubuntu 22.04/24.04/26.04، x86_64، systemd، port/Nginx conflict، architecture، RAM/disk، apt lock، DNS/mirror، time/TLS. نصب مجدد نباید config/credentials را overwrite کند.
 3. اجرای **bootstrap تحت root فقط یک‌بار برای اعمال تغییرات سیستم** لازم است: نصب بسته‌های امضاشده `nginx`, runtime PHP compatible, PHP extensions, PostgreSQL, دو Redis instance، ایجاد user `rahandaz` و در صورت نیاز هویت service جدا/UIDهای پروژه، ساخت مسیرهای root-owned، policy/allowlist helper و ثبت systemd unitها. پس از این مرحله PHP-FPM، Artisan workers، scheduler و runner پروژه‌ها هیچ‌گاه root اجرا نمی‌شوند.
 4. حساب `rahandaz` password locked / non-login است، sudo و docker group ندارد. installer **فایل رمز حساب Linux تولید نمی‌کند** و هر feature درخواست password لینوکسی خطای طراحی است. Owner اولیه وب رمز مستقل تصادفی در `/root/rahandaz-initial-credentials.txt` با mode 0600 دارد؛ ترمینال فقط آدرس را چاپ می‌کند.
-5. PostgreSQL پنل دارای role/db جدا؛ Redis `queue` و `cache` در production ترجیحاً instance/config مجزا با loopback/Unix socket، ACL، queue persistence/noeviction و cache quota/eviction است. DB یا Redis موجود بدون consent owner adopt یا reconfigure نمی‌شود. سرویس‌های پروژه نباید datastore کنترل‌پلین را تضعیف کنند.
+5. PostgreSQL پنل دارای role/db جدا؛ Redis `queue` و `cache` در production ترجیحاً instance/config مجزا با loopback/Unix socket، ACL، queue persistence/noeviction و cache quota/eviction است. DB یا Redis موجود بدون consent owner adopt یا reconfigure نمی‌شود. سرویس‌های پروژه نباید datastore راه‌انداز را تضعیف کنند.
 6. `composer install --no-dev --prefer-dist --classmap-authoritative` برای bundle از پیش تاییدشده یا package `vendor` از پیش ساخته و hashشده طبق release policy؛ **در سرور کاربر `npm install`, `npm run build` یا Node runtime صرفاً برای پنل اجباری نیست**، چون Vite production assets آماده‌اند. PHP application با `APP_ENV=production`, `APP_DEBUG=false`، precompile config/route/view cache و OPcache آزموده راه‌اندازی شود.
 7. installer `APP_KEY` پایدار و `RAHANDAZ_MASTER_KEY` مستقل را فقط در نصب اول می‌سازد؛ backup/recovery و canary طبق 6.2. `php artisan migrate --force` با backup/preflight و migration سازگار اجرا می‌شود؛ command غیرتعاملی `php artisan rahandaz:bootstrap-owner` Owner نخست را ایجاد می‌کند.
 8. Nginx config مالکیت‌دار `location /rahandaz/` و PHP-FPM pool اختصاصی نصب یا پس از طرح تعارض adopt می‌شود؛ فایل سایت موجود کاربر overwrite نمی‌شود. PHP `SCRIPT_FILENAME`, `fastcgi_param`, forwarded headers، URL generation Inertia، asset URL و security cookies باید با base path subdirectory به‌طور end-to-end روی IP و domain آزموده شوند. HTTPS معتبر برای production لازم؛ HTTP bootstrap فقط در شبکه trusted/tunnel و با هشدار محدود.
@@ -998,7 +998,7 @@ GET  /api/v1/servers/{id}/metrics/?range=1h
 - DB backup بدون master key کافی نیست؛ key backup جدا، رمزنگاری‌شده و مسیر recovery آفلاین لازم است.
 - لاگ secret، URL دارای credential، environment dump و secret در argv ممنوع.
 - ورودی domain/path/version/extension/systemd unit validated و canonical؛ subprocess با argv؛ اجرای shell تنها برای recipe داخلی reviewed، بدون interpolation ورودی.
-- build code مثل اجرای کد مهاجم در نظر گرفته شود؛ secretهای کنترل‌پنل، docker socket و credentialهای مدیریتی در دسترس آن نباشد.
+- build code مثل اجرای کد مهاجم در نظر گرفته شود؛ secretهای پنل مدیریت، docker socket و credentialهای مدیریتی در دسترس آن نباشد.
 - archive extraction با جلوگیری از `../`، absolute paths و symlink escape؛ path config و cleanup نیز همین بررسی را دارند.
 - endpoint health/repo fetch/webhook دارای SSRF controls براساس نوع مقصد؛ metadata مثل `169.254.169.254` منع شود. اتصال server خصوصی مجاز با policy ثبت‌شده باشد.
 - config Nginx آزاد از UI پذیرش نشود؛ fields امن به template reviewed نگاشت شود.
@@ -1095,7 +1095,7 @@ RAHANDAZ_MASTER_KEY_FILE=./var/config/master.key
 
 **نکات:** نام/متغیر `REDIS_QUEUE_*` و `REDIS_CACHE_*` تا زمان نگاشت در `config/database.php` و `config/queue.php` فقط قرارداد اختصاصی پیشنهادی‌اند، نه envهای built-in Laravel. `APP_KEY` با Artisan ساخته می‌شود؛ Master key تولید CSPRNG جدا و خارج DB است، فقط مسیر/reference آن در env. مقدار production secret در `.env.example` وجود ندارد. `APP_DEBUG=false` در production و مالکیت config/secret محدود اجباری است. `SESSION_DRIVER=database` مصرف حافظه Redis cache را کم می‌کند و session پایدار باقی می‌ماند؛ index/cleanup آن لازم است.
 
-- development کنترل‌پلین روی میزبان با PHP CLI، Composer و Node.js برای Vite/watch اجرا می‌شود. وابستگی‌ها می‌توانند مستقیماً نصب یا در Compose مخصوص **فقط PostgreSQL، Redis queue، Redis cache** باشند. Compose شامل Laravel/PHP-FPM/worker/frontend runtime نیست و production Docker ندارد.
+- توسعه راه‌انداز روی میزبان با PHP CLI، Composer و Node.js برای Vite/watch اجرا می‌شود. وابستگی‌ها می‌توانند مستقیماً نصب یا در Compose مخصوص **فقط PostgreSQL، Redis queue، Redis cache** باشند. Compose شامل Laravel/PHP-FPM/worker/frontend runtime نیست و production Docker ندارد.
 - راه‌اندازی local: `composer install`، `npm ci`، `.env` با کلید local جدید، `php artisan migrate`، `php artisan rahandaz:bootstrap-owner` در محیط disposable، `npm run dev`، `php artisan serve --host=127.0.0.1` و `php artisan queue:work redis --queue=control` به اضافه worker اجرای تست. `php artisan schedule:run` برای تست دستی scheduler؛ timers واقعی فقط روی VM تست.
 - Laravel `artisan serve` لزوماً subpath production را شبیه‌سازی نمی‌کند؛ تست routing `/rahandaz/` باید پشت Nginx + PHP-FPM container-free در VM اجرا شود. React/Inertia assets با `npm run build` و `php artisan optimize` پیش از بسته‌بندی release تولید می‌شوند.
 - Unit/Feature tests از PHPUnit یا Pest با انتخاب واحد pin‌شده، PostgreSQL تست واقعی، Redis جداگانه برای queue integration، fake executor و policy/permission استفاده کنند. SQLite به‌جای PostgreSQL برای invariantهای locking، JSONB، constraint و transactional outbox پذیرفته نیست.
@@ -1241,7 +1241,7 @@ monitoring با polling adaptive و Toast اعلان واقعی، سرور/SSH k
 
 ## 27. دستور شروع قابل کپی برای Agent
 
-> پروژه «راه‌انداز / rahandaz» را مطابق `docs/PROJECT_SPEC.md` نسخه 2.0 و `docs/ARCHITECTURE.md` پیاده‌سازی کن. قبل از کدنویسی واقعیت مخزن/فایل‌ها را بخوان و بدون حذف کورِ کار موجود، Django/Celery/Python **کنترل‌پلین** را به Laravel 13، Inertia.js 3، React 19 با TypeScript strict، Tailwind 4 و Vite تبدیل کن. PostgreSQL منبع حقیقت User/Job/Outbox است؛ Redis queue و cache به‌صورت instanceهای مستقل، Laravel `ShouldQueue`، workerهای سبک systemd و scheduler timer طراحی شوند. ابتدا فازهای 0 و 1: migration با کلید BIGINT و شناسه عمومی UUIDv7، Owner/Workspace/Policy، master key جدا از APP_KEY و encrypted secrets، پنل RTL/Vazirmatn، Lucide، React-Toastify، جلالی، تم light/dark/system، login، Wizard real read-only و shell صفحه «میرورها» با تست واقعی تکمیل شوند. سپس Job/Outbox/reconciler/lease، installer GitHub signed one-command، حساب سیستم `rahandaz` locked/no-sudo، helper allowlisted، UID مستقل پروژه‌ها، Nginx/PHP-FPM، GitHub/GitLab branch deployment و main/beta، SSL و PostgreSQL/MySQL/MongoDB و rollback مرحله‌ای پیاده شوند. اجرای پروژه‌ها با Docker و remote SSH در v1 ممنوع است. هیچ root shell یا اجرای mutation واقعی پیش از تکمیل helper و آزمون VM disposable مجاز نیست. هدف مصرف idle <=512MiB و <=0.5 vCPU با benchmark اندازه‌گیری شود، نه موفقیت ساختگی؛ برنامه سنگین اگر منابع کافی ندارد block شود. پس از هر برش اجرا، test/lint/typecheck/build، فایل‌های تغییرکرده و محدودیت‌های واقعی را گزارش کن.
+> پروژه «راه‌انداز / rahandaz» را مطابق `docs/PROJECT_SPEC.md` نسخه 2.0 و `docs/ARCHITECTURE.md` پیاده‌سازی کن. قبل از کدنویسی واقعیت مخزن/فایل‌ها را بخوان و بدون حذف کورِ کار موجود، Django/Celery/Python **راه‌انداز** را به Laravel 13، Inertia.js 3، React 19 با TypeScript strict، Tailwind 4 و Vite تبدیل کن. PostgreSQL منبع حقیقت User/Job/Outbox است؛ Redis queue و cache به‌صورت instanceهای مستقل، Laravel `ShouldQueue`، workerهای سبک systemd و scheduler timer طراحی شوند. ابتدا فازهای 0 و 1: migration با کلید BIGINT و شناسه عمومی UUIDv7، Owner/Workspace/Policy، master key جدا از APP_KEY و encrypted secrets، پنل RTL/Vazirmatn، Lucide، React-Toastify، جلالی، تم light/dark/system، login، Wizard real read-only و shell صفحه «میرورها» با تست واقعی تکمیل شوند. سپس Job/Outbox/reconciler/lease، installer GitHub signed one-command، حساب سیستم `rahandaz` locked/no-sudo، helper allowlisted، UID مستقل پروژه‌ها، Nginx/PHP-FPM، GitHub/GitLab branch deployment و main/beta، SSL و PostgreSQL/MySQL/MongoDB و rollback مرحله‌ای پیاده شوند. اجرای پروژه‌ها با Docker و remote SSH در v1 ممنوع است. هیچ root shell یا اجرای mutation واقعی پیش از تکمیل helper و آزمون VM disposable مجاز نیست. هدف مصرف idle <=512MiB و <=0.5 vCPU با benchmark اندازه‌گیری شود، نه موفقیت ساختگی؛ برنامه سنگین اگر منابع کافی ندارد block شود. پس از هر برش اجرا، test/lint/typecheck/build، فایل‌های تغییرکرده و محدودیت‌های واقعی را گزارش کن.
 
 ## 28. منابع رسمی برای بررسی پیاده‌سازی
 

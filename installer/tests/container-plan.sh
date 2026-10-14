@@ -23,9 +23,10 @@ for version in 22.04 24.04 26.04; do
     status=$?
     set -e
     printf 'plan %s exit %s\n' "$version" "$status"
-    if [[ "$version" == "22.04" && "$status" -eq 1 ]] && grep -q PHP_BASELINE_UNAVAILABLE "/tmp/rahandaz-plan-${version}.err"; then
-        printf 'ok %s php_baseline_blocked\n' "$version"
-    elif [[ "$version" != "22.04" && "$status" -eq 0 ]] && grep -q 'RESULT plan' "/tmp/rahandaz-plan-${version}.err"; then
+    if [[ "$status" -eq 0 ]] \
+        && grep -q 'RESULT plan' "/tmp/rahandaz-plan-${version}.err" \
+        && grep -q 'php8.4' "/tmp/rahandaz-plan-${version}.err" \
+        && ! grep -q 'update-alternatives' "/tmp/rahandaz-plan-${version}.err"; then
         printf 'ok %s plan\n' "$version"
     else
         printf 'not ok %s\n' "$version"

@@ -30,6 +30,7 @@
 | `/audit/` | `GET /rahandaz/audit` | `pages/audit/index.tsx` | App | فقط مالک و مدیر. بدون metadata و بدون export |
 | `/notifications/` | `GET /rahandaz/notifications` | `pages/notifications/index.tsx` | App | فهرست گیرنده. خواندن تک‌مورد و همه واقعی است |
 | `/settings/profile/` | `GET /rahandaz/settings/profile` | `pages/settings/profile.tsx` | App | نمایش timezone، locale، پوسته. MFA نیست |
+| `/settings/updates/` | `GET /rahandaz/settings/updates` و `POST /rahandaz/settings/updates/check` | `pages/settings/updates.tsx` | App | وضعیت نسخه از backend. دکمه بررسی، کپی دستور CLI و تاریخچه. پنل فرمان را اجرا نمی‌کند. پکیج UI تازه ندارد |
 | members، system، route | — | — | — | آماده نیست |
 
 مجوز: عضویت workspace برای صفحه‌های پنل. upload/deploy پروژه برای `owner`، `admin` و `operator` است و Viewer رد می‌شود. گزارش فعالیت فقط `owner` و `admin`. اعلان فقط `recipient` همان workspace. شناسه عددی و path آرشیو در props این صفحات نیست.

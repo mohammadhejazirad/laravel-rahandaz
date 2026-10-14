@@ -1,0 +1,214 @@
+#!/usr/bin/env bash
+# Rahandaz operator CLI. Update apply refuses an unverified artifact.
+set -euo pipefail
+
+INSTALLER_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=../lib/common.sh
+source "${INSTALLER_HOME}/lib/common.sh"
+# shellcheck source=../lib/state.sh
+source "${INSTALLER_HOME}/lib/state.sh"
+# shellcheck source=../lib/os.sh
+source "${INSTALLER_HOME}/lib/os.sh"
+# shellcheck source=../lib/verify.sh
+source "${INSTALLER_HOME}/lib/verify.sh"
+# shellcheck source=../lib/download.sh
+source "${INSTALLER_HOME}/lib/download.sh"
+# shellcheck source=../lib/mirror.sh
+source "${INSTALLER_HOME}/lib/mirror.sh"
+# shellcheck source=../lib/gate.sh
+source "${INSTALLER_HOME}/lib/gate.sh"
+# shellcheck source=../lib/render.sh
+source "${INSTALLER_HOME}/lib/render.sh"
+# shellcheck source=../lib/runtime.sh
+source "${INSTALLER_HOME}/lib/runtime.sh"
+# shellcheck source=../lib/semver.sh
+source "${INSTALLER_HOME}/lib/semver.sh"
+# shellcheck source=../lib/engine.sh
+source "${INSTALLER_HOME}/lib/engine.sh"
+# shellcheck source=../lib/update.sh
+source "${INSTALLER_HOME}/lib/update.sh"
+
+HTTP_PORT="${HTTP_PORT:-80}"
+SERVER_NAME="${SERVER_NAME:-_}"
+UPDATE_DRY_RUN=0
+UPDATE_APPROVE_MIGRATIONS=0
+UPDATE_APPROVE_DATABASE=0
+UPDATE_VERSION=""
+UPDATE_MANIFEST=""
+UPDATE_SIGNATURE=""
+UPDATE_PUBLIC_KEY=""
+UPDATE_ARTIFACT=""
+UPDATE_METADATA=""
+UPDATE_METADATA_SIGNATURE=""
+UPDATE_URL=""
+
+usage() {
+    cat <<EOF
+Rahandaz $(cat "${INSTALLER_HOME}/VERSION")
+
+Usage:
+  rahandaz version
+  rahandaz status
+  rahandaz doctor
+  rahandaz update check
+  rahandaz update history
+  rahandaz update --version VERSION --manifest FILE --signature FILE --public-key FILE --artifact FILE --metadata FILE --metadata-signature FILE
+  rahandaz update --dry-run [same release arguments]
+  rahandaz update rollback
+  rahandaz repair
+
+The panel does not run this command. A release is applied only after the manifest,
+the metadata signature, and the artifact checksum verify. There is no default download URL.
+EOF
+}
+
+take_value() {
+    local flag="$1"
+    local value="${2:-}"
+    if [[ -z "$value" || "$value" == --* ]]; then
+        installer_error INVALID_INPUT "Missing value for ${flag}."
+        exit 1
+    fi
+    printf '%s\n' "$value"
+}
+
+if [[ $# -lt 1 ]]; then
+    usage
+    exit 1
+fi
+
+command_name="$1"
+shift
+
+case "$command_name" in
+    version)
+        installer_release_print
+        exit 0
+        ;;
+    status)
+        installer_cli_status
+        exit 0
+        ;;
+    doctor)
+        set +e
+        installer_cli_doctor
+        status=$?
+        set -e
+        exit "$status"
+        ;;
+    repair)
+        action="repair"
+        ;;
+    update)
+        action="apply"
+        ;;
+    --help | -h | help)
+        usage
+        exit 0
+        ;;
+    *)
+        installer_error INVALID_INPUT "Unknown command."
+        exit 1
+        ;;
+esac
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        check | history | rollback)
+            action="$1"
+            ;;
+        --dry-run)
+            UPDATE_DRY_RUN=1
+            ;;
+        --approve-migrations)
+            UPDATE_APPROVE_MIGRATIONS=1
+            ;;
+        --approve-database-recovery)
+            UPDATE_APPROVE_DATABASE=1
+            ;;
+        --version)
+            UPDATE_VERSION="$(take_value "$1" "${2:-}")"
+            shift
+            ;;
+        --version=*)
+            UPDATE_VERSION="${1#*=}"
+            ;;
+        --manifest)
+            UPDATE_MANIFEST="$(take_value "$1" "${2:-}")"
+            shift
+            ;;
+        --manifest=*)
+            UPDATE_MANIFEST="${1#*=}"
+            ;;
+        --signature)
+            UPDATE_SIGNATURE="$(take_value "$1" "${2:-}")"
+            shift
+            ;;
+        --signature=*)
+            UPDATE_SIGNATURE="${1#*=}"
+            ;;
+        --public-key)
+            UPDATE_PUBLIC_KEY="$(take_value "$1" "${2:-}")"
+            shift
+            ;;
+        --public-key=*)
+            UPDATE_PUBLIC_KEY="${1#*=}"
+            ;;
+        --artifact)
+            UPDATE_ARTIFACT="$(take_value "$1" "${2:-}")"
+            shift
+            ;;
+        --artifact=*)
+            UPDATE_ARTIFACT="${1#*=}"
+            ;;
+        --metadata)
+            UPDATE_METADATA="$(take_value "$1" "${2:-}")"
+            shift
+            ;;
+        --metadata=*)
+            UPDATE_METADATA="${1#*=}"
+            ;;
+        --metadata-signature)
+            UPDATE_METADATA_SIGNATURE="$(take_value "$1" "${2:-}")"
+            shift
+            ;;
+        --metadata-signature=*)
+            UPDATE_METADATA_SIGNATURE="${1#*=}"
+            ;;
+        --state-dir)
+            INSTALLER_UPDATE_STATE_DIR="$(take_value "$1" "${2:-}")"
+            shift
+            ;;
+        --state-dir=*)
+            INSTALLER_UPDATE_STATE_DIR="${1#*=}"
+            ;;
+        --url)
+            UPDATE_URL="$(take_value "$1" "${2:-}")"
+            shift
+            ;;
+        --url=*)
+            UPDATE_URL="${1#*=}"
+            ;;
+        *)
+            installer_error INVALID_INPUT "Unknown argument."
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+set +e
+case "$action" in
+    check) installer_update_check ;;
+    history) installer_update_history_show ;;
+    rollback) installer_update_rollback ;;
+    repair) installer_update_repair ;;
+    apply) installer_update_apply ;;
+    *)
+        installer_error INVALID_INPUT "Unknown update action."
+        false
+        ;;
+esac
+status=$?
+set -e
+exit "$status"

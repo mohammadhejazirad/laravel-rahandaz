@@ -22,6 +22,25 @@ installer_public_key() {
     printf '%s\n' "$key"
 }
 
+installer_verify_signature() {
+    local file="$1"
+    local signature="$2"
+    local pubkey="$3"
+    if [[ ! -f "$file" || -L "$file" || ! -f "$signature" || -L "$signature" || ! -f "$pubkey" || -L "$pubkey" ]]; then
+        installer_error SIGNATURE_INVALID "A signed file is missing."
+        return 1
+    fi
+    if grep -q 'EXAMPLE' "$pubkey"; then
+        installer_error TRUST_ROOT_MISSING "The public key file is a placeholder."
+        return 1
+    fi
+    if ! openssl dgst -sha256 -verify "$pubkey" -signature "$signature" "$file" >/dev/null 2>&1; then
+        installer_error SIGNATURE_INVALID "Signature did not verify."
+        return 1
+    fi
+    return 0
+}
+
 installer_verify_manifest() {
     local manifest="$1"
     local signature="$2"

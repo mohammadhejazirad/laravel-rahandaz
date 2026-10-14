@@ -12,7 +12,7 @@
 | 3 — نصب تک‌دستوری | release تایید امضا، installer idempotent، user `rahandaz` non-root/locked، helper allowlisted، PHP-FPM/Nginx/Postgres/Redis، Welcome static | copy/paste واقعی فرمان README و healthcheck روی ۳ Ubuntu |
 | 4 — پروژه و منبع کد | GitHub/GitLab، repo/branch، deploy key، ZIP خصوصی با drag-and-drop، extraction ایمن worker، UID مستقل، static/Laravel/Nuxt/Next، domains/TLS، blue-green/rollback، webhook auto-deploy | Git و ZIP به release قابل راستی‌آزمایی برسند؛ main و beta بدون تداخل و failure recovery |
 | 5 — نرم‌افزار/دیتابیس | PHP/Node/Python پروژه‌ها، PostgreSQL/MySQL/MariaDB/MongoDB/Redis، DB user و permission، backups، mirrorهای امن | install/backup/restore/version-aware بدون آسیب به datastore پنل |
-| 6 — عملیات و انتشار | UFW/SSH key recovery، monitoring/notification، self-update مستقل، benchmark footprint و docs | گزارش idle هدف ≤512MiB RAM/≤0.5 vCPU و release آزموده |
+| 6 — عملیات و انتشار | UFW/SSH key recovery، monitoring/notification، self-update مستقل، benchmark footprint و docs | گزارش idle هدف ≤512MiB RAM/≤0.5 vCPU و release آزموده. CLI و بررسی نسخه در مخزن هستند؛ انتشار عمومی و نصب زنده هنوز آماده نیست و وضعیت در `docs/IMPLEMENTATION_PROGRESS.md` است |
 
 **تعهدات ثابت:** بدون Docker برای اجرای پنل یا استقرار پروژه‌ها؛ نصب اختیاری خود Docker Engine به عنوان نرم‌افزار مدیریت‌شونده ممکن است؛ backend باید PHP/Laravel باشد، نه Django. می‌توان نصب Docker را صرفاً به‌عنوان نرم‌افزار اختیاری و با helper امنیتی جدا بررسی کرد، ولی runtime container بخشی از استقرار نسخه ۱ نیست. تغییر سرورهای دیگر با SSH/Ansible در v1 وجود ندارد. zero-downtime فقط در شرایط ظرفیت/healthcheck/migration سازگار قابل اعلام است.
 

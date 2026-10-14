@@ -5,7 +5,7 @@
     "description": "Rahandaz control plane. No OSI license is chosen until the project owner records one.",
     "keywords": ["rahandaz", "laravel"],
     "require": {
-        "php": "^8.3",
+        "php": "^8.4",
         "ext-fileinfo": "*",
         "ext-zip": "*",
         "inertiajs/inertia-laravel": "^3.0",

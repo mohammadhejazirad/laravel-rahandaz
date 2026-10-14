@@ -4,8 +4,8 @@
 
 ## پیش‌نیازها
 
-- PHP **8.3+** و extensionهای موردنیاز **Laravel 13** مطابق نسخه pin شده؛ `ext-zip` و `fileinfo` برای بررسی upload پروژه الزامی‌اند؛ برای development ترجیحاً PHP 8.4/8.5 آزموده، Composer و Git.
-- Node.js نسخه LTS سازگار با Vite و React، npm با lockfile. Node فقط در development/CI برای build پنل؛ runtime production کنترل‌پلین به Node وابسته نیست.
+- PHP **8.4** برای خود راه‌انداز. محدودیت Composer `^8.4` است. ایستگاه توسعه‌ای که فقط PHP 8.5 دارد می‌تواند dependency را resolve کند، ولی باینری پنل `/usr/bin/php8.4` است و doctor در production اگر سری 8.4 نباشد شکست می‌خورد. `ext-zip` و `fileinfo` برای بررسی upload پروژه الزامی‌اند. `pdo_pgsql`، `redis` و `sodium` برای اجرا لازم‌اند حتی اگر در `require` کامپوزر نیامده باشند.
+- Node.js نسخه LTS سازگار با Vite و React، npm با lockfile. Node فقط در development/CI برای build پنل؛ runtime production راه‌انداز به Node وابسته نیست.
 - PostgreSQL برای business data و `JobOutbox`؛ دو Redis مجزا برای queue و cache (یا اتصال به نمونه محلی جدا با ACL/DB و policy آزموده در development).
 - Docker/Compose فقط **اختیاری** برای dependencyهای development؛ **هیچ web/worker/frontend راه‌انداز داخل Compose رسمی نیست**. Production نیز Docker-based نیست.
 - برای mutation APT/Nginx/systemd تنها VM disposable مجزا؛ روی لپ‌تاپ/سرور واقعی development به‌صورت پیش‌فرض `RAHANDAZ_EXECUTION_MODE=disabled`.

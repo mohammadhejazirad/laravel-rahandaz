@@ -1,0 +1,42 @@
+name: PHP 8.4 checks
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "app/**"
+      - "composer.json"
+      - "composer.lock"
+      - "installer/**"
+      - "resources/**"
+      - "tests/Unit/UpdateSystemTest.php"
+      - ".github/workflows/php-84.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: bcmath, curl, fileinfo, gd, intl, mbstring, pdo_pgsql, redis, sodium, xml, zip
+          coverage: none
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Check the declared platform
+        run: composer check-platform-reqs --no-interaction
+      - name: Run the update unit tests
+        run: vendor/bin/phpunit tests/Unit/UpdateSystemTest.php
+      - name: Install and check the panel
+        run: |
+          npm ci
+          npm run lint
+          npm run typecheck
+          npm run build
+      - name: Run the installer logic suite
+        run: bash installer/tests/run.sh

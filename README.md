@@ -1,16 +1,16 @@
 <p align="center">
-  <img src="public/branding/logo.svg" width="360" height="96" alt="راه‌انداز؛ کنترل‌پلین سرور محلی">
+  <img src="public/branding/logo.svg" width="360" height="96" alt="راه‌انداز؛ پنل مدیریت سرور محلی">
 </p>
 
 # راه‌انداز | Rahandaz
 
-**راه‌انداز؛ کنترل‌پنل فارسی و خودمیزبان برای همان سرور Ubuntu که روی آن نصب می‌شود.**
+**راه‌انداز؛ پنل مدیریت فارسی و خودمیزبان برای همان سرور Ubuntu که روی آن نصب می‌شود.**
 
-[![PHP 8.3+](https://img.shields.io/badge/PHP-8.3%2B-777BB4?logo=php&logoColor=white)](https://www.php.net/)
+[![PHP 8.4](https://img.shields.io/badge/PHP-8.4-777BB4?logo=php&logoColor=white)](https://www.php.net/)
 [![Laravel 13.35](https://img.shields.io/badge/Laravel-13.35-FF2D20?logo=laravel&logoColor=white)](https://laravel.com/docs/13.x)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16_dev-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 
-راه‌انداز یک کنترل‌پنل خودمیزبان است تا مدیر همان سرور، نصب نرم‌افزار، اتصال Git، استقرار پروژه، دامنه، گواهی، دیتابیس، پشتیبان و وضعیت سرویس‌ها را از یک رابط فارسی انجام دهد. نسخه ۱ فقط میزبان محلی را می‌بیند. مدیریت چند سرور، عامل راه دور و اجرای پنل داخل Docker در این نسخه نیست.
+راه‌انداز یک پنل مدیریت خودمیزبان است تا مدیر همان سرور، نصب نرم‌افزار، اتصال Git، استقرار پروژه، دامنه، گواهی، دیتابیس، پشتیبان و وضعیت سرویس‌ها را از یک رابط فارسی انجام دهد. نسخه ۱ فقط میزبان محلی را می‌بیند. مدیریت چند سرور، عامل راه دور و اجرای پنل داخل Docker در این نسخه نیست.
 
 درخت `installer/` در مخزن است، ولی نصب‌کنندهٔ عمومی و Release امضاشده منتشر نشده و مجوز OSI هم نیست. حالت پیش‌فرض `RAHANDAZ_EXECUTION_MODE=disabled` است. در این حالت پنل دستور میزبان اجرا نمی‌کند و هیچ عملیات یا deployment را موفق اعلام نمی‌کند. جدول وضعیت پایین، قابلیت آماده را از طرح محصول جدا می‌کند. جزئیات پیشرفت در [docs/IMPLEMENTATION_PROGRESS.md](docs/IMPLEMENTATION_PROGRESS.md) و مشخصات در [.docs/PROJECT_SPEC.md](.docs/PROJECT_SPEC.md) است.
 
@@ -108,7 +108,7 @@
 
 | قابلیت | وضعیت | امروز |
 | --- | --- | --- |
-| PostgreSQL کنترل‌پلین و دو Redis توسعه | آماده | صف `control` و cache جدا |
+| PostgreSQL راه‌انداز و دو Redis توسعه | آماده | صف `control` و cache جدا |
 | ثبت job، idempotency، outbox و lease | در حال ساخت | lease منقضی دزدیده نمی‌شود. runner موفقیت نمی‌نویسد |
 | لغو، تلاش مجدد و پیشرفت زنده | برنامه‌ریزی‌شده | صفحه job صفحه‌بندی و متن لاگ ذخیره‌شده دارد |
 | PostgreSQL، MySQL، MariaDB و MongoDB برای پروژه کاربر | برنامه‌ریزی‌شده | جدول instance و کاربر هست. ساخت دیتابیس اجرا نمی‌شود |
@@ -123,7 +123,7 @@
 <a id="architecture"></a>
 ## معماری
 
-کنترل‌پلین یک Laravel modular monolith است. رابط با Inertia به React می‌رسد. PostgreSQL وضعیت پایدار را نگه می‌دارد. Redis صف و cache را جدا نگه می‌دارد و جای وضعیت job نیست.
+پنل مدیریت یک Laravel modular monolith است. رابط با Inertia به React می‌رسد. PostgreSQL وضعیت پایدار را نگه می‌دارد. Redis صف و cache را جدا نگه می‌دارد و جای وضعیت job نیست.
 
 نمودار زیر **هدف نسخه ۱** است. در کد فعلی درخواست وب تا PostgreSQL و صفحه‌های خواندنی می‌رسد. انتشار outbox به Redis در `rahandaz:outbox:dispatch` هست. پیکان‌های executor، helper و تغییر Ubuntu هنوز بسته است.
 
@@ -148,7 +148,7 @@ flowchart LR
 
 | لایه | انتخاب فعلی | نسخه قفل‌شده یا محدودیت |
 | --- | --- | --- |
-| زبان پنل | PHP | محدودیت `^8.3`. محیط ثبت‌شده ۸٫۵٫۱۱ |
+| زبان پنل | PHP | محدودیت `^8.4`. باینری نصب‌شده `/usr/bin/php8.4`. این ایستگاه ۸٫۵٫۱۱ است و `php8.4` ندارد |
 | Backend | Laravel | ۱۳٫۳۵٫۰ |
 | پل رابط | Inertia Laravel | ۳٫۵٫۱ |
 | رابط | React و TypeScript سخت‌گیر | React ۱۹٫۳٫۰، TypeScript ۶٫۰٫۳ |
@@ -207,13 +207,13 @@ bash installer/bin/rahandaz-install --plan --state-dir /tmp/rahandaz-plan
 
 اعمال بعدی باید نسخه‌دار باشد، قبل از هر تغییر امضا و SHA-256 را بررسی کند، قابل ادامه باشد، سایت و سرویس موجود را بی‌اجازه عوض نکند، SSH جاری را نبندد، و حساب لینوکسی `rahandaz` را بدون sudo و بدون shell ورود بسازد. عملیات ممتاز بعد از بالا آمدن پنل فقط از helper می‌گذرد و امروز آن سوکت نصب نیست. سلامت نصب تولید از روی این فایل تأیید نمی‌شود.
 
-پیش‌نیاز هدف: Ubuntu Server 24.04 یا 26.04 روی x86_64، حداقل ۱ GiB RAM و ۵ GiB دیسک آزاد، و دسترسی root برای اعمال. 22.04 با PHP توزیع 8.1 پنل را میزبانی نمی‌کند. Node.js برای اجرای پنل لازم نیست. راهنمای کامل در [docs/INSTALLATION.md](docs/INSTALLATION.md) است.
+پیش‌نیاز هدف: Ubuntu Server 22.04، 24.04 یا 26.04 روی x86_64، حداقل ۱ GiB RAM و ۵ GiB دیسک آزاد، و دسترسی root برای اعمال. PHP خود راه‌انداز 8.4 است و از مخزن امضاشده `packages.sury.org` می‌آید؛ PHP پروژه‌های کاربر عوض نمی‌شود. نصب کامل این سه نسخه هنوز اجرا نشده است. Node.js برای اجرای پنل لازم نیست. راهنمای کامل در [docs/INSTALLATION.md](docs/INSTALLATION.md) و به‌روزرسانی در [docs/SELF_UPDATE.md](docs/SELF_UPDATE.md) است.
 
 ### بالا آوردن محیط توسعه
 
 این مسیر برای کارکردن روی خود مخزن است. Compose فقط PostgreSQL و دو Redis را بالا می‌آورد و پنل را داخل Docker اجرا نمی‌کند.
 
-پیش‌نیاز: PHP 8.3 یا جدیدتر با `pdo_pgsql`، `redis`، `sodium`، `zip` و `fileinfo`، Composer، Node.js سازگار با Vite 8، npm، و Docker فقط اگر پایگاه را از Compose می‌خواهید. PHP بدون درایور PostgreSQL به پایگاه وصل نمی‌شود و بدون `ext-zip` upload پروژه بررسی نمی‌شود.
+پیش‌نیاز توسعه: PHP ای که محدودیت `^8.4` را برآورده کند، همراه `pdo_pgsql`، `redis`، `sodium`، `zip` و `fileinfo`، Composer، Node.js سازگار با Vite 8، npm، و Docker فقط اگر پایگاه را از Compose می‌خواهید. PHP 8.5 این محدودیت را برآورده می‌کند، ولی باینری پنل روی سرور `/usr/bin/php8.4` است. PHP بدون درایور PostgreSQL به پایگاه وصل نمی‌شود و بدون `ext-zip` upload پروژه بررسی نمی‌شود.
 
 ```bash
 docker compose -f compose.dev.yml up -d
@@ -249,7 +249,7 @@ php artisan serve --host=127.0.0.1 --port=8000
 
 منوی استقرار، دامنه، دیتابیس، پشتیبان و پایش با برچسب «آماده نیست» است و لینک مرده ندارد.
 
-طرح نسخه ۱ بعد از نصب تولید این مرحله‌ها را می‌خواهد: بررسی میزبان، انتخاب میرور، انتخاب PHP و Node، انتخاب دیتابیس، سرویس اختیاری، کلید SSH، و سلامت Nginx. سرویس خود کنترل‌پلین با نرم‌افزار پروژه‌های کاربر یکی نیست. قالب خوشامد در `assets/welcome-site/index.html` و `installer/templates/welcome/index.html` است و placeholderهای `{{PANEL_URL}}`، `{{HEALTH_MARKER}}` و `{{SETUP_STATUS_LABEL}}` را نگه می‌دارد. مسیر `/` امروز متن `Not found` و مسیر ورود پنل را برمی‌گرداند. نصب‌کننده این قالب را فقط بعد از موفقیت `/up` و `/rahandaz/login` منتشر می‌کند. آن healthcheck هنوز اجرا نشده است.
+طرح نسخه ۱ بعد از نصب تولید این مرحله‌ها را می‌خواهد: بررسی میزبان، انتخاب میرور، انتخاب PHP و Node، انتخاب دیتابیس، سرویس اختیاری، کلید SSH، و سلامت Nginx. سرویس خود راه‌انداز با نرم‌افزار پروژه‌های کاربر یکی نیست. قالب خوشامد در `assets/welcome-site/index.html` و `installer/templates/welcome/index.html` است و placeholderهای `{{PANEL_URL}}`، `{{HEALTH_MARKER}}` و `{{SETUP_STATUS_LABEL}}` را نگه می‌دارد. مسیر `/` امروز متن `Not found` و مسیر ورود پنل را برمی‌گرداند. نصب‌کننده این قالب را فقط بعد از موفقیت `/up` و `/rahandaz/login` منتشر می‌کند. آن healthcheck هنوز اجرا نشده است.
 
 <a id="deployment"></a>
 ## استقرار پروژه‌ها
@@ -310,7 +310,7 @@ PostgreSQL وضعیت پایدار است. گروه‌های اصلی: کارب�
 
 در طرح، هر environment کاربر مسیر، کاربر یونیکس، pool یا port، و سایت Nginx خودش را دارد. Nginx درخواست را به همان پروژه می‌فرستد. Runtime مهمان با runtime پنل یکی نیست. سقف حافظه و CPU پروژه به cgroup بستگی دارد و با نصب‌نشدن Docker کامل نمی‌شود.
 
-پروفایل آزمون هدف در مشخصات، ۱ vCPU و ۲GB RAM است. سقف افزوده کنترل‌پلین در حالت idle، حداکثر ۵۱۲MiB RAM و میانگین ۰٫۵ vCPU، هدف طراحی است و benchmark نشده است. build کاربر، backup و نصب بسته از مصرف idle پنل جدا هستند و می‌توانند بالاتر بروند. تا ثبت اندازه‌گیری، این عددها تضمین محصول نیستند.
+پروفایل آزمون هدف در مشخصات، ۱ vCPU و ۲GB RAM است. سقف افزوده راه‌انداز در حالت idle، حداکثر ۵۱۲MiB RAM و میانگین ۰٫۵ vCPU، هدف طراحی است و benchmark نشده است. build کاربر، backup و نصب بسته از مصرف idle پنل جدا هستند و می‌توانند بالاتر بروند. تا ثبت اندازه‌گیری، این عددها تضمین محصول نیستند.
 
 <a id="development"></a>
 ## محیط توسعه
@@ -400,7 +400,7 @@ rahandaz/
 <a id="backup"></a>
 ## پشتیبان و بازیابی
 
-طرح، backup را برای پایگاه کنترل‌پلین، کلید اصلی و ماده بازیابی، پیکربندی متعلق به پنل، فراداده deployment، و backup دیتابیس پروژه‌ها در محدوده پشتیبانی لازم می‌داند. فایل backup داخل PostgreSQL ذخیره نمی‌شود. مسیر مجاز در اسکیما زیر `/var/backups/rahandaz/` است.
+طرح، backup را برای پایگاه راه‌انداز، کلید اصلی و ماده بازیابی، پیکربندی متعلق به پنل، فراداده deployment، و backup دیتابیس پروژه‌ها در محدوده پشتیبانی لازم می‌داند. فایل backup داخل PostgreSQL ذخیره نمی‌شود. مسیر مجاز در اسکیما زیر `/var/backups/rahandaz/` است.
 
 backup پایگاه به‌تنهایی credential رمزشده را برنمی‌گرداند. کلید اصلی باید جدا، با دسترسی محدود، و خارج از همان dump باشد. restore در اسکیما وضعیت تأیید جدا دارد. job اجرای restore نوشته نشده و restore آزمایش‌نشده را نباید تضمین‌شده دانست. backup روی همان دیسک سرور، بازیابی بعد از از دست رفتن دیسک نیست.
 

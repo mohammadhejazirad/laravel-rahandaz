@@ -1,5 +1,7 @@
 import { Head, Link, usePage } from "@inertiajs/react";
 import { Activity, ArrowUpLeft, CircleX, Clock3, FolderGit2, Server, type LucideIcon } from "lucide-react";
+import { UpdateAvailableCard } from "@/components/updates/UpdateAvailableCard";
+import type { ReleaseStatus } from "@/components/updates/update-status";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { AppLayout } from "@/layouts/app-layout";
@@ -22,9 +24,10 @@ interface DashboardPageProps {
         servers: number;
         metric_samples: number;
     };
+    release: ReleaseStatus;
 }
 
-export default function Dashboard({ workspace, execution_mode, operations, inventory }: DashboardPageProps) {
+export default function Dashboard({ workspace, execution_mode, operations, inventory, release }: DashboardPageProps) {
     const base = usePage<SharedProps>().props.app.base_path;
 
     return (
@@ -40,7 +43,7 @@ export default function Dashboard({ workspace, execution_mode, operations, inven
                         <p className="technical-value mt-2 text-xs text-slate-400">{workspace.slug}</p>
                     </div>
                     <div className="rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 backdrop-blur-sm">
-                        <p className="text-xs text-slate-400">وضعیت کنترل‌پلین</p>
+                        <p className="text-xs text-slate-400">وضعیت پنل مدیریت</p>
                         <Badge className="mt-2 border-amber-300/25 bg-amber-300/10 text-amber-200">
                             <span className="size-1.5 rounded-full bg-current" aria-hidden="true" />
                             <span className="technical-value">{execution_mode}</span>
@@ -48,6 +51,7 @@ export default function Dashboard({ workspace, execution_mode, operations, inven
                     </div>
                 </div>
             </Card>
+            <UpdateAvailableCard release={release} detailsHref={`${base}/settings/updates`} />
             <SectionTitle title="وضعیت عملیات" description="شمار Jobهای پایدار ثبت‌شده در پایگاه" />
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 <Metric icon={Clock3} label="در صف" value={operations.queued} href={`${base}/jobs`} tone="info" />

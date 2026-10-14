@@ -17,9 +17,10 @@ stage_01_preflight() {
     installer_check_resources || return 1
     installer_check_conflicts || return 1
     if ! installer_php_baseline_available; then
-        installer_error PHP_BASELINE_UNAVAILABLE "Ubuntu 22.04 ships PHP 8.1. The panel needs PHP 8.3 or newer, and no signed PHP repository is approved."
+        installer_error PHP_BASELINE_UNAVAILABLE "Rahandaz runs on PHP 8.4. This Ubuntu release has no verified PHP 8.4 suite."
         return 1
     fi
+    installer_php_key_ok || return 1
     installer_say "Ubuntu ${INSTALLER_OS_VERSION} ${INSTALLER_OS_CODENAME} ${INSTALLER_ARCH}"
     return 0
 }
@@ -28,7 +29,7 @@ stage_02_repository_setup() {
     local id dest root backup
     root="$(installer_sysroot)"
     if [[ "$MODE" == "plan" ]]; then
-        installer_say "PLAN apt sources stay on the signed Ubuntu archive unless it is unreachable or an Iranian mirror was requested."
+        installer_say "PLAN apt sources stay on the signed Ubuntu archive unless it is unreachable or an Iranian mirror was requested. PHP 8.4 packages are pinned to packages.sury.org and no other package from that origin is installed."
         return 0
     fi
     id="$(installer_select_mirror "$INSTALLER_OS_CODENAME" "${INSTALLER_MIRROR_PIN:-}" "${PREFER_IRANIAN:-0}")" || return 1
@@ -37,23 +38,25 @@ stage_02_repository_setup() {
     installer_say "MIRROR ${id} $(installer_mirror_field "$id" 4) $(installer_mirror_field "$id" 5)"
     if [[ "$id" == "ubuntu-archive" && "${PREFER_IRANIAN:-0}" != "1" ]]; then
         installer_say "Keeping the existing APT sources because the official archive verified."
-        return 0
+    else
+        dest="$(installer_root_path /etc/apt/sources.list.d/rahandaz-ubuntu.sources)"
+        backup="$(installer_root_path /var/lib/rahandaz/installer/apt-backup)"
+        mkdir -p "$backup" "$(dirname "$dest")"
+        if [[ -f "$(installer_root_path /etc/apt/sources.list.d/ubuntu.sources)" && ! -f "$backup/ubuntu.sources" ]]; then
+            cp -a "$(installer_root_path /etc/apt/sources.list.d/ubuntu.sources)" "$backup/ubuntu.sources"
+        fi
+        if [[ -f "$(installer_root_path /etc/apt/sources.list)" && ! -f "$backup/sources.list" ]]; then
+            cp -a "$(installer_root_path /etc/apt/sources.list)" "$backup/sources.list"
+        fi
+        installer_write_apt_sources "$id" "$INSTALLER_OS_CODENAME" "$dest"
+        if grep -E -q 'trusted=yes|allow-unauthenticated|Acquire::https::Verify-Peer false' "$dest"; then
+            rm -f "$dest"
+            installer_error MIRROR_SIGNATURE_INVALID "Refusing an APT source that disables authentication."
+            return 1
+        fi
     fi
-    dest="$(installer_root_path /etc/apt/sources.list.d/rahandaz-ubuntu.sources)"
-    backup="$(installer_root_path /var/lib/rahandaz/installer/apt-backup)"
-    mkdir -p "$backup" "$(dirname "$dest")"
-    if [[ -f "$(installer_root_path /etc/apt/sources.list.d/ubuntu.sources)" && ! -f "$backup/ubuntu.sources" ]]; then
-        cp -a "$(installer_root_path /etc/apt/sources.list.d/ubuntu.sources)" "$backup/ubuntu.sources"
-    fi
-    if [[ -f "$(installer_root_path /etc/apt/sources.list)" && ! -f "$backup/sources.list" ]]; then
-        cp -a "$(installer_root_path /etc/apt/sources.list)" "$backup/sources.list"
-    fi
-    installer_write_apt_sources "$id" "$INSTALLER_OS_CODENAME" "$dest"
-    if grep -E -q 'trusted=yes|allow-unauthenticated|Acquire::https::Verify-Peer false' "$dest"; then
-        rm -f "$dest"
-        installer_error MIRROR_SIGNATURE_INVALID "Refusing an APT source that disables authentication."
-        return 1
-    fi
+    installer_write_php_repository || return 1
+    installer_say "PHP repository pinned for php8.4-* only."
     return 0
 }
 
@@ -91,24 +94,20 @@ stage_03_system_packages() {
 }
 
 stage_04_runtime_installation() {
-    local php_version
     if [[ "$MODE" == "plan" ]]; then
-        installer_say "PLAN runtime: postgresql redis nginx php-fpm and the PHP extensions the panel imports. Node.js is not installed."
+        installer_say "PLAN runtime: postgresql redis nginx and PHP 8.4 from /usr/bin/php8.4. Other PHP versions stay installed. Node.js is not installed."
         return 0
     fi
-    installer_apt_install postgresql postgresql-client redis-server nginx \
-        php-cli php-fpm php-pgsql php-mbstring php-xml php-curl php-zip \
-        php-bcmath php-intl php-gd php-opcache php-readline php-redis || return 1
+    installer_apt_install postgresql postgresql-client redis-server nginx "${INSTALLER_PHP_PACKAGES[@]}" || return 1
     if [[ "$(installer_sysroot)" != "/" || "${INSTALLER_OFFLINE:-}" == "1" ]]; then
         return 0
     fi
-    php_version="$(php -r 'echo PHP_MAJOR_VERSION, ".", PHP_MINOR_VERSION;')"
-    php -r 'exit(PHP_VERSION_ID >= 80300 ? 0 : 1);' || {
-        installer_error PHP_BASELINE_UNAVAILABLE "Installed PHP ${php_version} is older than 8.3."
+    if ! installer_php84_binary_ok; then
+        installer_error PHP_BASELINE_UNAVAILABLE "Rahandaz requires the regular file /usr/bin/php8.4 at exactly PHP 8.4."
         return 1
-    }
-    php -m | awk 'BEGIN { need["pdo_pgsql"]=1; need["redis"]=1; need["sodium"]=1; need["zip"]=1; need["fileinfo"]=1; need["mbstring"]=1; need["curl"]=1; need["xml"]=1; need["bcmath"]=1; need["intl"]=1 } { delete need[$1] } END { for (name in need) { print name; missing=1 } exit missing }' && return 0
-    installer_error PHP_BASELINE_UNAVAILABLE "A required PHP extension is missing."
+    fi
+    "$INSTALLER_PHP_BIN" -m | awk 'BEGIN { need["pdo_pgsql"]=1; need["redis"]=1; need["sodium"]=1; need["zip"]=1; need["fileinfo"]=1; need["mbstring"]=1; need["curl"]=1; need["xml"]=1; need["bcmath"]=1; need["intl"]=1 } { delete need[$1] } END { for (name in need) { print name; missing=1 } exit missing }' && return 0
+    installer_error PHP_BASELINE_UNAVAILABLE "A required PHP 8.4 extension is missing."
     return 1
 }
 
@@ -187,6 +186,11 @@ stage_06_application_release() {
         return 1
     }
     ln -sfn "$dest" "$(installer_root_path /var/lib/rahandaz/current)"
+    if [[ "$version" == *-* ]]; then
+        installer_write_release_record "$version" development
+    else
+        installer_write_release_record "$version" stable
+    fi
     mkdir -p "$(installer_root_path /var/lib/rahandaz/shared/storage)"
     if [[ ! -e "$dest/storage" ]]; then
         ln -s "$(installer_root_path /var/lib/rahandaz/shared/storage)" "$dest/storage"
@@ -328,12 +332,12 @@ PY
         return 2
     fi
     if [[ -z "$(installer_env_get "$envfile" APP_KEY)" ]]; then
-        (cd "$current" && php artisan key:generate --no-interaction) || {
+        (cd "$current" && "${INSTALLER_PHP_BIN}" artisan key:generate --no-interaction) || {
             installer_error KEY_EXISTS "APP_KEY could not be created."
             return 1
         }
     fi
-    (cd "$current" && php artisan rahandaz:keys:init --installer --no-interaction) || {
+    (cd "$current" && "${INSTALLER_PHP_BIN}" artisan rahandaz:keys:init --installer --no-interaction) || {
         installer_error KEY_EXISTS "The master key canary could not be created."
         return 1
     }
@@ -358,11 +362,11 @@ stage_10_database_migration() {
         return 1
     fi
     current="$(installer_root_path /var/lib/rahandaz/current)"
-    (cd "$current" && php artisan migrate --force --no-interaction) || {
+    (cd "$current" && "${INSTALLER_PHP_BIN}" artisan migrate --force --no-interaction) || {
         installer_error MIGRATION_FAILED "Migrations failed. The database was not dropped."
         return 1
     }
-    (cd "$current" && php artisan db:seed --force --no-interaction) || {
+    (cd "$current" && "${INSTALLER_PHP_BIN}" artisan db:seed --force --no-interaction) || {
         installer_error MIGRATION_FAILED "Catalog seed failed."
         return 1
     }
@@ -370,10 +374,10 @@ stage_10_database_migration() {
 }
 
 stage_11_nginx_php_fpm() {
-    local root site pool php_version pool_dir
+    local root site pool pool_dir
     root="$(installer_sysroot)"
     if [[ "$MODE" == "plan" ]]; then
-        installer_say "PLAN a dedicated Nginx site and PHP-FPM pool. The default site is not removed."
+        installer_say "PLAN a dedicated Nginx site and a private PHP 8.4 FPM pool. Distro PHP-FPM pools are not changed."
         return 0
     fi
     site="$(installer_root_path /etc/nginx/sites-available/rahandaz.conf)"
@@ -384,13 +388,11 @@ stage_11_nginx_php_fpm() {
         WELCOME_ROOT /var/lib/rahandaz/welcome \
         FPM_SOCK /run/rahandaz/php-fpm.sock \
         CLIENT_MAX_BODY 100m || return 1
-    php_version="8.3"
-    if [[ "$root" == "/" && "${INSTALLER_OFFLINE:-}" != "1" ]] && installer_require_cmd php; then
-        php_version="$(php -r 'echo PHP_MAJOR_VERSION, ".", PHP_MINOR_VERSION;')"
-    fi
-    pool_dir="$(installer_root_path "/etc/php/${php_version}/fpm/pool.d")"
+    pool_dir="$(installer_root_path /etc/rahandaz/php/pool.d)"
     pool="${pool_dir}/rahandaz.conf"
     mkdir -p "$pool_dir" "$(installer_root_path /etc/nginx/sites-enabled)"
+    cp "${INSTALLER_HOME}/templates/php-fpm/rahandaz-fpm.conf" "$(installer_root_path /etc/rahandaz/php/php-fpm.conf)"
+    chmod 0644 "$(installer_root_path /etc/rahandaz/php/php-fpm.conf)"
     installer_render_template "${INSTALLER_HOME}/templates/php-fpm/rahandaz.conf.tpl" "$pool" \
         FPM_SOCK /run/rahandaz/php-fpm.sock \
         UPLOAD_MAX 100M || return 1
@@ -407,15 +409,19 @@ stage_11_nginx_php_fpm() {
 }
 
 stage_12_systemd_services() {
-    local root release php_bin
+    local root release php_bin fpm_bin cli_dest lib_dest item
     root="$(installer_sysroot)"
     release="/var/lib/rahandaz/current"
-    php_bin="/usr/bin/php"
+    php_bin="${INSTALLER_PHP_BIN}"
+    fpm_bin="${INSTALLER_PHP_FPM_BIN}"
     if [[ "$MODE" == "plan" ]]; then
-        installer_say "PLAN systemd units for the queue worker, the scheduler timer, and the Redis cache. Cron is not installed."
+        installer_say "PLAN systemd units for rahandaz-php-fpm, the queue worker, the scheduler timer, and the Redis cache. ExecStart uses /usr/bin/php8.4. Cron is not installed."
         return 0
     fi
     mkdir -p "$(installer_root_path /etc/systemd/system)"
+    installer_render_template "${INSTALLER_HOME}/templates/systemd/rahandaz-php-fpm.service.tpl" \
+        "$(installer_root_path /etc/systemd/system/rahandaz-php-fpm.service)" \
+        PHP_FPM_BIN "$fpm_bin" || return 1
     installer_render_template "${INSTALLER_HOME}/templates/systemd/rahandaz-queue.service.tpl" \
         "$(installer_root_path /etc/systemd/system/rahandaz-queue.service)" \
         RELEASE "$release" PHP_BIN "$php_bin" DATA_ROOT /var/lib/rahandaz || return 1
@@ -427,6 +433,19 @@ stage_12_systemd_services() {
     installer_render_template "${INSTALLER_HOME}/templates/systemd/redis-rahandaz-cache.service.tpl" \
         "$(installer_root_path /etc/systemd/system/redis-rahandaz-cache.service)" \
         CONFIG /etc/redis/redis-rahandaz-cache.conf || return 1
+    lib_dest="$(installer_root_path /usr/local/lib/rahandaz)"
+    mkdir -p "$lib_dest"
+    for item in bin lib templates trust release VERSION; do
+        rm -rf "${lib_dest}/${item}"
+        cp -a "${INSTALLER_HOME}/${item}" "${lib_dest}/${item}"
+    done
+    mkdir -p "$(installer_root_path /usr/local/sbin)"
+    cli_dest="$(installer_root_path /usr/local/sbin/rahandaz)"
+    cat >"$cli_dest" <<'EOF'
+#!/usr/bin/env bash
+exec /usr/local/lib/rahandaz/bin/rahandaz "$@"
+EOF
+    chmod 0755 "$cli_dest" "${lib_dest}/bin/rahandaz"
     if [[ -e "$(installer_root_path /etc/cron.d/rahandaz)" ]]; then
         installer_error STAGE_FAILED "Refusing to keep a Rahandaz cron file beside the systemd timer."
         return 1
@@ -436,7 +455,7 @@ stage_12_systemd_services() {
         return 2
     fi
     systemctl daemon-reload
-    systemctl enable --now redis-rahandaz-cache.service rahandaz-queue.service rahandaz-scheduler.timer || {
+    systemctl enable --now redis-rahandaz-cache.service rahandaz-php-fpm.service rahandaz-queue.service rahandaz-scheduler.timer || {
         installer_error STAGE_FAILED "A Rahandaz unit did not become active."
         return 1
     }
@@ -461,7 +480,7 @@ stage_13_first_boot() {
     local tmp
     tmp="$(mktemp)"
     chmod 0600 "$tmp"
-    if ! (cd "$current" && php artisan rahandaz:bootstrap-owner --credentials-file="$tmp" --no-interaction); then
+    if ! (cd "$current" && "${INSTALLER_PHP_BIN}" artisan rahandaz:bootstrap-owner --credentials-file="$tmp" --no-interaction); then
         rm -f "$tmp"
         installer_error OWNER_FAILED "The initial owner was not created."
         return 1

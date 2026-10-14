@@ -66,8 +66,10 @@ PostgreSQL منبع نهایی وضعیت است. dispatcher ردیف‌های O
 
 ## نصب، سلامت و مصرف
 
-GitHub README یک دستور واحد برای دانلود **release امضاشده و verified** دارد؛ تا انتشار واقعی repo/key نباید دستور اجرایی جعلی نشان داد. installer با دسترسی موقت root برنامه PHP-FPM، Nginx، PostgreSQL، دو Redis، user/service و helper را آماده می‌کند؛ پس از bootstrap همه فعالیت‌های عادی غیر-root هستند. Wizard انتخاب software، mirror، Git و دیتابیس را به Job مرحله‌ای منتقل می‌کند. پس از موفقیت، welcome static site نیم‌صفحه‌ای حذف‌پذیر روی domain/IP بدون overwrite site موجود نمایش داده می‌شود؛ کنترل‌پنل در `/rahandaz/` باقی می‌ماند.
+GitHub README یک دستور واحد برای دانلود **release امضاشده و verified** دارد؛ تا انتشار واقعی repo/key نباید دستور اجرایی جعلی نشان داد. installer با دسترسی موقت root برنامه PHP-FPM، Nginx، PostgreSQL، دو Redis، user/service و helper را آماده می‌کند؛ پس از bootstrap همه فعالیت‌های عادی غیر-root هستند. Wizard انتخاب software، mirror، Git و دیتابیس را به Job مرحله‌ای منتقل می‌کند. پس از موفقیت، welcome static site نیم‌صفحه‌ای حذف‌پذیر روی domain/IP بدون overwrite site موجود نمایش داده می‌شود؛ پنل مدیریت در `/rahandaz/` باقی می‌ماند.
 
-بودجه عملکرد `lite`: هدف idle افزوده **≤512MiB RAM و متوسط ≤0.5 vCPU** پس از benchmark با پروفایل 1 vCPU/2GB. این عدد peak build/backup را تضمین نمی‌کند؛ workloadهای سنگین با preflight/resource cgroup محدود یا blocked می‌شوند. کنترل‌پلین نباید بعد از خرابی خود سرویسینگ پروژه‌ها را متوقف کند.
+بودجه عملکرد `lite`: هدف idle افزوده **≤512MiB RAM و متوسط ≤0.5 vCPU** پس از benchmark با پروفایل 1 vCPU/2GB. این عدد peak build/backup را تضمین نمی‌کند؛ workloadهای سنگین با preflight/resource cgroup محدود یا blocked می‌شوند. راه‌انداز نباید بعد از خرابی خود، سرویس پروژه‌های کاربر را متوقف کند.
+
+به‌روزرسانی خود راه‌انداز از CLI `installer/bin/rahandaz` و کتابخانه `installer/lib/update.sh` می‌گذرد و به Laravel نسخه‌ای که در حال جایگزینی است وابسته نیست. پنل فقط وضعیت backend را نشان می‌دهد و فرمان root اجرا نمی‌کند. جزئیات در `docs/SELF_UPDATE.md` است.
 
 **منبع حقیقت درباره ماژول‌ها، گردش نصب، مجوزها، API و قیدهای آزمون:** `PROJECT_SPEC.md`. هر تغییر مهم مرز trust/queue/runtime باید ADR داشته باشد.

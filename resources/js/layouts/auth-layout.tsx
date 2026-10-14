@@ -18,7 +18,7 @@ export function AuthLayout({ title, children }: { title: string; children: React
                         <p className="mt-4 max-w-sm text-sm leading-7 text-slate-300">هیچ عملیات میزبانی از صفحه ورود اجرا نمی‌شود و وضعیت موفق بدون مشاهده نتیجه واقعی نمایش داده نخواهد شد.</p>
                     </div>
                     <ul className="relative mt-12 space-y-4 text-sm text-slate-200">
-                        <AuthFeature icon={ServerCog}>کنترل‌پلین تک‌میزبان و خودمیزبان</AuthFeature>
+                        <AuthFeature icon={ServerCog}>پنل مدیریت تک‌میزبان و خودمیزبان</AuthFeature>
                         <AuthFeature icon={ShieldCheck}>مجوز سمت سرور و گزارش فعالیت</AuthFeature>
                         <AuthFeature icon={LockKeyhole}>بدون ثبت‌نام عمومی و بدون افشای Secret</AuthFeature>
                     </ul>

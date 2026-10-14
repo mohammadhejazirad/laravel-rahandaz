@@ -21,19 +21,6 @@ INSTALLER_PACKAGES=(
     postgresql-client
     redis-server
     nginx
-    php-cli
-    php-fpm
-    php-pgsql
-    php-mbstring
-    php-xml
-    php-curl
-    php-zip
-    php-bcmath
-    php-intl
-    php-gd
-    php-opcache
-    php-readline
-    php-redis
 )
 
 installer_package_allowed() {
@@ -112,7 +99,7 @@ installer_acknowledged() {
 installer_check_conflicts() {
     local blocked=0
     local name
-    for name in nginx postgresql redis-server php-fpm php-cli; do
+    for name in nginx postgresql redis-server php8.4-fpm php8.4-cli; do
         if installer_pkg_installed "$name" && ! installer_acknowledged "$name"; then
             installer_say "CONFLICT ${name} is already installed. Re-run with --acknowledge-existing ${name} to keep it and configure Rahandaz beside it."
             blocked=1
@@ -153,3 +140,7 @@ installer_env_get() {
     local key="$2"
     awk -F= -v k="$key" '$1 == k { sub(/^[^=]*=/, ""); print; exit }' "$file" 2>/dev/null || true
 }
+
+# shellcheck source=php-runtime.sh
+source "${INSTALLER_HOME}/lib/php-runtime.sh"
+INSTALLER_PACKAGES+=("${INSTALLER_PHP_PACKAGES[@]}")

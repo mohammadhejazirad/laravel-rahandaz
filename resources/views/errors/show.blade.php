@@ -27,7 +27,7 @@
                 <img src="{{ asset('branding/logo-symbol.svg') }}" width="40" height="40" alt="">
                 <span>
                     <strong>راه‌انداز</strong>
-                    <small>کنترل‌پلین سرور محلی</small>
+                    <small>پنل مدیریت سرور محلی</small>
                 </span>
             </div>
             <div class="error-mark" aria-hidden="true">!</div>
