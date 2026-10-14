@@ -27,6 +27,17 @@ npm run dev
 php artisan serve --host=127.0.0.1 --port=8000
 ```
 
+### اجرای یک‌دست با Lerd
+
+فرمان `composer run dev` داخل کانتینر PHP مربوط به Lerd اجرا می‌شود. پورت‌های سرور Laravel و Vite را یک بار برای PHP فعال پروژه publish کنید:
+
+```bash
+lerd php:ports add 8000:8000 5173:5173
+composer run dev
+```
+
+در محیط Lerd، پروژه به‌صورت خودکار Laravel و Vite را داخل کانتینر روی همه interfaceها bind می‌کند، ولی آدرس مرورگر همچنان `http://127.0.0.1:8000/rahandaz/login` است. این رفتار فقط وقتی `LERD_SITE` وجود دارد فعال می‌شود؛ اجرای native روی loopback پیش‌فرض باقی می‌ماند.
+
 `rahandaz:keys:init --local-only` و `rahandaz:bootstrap-owner` در مخزن هستند. اولی اگر فایل کلید پر باشد بازنویسی نمی‌کند. دومی مسیر فایل را اجباری می‌کند، داخل `public/` نمی‌نویسد و فایل موجود را عوض نمی‌کند. `APP_KEY` کلید master عملیاتی راه‌انداز نیست. داده production با کلید local باز نشود.
 
 ## Worker و scheduler — terminalهای جدا
