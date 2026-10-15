@@ -89,8 +89,8 @@ export default function ProfileSettings({
                 </dl>
                 <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5">
                     <p className="max-w-2xl text-sm leading-7 text-muted">
-                        از منوی پوسته در نوار بالا می‌توانید حالت روشن، تیره یا
-                        سیستم را انتخاب کنید. تاریخ‌ها با منطقه زمانی ذخیره‌شده
+                        با هر کلیک روی دکمه پوسته در نوار بالا، حالت به‌ترتیب
+                        روشن، تیره و سیستم تغییر می‌کند. تاریخ‌ها با منطقه زمانی ذخیره‌شده
                         به جلالی نمایش داده می‌شوند.
                     </p>
                     <Button asChild variant="secondary">

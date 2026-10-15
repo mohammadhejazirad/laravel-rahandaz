@@ -46,4 +46,6 @@
 
 مجوز: عضویت workspace برای صفحه‌های پنل. upload/deploy پروژه برای `owner`، `admin` و `operator` است و Viewer رد می‌شود. گزارش فعالیت فقط `owner` و `admin`. اعلان فقط `recipient` همان workspace. شناسه عددی و path آرشیو در props این صفحات نیست.
 
+کنترل پوسته در AuthLayout و AppLayout از کامپوننت مشترک `components/theme-toggle.tsx` استفاده می‌کند. هر کلیک چرخهٔ روشن ← تیره ← سیستم ← روشن را پیش می‌برد؛ آیکون وضعیت فعلی و Tooltip و برچسب دسترس‌پذیر وضعیت فعلی و اقدام بعدی را نشان می‌دهند. انتخاب مهمان محلی و انتخاب کاربر واردشده در Backend ذخیره می‌شود؛ شکست ذخیره انتخاب قبلی را برمی‌گرداند.
+
 آزمون‌های Backend: PanelPages، ProjectArchiveUpload، PanelHttp، BrandAssets، V1FeatureWorkflow و TutorialTest. در ۲۰۲۶-۱۰-۱۴، ۱۲ صفحه جدید بالا اضافه شد. Chrome واقعی با نشست و PG ایزوله، ۲۱ مسیر × ۹ عرض × دو پوسته (۳۷۸ بررسی) بدون overflow گذشت؛ Header با عنوان بلند در 320px اصلاح شد. drawer.right=390 و Escape تأیید شد. پوشش تمام حالت‌های غیرخالی/خطای فرم و visual regression جامع نداریم. `evidence/v1-browser.json` و `V1_TEST_REPORT.md` مرجع اجرای آخرند. ResourceGrant جامع هنوز blocker است؛ workspace scoping کافی برای انتشار نیست.

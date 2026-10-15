@@ -2,6 +2,12 @@
 
 این فایل گزارش واقعیت مخزن است. نقشه در `.docs/ROADMAP.md` و مشخصات در `.docs/PROJECT_SPEC.md` است.
 
+## تغییر چرخه‌ای پوسته — ۲۰۲۶-۱۰-۱۵
+
+کامپوننت مشترک `ThemeToggle` در AuthLayout و AppLayout با هر کلیک چرخهٔ روشن، تیره، سیستم و دوباره روشن را طی می‌کند. Dropdown حذف شد؛ آیکون حالت فعلی و Tooltip/aria-label حالت فعلی و اقدام بعدی را نشان می‌دهند. ذخیره محلی مهمان، PATCH کاربر واردشده، دنبال‌کردن تم دستگاه و rollback خطای ذخیره حفظ شدند. راهنمای صفحه پروفایل و مستندات رابط با رفتار جدید هماهنگ شدند. صفحه و dependency تازه اضافه نشد.
+
+`npm run lint`، `npx tsc --noEmit` و `npm run build` خروج صفر داشتند. Chrome headless با خروجی build واقعی صفحه ورود و props آزمایشی، چرخه کامل در عرض‌های ۳۶۰، ۷۶۸، ۱۲۸۰ و ۱۴۴۰، نبود Dropdown و overflow، تغییر تم دستگاه، کلید Enter و حفظ انتخاب مهمان پس از reload را بدون runtime exception گذراند. این آزمون نشست واقعی Backend را بررسی نکرد. اجرای ۲۰ آزمون `PanelHttpTest` و `PanelPagesTest` با PHP 8.5 سیستم به‌دلیل نبود درایور `pdo_pgsql` با خطای محیطی متوقف شد؛ wrapper پیش‌فرض Lerd نیز در sandbox به D-Bus دسترسی نداشت. آزمون PHP موفق گزارش نمی‌شود. نصب‌کننده و عملیات میزبان تغییری نکردند؛ Matrix Ubuntu در این برش اجرا نشد.
+
 ## آخرین برش — نهایی‌سازی نسخه اول، ۲۰۲۶-۱۰-۱۴
 
 مأموریت کامل نسخه اول تمام نشده؛ انتشار blocked است. گزارش‌های پایین snapshot تاریخی‌اند. وضعیت کنونی در V1_FEATURE_INVENTORY، V1_RELEASE_READINESS، V1_TEST_REPORT و V1_SECURITY_AUDIT است.

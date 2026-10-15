@@ -3,14 +3,6 @@ import { Laptop, Moon, Sun, type LucideIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuLabel,
-    DropdownMenuRadioGroup,
-    DropdownMenuRadioItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
@@ -22,25 +14,21 @@ import type { SharedProps, ThemePreference } from "@/types";
 const options: Array<{
     value: ThemePreference;
     label: string;
-    description: string;
     icon: LucideIcon;
 }> = [
     {
         value: "light",
         label: "روشن",
-        description: "همیشه از پوسته روشن استفاده شود",
         icon: Sun,
     },
     {
         value: "dark",
         label: "تیره",
-        description: "همیشه از پوسته تیره استفاده شود",
         icon: Moon,
     },
     {
         value: "system",
         label: "سیستم",
-        description: "از تنظیم روشن یا تیره دستگاه پیروی شود",
         icon: Laptop,
     },
 ];
@@ -53,12 +41,14 @@ export function ThemeToggle() {
     );
     const [saving, setSaving] = useState(false);
     const selected = options.find((option) => option.value === preference) ?? options[2];
+    const next = options[(options.indexOf(selected) + 1) % options.length];
     const SelectedIcon = selected.icon;
     const resolvedLabel = resolved === "dark" ? "تیره" : "روشن";
     const triggerLabel =
         preference === "system"
             ? `پوسته سیستم، اکنون ${resolvedLabel}`
             : `پوسته ${selected.label}`;
+    const actionLabel = `${triggerLabel}؛ تغییر به ${next.label}`;
 
     useEffect(() => {
         const root = document.documentElement;
@@ -75,13 +65,15 @@ export function ThemeToggle() {
         return () => observer.disconnect();
     }, []);
 
-    function select(next: string) {
-        if (!isThemePreference(next) || next === preference || saving) {
+    function select(next: ThemePreference) {
+        if (next === preference || saving) {
             return;
         }
 
         const previous = readPreference();
         applyTheme(next);
+        setPreference(next);
+        setResolved(readResolvedTheme());
         persistGuestPreference(next);
 
         if (!page.props.auth.user) {
@@ -97,6 +89,8 @@ export function ThemeToggle() {
                 preserveState: true,
                 onError: () => {
                     applyTheme(previous);
+                    setPreference(previous);
+                    setResolved(readResolvedTheme());
                     persistGuestPreference(previous);
                     notify.error(
                         "ذخیره پوسته انجام نشد و انتخاب قبلی بازگردانده شد.",
@@ -108,58 +102,26 @@ export function ThemeToggle() {
     }
 
     return (
-        <DropdownMenu dir="rtl">
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <span className="inline-flex">
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                type="button"
-                                variant="secondary"
-                                size="icon"
-                                aria-label={`تغییر پوسته؛ ${triggerLabel}`}
-                                disabled={saving}
-                            >
-                                <SelectedIcon
-                                    className="size-[18px]"
-                                    aria-hidden="true"
-                                />
-                            </Button>
-                        </DropdownMenuTrigger>
-                    </span>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">{triggerLabel}</TooltipContent>
-            </Tooltip>
-            <DropdownMenuContent align="end" className="min-w-64">
-                <DropdownMenuLabel>انتخاب پوسته</DropdownMenuLabel>
-                <DropdownMenuRadioGroup
-                    value={preference}
-                    onValueChange={select}
-                >
-                    {options.map((option) => {
-                        const Icon = option.icon;
-
-                        return (
-                            <DropdownMenuRadioItem
-                                key={option.value}
-                                value={option.value}
-                                disabled={saving}
-                            >
-                                <Icon aria-hidden="true" />
-                                <span className="min-w-0">
-                                    <span className="block font-medium">
-                                        {option.label}
-                                    </span>
-                                    <span className="block text-xs leading-5 text-muted">
-                                        {option.description}
-                                    </span>
-                                </span>
-                            </DropdownMenuRadioItem>
-                        );
-                    })}
-                </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-        </DropdownMenu>
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <span className="inline-flex">
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        size="icon"
+                        aria-label={`تغییر پوسته؛ ${actionLabel}`}
+                        disabled={saving}
+                        onClick={() => select(next.value)}
+                    >
+                        <SelectedIcon
+                            className="size-[18px]"
+                            aria-hidden="true"
+                        />
+                    </Button>
+                </span>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">{actionLabel}</TooltipContent>
+        </Tooltip>
     );
 }
 
