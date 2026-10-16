@@ -97,7 +97,7 @@ class LoginRequest extends FormRequest
             return;
         }
 
-        self::$dummyHash ??= Hash::make(random_bytes(32));
+        self::$dummyHash ??= Hash::make(bin2hex(random_bytes(32)));
         Hash::check($password, self::$dummyHash);
     }
 }
