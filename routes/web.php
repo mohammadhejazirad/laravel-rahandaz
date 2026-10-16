@@ -57,6 +57,8 @@ Route::prefix(trim((string) config('rahandaz.base_path'), '/'))->group(function 
                 Route::get('/servers/{localHost}', [ServerController::class, 'show'])->name('servers.show');
                 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
                 Route::get('/mirrors', [MirrorController::class, 'index'])->name('mirrors.index');
+                Route::post('/git/github/register', [GitConnectionController::class, 'manifestStart'])->middleware('throttle:5,1')->name('git.manifest.start');
+                Route::get('/git/github/registered', [GitConnectionController::class, 'manifestCallback'])->middleware('throttle:10,1')->name('git.manifest.callback');
                 Route::get('/git', [GitConnectionController::class, 'index'])->name('git.index');
                 Route::put('/git/providers/{provider}', [GitConnectionController::class, 'settings'])->where('provider', 'github|gitlab|gitlabSelf')->middleware('throttle:10,1')->name('git.settings');
                 Route::post('/git/authorize/{provider}', [GitConnectionController::class, 'start'])->where('provider', 'github|gitlab|gitlabSelf')->middleware('throttle:10,1')->name('git.start');

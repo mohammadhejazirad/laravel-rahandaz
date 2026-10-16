@@ -10,6 +10,7 @@ use App\Domain\Git\Enums\GitConnectionState;
 use App\Domain\Git\Enums\GitProvider;
 use App\Domain\Git\Exceptions\GitRejected;
 use App\Domain\Git\GitConnector;
+use App\Domain\Git\GitHubManifest;
 use App\Domain\Git\GitOAuthClient;
 use App\Http\CurrentWorkspace;
 use App\Http\PaginatorPayload;
@@ -47,6 +48,67 @@ final class GitConnectionController extends Controller
             'can_manage' => $manages,
             'events' => $manages ? $this->events($workspace->id) : null,
         ]);
+    }
+
+    public function manifestStart(Request $request, GitHubManifest $manifest, AuditRecorder $audit)
+    {
+        $workspace = CurrentWorkspace::get($request);
+        WorkspaceAccess::assertManagesSecrets($request->user(), $workspace);
+        // Never silently replace an existing app used by connected accounts.
+        if (GitProviderSetting::query()->forWorkspace($workspace->id)->where('provider', 'github')->exists()) {
+            return $this->start($request, 'github', $audit);
+        }
+        $state = bin2hex(random_bytes(32));
+        $request->session()->put('git_manifest', [
+            'state' => $state, 'user' => $request->user()->uuid, 'workspace' => $workspace->uuid, 'expires' => time() + 600,
+        ]);
+        $audit->record($workspace, $request->user(), 'git.app_registration_started', 'git_provider', null, AuditResult::Success, ['provider' => 'github']);
+
+        return Inertia::render('git/register', [
+            'action' => 'https://github.com/settings/apps/new?state='.$state,
+            'manifest' => json_encode($manifest->definition(), JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES),
+        ]);
+    }
+
+    public function manifestCallback(Request $request, GitHubManifest $manifest, CredentialStore $credentials, AuditRecorder $audit)
+    {
+        $workspace = CurrentWorkspace::get($request);
+        WorkspaceAccess::assertManagesSecrets($request->user(), $workspace);
+        $pending = $request->session()->pull('git_manifest');
+        $state = $request->query('state');
+        $code = $request->query('code');
+        if (! is_array($pending) || ! is_string($state) || ! hash_equals($pending['state'], $state)
+            || $pending['expires'] < time() || $pending['workspace'] !== $workspace->uuid || $pending['user'] !== $request->user()->uuid
+            || ! is_string($code) || preg_match('/^[A-Za-z0-9_-]{1,200}$/D', $code) !== 1) {
+            $audit->record($workspace, $request->user(), 'git.app_registration_rejected', 'git_provider', null, AuditResult::Denied, ['provider' => 'github']);
+
+            return redirect()->route('git.index')->with('error', 'تأیید ساخت برنامه نامعتبر یا منقضی است؛ دوباره شروع کنید.');
+        }
+
+        return Cache::lock('git-manifest:'.$workspace->uuid, 30)->block(3, function () use ($request, $workspace, $pending, $manifest, $code, $credentials, $audit) {
+            if (! Cache::add('git-manifest-used:'.hash('sha256', $pending['state']), true, 660)
+                || GitProviderSetting::query()->forWorkspace($workspace->id)->where('provider', 'github')->exists()) {
+                return redirect()->route('git.index')->with('error', 'این درخواست قبلاً استفاده شده یا برنامهٔ اتصال تنظیم شده است.');
+            }
+            try {
+                $data = $manifest->exchange($code);
+                DB::transaction(function () use ($workspace, $request, $credentials, $data, $audit): void {
+                    $credential = $credentials->store($workspace, $request->user(), 'github_oauth_client', $data['client_secret'], 'github');
+                    $setting = GitProviderSetting::query()->create([
+                        'workspace_id' => $workspace->id, 'provider' => 'github', 'base_url' => 'https://github.com',
+                        'client_id' => $data['client_id'], 'app_slug' => $data['app_slug'], 'credential_id' => $credential->id,
+                    ]);
+                    $audit->record($workspace, $request->user(), 'git.app_registered', 'git_provider', $setting->uuid, AuditResult::Success, ['provider' => 'github']);
+                });
+            } catch (Throwable) {
+                $audit->record($workspace, $request->user(), 'git.app_registration_failed', 'git_provider', null, AuditResult::Failure, ['provider' => 'github']);
+
+                return redirect()->route('git.index')->with('error', 'ساخت برنامه تأیید نشد؛ دوباره تلاش کنید یا از تنظیمات پیشرفته استفاده کنید.');
+            }
+
+            // Continue straight to GitHub's repository permission chooser.
+            return $this->start($request, 'github', $audit);
+        });
     }
 
     public function settings(Request $request, string $provider, CredentialStore $credentials, AuditRecorder $audit)
@@ -280,10 +342,13 @@ final class GitConnectionController extends Controller
     public function show(Request $request, GitConnection $connection)
     {
         $this->authorizeConnection($request, $connection, 'view');
-        $repositories = $connection->repositories()->orderBy('full_name')->paginate(50, ['*'], 'repositories_page')->withQueryString();
+        $filters = $request->validate(['search' => ['nullable', 'string', 'max:200']]);
+        $search = trim($filters['search'] ?? '');
+        $repositories = $connection->repositories()->when($search !== '', fn ($q) => $q->whereRaw('strpos(lower(full_name), lower(?)) > 0', [$search]))->orderBy('full_name')->paginate(50, ['*'], 'repositories_page')->withQueryString();
 
         return Inertia::render('git/show', [
             'connection' => $this->summary($connection),
+            'filters' => ['search' => $search],
             'repositories' => ['data' => $repositories->getCollection()->map(fn ($r) => ['uuid' => $r->uuid, 'full_name' => $r->full_name, 'default_branch' => $r->default_branch, 'visibility' => $r->visibility->value, 'archived' => $r->archived, 'disabled' => $r->disabled, 'is_selected' => $r->is_selected])->all(), 'meta' => PaginatorPayload::meta($repositories)],
             'events' => $this->events($connection->workspace_id, $connection->uuid),
             'can_manage' => Gate::allows('update', $connection),

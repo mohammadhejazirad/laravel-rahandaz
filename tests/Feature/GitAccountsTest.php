@@ -53,6 +53,89 @@ class GitAccountsTest extends TestCase
         Cache::flush();
     }
 
+    public function test_manifest_registration_stores_only_encrypted_client_secret_and_continues_to_installation(): void
+    {
+        [$owner, $workspace] = $this->panelAccount(setupComplete: true);
+        $this->actingAs($owner)->post(route('git.manifest.start'))->assertOk()->assertInertia(fn (Assert $page) => $page
+            ->component('git/register')->where('manifest', function ($json) {
+                $manifest = json_decode($json, true);
+                $this->assertSame(['contents' => 'read', 'metadata' => 'read'], $manifest['default_permissions']);
+                $this->assertFalse($manifest['hook_attributes']['active']);
+                $this->assertSame(route('git.manifest.callback'), $manifest['redirect_url']);
+                $this->assertSame([route('git.callback', 'github')], $manifest['callback_urls']);
+
+                return true;
+            })->missing('client_secret'));
+        $state = session('git_manifest.state');
+        Http::fake(['api.github.com/app-manifests/fixture-code/conversions' => Http::response([
+            'client_id' => 'manifest-client', 'client_secret' => 'manifest-secret-fixture', 'slug' => 'manifest-app',
+            'pem' => 'unused-private-key-fixture', 'webhook_secret' => 'unused-webhook-fixture',
+        ])]);
+        $this->get(route('git.manifest.callback', ['state' => $state, 'code' => 'fixture-code']))
+            ->assertRedirect('https://github.com/apps/manifest-app/installations/new?state='.session('git_oauth.github.state'));
+        $setting = GitProviderSetting::query()->firstOrFail();
+        $this->assertSame($workspace->id, $setting->workspace_id);
+        $this->assertSame('manifest-secret-fixture', app(CredentialStore::class)->openFor($setting->credential, $owner));
+        $this->assertStringNotContainsString('manifest-secret-fixture', $setting->credential->toJson());
+        $this->assertStringNotContainsString('unused-private-key-fixture', $setting->credential->toJson());
+        $this->assertStringNotContainsString('manifest-secret-fixture', AuditEvent::query()->get()->toJson());
+        $this->get(route('git.index'))->assertOk()->assertDontSee('manifest-secret-fixture')->assertDontSee('unused-private-key-fixture');
+        $this->get(route('git.manifest.callback', ['state' => $state, 'code' => 'fixture-code']))->assertSessionHas('error');
+        Http::assertSentCount(1);
+        $this->assertDatabaseCount('git_provider_settings', 1);
+        $this->assertDatabaseCount('git_connections', 0);
+    }
+
+    public function test_manifest_rejects_invalid_expired_or_cross_workspace_state_without_http(): void
+    {
+        [$owner] = $this->panelAccount(setupComplete: true);
+        $this->actingAs($owner)->post(route('git.manifest.start'))->assertOk();
+        $this->get(route('git.manifest.callback', ['state' => 'wrong', 'code' => 'fixture']))->assertSessionHas('error');
+        $this->post(route('git.manifest.start'))->assertOk();
+        $state = session('git_manifest.state');
+        $this->withSession(['git_manifest.expires' => time() - 1])->get(route('git.manifest.callback', ['state' => $state, 'code' => 'fixture']))->assertSessionHas('error');
+        $this->post(route('git.manifest.start'))->assertOk();
+        $state = session('git_manifest.state');
+        $this->withSession(['git_manifest.workspace' => 'different-workspace'])->get(route('git.manifest.callback', ['state' => $state, 'code' => 'fixture']))->assertSessionHas('error');
+        Http::assertNothingSent();
+        $this->assertDatabaseCount('git_provider_settings', 0);
+    }
+
+    public function test_manifest_failure_is_sanitized_and_existing_setting_is_not_replaced(): void
+    {
+        [$owner] = $this->panelAccount(setupComplete: true);
+        $this->actingAs($owner)->post(route('git.manifest.start'))->assertOk();
+        $state = session('git_manifest.state');
+        Http::fake(['api.github.com/app-manifests/*' => Http::response(['client_secret' => 'response-secret-fixture'], 500)]);
+        $this->get(route('git.manifest.callback', ['state' => $state, 'code' => 'fixture']))->assertSessionHas('error');
+        $this->assertStringNotContainsString('response-secret-fixture', json_encode(session()->all()));
+        $this->assertDatabaseCount('git_provider_settings', 0);
+        $this->configureProvider($owner, 'github');
+        $this->post(route('git.manifest.start'))->assertRedirect();
+        $this->assertSame('test-client', GitProviderSetting::query()->firstOrFail()->client_id);
+        Http::assertSentCount(1);
+    }
+
+    public function test_manifest_registration_requires_permission_to_manage_secrets(): void
+    {
+        [$owner, $workspace] = $this->panelAccount(setupComplete: true);
+        Membership::query()->where('workspace_id', $workspace->id)->where('user_id', $owner->id)->update(['role' => MembershipRole::Viewer]);
+        $this->actingAs($owner)->post(route('git.manifest.start'))->assertForbidden();
+        $this->get(route('git.manifest.callback', ['state' => 'fixture', 'code' => 'fixture']))->assertForbidden();
+        Http::assertNothingSent();
+    }
+
+    public function test_repository_search_is_server_side_literal_and_connection_scoped(): void
+    {
+        [$owner, $workspace] = $this->panelAccount(setupComplete: true);
+        $connection = GitConnection::factory()->create(['workspace_id' => $workspace->id]);
+        RemoteRepository::factory()->create(['workspace_id' => $workspace->id, 'git_connection_id' => $connection->id, 'full_name' => 'team/Match_repo']);
+        RemoteRepository::factory()->create(['workspace_id' => $workspace->id, 'git_connection_id' => $connection->id, 'full_name' => 'team/other']);
+        $this->actingAs($owner)->get(route('git.show', ['connection' => $connection, 'search' => 'match_']))->assertInertia(fn (Assert $page) => $page
+            ->has('repositories.data', 1)->where('repositories.data.0.full_name', 'team/Match_repo')->where('filters.search', 'match_'));
+        $this->get(route('git.show', ['connection' => $connection, 'search' => '%']))->assertInertia(fn (Assert $page) => $page->has('repositories.data', 0));
+    }
+
     private function configureProvider($owner, string $provider): void
     {
         $this->actingAs($owner)->put(route('git.settings', $provider), [

@@ -4,11 +4,12 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import type { GitProviderConfig } from './types';
 
-export function ManualGitConnection({ config, base }: { config: GitProviderConfig; base: string }) {
+export function ManualGitConnection({ config, base, expanded = false }: { config: GitProviderConfig; base: string; expanded?: boolean }) {
     const form = useForm({ access_token: '', base_url: config.base_url, mode: 'manual' });
-    return <details className="mt-4 rounded-xl border border-line p-3">
-        <summary className="min-h-11 cursor-pointer text-sm font-medium">اتصال دستی با توکن</summary>
+    return <details open={expanded || undefined} className="mt-4 rounded-xl border border-line p-3">
+        <summary className="min-h-11 cursor-pointer text-sm font-medium">اتصال با توکن دسترسی</summary>
         <p className="my-3 text-sm leading-7 text-muted">توکن محدود با مجوز خواندن هویت و مخزن‌ها وارد کنید. تست، توکن را ذخیره نمی‌کند؛ هنگام اتصال، توکن رمزگذاری می‌شود. برای GitHub توکن Fine-grained با مخزن‌های انتخابی ترجیح دارد.</p>
+        {config.provider !== 'gitlabSelf' ? <Button asChild variant="secondary" className="mb-4"><a href={config.provider === 'github' ? 'https://github.com/settings/personal-access-tokens/new' : 'https://gitlab.com/-/user_settings/personal_access_tokens?name=Rahandaz&scopes=read_user,read_api,read_repository'} target="_blank" rel="noopener noreferrer">ساخت توکن در {config.provider === 'github' ? 'GitHub' : 'GitLab'}</a></Button> : null}
         <Form className="space-y-4" onSubmit={event => {
             event.preventDefault();
             const save = (event.nativeEvent as SubmitEvent).submitter?.getAttribute('value') === 'save';

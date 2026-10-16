@@ -34,3 +34,4 @@ Homestead.yaml
 Thumbs.db
 /tests/infrastructure/ubuntu-lab/reports/*
 !/tests/infrastructure/ubuntu-lab/reports/.gitkeep
+.temp

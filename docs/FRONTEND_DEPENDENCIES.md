@@ -37,3 +37,8 @@ Primitiveهای Radix به‌صورت بسته‌های مستقل Avatar، Dial
 ### آیکون سرویس‌ها و اعتبارسنجی React — ۲۰۲۶-۱۰-۱۶
 
 پکیج تازه نصب نشد. دو SVG محلی GitHub/GitLab از Simple Icons با مجوز CC0-1.0 در `public/icons/git` اضافه شدند؛ GitLab شخصی نشان Server از Lucide موجود دارد. منبع/مجوز در README کنار assetها ثبت است. `Form`، context خطا و validator کوچک React برای الزام، URL/email، طول و pattern ساخته شدند؛ Input/Select مشترک از isRequired/aria-required استفاده و HTML required را قبول نمی‌کنند. ESLint جلوی required در JSX را می‌گیرد.
+
+
+## ساده‌سازی اتصال گیت — ۲۰۲۶-۱۰-۱۶
+
+وابستگی جدید نصب نشد. راهنمای اتصال از Modal/Radix موجود، Form/Input/Button مشترک، useForm/Inertia و steps کوچک مشترک Git استفاده می‌کند. manifest عمومی با فرم POST مرورگر به GitHub ارسال می‌شود؛ پاسخ شامل کلیدها فقط در Backend پردازش می‌شود. تصاویر مرجع خصوصی در هیچ asset یا سند قابل انتشار کپی نشدند.

@@ -6,6 +6,10 @@ import type { SharedProps } from '@/types';
 import type { GitEvents } from './types';
 
 const labels: Record<string, string> = {
+    'git.app_registration_started': 'راه‌اندازی خودکار برنامهٔ GitHub آغاز شد',
+    'git.app_registered': 'برنامهٔ اختصاصی GitHub ساخته و کلید آن رمزگذاری شد',
+    'git.app_registration_rejected': 'درخواست ساخت برنامه نامعتبر یا منقضی بود',
+    'git.app_registration_failed': 'ساخت برنامهٔ GitHub تأیید نشد',
     'git.manual_connect_failed': 'ثبت اتصال دستی ناموفق بود',
     'git.manual_test_started': 'تست توکن دستی آغاز شد',
     'git.manual_test': 'نتیجهٔ بررسی هویت و دسترسی توکن دستی',

@@ -1,3 +1,5 @@
+import { Input } from '@/components/ui/input';
+import { GitConnectionSteps } from '@/components/git/connection-steps';
 import { Form } from '@/components/ui/form';
 import { Head, Link, router, useForm, usePage } from "@inertiajs/react";
 import { useEffect, useRef, useState } from "react";
@@ -36,14 +38,17 @@ export default function GitShow({
     events,
     can_manage,
     manage_url,
+    filters,
 }: {
     connection: GitAccount;
     repositories: { data: Repository[]; meta: PageMeta };
     events: GitEvents;
     can_manage: boolean;
     manage_url: string;
+    filters: { search: string };
 }) {
-    const base = usePage<SharedProps>().props.app.base_path;
+    const page = usePage<SharedProps>();
+    const base = page.props.app.base_path;
     const url = `${base}/git/connections/${connection.uuid}`;
     const [confirm, setConfirm] = useState(false);
     const [disconnecting, setDisconnecting] = useState(false);
@@ -56,6 +61,7 @@ export default function GitShow({
             router.reload({ only: ["repositories"] });
         }
     }, [connection.last_synced_at]);
+    const search = useForm({ search: filters.search });
     const revoked = connection.state === "revoked";
     return (
         <AppLayout
@@ -66,6 +72,7 @@ export default function GitShow({
             <Link className="text-sm text-accent" href={`${base}/git`}>
                 بازگشت به حساب‌های گیت
             </Link>
+            <GitConnectionSteps current={2} />
             <Card>
                 <div className="flex flex-wrap items-center justify-between gap-4">
                     <div className="min-w-0">
@@ -140,8 +147,16 @@ export default function GitShow({
                 استفاده کنید. در GitLab دامنهٔ مجوز OAuth مستقل از انتخاب‌های
                 پنل است.
             </Alert>
+            <Card>
+                <Form className="flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={event => { event.preventDefault(); search.get(url, { preserveState: true, preserveScroll: true }); }}>
+                    <div className="min-w-0 flex-1"><Input label="جست‌وجوی مخزن" name="search" maxLength={200} dir="ltr" className="font-mono" placeholder="team / repository" value={search.data.search} onChange={event => search.setData('search', event.target.value)} error={search.errors.search} /></div>
+                    <Button type="submit" variant="secondary" loading={search.processing}>جست‌وجو</Button>
+                    {filters.search ? <Button asChild variant="secondary"><Link href={url}>پاک‌کردن جست‌وجو</Link></Button> : null}
+                </Form>
+                <p className="mt-3 text-xs text-muted">پیش از جست‌وجو یا تغییر صفحه، انتخاب‌های فعلی را ذخیره کنید.</p>
+            </Card>
             <RepositorySelection
-                key={`${repositories.meta.current_page}-${connection.last_synced_at}-${connection.state}`}
+                key={`${filters.search}-${repositories.meta.current_page}-${connection.last_synced_at}-${connection.state}`}
                 repositories={repositories.data}
                 canManage={can_manage && !revoked}
                 url={url}
@@ -155,7 +170,8 @@ export default function GitShow({
             >
                 تازه‌سازی نمایش مخزن‌ها
             </Button>
-            <GitEventLog events={events} />
+            {!revoked && connection.selected_count > 0 ? <Button asChild><Link href={`${base}/projects`}>ادامه به پروژه‌ها</Link></Button> : null}
+            <details className="rounded-2xl border border-line p-4" open={Boolean(new URLSearchParams(page.url.split('?')[1]).get('events_page'))}><summary className="min-h-11 cursor-pointer font-semibold">تاریخچهٔ مرحله‌ها و نتیجهٔ تست اتصال</summary><GitEventLog events={events} /></details>
             <Modal open={confirm} onOpenChange={setConfirm}>
                 <ModalContent>
                     <ModalHeader>
@@ -229,6 +245,7 @@ function RepositorySelection({
                         });
                     }}
                 >
+                    {canManage ? <div className="mb-4 flex flex-wrap items-center gap-3"><Button variant="secondary" disabled={form.processing} onClick={() => form.setData('selected_uuids', repositories.filter(r => !r.disabled && !r.archived).map(r => r.uuid))}>انتخاب همهٔ مخزن‌های این صفحه</Button><Button variant="secondary" disabled={form.processing} onClick={() => form.setData('selected_uuids', [])}>پاک‌کردن انتخاب‌های این صفحه</Button><span className="text-xs text-muted">{form.data.selected_uuids.length.toLocaleString('fa-IR')} انتخاب</span></div> : null}
                     <div className="space-y-2">
                         {repositories.map((repository) => (
                             <label
@@ -303,13 +320,7 @@ function RepositorySelection({
                         </p>
                     ))}
                     {canManage ? (
-                        <Button
-                            className="mt-4"
-                            type="submit"
-                            loading={form.processing}
-                        >
-                            ذخیرهٔ دسترسی‌های این صفحه
-                        </Button>
+                        <div className="sticky bottom-3 mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-line bg-surface-raised p-3"><Button type="submit" loading={form.processing}>ذخیرهٔ دسترسی‌های این صفحه</Button><span role="status" className="text-xs text-muted">{form.isDirty ? 'تغییرات هنوز ذخیره نشده‌اند' : 'انتخاب‌های ذخیره‌شده'}</span></div>
                     ) : null}
                 </Form>
             ) : (
