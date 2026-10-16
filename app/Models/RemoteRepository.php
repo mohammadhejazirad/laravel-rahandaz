@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['workspace_id', 'git_connection_id', 'provider_repository_id', 'full_name', 'namespace', 'clone_url', 'default_branch', 'visibility', 'archived', 'disabled', 'last_seen_at', 'provider_metadata'])]
+#[Fillable(['workspace_id', 'git_connection_id', 'provider_repository_id', 'full_name', 'namespace', 'clone_url', 'default_branch', 'visibility', 'archived', 'disabled', 'is_selected', 'last_seen_at', 'provider_metadata'])]
 class RemoteRepository extends Model
 {
     /** @use HasFactory<RemoteRepositoryFactory> */
@@ -29,6 +29,7 @@ class RemoteRepository extends Model
             'visibility' => RepositoryVisibility::class,
             'archived' => 'boolean',
             'disabled' => 'boolean',
+            'is_selected' => 'boolean',
             'last_seen_at' => 'datetime',
             'provider_metadata' => 'array',
         ];

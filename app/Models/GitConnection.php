@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['workspace_id', 'provider', 'auth_method', 'account_label', 'external_account_id', 'external_account_type', 'credential_id', 'base_url', 'scopes', 'state', 'expires_at', 'last_synced_at', 'revoked_at'])]
+#[Fillable(['workspace_id', 'provider', 'auth_method', 'account_label', 'external_account_id', 'external_account_type', 'credential_id', 'base_url', 'scopes', 'state', 'expires_at', 'last_synced_at', 'revoked_at', 'installation_id'])]
 class GitConnection extends Model
 {
     /** @use HasFactory<GitConnectionFactory> */

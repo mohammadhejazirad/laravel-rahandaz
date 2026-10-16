@@ -1,3 +1,4 @@
+import { Form } from '@/components/ui/form';
 import { Head, useForm, usePage } from "@inertiajs/react";
 import type { FormEvent } from "react";
 import { Button } from "@/components/ui/button";
@@ -21,13 +22,13 @@ export default function Login() {
     return (
         <AuthLayout title="ورود">
             <Head title="ورود" />
-            <form className="space-y-4" onSubmit={submit}>
+            <Form className="space-y-4" onSubmit={submit}>
                 <Input
                     label="نام کاربری یا ایمیل"
                     name="identifier"
                     autoComplete="username"
                     autoFocus
-                    required
+                    isRequired
                     value={form.data.identifier}
                     error={form.errors.identifier}
                     onChange={(event) =>
@@ -39,7 +40,7 @@ export default function Login() {
                     name="password"
                     type="password"
                     autoComplete="current-password"
-                    required
+                    isRequired
                     value={form.data.password}
                     error={form.errors.password}
                     onChange={(event) =>
@@ -54,7 +55,7 @@ export default function Login() {
                 >
                     ورود
                 </Button>
-            </form>
+            </Form>
             <Separator className="my-5" />
             <p className="text-sm leading-7 text-muted">
                 ثبت‌نام عمومی بسته است. فقط حساب ساخته‌شده روی همین سرور

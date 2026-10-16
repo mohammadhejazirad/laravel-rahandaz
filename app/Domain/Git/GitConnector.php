@@ -15,6 +15,7 @@ use App\Infrastructure\Http\Exceptions\UnsafeOutboundUrl;
 use App\Infrastructure\Http\PublicHttpsGuard;
 use App\Infrastructure\Secrets\CredentialStore;
 use App\Models\GitConnection;
+use App\Models\GitProviderSetting;
 use App\Models\RemoteBranch;
 use App\Models\RemoteRepository;
 use App\Models\User;
@@ -31,7 +32,47 @@ final class GitConnector
         private readonly PublicHttpsGuard $guard,
         private readonly CredentialStore $credentials,
         private readonly AuditRecorder $audit,
+        private readonly GitOAuthClient $oauth,
     ) {}
+
+    /** @return array{account_label: string, external_account_id: string} */
+    public function testAccess(GitProvider $provider, string $baseUrl, string $material, bool $oauth = false, ?string $installationId = null): array
+    {
+        $baseUrl = $this->baseUrl($provider, $baseUrl);
+        if (! $oauth) {
+            $this->assertMaterial($material);
+        }
+        $identity = $this->identity($provider, $baseUrl, $material, $oauth);
+        $connection = new GitConnection;
+        $connection->provider = $provider;
+        $connection->auth_method = $oauth ? GitAuthMethod::Oauth : GitAuthMethod::PersonalAccessToken;
+        $url = $provider === GitProvider::Github
+            ? ($installationId !== null ? 'https://api.github.com/user/installations/'.$installationId.'/repositories' : 'https://api.github.com/user/repos')
+            : $baseUrl.'/api/v4/projects';
+        if ($installationId !== null && preg_match('/^[0-9]{1,32}$/D', $installationId) !== 1) {
+            throw new GitRejected('شناسه نصب معتبر نیست.');
+        }
+        $response = $this->get($url, $this->guard->pin($url), $this->connectionHeaders($connection, $material), ['per_page' => 1, 'membership' => 'true']);
+        $this->assertOk($response);
+        $payload = $installationId !== null ? $response->json('repositories') : $response->json();
+        if (! is_array($payload) || ! array_is_list($payload)) {
+            throw new GitRejected('پاسخ فهرست مخزن معتبر نیست.');
+        }
+
+        return ['account_label' => $identity['login'], 'external_account_id' => $identity['id']];
+    }
+
+    public function testAuthorizationPage(GitProviderSetting $setting): void
+    {
+        $url = $this->oauth->authorizeUrl($setting, bin2hex(random_bytes(32)), bin2hex(random_bytes(32)));
+        $query = [];
+        parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
+        $url = explode('?', $url, 2)[0];
+        $response = $this->get($url, $this->guard->pin($url), ['Accept' => 'text/html'], $query);
+        if (! in_array($response->status(), [200, 302, 303], true)) {
+            throw new GitRejected('صفحهٔ مجوز سرویس در دسترس نیست.');
+        }
+    }
 
     public function connect(
         Workspace $workspace,
@@ -42,9 +83,13 @@ final class GitConnector
         string $accountType,
         ?string $requestId,
         ?string $sourceIp,
+        ?array $oauthTokens = null,
+        ?string $installationId = null,
     ): GitConnection {
         $baseUrl = $this->baseUrl($provider, $baseUrl);
-        $this->assertMaterial($accessMaterial);
+        if ($oauthTokens === null) {
+            $this->assertMaterial($accessMaterial);
+        }
 
         if (! in_array($accountType, ['user', 'organization', 'group'], true)) {
             throw new GitRejected('نوع حساب معتبر نیست.');
@@ -55,24 +100,67 @@ final class GitConnector
         }
 
         try {
-            $identity = $this->identity($provider, $baseUrl, $accessMaterial);
+            $identity = $this->identity($provider, $baseUrl, $accessMaterial, $oauthTokens !== null);
+            if ($oauthTokens !== null && $provider === GitProvider::Github) {
+                if (preg_match('/^[0-9]{1,32}$/D', (string) $installationId) !== 1) {
+                    throw new GitRejected('شناسه نصب GitHub معتبر نیست.');
+                }
+                $setting = GitProviderSetting::query()->where('workspace_id', $workspace->id)->where('provider', 'github')->firstOrFail();
+                $installation = null;
+                for ($page = 1; $page <= 20; $page++) {
+                    $url = 'https://api.github.com/user/installations';
+                    $response = $this->get($url, $this->guard->pin($url), $this->githubHeaders($accessMaterial), ['per_page' => 100, 'page' => $page]);
+                    $this->assertOk($response);
+                    $items = $response->json('installations');
+                    if (! is_array($items)) {
+                        throw new GitRejected('نصب برنامه قابل بررسی نیست.');
+                    }
+                    foreach ($items as $item) {
+                        if (is_array($item) && (string) ($item['id'] ?? '') === $installationId && ($item['app_slug'] ?? '') === $setting->app_slug) {
+                            $installation = $item;
+                            break 2;
+                        }
+                    }
+                    if (count($items) < 100) {
+                        break;
+                    }
+                }
+                if ($installation === null || ($installation['permissions']['contents'] ?? '') !== 'read' || ($installation['permissions']['metadata'] ?? '') !== 'read' || in_array('write', $installation['permissions'] ?? [], true)) {
+                    throw new GitRejected('نصب برنامه تأیید نشد؛ دسترسی Contents و Metadata باید فقط‌خواندنی باشد و مجوز نوشتن فعال نباشد.');
+                }
+                $account = $installation['account'] ?? [];
+                if (preg_match('/^[A-Za-z0-9_-]{1,64}$/D', (string) ($account['id'] ?? '')) !== 1 || preg_match('/^[A-Za-z0-9_.-]{1,120}$/D', (string) ($account['login'] ?? '')) !== 1) {
+                    throw new GitRejected('هویت مالک نصب GitHub معتبر نیست.');
+                }
+                $identity['id'] = (string) $account['id'];
+                $identity['login'] = $account['login'];
+                $identity['scopes'] = ['contents:read', 'metadata:read'];
+                $accountType = ($account['type'] ?? '') === 'Organization' ? 'organization' : 'user';
+                $url = 'https://api.github.com/user/installations/'.$installationId.'/repositories';
+                $this->assertOk($this->get($url, $this->guard->pin($url), $this->githubHeaders($accessMaterial), ['per_page' => 1]));
+            }
         } catch (UnsafeOutboundUrl $exception) {
             throw new GitRejected($exception->getMessage());
         }
 
         try {
-            return DB::transaction(function () use ($workspace, $actor, $provider, $baseUrl, $accessMaterial, $accountType, $identity, $requestId, $sourceIp): GitConnection {
+            return DB::transaction(function () use ($workspace, $actor, $provider, $baseUrl, $accessMaterial, $accountType, $identity, $requestId, $sourceIp, $oauthTokens, $installationId): GitConnection {
                 $credential = $this->credentials->store(
                     $workspace,
                     $actor,
                     $provider === GitProvider::Github ? 'github_access' : 'gitlab_access',
-                    $accessMaterial,
+                    $oauthTokens === null ? $accessMaterial : json_encode($oauthTokens, JSON_THROW_ON_ERROR),
                     $identity['login'],
                 );
-                $connection = GitConnection::query()->create([
+                $existing = GitConnection::query()->where('workspace_id', $workspace->id)->where('provider', $provider)->where('base_url', $baseUrl)->where('external_account_id', $identity['id'])->lockForUpdate()->first();
+                if ($existing !== null && $existing->state !== GitConnectionState::Revoked) {
+                    throw new GitRejected('این حساب متصل است؛ برای اتصال مجدد ابتدا دسترسی آن را در پنل قطع کنید.');
+                }
+                $connection = $existing ?? new GitConnection;
+                $connection->fill([
                     'workspace_id' => $workspace->id,
                     'provider' => $provider,
-                    'auth_method' => $provider === GitProvider::Github ? GitAuthMethod::PersonalAccessToken : GitAuthMethod::GitlabToken,
+                    'auth_method' => $oauthTokens !== null ? ($provider === GitProvider::Github ? GitAuthMethod::GithubApp : GitAuthMethod::Oauth) : ($provider === GitProvider::Github ? GitAuthMethod::PersonalAccessToken : GitAuthMethod::GitlabToken),
                     'account_label' => $identity['login'],
                     'external_account_id' => $identity['id'],
                     'external_account_type' => $accountType,
@@ -80,10 +168,11 @@ final class GitConnector
                     'base_url' => $baseUrl,
                     'scopes' => $identity['scopes'],
                     'state' => GitConnectionState::Active,
-                    'expires_at' => null,
+                    'expires_at' => ! empty($oauthTokens['expires_in']) ? now()->addSeconds($oauthTokens['expires_in']) : null,
+                    'installation_id' => $installationId,
                     'last_synced_at' => null,
                     'revoked_at' => null,
-                ]);
+                ])->save();
                 $this->audit->record(
                     $workspace,
                     $actor,
@@ -123,21 +212,29 @@ final class GitConnector
         }
 
         $connection->loadMissing('credential', 'workspace');
-        $material = $this->credentials->openFor($connection->credential, $actor);
+        $credentialId = $connection->credential_id;
+        $material = $this->oauth->accessToken($connection, $actor);
 
         try {
-            $rows = $this->repositories($connection, $material);
+            $rows = $this->repositories($connection, $material, $actor);
         } catch (UnsafeOutboundUrl $exception) {
             throw new GitRejected($exception->getMessage());
         } catch (GitRejected $exception) {
-            $connection->forceFill(['state' => GitConnectionState::Error])->save();
+            GitConnection::query()->whereKey($connection->id)->where('credential_id', $credentialId)->where('state', '!=', GitConnectionState::Revoked)->update(['state' => GitConnectionState::Error]);
 
             throw $exception;
         }
 
         $stored = 0;
 
-        DB::transaction(function () use ($connection, $actor, $rows, $requestId, $sourceIp, &$stored): void {
+        DB::transaction(function () use ($connection, $actor, $rows, $requestId, $sourceIp, $credentialId, &$stored): void {
+            GitConnection::query()->whereKey($connection->id)->lockForUpdate()->firstOrFail();
+            $connection->refresh();
+            if ($connection->state === GitConnectionState::Revoked || (string) $connection->credential_id !== (string) $credentialId) {
+                throw new GitRejected('اتصال باطل شده است.');
+            }
+            $selected = $connection->repositories()->where('is_selected', true)->pluck('provider_repository_id')->all();
+            $connection->repositories()->update(['disabled' => true, 'is_selected' => false]);
             foreach ($rows as $row) {
                 if (! $this->cloneUrlAllowed($row['clone_url'])) {
                     continue;
@@ -157,6 +254,7 @@ final class GitConnector
                         'visibility' => $row['visibility'],
                         'archived' => $row['archived'],
                         'disabled' => false,
+                        'is_selected' => ! $row['archived'] && in_array($row['id'], $selected, true),
                         'last_seen_at' => now(),
                         'provider_metadata' => [],
                     ],
@@ -190,6 +288,9 @@ final class GitConnector
 
     public function syncBranches(RemoteRepository $repository, User $actor, ?string $requestId, ?string $sourceIp): int
     {
+        if (! $repository->is_selected || $repository->disabled || $repository->archived) {
+            throw new GitRejected('دسترسی این مخزن انتخاب نشده یا مخزن در دسترس نیست.');
+        }
         $repository->loadMissing('gitConnection.credential', 'gitConnection.workspace');
         $connection = $repository->gitConnection;
 
@@ -201,7 +302,7 @@ final class GitConnector
             throw new GitRejected('مخزن خارج از اتصال است.');
         }
 
-        $material = $this->credentials->openFor($connection->credential, $actor);
+        $material = $this->oauth->accessToken($connection, $actor);
 
         try {
             $rows = $this->branches($connection, $repository, $material);
@@ -277,7 +378,7 @@ final class GitConnector
     /**
      * @return array{id: string, login: string, scopes: list<string>}
      */
-    private function identity(GitProvider $provider, string $baseUrl, string $material): array
+    private function identity(GitProvider $provider, string $baseUrl, string $material, bool $oauth = false): array
     {
         if ($provider === GitProvider::Github) {
             $url = 'https://api.github.com/user';
@@ -288,7 +389,7 @@ final class GitConnector
             $scopes = $this->scopes((string) $response->header('X-OAuth-Scopes'));
         } else {
             $url = $baseUrl.'/api/v4/user';
-            $response = $this->get($url, $this->guard->pin($url), $this->gitlabHeaders($material));
+            $response = $this->get($url, $this->guard->pin($url), $oauth ? ['Authorization' => 'Bearer '.$material, 'Accept' => 'application/json'] : $this->gitlabHeaders($material));
             $this->assertOk($response);
             $login = (string) ($response->json('username') ?? '');
             $id = (string) ($response->json('id') ?? '');
@@ -305,39 +406,35 @@ final class GitConnector
     /**
      * @return list<array{id: string, full_name: string, namespace: string, clone_url: string, default_branch: string, visibility: string, archived: bool}>
      */
-    private function repositories(GitConnection $connection, string $material): array
+    private function repositories(GitConnection $connection, string $material, User $actor): array
     {
-        if ($connection->provider === GitProvider::Github) {
-            $url = 'https://api.github.com/user/repos';
-            $response = $this->get($url, $this->guard->pin($url), $this->githubHeaders($material), [
-                'per_page' => 100,
-                'page' => 1,
-            ]);
-            $this->assertOk($response);
-            $payload = $response->json();
-
-            if (! is_array($payload)) {
-                throw new GitRejected('فهرست مخزن GitHub قابل خواندن نیست.');
+        $github = $connection->provider === GitProvider::Github;
+        $installation = $github && $connection->auth_method === GitAuthMethod::GithubApp;
+        if ($installation && preg_match('/^[0-9]{1,32}$/D', (string) $connection->installation_id) !== 1) {
+            throw new GitRejected('شناسه نصب GitHub معتبر نیست.');
+        }
+        $url = $github
+            ? ($installation ? 'https://api.github.com/user/installations/'.$connection->installation_id.'/repositories' : 'https://api.github.com/user/repos')
+            : rtrim($connection->base_url, '/').'/api/v4/projects';
+        $rows = [];
+        for ($page = 1; $page <= 100; $page++) {
+            $query = ['per_page' => 100, 'page' => $page];
+            if (! $github) {
+                $query += ['membership' => 'true', 'simple' => 'true'];
             }
-
-            return $this->mapGithubRepositories($payload);
+            $response = $this->get($url, $this->guard->pin($url), $this->connectionHeaders($connection, $material), $query);
+            $this->assertOk($response);
+            $payload = $installation ? $response->json('repositories') : $response->json();
+            if (! is_array($payload) || ! array_is_list($payload)) {
+                throw new GitRejected('فهرست مخزن سرویس قابل خواندن نیست.');
+            }
+            $this->audit->record($connection->workspace, $actor, 'git.repositories_page', 'git_connection', $connection->uuid, AuditResult::Success, ['page' => $page, 'repository_count' => count($payload)]);
+            $rows = array_merge($rows, $github ? $this->mapGithubRepositories($payload) : $this->mapGitlabRepositories($payload));
+            if (count($payload) < 100) {
+                return $rows;
+            }
         }
-
-        $url = rtrim($connection->base_url, '/').'/api/v4/projects';
-        $response = $this->get($url, $this->guard->pin($url), $this->gitlabHeaders($material), [
-            'membership' => 'true',
-            'simple' => 'true',
-            'per_page' => 100,
-            'page' => 1,
-        ]);
-        $this->assertOk($response);
-        $payload = $response->json();
-
-        if (! is_array($payload)) {
-            throw new GitRejected('فهرست مخزن GitLab قابل خواندن نیست.');
-        }
-
-        return $this->mapGitlabRepositories($payload);
+        throw new GitRejected('فهرست بیش از ۱۰۰۰۰ مخزن دارد؛ مجوز سرویس را محدودتر کنید.');
     }
 
     /**
@@ -359,7 +456,7 @@ final class GitConnector
             }
 
             $url = rtrim($connection->base_url, '/').'/api/v4/projects/'.rawurlencode($repository->provider_repository_id).'/repository/branches';
-            $response = $this->get($url, $this->guard->pin($url), $this->gitlabHeaders($material), ['per_page' => 100]);
+            $response = $this->get($url, $this->guard->pin($url), $this->connectionHeaders($connection, $material), ['per_page' => 100]);
         }
 
         $this->assertOk($response);
@@ -520,17 +617,32 @@ final class GitConnector
         $port = (int) (parse_url($url, PHP_URL_PORT) ?: 443);
         $address = str_contains($pinnedIp, ':') ? '['.$pinnedIp.']' : $pinnedIp;
 
-        return Http::withOptions([
-            'allow_redirects' => false,
-            'curl' => [
-                CURLOPT_RESOLVE => [$host.':'.$port.':'.$address],
-            ],
-        ])->withHeaders($headers)->timeout(8)->connectTimeout(3)->get($url, $query);
+        try {
+            return Http::withOptions([
+                'allow_redirects' => false,
+                'curl' => [
+                    CURLOPT_RESOLVE => [$host.':'.$port.':'.$address],
+                ],
+            ])->withHeaders($headers)->timeout(8)->connectTimeout(3)->get($url, $query);
+        } catch (Throwable) {
+            throw new GitRejected('ارتباط با سرویس Git برقرار نشد؛ دوباره تلاش کنید.');
+        }
     }
 
     /**
      * @return array<string, string>
      */
+    private function connectionHeaders(GitConnection $connection, string $material): array
+    {
+        if ($connection->provider === GitProvider::Github) {
+            return $this->githubHeaders($material);
+        }
+
+        return $connection->auth_method === GitAuthMethod::Oauth
+            ? ['Authorization' => 'Bearer '.$material, 'Accept' => 'application/json', 'User-Agent' => 'Rahandaz']
+            : $this->gitlabHeaders($material);
+    }
+
     private function githubHeaders(string $material): array
     {
         return [

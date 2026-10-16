@@ -86,3 +86,7 @@ Laravel Boost را نصب نکن. حالت اجرای پیش‌فرض `disabled`
 6. README فقط فرمان verified و screenshot واقعی بدون راز داشته باشد.
 7. قابلیت نیازموده complete/production-ready معرفی نشود؛ هدف Ubuntu با supported فرق دارد.
 8. انتشار `v1.0.0` فقط پس از پذیرش `docs/V1_RELEASE_READINESS.md`، آزمون سه Ubuntu، artifact امضاشده و تصمیم مجوز مالک مجاز است.
+
+قواعد دائمی اعتبارسنجی فرم‌ها:
+
+هیچ فیلد رابط نباید attribute بومی HTML به نام `required` داشته باشد. همهٔ فرم‌ها از `Form` مشترک با `noValidate` و اعتبارسنجی React با پیام فارسی کنار فیلد استفاده کنند. الزام فیلد فقط با `isRequired`/`aria-required` بیان می‌شود و به `required` HTML تبدیل نمی‌شود. اعتبارسنجی و مجوزهای Backend همچنان الزامی‌اند.

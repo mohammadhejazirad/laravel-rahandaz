@@ -19,6 +19,7 @@ export default tseslint.config(
             'react-refresh': reactRefresh,
         },
         rules: {
+            'no-restricted-syntax': ['error', { selector: "JSXAttribute[name.name='required']", message: 'Use React Form validation and isRequired; HTML required is forbidden.' }],
             'react-hooks/rules-of-hooks': 'error',
             'react-hooks/exhaustive-deps': 'error',
             'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],

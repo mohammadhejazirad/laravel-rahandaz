@@ -230,3 +230,33 @@ workflowهای `installer-test.yml` و `release-build.yml` اجرا نشدند. 
 ## اصلاح هش مسیر ورود حساب ناموجود — ۲۰۲۶-۱۰-۱۶
 
 در `LoginRequest` ورودی هش زمان‌گیر از `random_bytes(32)` خام به نمایش hex همان ۳۲ بایت تبدیل شد؛ Bcrypt بایت صفر در ورودی را نمی‌پذیرد و Laravel آن را با پیام گمراه‌کننده `Bcrypt hashing not supported` گزارش می‌کرد. هش‌های کاربران و الگوریتم ذخیره گذرواژه تغییر نکردند. آزمون `php artisan test tests/Unit/LoginPasswordTimingTest.php` روی PHP 8.5.11 اجرا شد: ۱ آزمون و ۵ assertion موفق؛ ورودی سازگار با Bcrypt، بررسی واقعی هش و استفاده مجدد از dummy hash بررسی شدند. ماتریس Ubuntu اجرا نشد؛ تغییری در installer یا عملیات میزبان وجود ندارد.
+
+## حساب‌های GitHub/GitLab و انتخاب مخزن — ۲۰۲۶-۱۰-۱۶
+
+صفحه‌های `/git` و `/git/connections/{uuid}`، navigation مشترک Desktop/Mobile، تنظیم GitHub App و GitLab OAuth، جریان نصب/مجوز با state یک‌بارمصرف و PKCE، رمزگذاری Client Secret و access/refresh token و تمدید مجوز اضافه شدند. نصب GitHub از نظر app slug، مالک حساب/سازمان و مجوز Contents/Metadata فقط‌خواندنی بررسی می‌شود. انتخاب مخزن در GitHub و انتخاب مجازبودن در پنل مستقل‌اند؛ در GitLab رابط صریحاً می‌گوید انتخاب پنل scope توکن را محدود نمی‌کند. مدیریت این موارد به مالک/مدیر محدود است و مشاهدهٔ سایر اعضا ResourceGrant می‌خواهد.
+
+مخزن تازه پیش‌فرض انتخاب‌نشده است. دریافت فهرست توسط `SyncGitRepositories` در صف control با UUIDهای بدون راز، timeout ۶۰ ثانیه و unique انجام می‌شود؛ فهرست ناقص ذخیره نمی‌شود و دسترسی حذف‌شدهٔ upstream در sync موفق غیرفعال می‌شود. انتخاب مخزن در خواندن شاخه و workflow ثبت استقرار بررسی می‌شود. قطع دسترسی credential محلی را revoke و انتخاب‌ها را غیرفعال می‌کند؛ لغو مجوز سرویس جداست و اتصال مجدد بدون بازگرداندن انتخاب‌ها ممکن است. موتور میزبان disabled ماند؛ webhook و deploy key یا اتصال پروژه از فرم ZIP در این برش ایجاد نشدند.
+
+تاریخچه از audit واقعی زنجیره‌دار موجود، با تاریخ جلالی/timezone کاربر، حساب، شماره صفحهٔ API، تعداد مخزن، فعال/غیرفعال‌کردن دسترسی، تمدید مجوز و خطاها ساخته می‌شود. نتیجهٔ صف پیش از اجرا موفق اعلام نمی‌شود. payload، راز و پاسخ خام سرویس در props یا تاریخچه نیستند. مستند تنظیم و محدودیت‌ها: `docs/GIT_ACCOUNT_CONNECTIONS.md`؛ آموزش‌های GitHub/GitLab و inventory/dependencies نیز به‌روز شدند. پکیج تازه‌ای نصب نشد.
+
+Migration افزایشی `2026_10_16_190000_add_git_account_authorization` روی پایگاه توسعه اجرا شد؛ داده یا کلید موجود حذف/بازتولید نشد. تست‌ها فقط در `rahandaz_test` مجزا با `DB_HOST=127.0.0.1` اجرا شدند. `vendor/bin/pint --dirty`، `npm run lint`، `npx tsc --noEmit` و `npm run build` خروج ۰ داشتند. کل suite: **۱۲۹ آزمون موفق، ۳۳۵۴ assertion** روی PHP 8.5.11؛ شامل ۱۳ تست جدید Git با HTTP fake برای OAuth، PKCE، replay/expiry، نصب read-only، refresh، pagination، شکست بدون فهرست ناقص، انتخاب و revoke/reconnect، مرز Workspace/ResourceGrant، عدم افشای راز و رد branch/deployment برای مخزن انتخاب‌نشده.
+
+آزمون زندهٔ GitHub/GitLab به برنامهٔ واقعی و تصمیم اپراتور برای دسترسی نیاز دارد و انجام نشد. مرورگر قابل کنترل در نشست موجود نبود؛ آزمون بصری viewportها انجام نشد. وضعیت Matrix اوبونتو 22.04/24.04/26.04 برای این برش: اجرا نشده/گواهی نشده؛ Bash، installer و عملیات میزبان تغییر نکرده‌اند. این گزارش ادعای production-ready یا Full VM certification ندارد.
+
+## اتصال مستقیم و GitLab شخصی — ۲۰۲۶-۱۰-۱۶
+
+سه گزینهٔ `github`، `gitlab` و `gitlabSelf` در رابط قرار گرفتند. دکمهٔ اصلی هر سرویس، پس از تنظیم اولیه، مرورگر را مستقیم به فرایند تأیید دسترسی می‌برد؛ نبود تنظیمات به‌جای ۴۰۴ فرم یک‌باره را باز می‌کند و Backend هم پیام راه‌اندازی برمی‌گرداند. تنظیمات فنی در details و جدا از دکمهٔ اتصال روزمره قرار گرفتند. ساخت OAuth Application واقعی در سرویس هنوز لازم است؛ client id/secret جعلی یا عمومی اضافه نشد.
+
+Migration افزایشی `2026_10_16_200000_add_self_managed_gitlab` origin تنظیمات موجود را حفظ کرد و روی پایگاه توسعه اجرا شد. GitLab شخصی OAuth/API/refresh و لینک مدیریت مجوز مستقل دارد؛ در دامنه provider همان `gitlab` است و base_url تفاوت سرور را مشخص می‌کند. origin ثبت‌شده توسط مدیر allowlist Workspace است. DNS و IP عمومی بررسی و اتصال HTTPS pin می‌شود؛ userinfo، مسیر، پورت سفارشی، HTTP و مقصد داخلی رد می‌شوند. تغییر آدرس با اتصال فعال ممنوع است و آدرس تازه راز برنامهٔ تازه می‌خواهد. state به digest تنظیمات اتصال بسته شد تا تغییر origin/client/secret جریان قبلی را نامعتبر کند.
+
+تست‌های Git اکنون ۱۶ موردند؛ سه مورد تازه گزینه‌های رابط/هدایت یک‌کلیکی، اتصال/مخزن/refresh روی origin شخصی و رد URL/DNS داخلی را بررسی می‌کنند. suite کامل با PostgreSQL مجزای `rahandaz_test`: **۱۳۲ passed و ۳۴۱۳ assertion** روی PHP 8.5.11. `vendor/bin/pint --dirty`، `npm run lint`، `npx tsc --noEmit`، `npm run build` و `git diff --check` موفق بودند. API سرویس‌ها fake بود؛ هیچ حساب واقعی متصل نشد و آزمون مرورگر انجام نشد. Matrix Ubuntu 22.04/24.04/26.04 برای این برش اجرا/گواهی نشد؛ Bash، installer و عملیات سیستم تغییر نکردند. پکیج تازه‌ای نصب نشد.
+
+## آیکون Git، اعتبارسنجی React و تست اتصال — ۲۰۲۶-۱۰-۱۶
+
+نشان‌های محلی Simple Icons برای GitHub/GitLab و ترکیب GitLab با Lucide Server برای Self-Managed کنار عنوان/دکمهٔ اتصال اضافه شدند. هیچ لوگوی راه‌انداز تغییر نکرد و پکیج تازه‌ای نصب نشد.
+
+اتصال دستی با توکن، تست دستی بدون ذخیره، ذخیرهٔ Credential پس از تأیید API، تست دسترس‌پذیری صفحهٔ OAuth پیش از اتصال و تست حساب ذخیره‌شده پس از OAuth/PAT پیاده شدند. تست حساب واقعی هویت و خواندن فهرست مخزن را بررسی می‌کند؛ تست مسیر OAuth فقط reachability است و اعتبار Client Secret یا تکمیل ورود را ادعا نمی‌کند. رخداد شروع و نتیجه با زمان و وضعیت success/failure در audit می‌آید. تست بدون secret در props/log، با کنترل Workspace و نقش، rate limit، DNS pinning و عدم دنبال‌کردن redirect است. انتخاب مخزن‌ها در تست عوض نمی‌شود و اتصال revoked تست نمی‌شود.
+
+قاعدهٔ عمومی منع required HTML در AGENTS و rule دائمی ثبت شد. تمام فرم‌های موجود از Form مشترک React با noValidate استفاده می‌کنند؛ خطاهای الزام/URL/email/طول/pattern فارسی و inline و اولین فیلد نامعتبر focus می‌شود. Input/Select فقط isRequired و aria-required دارند و ESLint required در JSX را ممنوع می‌کند. Backend validation حفظ شد. مستندات: `docs/FRONTEND_VALIDATION.md` و `docs/GIT_ACCOUNT_CONNECTIONS.md`.
+
+بررسی‌ها اجرا شدند: Pint، lint، TypeScript و build خروج ۰؛ دو تست JS اعتبارسنجی موفق؛ suite کامل PHP با پایگاه مجزای rahandaz_test برابر **۱۳۶ passed و ۳۴۳۹ assertion** روی PHP 8.5.11 بود. APIها fake بودند؛ اتصال زنده به حساب خارجی و بررسی بصری مرورگر انجام نشد. Matrix Ubuntu 22.04/24.04/26.04 اجرا نشده؛ installer، Bash و عملیات میزبان در این برش تغییر نکردند و ادعای production-ready وجود ندارد.

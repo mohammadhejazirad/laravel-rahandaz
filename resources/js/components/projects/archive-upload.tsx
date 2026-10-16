@@ -1,3 +1,4 @@
+import { Form } from '@/components/ui/form';
 import { useForm } from "@inertiajs/react";
 import { FileArchive, GitBranch, ShieldCheck, UploadCloud } from "lucide-react";
 import { useRef, useState, type DragEvent, type FormEvent } from "react";
@@ -103,7 +104,7 @@ export function ArchiveUpload({ basePath, projectUuid, environments, available, 
                             <Badge>در حال ساخت</Badge>
                         </div>
                         <h3 className="mt-3 font-semibold">GitHub، GitLab و GitLab شخصی</h3>
-                        <p className="mt-1 text-sm leading-7 text-muted">مدل داده Git موجود است، اما اتصال و انتخاب مخزن هنوز از این صفحه عملیاتی نشده است.</p>
+                        <p className="mt-1 text-sm leading-7 text-muted">از بخش «حساب‌های گیت» حساب را متصل و مخزن‌های مجاز را انتخاب کنید. اتصال مخزن به این پروژه هنوز از این فرم انجام نمی‌شود.</p>
                     </div>
                     <div className="rounded-2xl border border-accent/35 bg-accent-soft/55 p-4 shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--color-accent)_8%,transparent)]">
                         <div className="flex items-center justify-between gap-3">
@@ -122,7 +123,7 @@ export function ArchiveUpload({ basePath, projectUuid, environments, available, 
                 ) : environments.length === 0 ? (
                     <Alert tone="neutral">برای آپلود ZIP ابتدا باید حداقل یک environment واقعی برای پروژه ثبت شود.</Alert>
                 ) : (
-                    <form className="space-y-4" onSubmit={submit}>
+                    <Form className="space-y-4" onSubmit={submit}>
                         <label className="block text-sm" htmlFor="archive-environment">
                             <span className="mb-1.5 block font-medium text-ink">محیط مقصد</span>
                             <select id="archive-environment" className="min-h-11 w-full rounded-xl border border-line bg-surface px-3.5 py-2 text-ink shadow-sm outline-none focus:border-accent focus:ring-4 focus:ring-accent/10" value={environmentUuid} onChange={(event) => setEnvironmentUuid(event.target.value)}>
@@ -158,7 +159,7 @@ export function ArchiveUpload({ basePath, projectUuid, environments, available, 
                             <span className="flex items-start gap-2"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-success" aria-hidden="true" />مسیرهای خروجی، symlink، فایل رمز‌شده، تعداد ورودی و بمب فشرده‌سازی پیش از ذخیره رد می‌شوند.</span>
                             <Button type="submit" loading={form.processing} loadingLabel="در حال آپلود" disabled={!form.data.archive}>آپلود و ثبت استقرار دستی</Button>
                         </div>
-                    </form>
+                    </Form>
                 )}
             </div>
         </Card>

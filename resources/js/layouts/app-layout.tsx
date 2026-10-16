@@ -136,6 +136,12 @@ export function AppLayout({
                     enabled: true,
                 },
                 {
+                    href: `${base}/git`,
+                    label: "حساب‌های گیت",
+                    icon: FolderGit2,
+                    enabled: true,
+                },
+                {
                     href: `${base}/projects`,
                     label: "پروژه‌ها",
                     icon: FolderGit2,

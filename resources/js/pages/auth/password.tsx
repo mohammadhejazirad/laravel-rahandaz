@@ -1,3 +1,4 @@
+import { Form } from '@/components/ui/form';
 import { Head, useForm, usePage } from "@inertiajs/react";
 import type { FormEvent } from "react";
 import { Button } from "@/components/ui/button";
@@ -28,14 +29,14 @@ export default function Password() {
                 پیش از ادامه، گذرواژه اولیه باید عوض شود. این کار هیچ تغییری روی
                 میزبان ایجاد نمی‌کند.
             </p>
-            <form className="space-y-4" onSubmit={submit}>
+            <Form className="space-y-4" onSubmit={submit}>
                 <Input
                     label="گذرواژه فعلی"
                     name="current_password"
                     type="password"
                     autoComplete="current-password"
                     autoFocus
-                    required
+                    isRequired
                     value={form.data.current_password}
                     error={form.errors.current_password}
                     onChange={(event) =>
@@ -47,7 +48,7 @@ export default function Password() {
                     name="password"
                     type="password"
                     autoComplete="new-password"
-                    required
+                    isRequired
                     value={form.data.password}
                     error={form.errors.password}
                     onChange={(event) =>
@@ -59,7 +60,7 @@ export default function Password() {
                     name="password_confirmation"
                     type="password"
                     autoComplete="new-password"
-                    required
+                    isRequired
                     value={form.data.password_confirmation}
                     error={form.errors.password_confirmation}
                     onChange={(event) =>
@@ -72,7 +73,7 @@ export default function Password() {
                 <Button type="submit" className="w-full" loading={form.processing} loadingLabel="در حال ذخیره">
                     ذخیره گذرواژه
                 </Button>
-            </form>
+            </Form>
         </AuthLayout>
     );
 }

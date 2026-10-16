@@ -6,6 +6,7 @@ namespace App\Domain\Projects;
 
 use App\Domain\Audit\AuditRecorder;
 use App\Domain\Audit\Enums\AuditResult;
+use App\Domain\Git\Enums\GitConnectionState;
 use App\Domain\Jobs\Data\RecordOperationData;
 use App\Domain\Jobs\Enums\JobStatus;
 use App\Domain\Jobs\Enums\StepStatus;
@@ -21,6 +22,7 @@ use App\Models\Deployment;
 use App\Models\Environment;
 use App\Models\OperationJob;
 use App\Models\Release;
+use App\Models\RemoteRepository;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -265,6 +267,13 @@ final class DeploymentWorkflow
                         $old = Deployment::query()->where('operation_job_id', $existing->id)->firstOrFail();
 
                         return new QueuedDeployment($old, $existing);
+                    }
+                }
+                $repositoryId = $environment->project?->remote_repository_id;
+                if ($repositoryId !== null) {
+                    $repository = RemoteRepository::query()->whereKey($repositoryId)->where('workspace_id', $environment->workspace_id)->first();
+                    if ($repository === null || ! $repository->is_selected || $repository->disabled || $repository->archived || $repository->gitConnection?->state !== GitConnectionState::Active) {
+                        throw new DeploymentRejected('دسترسی مخزن این پروژه در حساب گیت فعال نیست.');
                     }
                 }
                 $deployment = $this->recorder->queue($environment, $actor, $commitSha, $trigger, null, $rollbackOf);

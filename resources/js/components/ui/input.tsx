@@ -1,13 +1,17 @@
-import type { InputHTMLAttributes } from 'react';
+import { useContext, type InputHTMLAttributes } from 'react';
+import { FormErrors } from './form-context';
 import { cn } from '@/lib/cn';
 
-type InputProps = InputHTMLAttributes<HTMLInputElement> & {
+type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'required'> & {
+    isRequired?: boolean;
     label: string;
     error?: string;
     help?: string;
 };
 
-export function Input({ label, error, help, id, className, required, ...props }: InputProps) {
+export function Input({ label, error: serverError, help, id, className, isRequired, ...props }: InputProps) {
+    const clientErrors = useContext(FormErrors);
+    const error = clientErrors[props.name ?? id ?? ''] ?? serverError;
     const inputId = id ?? props.name;
     const errorId = error ? `${inputId}-error` : undefined;
     const helpId = help ? `${inputId}-help` : undefined;
@@ -17,14 +21,14 @@ export function Input({ label, error, help, id, className, required, ...props }:
         <label data-slot="field" className="block text-sm" htmlFor={inputId}>
             <span className="mb-1.5 block font-medium text-ink">
                 {label}
-                {required ? <span className="ms-1 text-danger" aria-hidden="true">*</span> : null}
+                {isRequired ? <span className="ms-1 text-danger" aria-hidden="true">*</span> : null}
             </span>
             <input
                 data-slot="input"
                 id={inputId}
                 aria-invalid={error ? true : undefined}
                 aria-describedby={describedBy}
-                required={required}
+                aria-required={isRequired || undefined}
                 className={cn(
                     'min-h-11 w-full max-w-full rounded-xl border border-line bg-surface px-3.5 py-2 text-base text-ink shadow-sm outline-none transition-[border-color,box-shadow,background-color] placeholder:text-muted/75 hover:border-accent/35 focus:border-accent focus:ring-4 focus:ring-accent/10 disabled:cursor-not-allowed disabled:bg-surface-muted disabled:opacity-70',
                     error ? 'border-danger focus:border-danger focus:ring-danger/10' : '',
