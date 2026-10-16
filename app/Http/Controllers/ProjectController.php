@@ -20,8 +20,11 @@ class ProjectController extends Controller
     {
         $workspace = CurrentWorkspace::get($request);
 
+        $filters = $request->validate(['q' => ['nullable', 'string', 'max:120']]);
+        $query = trim($filters['q'] ?? '');
         $projects = Project::query()
             ->forWorkspace($workspace->id)
+            ->when($query !== '', fn ($q) => $q->where(fn ($q) => $q->whereRaw('strpos(lower(name), lower(?)) > 0', [$query])->orWhereRaw('strpos(lower(slug), lower(?)) > 0', [$query])))
             ->withCount('environments')
             ->orderByDesc('id')
             ->paginate(20)
@@ -41,6 +44,7 @@ class ProjectController extends Controller
                 'meta' => PaginatorPayload::meta($projects),
             ],
             'create_available' => false,
+            'filters' => ['q' => $query],
         ]);
     }
 

@@ -9,7 +9,7 @@ import type { SharedProps } from '@/types';
 
 export default function GitRegister({ action, manifest }: { action: string; manifest: string }) {
     const base = usePage<SharedProps>().props.app.base_path;
-    return <AppLayout title="اتصال به GitHub" description="راه‌اندازی برنامهٔ اختصاصی این نصب با تأیید شما در GitHub.">
+    return <AppLayout title="اتصال به GitHub" description="اطلاعات اتصال با تأیید شما مستقیم دریافت می‌شود؛ نیازی به کپی‌کردن کلید نیست.">
         <Head title="تأیید اتصال GitHub" />
         <Card className="mx-auto w-full max-w-2xl">
             <GitConnectionSteps current={1} />

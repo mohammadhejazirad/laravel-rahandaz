@@ -1,30 +1,12 @@
 import { Link, router, usePage } from "@inertiajs/react";
-import {
-    Activity,
-    BookOpen,
-    ArchiveRestore,
-    Bell,
-    ChevronDown,
-    Database,
-    FolderGit2,
-    Globe2,
-    LayoutDashboard,
-    ListChecks,
-    LogOut,
-    Menu,
-    Package,
-    RefreshCw,
-    Rocket,
-    ScrollText,
-    Server,
-    Settings,
-    Shield,
-    type LucideIcon,
-} from "lucide-react";
+import { Bell, ChevronDown, LogOut, Menu, Settings } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from "react";
 import { AppLogo } from "@/components/branding/app-logo";
 import { FlashToaster } from "@/components/flash-toaster";
 import { ContextualHelp } from "@/components/help-link";
+import { QuickNavigation } from '@/components/navigation/quick-navigation';
+import { SectionNavigation } from '@/components/navigation/section-navigation';
+import { destinationForPath, visibleNavigation, type PanelGroup } from '@/lib/panel-navigation';
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Alert } from "@/components/ui/alert";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -57,22 +39,8 @@ import {
     ModalTitle,
 } from "@/components/ui/modal";
 import { cn } from "@/lib/cn";
-import { labelOf } from "@/lib/labels";
 import { notify } from "@/lib/notify";
 import type { AuthUser, SharedProps } from "@/types";
-
-interface NavLink {
-    href: string;
-    label: string;
-    icon: LucideIcon;
-    enabled: boolean;
-    visible?: boolean;
-}
-
-interface NavGroup {
-    label: string;
-    links: NavLink[];
-}
 
 interface AppLayoutProps {
     title: string;
@@ -95,117 +63,8 @@ export function AppLayout({
     const role = user?.role;
     const canAudit = role === "owner" || role === "admin";
     const unread = page.props.notifications.unread;
-    const groups: NavGroup[] = [
-        {
-            label: "نمای کلی",
-            links: [
-                {
-                    href: `${base}/dashboard`,
-                    label: "داشبورد",
-                    icon: LayoutDashboard,
-                    enabled: true,
-                },
-                { href: `${base}/tutorials`, label: "آموزش‌ها", icon: BookOpen, enabled: true },
-                {
-                    href: `${base}/setup`,
-                    label: "راه‌اندازی",
-                    icon: Rocket,
-                    enabled: true,
-                },
-                {
-                    href: `${base}/servers`,
-                    label: "سرورها",
-                    icon: Server,
-                    enabled: true,
-                },
-            ],
-        },
-        {
-            label: "منابع و استقرار",
-            links: [
-                {
-                    href: `${base}/catalog`,
-                    label: "نرم‌افزارها",
-                    icon: Package,
-                    enabled: true,
-                },
-                {
-                    href: `${base}/mirrors`,
-                    label: "میرورها",
-                    icon: Shield,
-                    enabled: true,
-                },
-                {
-                    href: `${base}/git`,
-                    label: "حساب‌های گیت",
-                    icon: FolderGit2,
-                    enabled: true,
-                },
-                {
-                    href: `${base}/projects`,
-                    label: "پروژه‌ها",
-                    icon: FolderGit2,
-                    enabled: true,
-                },
-                {
-                    href: `${base}/deployments`,
-                    label: "استقرارها",
-                    icon: Rocket,
-                    enabled: true,
-                },
-                {
-                    href: `${base}/jobs`,
-                    label: "عملیات",
-                    icon: ListChecks,
-                    enabled: true,
-                },
-            ],
-        },
-        {
-            label: "زیرساخت",
-            links: [
-                { href: `${base}/domains`, label: "دامنه‌ها", icon: Globe2, enabled: true },
-                { href: `${base}/databases`, label: "دیتابیس‌ها", icon: Database, enabled: true },
-                {
-                    href: `${base}/backups`,
-                    label: "پشتیبان‌گیری",
-                    icon: ArchiveRestore,
-                    enabled: true,
-                },
-                { href: `${base}/monitoring`, label: "پایش", icon: Activity, enabled: true },
-            ],
-        },
-        {
-            label: "حساب و گزارش",
-            links: [
-                {
-                    href: `${base}/notifications`,
-                    label: "اعلان‌ها",
-                    icon: Bell,
-                    enabled: true,
-                },
-                {
-                    href: `${base}/audit`,
-                    label: "گزارش فعالیت",
-                    icon: ScrollText,
-                    enabled: true,
-                    visible: canAudit,
-                },
-                {
-                    href: `${base}/settings/updates`,
-                    label: "به‌روزرسانی",
-                    icon: RefreshCw,
-                    enabled: true,
-                },
-                {
-                    href: `${base}/settings/profile`,
-                    label: "تنظیمات",
-                    icon: Settings,
-                    enabled: true,
-                },
-            ],
-        },
-    ];
+    const groups = visibleNavigation(canAudit);
+    const destination = destinationForPath(path, base);
 
     useEffect(() => {
         const media = window.matchMedia("(min-width: 1024px)");
@@ -232,10 +91,10 @@ export function AppLayout({
                 <Sidebar
                     path={path}
                     groups={groups}
-                    className="sticky top-0 hidden h-dvh w-[280px] shrink-0 overflow-y-auto lg:block"
+                    className="fixed right-0 top-0 z-50 hidden h-dvh w-[264px] overflow-y-auto lg:block"
                 />
-                <div className="min-w-0 flex-1">
-                    <header className="sticky top-0 z-40 border-b border-line bg-canvas/88 backdrop-blur-xl">
+                <div className="min-w-0 flex-1 lg:pr-[264px]">
+                    <header className="sticky top-0 z-40 border-b border-line bg-canvas">
                         <div className="flex min-h-[4.5rem] items-center justify-between gap-3 px-3 sm:px-5 md:px-7">
                             <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
                                 <Sheet
@@ -274,15 +133,12 @@ export function AppLayout({
                                     </SheetContent>
                                 </Sheet>
                                 <div className="min-w-0 flex-1">
-                                    <p className="truncate text-xs text-muted">
-                                        راه‌انداز / {title}
-                                    </p>
-                                    <p className="truncate text-sm font-semibold text-ink sm:text-base">
-                                        {user?.display_name || user?.username}
-                                    </p>
+                                    <Link href={`${base}/dashboard`} className="text-xs text-muted hover:text-accent">پنل مدیریت راه‌انداز</Link>
+                                    <p className="truncate text-sm font-semibold text-ink">{destination?.label ?? title}</p>
                                 </div>
                             </div>
                             <div className="flex shrink-0 items-center gap-2">
+                                <QuickNavigation base={base} groups={groups} />
                                 <Link
                                     href={`${base}/notifications`}
                                     className={cn(
@@ -312,14 +168,14 @@ export function AppLayout({
                     </header>
                     <main
                         id="main-content"
-                        className="mx-auto w-full min-w-0 max-w-[1680px] px-4 py-6 sm:px-5 md:px-7 md:py-8"
+                        className="mx-auto w-full min-w-0 max-w-[1480px] px-4 py-6 sm:px-5 md:px-7 md:py-8"
                     >
-                        <header className="mb-7 flex min-w-0 flex-wrap items-end justify-between gap-4 border-b border-line pb-5">
+                        <header className="mb-5 flex min-w-0 flex-wrap items-end justify-between gap-4 border-b border-line pb-5">
                             <div className="min-w-0 max-w-3xl">
                                 <p className="mb-1.5 text-xs font-semibold text-accent">
                                     {eyebrow}
                                 </p>
-                                <h1 className="break-words text-2xl font-bold leading-tight tracking-[-0.02em] text-ink sm:text-3xl">
+                                <h1 className="break-words text-2xl font-bold leading-tight tracking-[-0.02em] text-ink sm:text-[1.75rem]">
                                     {title}
                                 </h1>
                                 {description ? (
@@ -328,20 +184,13 @@ export function AppLayout({
                                     </p>
                                 ) : null}
                             </div>
-                            <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-xs text-muted shadow-sm">
-                                <span
-                                    className="size-2 rounded-full bg-success shadow-[0_0_0_4px_color-mix(in_srgb,var(--color-success)_12%,transparent)]"
-                                    aria-hidden="true"
-                                />
-                                میزبان محلی
-                            </span>
+                            <div className="flex flex-wrap items-center gap-3"><ContextualHelp path={path} /><span className="rounded-lg border border-line bg-surface px-3 py-2 text-xs text-muted">میزبان همین نصب</span></div>
                         </header>
-                        <div className="space-y-5">
-                            <ContextualHelp path={path} />
+                        <div className="page-content space-y-5">
+                            <SectionNavigation path={path} base={base} canManage={canAudit} />
                             {page.props.execution.mode === "disabled" ? (
                                 <Alert tone="warning">
-                                    اجرای دستور میزبان خاموش است. ثبت یک درخواست
-                                    به‌معنی نصب یا استقرار موفق نیست.
+                                    اجرای میزبان غیرفعال است؛ درخواست‌ها قابل پیگیری‌اند و نصب یا استقرار تا اجرای واقعی تأیید نمی‌شود.
                                 </Alert>
                             ) : null}
                             {children}
@@ -484,126 +333,28 @@ function UserMenu({ user, base }: { user: AuthUser; base: string }) {
     );
 }
 
-function Sidebar({
-    path,
-    groups,
-    className,
-    onNavigate,
-    hideBrand = false,
-}: {
-    path: string;
-    groups: NavGroup[];
-    className?: string;
-    onNavigate?: () => void;
-    hideBrand?: boolean;
+function Sidebar({ path, groups, className, onNavigate, hideBrand = false }: {
+    path: string; groups: PanelGroup[]; className?: string; onNavigate?: () => void; hideBrand?: boolean;
 }) {
-    const { auth, enum_labels: labels } = usePage<SharedProps>().props;
-    const user = auth.user;
-
-    return (
-        <aside className={cn("border-e border-line bg-surface/96", className)}>
-            {hideBrand ? null : (
-                <div className="border-b border-line px-5 py-5">
-                    <AppLogo />
-                </div>
-            )}
-            {user ? (
-                <div className="px-4 py-4">
-                    <div className="flex items-center gap-3 rounded-xl border border-line bg-surface-muted/65 p-3">
-                        <Avatar size="lg">
-                            <AvatarFallback>
-                                {initialOf(user.display_name || user.username)}
-                            </AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold text-ink">
-                                {user.display_name || user.username}
-                            </p>
-                            <p className="truncate text-xs text-muted">
-                                {user.role
-                                    ? labelOf(user.role, labels)
-                                    : "بدون نقش"}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            ) : null}
-            <nav className="space-y-5 px-3 pb-8" aria-label="اصلی">
-                {groups.map((group) => {
-                    const visibleLinks = group.links.filter(
-                        (link) => link.visible !== false,
-                    );
-
-                    if (visibleLinks.length === 0) {
-                        return null;
-                    }
-
-                    return (
-                        <div key={group.label}>
-                            <p className="mb-1.5 px-3 text-[11px] font-semibold text-muted">
-                                {group.label}
-                            </p>
-                            <div className="space-y-1">
-                                {visibleLinks.map((link) => {
-                                    const Icon = link.icon;
-                                    const active =
-                                        link.enabled &&
-                                        (path === link.href ||
-                                            path.startsWith(`${link.href}/`));
-
-                                    if (!link.enabled) {
-                                        return (
-                                            <div
-                                                key={link.label}
-                                                aria-disabled="true"
-                                                className="flex min-h-10 items-center justify-between gap-2 rounded-xl px-3 py-2 text-sm text-muted opacity-60"
-                                            >
-                                                <span className="inline-flex min-w-0 items-center gap-2.5">
-                                                    <Icon
-                                                        className="size-4 shrink-0"
-                                                        aria-hidden="true"
-                                                    />
-                                                    {link.label}
-                                                </span>
-                                                <span className="shrink-0 rounded-full border border-line px-1.5 text-[10px]">
-                                                    بعداً
-                                                </span>
-                                            </div>
-                                        );
-                                    }
-
-                                    return (
-                                        <Link
-                                            key={link.href}
-                                            href={link.href}
-                                            aria-current={
-                                                active ? "page" : undefined
-                                            }
-                                            onClick={onNavigate}
-                                            className={cn(
-                                                "group flex min-h-10 items-center gap-2.5 rounded-xl border border-transparent px-3 py-2 text-sm transition-colors",
-                                                active
-                                                    ? "border-accent/15 bg-accent-soft font-semibold text-accent"
-                                                    : "text-muted hover:bg-surface-muted hover:text-ink",
-                                            )}
-                                        >
-                                            <Icon
-                                                className="size-4 shrink-0"
-                                                aria-hidden="true"
-                                            />
-                                            {link.label}
-                                        </Link>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    );
-                })}
-            </nav>
-        </aside>
-    );
+    const { auth, app } = usePage<SharedProps>().props;
+    return <aside className={cn('border-l border-line bg-surface', className)}>
+        {!hideBrand ? <div className="border-b border-line px-5 py-5"><AppLogo size="sm" showTagline={false} /></div> : null}
+        <div className="m-3 rounded-xl border border-line bg-surface-muted px-3 py-3"><p className="text-[11px] text-muted">فضای کاری محلی</p><p className="mt-1 truncate text-sm font-semibold">{auth.user?.display_name || auth.user?.username}</p></div>
+        <nav className="space-y-3 px-3 pb-5" aria-label="اصلی">{groups.map((group, index) => {
+            const activeGroup = group.destinations.some(item => path === `${app.base_path}/${item.path}` || path.startsWith(`${app.base_path}/${item.path}/`));
+            return <details key={group.label} open={index === 0 || activeGroup || undefined} className="group/nav">
+                <summary className="flex min-h-11 list-none items-center justify-between gap-2 px-3 text-xs font-semibold text-muted [&::-webkit-details-marker]:hidden">{group.label}<ChevronDown className="size-3.5 group-open/nav:rotate-180" aria-hidden="true" /></summary>
+                <div className="space-y-1">{group.destinations.map(item => {
+                    const href = `${app.base_path}/${item.path}`;
+                    const active = path === href || path.startsWith(`${href}/`);
+                    return <Link key={item.path} href={href} aria-current={active ? 'page' : undefined} onClick={onNavigate} className={cn('flex min-h-11 items-center gap-3 rounded-xl border border-transparent px-3 py-2 text-sm transition-colors', active ? 'border-accent/15 bg-accent-soft font-semibold text-accent' : 'text-muted hover:bg-surface-muted hover:text-ink')}><item.icon className="size-4 shrink-0" aria-hidden="true" />{item.label}</Link>;
+                })}</div>
+            </details>;
+        })}</nav>
+        <div className="mx-4 mb-5 border-t border-line pt-4 text-xs leading-6 text-muted">راه‌انداز روی میزبان شما اجرا می‌شود؛ وضعیت هر درخواست در عملیات و لاگ‌ها قابل پیگیری است.</div>
+    </aside>;
 }
 
 function initialOf(value: string): string {
-    return value.trim().charAt(0).toLocaleUpperCase("fa-IR") || "ر";
+    return value.trim().charAt(0).toLocaleUpperCase('fa-IR') || 'ر';
 }

@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import { Head, Link, usePage } from "@inertiajs/react";
 import { PersianDate } from "@/components/dates/persian-date";
 import { Alert } from "@/components/ui/alert";
@@ -69,6 +70,7 @@ export default function ServerShow({
                     </div>
                 </dl>
             </Card>
+            <Card><h2 className="font-semibold">مدیریت میزبان</h2><p className="mt-2 text-sm text-muted">بخش موردنیاز را باز کنید؛ هر بخش وضعیت و محدودیت‌های واقعی خود را نشان می‌دهد.</p><div className="mt-4 grid gap-3 sm:grid-cols-2"><Button asChild variant="secondary"><Link href={`${base}/monitoring`}>منابع و سلامت سرویس‌ها</Link></Button><Button asChild variant="secondary"><Link href={`${base}/catalog`}>نرم‌افزارها و موتورهای اجرا</Link></Button><Button asChild variant="secondary"><Link href={`${base}/databases`}>دیتابیس‌های پروژه</Link></Button><Button asChild variant="secondary"><Link href={`${base}/jobs`}>عملیات و لاگ‌های میزبان</Link></Button></div></Card>
         </AppLayout>
     );
 }

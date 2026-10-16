@@ -58,7 +58,7 @@ export default function Login() {
             </Form>
             <Separator className="my-5" />
             <p className="text-sm leading-7 text-muted">
-                ثبت‌نام عمومی بسته است. فقط حساب ساخته‌شده روی همین سرور
+                ثبت‌نام عمومی بسته است. فقط حسابی که مدیر این نصب ساخته است
                 می‌تواند وارد شود.
             </p>
         </AuthLayout>

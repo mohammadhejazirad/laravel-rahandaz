@@ -1,6 +1,8 @@
+import { router } from '@inertiajs/react';
+import { Button } from '@/components/ui/button';
+import { useVisiblePoll } from '@/hooks/use-visible-poll';
 import { Head, Link, usePage } from "@inertiajs/react";
 import { PersianDate } from "@/components/dates/persian-date";
-import { Alert } from "@/components/ui/alert";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -36,6 +38,9 @@ export default function JobShow({
     cancel_available: false;
 }) {
     const base = usePage<SharedProps>().props.app.base_path;
+
+    const active = !['failed', 'succeeded', 'cancelled'].includes(job.status);
+    useVisiblePoll(active, 'job,logs', 10000);
 
     return (
         <AppLayout title="جزئیات عملیات" description="وضعیت، زمان‌بندی و خروجی پالایش‌شده این Job." eyebrow="عملیات">
@@ -88,7 +93,7 @@ export default function JobShow({
             {logs.data.length === 0 ? (
                 <EmptyState title="لاگی ثبت نشده است">خروجی این عملیات پس از نوشته شدن در پایگاه اینجا می‌آید.</EmptyState>
             ) : (
-                <ol className="space-y-2" aria-label="لاگ عملیات">
+                <ol id="operation-logs" className="space-y-2" aria-label="لاگ عملیات">
                     {logs.data.map((log) => (
                         <li key={log.sequence} className="rounded-lg border border-line bg-surface px-3 py-2">
                             <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted">
@@ -105,8 +110,9 @@ export default function JobShow({
                     ))}
                 </ol>
             )}
+            <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-sm font-semibold">لاگ‌ها از قدیم به جدید · صفحهٔ {logs.meta.current_page.toLocaleString('fa-IR')}</h2>{logs.meta.current_page < logs.meta.last_page ? <Button asChild variant="secondary"><Link href={`${base}/jobs/${job.uuid}?page=${logs.meta.last_page}#operation-logs`}>رفتن به آخرین لاگ‌ها</Link></Button> : null}</div>
             <Pagination meta={logs.meta} />
-            <Alert tone="neutral">به‌روزرسانی خودکار لاگ وصل نیست. برای دیدن ردیف‌های جدید صفحه را دوباره باز کنید.</Alert>
+            <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-xs text-muted">{active ? 'تا پایان عملیات، لاگ‌های همین صفحه هنگام بازبودن پنجره هر ۱۰ ثانیه تازه می‌شوند.' : 'عملیات در وضعیت پایانی است؛ دریافت دوره‌ای متوقف شده است.'}</p><Button variant="secondary" onClick={() => router.reload({ only: ['job', 'logs'] })}>تازه‌سازی لاگ‌ها</Button></div>
         </AppLayout>
     );
 }

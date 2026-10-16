@@ -11,16 +11,15 @@ export function AuthLayout({ title, children }: { title: string; children: React
             <div className="surface-shadow grid w-full min-w-0 max-w-5xl overflow-hidden rounded-[2rem] border border-line bg-surface/96 lg:grid-cols-[0.92fr_1.08fr]">
                 <section className="relative hidden overflow-hidden bg-[#0b1220] p-10 text-white lg:flex lg:flex-col lg:justify-between">
                     <div className="absolute -start-24 -top-24 size-64 rounded-full border border-white/10" aria-hidden="true" />
-                    <div className="absolute -bottom-32 -end-16 size-80 rounded-full bg-indigo-500/15 blur-3xl" aria-hidden="true" />
                     <div className="relative">
                         <AppLogo theme="dark" />
-                        <p className="mt-12 max-w-sm text-3xl font-bold leading-[1.65]">مدیریت روشن و قابل‌ردیابی، برای همان سروری که در اختیار شماست.</p>
-                        <p className="mt-4 max-w-sm text-sm leading-7 text-slate-300">هیچ عملیات میزبانی از صفحه ورود اجرا نمی‌شود و وضعیت موفق بدون مشاهده نتیجه واقعی نمایش داده نخواهد شد.</p>
+                        <p className="mt-12 max-w-sm text-3xl font-bold leading-[1.65]">پروژه‌ها و سرورتان، در یک فضای روشن و ساده.</p>
+                        <p className="mt-4 max-w-sm text-sm leading-7 text-slate-300">کد پروژه را آماده کنید، محیط را بشناسید و نتیجهٔ هر درخواست را مرحله‌به‌مرحله دنبال کنید.</p>
                     </div>
                     <ul className="relative mt-12 space-y-4 text-sm text-slate-200">
                         <AuthFeature icon={ServerCog}>پنل مدیریت تک‌میزبان و خودمیزبان</AuthFeature>
                         <AuthFeature icon={ShieldCheck}>مجوز سمت سرور و گزارش فعالیت</AuthFeature>
-                        <AuthFeature icon={LockKeyhole}>بدون ثبت‌نام عمومی و بدون افشای Secret</AuthFeature>
+                        <AuthFeature icon={LockKeyhole}>دسترسی خصوصی برای مالک و اعضای تیم</AuthFeature>
                     </ul>
                 </section>
                 <section className="p-5 sm:p-8 lg:p-11">

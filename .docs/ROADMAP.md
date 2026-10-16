@@ -27,3 +27,8 @@ Agent/worker توزیع‌شده، providerهای cloud، API اتوماسیون
 **Definition of Done و چک‌لیست انتشار تفصیلی:** `docs/PROJECT_SPEC.md`، فصل‌های 24، 25 و 29.
 
 برش ۲۰۲۶-۱۰-۱۴: صفحات درخواست/وضعیت پنج حوزه اصلی و آموزش‌ها ساخته و کنترل‌پلین آزموده شد؛ مرحله‌های host/runtime/Git/installer/Boot تکمیل نشده‌اند. ترتیب بعدی: authorization دقیق منابع، executor/helper قرارداددار در VM، deployment و datastore/edge/backup واقعی، Git/runtime، سپس certification/benchmark/signing. هیچ مرحله صرفاً با گزارش یا UI complete محسوب نمی‌شود. gateها در `docs/V1_RELEASE_READINESS.md` هستند.
+
+
+## رابط یکپارچه — وضعیت ۲۰۲۶-۱۰-۱۶
+
+پوسته، نقشهٔ ناوبری، جست‌وجوی بخش‌ها، داشبورد اخیر، فهرست responsive، فیلترهای پروژه/عملیات، بخش‌بندی جزئیات و بازبینی ZIP پیاده شدند. قرارداد تمام صفحه‌ها در docs/UX_SYSTEM.md است. این مرحله جای Gate موتور میزبان، ساخت پروژه، اتصال Git به پروژه، گواهی/restore و VM certification را نمی‌گیرد. QA بصری تمام مسیرها و benchmark runtime هنوز شرط پذیرش رابط‌اند؛ build کوچک‌تر CSS، گواهی سریع‌ترشدن همهٔ صفحه‌ها نیست.

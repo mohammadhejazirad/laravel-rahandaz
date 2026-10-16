@@ -42,3 +42,8 @@ Primitiveهای Radix به‌صورت بسته‌های مستقل Avatar، Dial
 ## ساده‌سازی اتصال گیت — ۲۰۲۶-۱۰-۱۶
 
 وابستگی جدید نصب نشد. راهنمای اتصال از Modal/Radix موجود، Form/Input/Button مشترک، useForm/Inertia و steps کوچک مشترک Git استفاده می‌کند. manifest عمومی با فرم POST مرورگر به GitHub ارسال می‌شود؛ پاسخ شامل کلیدها فقط در Backend پردازش می‌شود. تصاویر مرجع خصوصی در هیچ asset یا سند قابل انتشار کپی نشدند.
+
+
+## بازچینی سراسری — ۲۰۲۶-۱۰-۱۶
+
+وابستگی تازه نصب نشد. QuickNavigation با Input/Modal موجود، metadata تایپ‌شده و لینک استاندارد کار می‌کند؛ کتابخانهٔ command palette اضافه نشد. PageSections از hash/hidden با حفظ mount فرم، ActionPanel از details و خطاهای Inertia، و TableFrame از cloneElement محدود برای برچسب‌گذاری ردیف موجود استفاده می‌کنند. جدول دو نسخهٔ desktop/mobile ندارد. React، TypeScript strict، Radix، Lucide و formatter جلالی موجود حفظ شدند. اندازه‌ها و محدودیت measurement در PERFORMANCE.md هستند.

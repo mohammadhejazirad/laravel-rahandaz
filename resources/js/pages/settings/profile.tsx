@@ -1,3 +1,4 @@
+import { PageSections } from '@/components/ui/page-sections';
 import { Head, Link, usePage } from "@inertiajs/react";
 import { UserRound } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
@@ -32,6 +33,8 @@ export default function ProfileSettings({
     return (
         <AppLayout title="تنظیمات" description="تنظیمات نمایشی حساب، منطقه زمانی و پوسته رابط.">
             <Head title="تنظیمات" />
+            <PageSections label="تنظیمات حساب" sections={[
+                { id: 'profile', label: 'حساب و نمایش', content: <>
             <Card>
                 <div className="flex items-center gap-3 border-b border-line pb-5">
                     <Avatar size="lg">
@@ -98,11 +101,15 @@ export default function ProfileSettings({
                     </Button>
                 </div>
             </Card>
+                </> },
+                { id: 'security', label: 'امنیت حساب', content: <><Card><h2 className="font-semibold">گذرواژه و دسترسی</h2><p className="mt-2 text-sm leading-7 text-muted">گذرواژهٔ پنل را از مسیر امن تغییر دهید. این کار گذرواژهٔ سرور یا پروژه‌ها را تغییر نمی‌دهد.</p><Button asChild className="mt-4" variant="secondary"><Link href={`${base}/password`}>تغییر گذرواژه</Link></Button></Card>
             {mfa_available ? null : (
                 <Alert tone="info">
                     راه‌اندازی MFA در این نسخه وجود ندارد و وضعیت فعال برای آن نشان داده نمی‌شود.
                 </Alert>
             )}
+                </> },
+            ]} />
         </AppLayout>
     );
 }

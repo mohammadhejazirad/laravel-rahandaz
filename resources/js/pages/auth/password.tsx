@@ -26,8 +26,7 @@ export default function Password() {
         <AuthLayout title="تغییر گذرواژه">
             <Head title="تغییر گذرواژه" />
             <p className="mb-4 text-sm text-muted">
-                پیش از ادامه، گذرواژه اولیه باید عوض شود. این کار هیچ تغییری روی
-                میزبان ایجاد نمی‌کند.
+                یک گذرواژهٔ تازه و قوی برای حساب پنل انتخاب کنید. اگر با گذرواژهٔ اولیه وارد شده‌اید، تغییر آن پیش از ادامه الزامی است.
             </p>
             <Form className="space-y-4" onSubmit={submit}>
                 <Input
@@ -46,6 +45,7 @@ export default function Password() {
                 <Input
                     label="گذرواژه جدید"
                     name="password"
+                    help="گذرواژهٔ بلند و منحصربه‌فرد انتخاب کنید؛ از گذرواژهٔ سرور استفاده نکنید."
                     type="password"
                     autoComplete="new-password"
                     isRequired

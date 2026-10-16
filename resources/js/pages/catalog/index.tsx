@@ -27,7 +27,7 @@ export default function CatalogIndex({
     const labels = usePage<SharedProps>().props.enum_labels;
 
     return (
-        <AppLayout title="نرم‌افزارها" description="تعریف‌های نسخه‌دار کاتالوگ؛ نمایش در این صفحه به‌معنی پشتیبانی یا امکان نصب نیست.">
+        <AppLayout title="نرم‌افزارها" description="نرم‌افزارها و نسخه‌های ثبت‌شده را بررسی کنید؛ وضعیت نصب هر مورد جداگانه مشخص می‌شود.">
             <Head title="نرم‌افزارها" />
             {install_available ? null : (
                 <Alert tone="info">نصب از این فهرست انجام نمی‌شود. وضعیت نسخه تا آزمون واقعی «آزموده‌نشده» می‌ماند.</Alert>

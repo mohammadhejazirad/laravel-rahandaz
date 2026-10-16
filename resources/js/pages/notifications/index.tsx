@@ -26,6 +26,8 @@ export default function NotificationsIndex({
 }) {
     const base = usePage<SharedProps>().props.app.base_path;
     const unread = usePage<SharedProps>().props.notifications.unread;
+    const [unreadOnly, setUnreadOnly] = useState(false);
+    const visible = notifications.data.filter(item => !unreadOnly || !item.read_at);
     const [reading, setReading] = useState<string | null>(null);
 
     function markRead(path: string, key: string, errorMessage: string) {
@@ -38,7 +40,7 @@ export default function NotificationsIndex({
     }
 
     return (
-        <AppLayout title="اعلان‌ها" description="پیام‌های پایدار ثبت‌شده در پایگاه؛ Toastهای موقت جایگزین این فهرست نیستند.">
+        <AppLayout title="اعلان‌ها" description="پیام‌های حساب شما و نتیجهٔ درخواست‌ها؛ پیام‌های خوانده‌نشده را از همین‌جا پیگیری کنید.">
             <Head title="اعلان‌ها" />
             {unread > 0 ? (
                 <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-accent/20 bg-accent-soft/60 p-4">
@@ -68,11 +70,12 @@ export default function NotificationsIndex({
                     </Button>
                 </div>
             ) : null}
-            {notifications.data.length === 0 ? (
-                <EmptyState title="اعلانی ندارید">اعلان پایدار فقط وقتی در پایگاه برای شما ثبت شود اینجا می‌آید. Toast جای آن را نمی‌گیرد.</EmptyState>
+            <div className="flex flex-wrap items-center gap-2"><Button variant={unreadOnly ? 'secondary' : 'primary'} aria-pressed={!unreadOnly} onClick={() => setUnreadOnly(false)}>همهٔ پیام‌های این صفحه</Button><Button variant={unreadOnly ? 'primary' : 'secondary'} aria-pressed={unreadOnly} onClick={() => setUnreadOnly(true)}>خوانده‌نشده‌های این صفحه</Button></div>
+            {visible.length === 0 ? (
+                <EmptyState title="اعلانی ندارید">در این صفحه پیامی برای نمایش وجود ندارد. برای نتیجه‌های قبلی، صفحه‌بندی را بررسی کنید.</EmptyState>
             ) : (
                 <ul className="space-y-3">
-                    {notifications.data.map((item) => (
+                    {visible.map((item) => (
                         <li
                             key={item.uuid}
                             className={

@@ -25,8 +25,8 @@ export default function MirrorsIndex({
     apply_available: false;
 }) {
     return (
-        <AppLayout title="میرورها" description="منابع ثبت‌شده برای دریافت بسته‌ها همراه وضعیت اعتماد و زمان آخرین بررسی.">
-            <Head title="میرورها" />
+        <AppLayout title="منابع دریافت بسته" description="منابع ثبت‌شده برای دریافت بسته‌ها همراه وضعیت اعتماد و زمان آخرین بررسی.">
+            <Head title="منابع دریافت بسته" />
             {apply_available ? null : (
                 <Alert tone="warning">اعمال یا بازگشت میرور از این صفحه انجام نمی‌شود. اعتماد «نامزد» به‌معنی آزموده‌بودن نیست.</Alert>
             )}

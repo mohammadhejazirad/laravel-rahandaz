@@ -1,3 +1,5 @@
+import { PageSections } from '@/components/ui/page-sections';
+import { PersianDate } from '@/components/dates/persian-date';
 import { Head, router, usePage } from "@inertiajs/react";
 import { useState } from "react";
 import { UpdateAvailableCard } from "@/components/updates/UpdateAvailableCard";
@@ -10,7 +12,6 @@ import type { SharedProps } from "@/types";
 export default function SystemUpdates({ release }: { release: ReleaseStatus }) {
     const base = usePage<SharedProps>().props.app.base_path;
     const [copied, setCopied] = useState(false);
-    const published = release.published_at ?? "ثبت نشده";
 
     async function copyCommand() {
         try {
@@ -25,7 +26,8 @@ export default function SystemUpdates({ release }: { release: ReleaseStatus }) {
         <AppLayout title="به‌روزرسانی" description="وضعیت نسخه راه‌انداز، یادداشت انتشار و دستور به‌روزرسانی. پنل این دستور را اجرا نمی‌کند.">
             <Head title="به‌روزرسانی راه‌انداز" />
             <UpdateAvailableCard release={release} detailsHref={`${base}/settings/updates`} />
-            <Card>
+            <PageSections label="به‌روزرسانی راه‌انداز" sections={[
+                { id: 'version', label: 'وضعیت نسخه', content: <>            <Card>
                 <h2 className="text-base font-bold">وضعیت بررسی</h2>
                 <p className="mt-2 text-sm leading-6 text-muted">
                     {updateStateText(release.state)}. کانال مجاز از تنظیم سرور خوانده می‌شود و در این صفحه عوض نمی‌شود.
@@ -42,11 +44,11 @@ export default function SystemUpdates({ release }: { release: ReleaseStatus }) {
                     </div>
                     <div>
                         <dt className="text-xs text-muted">زمان انتشار</dt>
-                        <dd className="technical-value mt-1 text-sm">{published}</dd>
+                        <dd className="technical-value mt-1 text-sm"><PersianDate iso={release.published_at} /></dd>
                     </div>
                     <div>
                         <dt className="text-xs text-muted">زمان بررسی معتبر</dt>
-                        <dd className="technical-value mt-1 text-sm">{release.verified_at ?? "ثبت نشده"}</dd>
+                        <dd className="technical-value mt-1 text-sm"><PersianDate iso={release.verified_at} /></dd>
                     </div>
                 </dl>
                 <div className="mt-4 flex flex-wrap gap-2">
@@ -60,7 +62,8 @@ export default function SystemUpdates({ release }: { release: ReleaseStatus }) {
                     </Button>
                 </div>
             </Card>
-            <Card>
+</> },
+                { id: 'instructions', label: 'راهنمای اجرا', content: <>            <Card>
                 <h2 className="text-base font-bold">دستور به‌روزرسانی</h2>
                 <p className="mt-2 text-sm leading-6 text-muted">
                     به‌روزرسانی فقط با نسخه، مانیفست، امضا، کلید عمومی و فایل انتشار انجام می‌شود. پنل مدیریت این فرمان را اجرا نمی‌کند.
@@ -86,7 +89,8 @@ export default function SystemUpdates({ release }: { release: ReleaseStatus }) {
                     {release.version_command} · {release.history_command}
                 </p>
             </Card>
-            <Card>
+</> },
+                { id: 'checks', label: 'تاریخچهٔ بررسی', content: <>            <Card>
                 <h2 className="text-base font-bold">تاریخچه بررسی</h2>
                 {release.history.length === 0 ? (
                     <p className="mt-2 text-sm text-muted">
@@ -97,12 +101,14 @@ export default function SystemUpdates({ release }: { release: ReleaseStatus }) {
                         {release.history.map((item) => (
                             <li key={`${item.checked_at ?? "none"}-${item.result ?? "none"}`} className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm">
                                 <span>{updateStateText(item.update_available ? "update_available" : "up_to_date")}</span>
-                                <span className="technical-value text-xs">{item.latest_version ?? "—"} · {item.checked_at ?? "بدون زمان"}</span>
+                                <span className="technical-value text-xs">{item.latest_version ?? "—"} · <PersianDate iso={item.checked_at} /></span>
                             </li>
                         ))}
                     </ul>
                 )}
             </Card>
+</> },
+            ]} />
         </AppLayout>
     );
 }

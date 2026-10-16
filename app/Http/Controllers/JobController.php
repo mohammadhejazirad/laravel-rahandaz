@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Domain\Jobs\Enums\JobStatus;
 use App\Http\CurrentWorkspace;
 use App\Http\PaginatorPayload;
 use App\Models\OperationJob;
 use App\Models\OperationJobLog;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -18,13 +20,17 @@ class JobController extends Controller
     {
         $workspace = CurrentWorkspace::get($request);
 
+        $filters = $request->validate(['status' => ['nullable', Rule::enum(JobStatus::class)]]);
+        $status = $filters['status'] ?? '';
         $jobs = OperationJob::query()
             ->where('workspace_id', $workspace->id)
+            ->when($status !== '', fn ($q) => $q->where('status', $status))
             ->orderByDesc('id')
             ->paginate(20)
             ->withQueryString();
 
         return Inertia::render('jobs/index', [
+            'filters' => ['status' => $status],
             'jobs' => [
                 'data' => $jobs->getCollection()->map(fn (OperationJob $job): array => $this->summary($job))->all(),
                 'meta' => PaginatorPayload::meta($jobs),

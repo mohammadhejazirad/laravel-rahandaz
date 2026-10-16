@@ -18,7 +18,7 @@ interface AuditRow {
 
 export default function AuditIndex({ events }: { events: { data: AuditRow[]; meta: PageMeta } }) {
     return (
-        <AppLayout title="گزارش فعالیت" description="رخدادهای حسابرسی‌شده این فضای کاری، بدون نمایش راز یا فراداده حساس.">
+        <AppLayout title="گزارش فعالیت" description="چه کاری، روی کدام منبع و در چه زمانی ثبت شده است.">
             <Head title="گزارش فعالیت" />
             <Alert tone="neutral">متن رخداد بدون فراداده و بدون راز است. خروجی فایل از این صفحه ساخته نمی‌شود.</Alert>
             {events.data.length === 0 ? (

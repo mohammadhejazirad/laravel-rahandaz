@@ -1,3 +1,5 @@
+import { PageSections } from '@/components/ui/page-sections';
+import { Button } from '@/components/ui/button';
 import { Head, Link, usePage } from "@inertiajs/react";
 import { PersianDate } from "@/components/dates/persian-date";
 import { ArchiveUpload } from "@/components/projects/archive-upload";
@@ -66,6 +68,8 @@ export default function ProjectShow({ project, environments, source_archives, ar
                 </BreadcrumbList>
             </Breadcrumb>
 
+            <PageSections label="مدیریت پروژه" sections={[
+                { id: 'overview', label: 'نمای کلی', content: <>
             <Card>
                 <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
@@ -82,13 +86,35 @@ export default function ProjectShow({ project, environments, source_archives, ar
                 {deploy_available ? null : <Alert className="mt-4" tone="neutral">اجرای build و فعال‌سازی release هنوز به executor امن متصل نیست؛ عملیات ZIP فقط ثبت و قابل پیگیری می‌شود.</Alert>}
             </Card>
 
+                    <Card><h2 className="font-semibold">قدم بعدی</h2><p className="mt-2 text-sm text-muted">منبع کد را آماده کنید، محیط مقصد را بررسی و نتیجه را در تاریخچه دنبال کنید.</p><div className="mt-4 flex flex-wrap gap-3"><Button asChild><a href="#source">انتخاب منبع کد</a></Button><Button asChild variant="secondary"><a href="#environments">بررسی محیط‌ها</a></Button><Button asChild variant="secondary"><Link href={`${base}/deployments`}>همهٔ استقرارها</Link></Button></div></Card>
+                </> },
+                { id: 'source', label: 'منبع کد', content: <>
             <ArchiveUpload basePath={base} projectUuid={project.uuid} environments={environments} available={archive_upload.available} maxBytes={archive_upload.max_bytes} executionMode={archive_upload.execution_mode} />
 
+                </> },
+                { id: 'environments', label: 'محیط‌ها', content: <>
+            {environments.length === 0 ? (
+                <EmptyState title="محیطی ثبت نشده است">محیط‌های این پروژه پس از ثبت واقعی اینجا دیده می‌شوند.</EmptyState>
+            ) : (
+                <Card>
+                    <h2 className="text-lg font-semibold">محیط‌ها</h2>
+                    <ul className="mt-3 space-y-2">
+                        {environments.map((environment) => (
+                            <li key={environment.uuid} className="flex flex-wrap items-center justify-between gap-2 border-t border-line py-2">
+                                <span className="min-w-0">{environment.name}{" "}<span className="font-mono text-sm text-muted" dir="ltr">{environment.branch_name}</span></span>
+                                <StatusBadge value={environment.status} />
+                            </li>
+                        ))}
+                    </ul>
+                </Card>
+            )}
+                </> },
+                { id: 'history', label: 'تاریخچهٔ فایل‌ها', content: <>
             <Card>
                 <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                         <h2 className="text-lg font-semibold">آرشیوهای اخیر پروژه</h2>
-                        <p className="mt-1 text-sm text-muted">فقط فراداده امن نمایش داده می‌شود؛ مسیر خصوصی فایل به مرورگر فرستاده نمی‌شود.</p>
+                        <p className="mt-1 text-sm text-muted">فایل‌های دریافت‌شده و وضعیت درخواست استقرار هر نسخه.</p>
                     </div>
                     <Badge>{source_archives.length.toLocaleString("fa-IR")} مورد</Badge>
                 </div>
@@ -123,21 +149,8 @@ export default function ProjectShow({ project, environments, source_archives, ar
                 )}
             </Card>
 
-            {environments.length === 0 ? (
-                <EmptyState title="محیطی ثبت نشده است">محیط‌های این پروژه پس از ثبت واقعی اینجا دیده می‌شوند.</EmptyState>
-            ) : (
-                <Card>
-                    <h2 className="text-lg font-semibold">محیط‌ها</h2>
-                    <ul className="mt-3 space-y-2">
-                        {environments.map((environment) => (
-                            <li key={environment.uuid} className="flex flex-wrap items-center justify-between gap-2 border-t border-line py-2">
-                                <span className="min-w-0">{environment.name}{" "}<span className="font-mono text-sm text-muted" dir="ltr">{environment.branch_name}</span></span>
-                                <StatusBadge value={environment.status} />
-                            </li>
-                        ))}
-                    </ul>
-                </Card>
-            )}
+                </> },
+            ]} />
         </AppLayout>
     );
 }

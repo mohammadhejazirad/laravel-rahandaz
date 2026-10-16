@@ -1,10 +1,11 @@
-import { Head } from "@inertiajs/react";
+import { Head, Link, usePage } from "@inertiajs/react";
 import { AlertTriangle } from "lucide-react";
 import { AppLogo } from "@/components/branding/app-logo";
 import { Alert } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
 import { AppLayout } from "@/layouts/app-layout";
-import type { HostFacts } from "@/types";
+import { Button } from '@/components/ui/button';
+import type { SharedProps, HostFacts } from "@/types";
 
 interface SetupPageProps {
     holding: boolean;
@@ -17,6 +18,7 @@ interface SetupPageProps {
 }
 
 export default function Setup({ holding, workspace, facts }: SetupPageProps) {
+    const base = usePage<SharedProps>().props.app.base_path;
     return (
         <AppLayout title="راه‌اندازی" description="مشاهده امن مشخصات همین میزبان، بدون نصب بسته یا تغییر پیکربندی سیستم.">
             <Head title="راه‌اندازی" />
@@ -102,6 +104,7 @@ export default function Setup({ holding, workspace, facts }: SetupPageProps) {
                         </dl>
                     </Card>
                 )}
+                <Card><h2 className="font-semibold">مسیر شروع استفاده</h2><p className="mt-2 text-sm leading-7 text-muted">این صفحه مشاهدهٔ مشخصات است و نصب انجام نمی‌دهد. قدم بعدی را متناسب با وضعیت نصب انتخاب کنید.</p><ol className="mt-4 grid gap-3 sm:grid-cols-3">{[['tutorials/installation', '۱. آماده‌سازی نصب', 'راهنما، پیش‌نیازها و محدودیت‌های نصب'], ['git', '۲. اتصال منبع کد', 'افزودن حساب و انتخاب مخزن‌ها'], ['projects', '۳. بررسی پروژه‌ها', 'منبع، محیط‌ها و درخواست استقرار']].map(([path, title, detail]) => <li key={path} className="rounded-xl border border-line p-3"><h3 className="text-sm font-semibold">{title}</h3><p className="my-3 text-xs leading-6 text-muted">{detail}</p><Button asChild variant="secondary"><Link href={`${base}/${path}`}>بازکردن این مرحله</Link></Button></li>)}</ol></Card>
             </div>
         </AppLayout>
     );

@@ -28,6 +28,7 @@ export default function ErrorPage({ status }: { status: number }) {
                     {messages[status] ?? "درخواست انجام نشد."}
                 </h1>
                 <p className="mt-3 text-sm leading-7 text-muted">اگر این خطا ادامه داشت، زمان رخداد را همراه شناسه درخواست در لاگ داخلی بررسی کنید.</p>
+                {props.auth?.user && status !== 419 ? <a href={`${base}/dashboard`} className="mt-5 inline-flex min-h-11 items-center text-sm font-semibold text-accent">بازگشت به داشبورد</a> : null}
                 <a className="mt-7 inline-flex min-h-11 items-center justify-center rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground shadow-sm" href={`${base}/login`}>
                     بازگشت به ورود
                 </a>

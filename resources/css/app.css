@@ -73,20 +73,6 @@
         text-rendering: optimizeLegibility;
     }
 
-    body::before {
-        position: fixed;
-        z-index: -1;
-        inset: 0;
-        content: '';
-        pointer-events: none;
-        background:
-            radial-gradient(circle at 88% 2%, color-mix(in srgb, var(--color-accent) 8%, transparent) 0, transparent 27rem),
-            linear-gradient(color-mix(in srgb, var(--color-line) 24%, transparent) 1px, transparent 1px),
-            linear-gradient(90deg, color-mix(in srgb, var(--color-line) 24%, transparent) 1px, transparent 1px);
-        background-size: auto, 32px 32px, 32px 32px;
-        mask-image: linear-gradient(to bottom, black, transparent 72%);
-    }
-
     ::selection {
         background: var(--color-accent-soft);
         color: var(--color-ink);
@@ -295,4 +281,36 @@
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
     }
+}
+
+@layer components {
+    /* A single semantic table becomes labelled cards on narrow screens. */
+    .resource-table th { padding: .875rem 1rem; text-align: start; font-size: .75rem; color: var(--color-muted); font-weight: 600; }
+    .resource-table td { padding: 1rem; vertical-align: middle; }
+    .resource-table tbody tr:hover { background: var(--color-surface-muted); }
+    .resource-table .table-cell-value { min-width: 0; overflow-wrap: anywhere; }
+    .resource-table .mobile-cell-label { display: none; }
+    .resource-table td a { display: inline-flex; min-height: 2.75rem; align-items: center; font-weight: 500; color: var(--color-accent); }
+    .resource-table td[dir='ltr'] .mobile-cell-label { direction: rtl; text-align: right; }
+    .page-content > section > dl > div, .page-content > div > section > dl > div { min-width: 0; }
+    :where(summary, section[id]) { scroll-margin-top: 6rem; }
+    @media (max-width: 767px) {
+        .resource-table { border: 0; background: transparent; }
+        .resource-table table { display: block; }
+        .resource-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+        .resource-table tbody { display: grid; gap: .75rem; }
+        .resource-table tbody tr { display: block; border: 1px solid var(--color-line); border-radius: 1rem; padding: .5rem 1rem; background: var(--color-surface); }
+        .resource-table tbody td { display: grid; grid-template-columns: minmax(5rem, .7fr) minmax(0, 1.3fr); gap: .75rem; align-items: center; padding: .625rem 0; border-bottom: 1px solid var(--color-line); }
+        .resource-table tbody td:last-child { border-bottom: 0; }
+        .resource-table .mobile-cell-label { display: block; color: var(--color-muted); font-family: var(--font-sans); font-size: .75rem; }
+        .resource-table tbody td[dir='ltr'] { direction: rtl; }
+        .resource-table td[dir='ltr'] .table-cell-value { direction: ltr; }
+    }
+}
+
+@layer components {
+    .page-content :where(dd) { margin-top: .375rem; overflow-wrap: anywhere; }
+    .page-content :where(dt) { font-size: .75rem; }
+    .page-content :where(section[data-slot='card']) > dl > div { border-radius: .75rem; background: var(--color-surface-muted); padding: .875rem; }
+    @media (min-width: 768px) { .resource-table table { table-layout: fixed; } }
 }

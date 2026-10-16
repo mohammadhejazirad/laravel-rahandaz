@@ -1,3 +1,4 @@
+import { destinationForPath } from '@/lib/panel-navigation';
 import { Link, usePage } from '@inertiajs/react';
 import { BookOpen } from 'lucide-react';
 import type { SharedProps } from '@/types';
@@ -8,13 +9,7 @@ export function HelpLink({ slug, label = 'راهنمای این بخش' }: { slu
 }
 
 export function ContextualHelp({ path }: { path: string }) {
-    const guides: Record<string, string> = {
-        dashboard: 'getting-started', setup: 'installation', servers: 'server-management',
-        catalog: 'php-runtimes', mirrors: 'troubleshooting', projects: 'projects-environments',
-        deployments: 'deployments', domains: 'domains-dns', certificates: 'ssl-certificates',
-        databases: 'databases', backups: 'backups', monitoring: 'monitoring',
-        jobs: 'jobs-logs', notifications: 'jobs-logs', audit: 'account-security', settings: 'account-security', git: 'github',
-    };
-    const area = path.split('/').filter(Boolean).find((part) => guides[part]);
-    return area ? <HelpLink slug={guides[area]!} /> : null;
+    const { app } = usePage<SharedProps>().props;
+    const item = destinationForPath(path, app.base_path);
+    return item ? <HelpLink slug={item.guide} /> : null;
 }

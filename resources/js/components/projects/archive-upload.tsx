@@ -1,5 +1,5 @@
 import { Form } from '@/components/ui/form';
-import { useForm } from "@inertiajs/react";
+import { Link, useForm } from "@inertiajs/react";
 import { FileArchive, GitBranch, ShieldCheck, UploadCloud } from "lucide-react";
 import { useRef, useState, type DragEvent, type FormEvent } from "react";
 import { Alert } from "@/components/ui/alert";
@@ -24,6 +24,7 @@ export function ArchiveUpload({ basePath, projectUuid, environments, available, 
     executionMode: string;
 }) {
     const [environmentUuid, setEnvironmentUuid] = useState(environments[0]?.uuid ?? "");
+    const [reviewing, setReviewing] = useState(false);
     const [dragging, setDragging] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const form = useForm<{ archive: File | null }>({ archive: null });
@@ -72,12 +73,15 @@ export function ArchiveUpload({ basePath, projectUuid, environments, available, 
             return;
         }
 
+        if (!reviewing) { setReviewing(true); return; }
+
         form.post(`${basePath}/projects/${projectUuid}/environments/${environmentUuid}/source-archives`, {
             forceFormData: true,
             preserveScroll: true,
-            onError: (errors) => notify.formErrors(errors),
+            onError: (errors) => { setReviewing(false); notify.formErrors(errors); },
             onSuccess: () => {
                 form.reset();
+                setReviewing(false);
                 if (inputRef.current) inputRef.current.value = "";
             },
         });
@@ -90,7 +94,7 @@ export function ArchiveUpload({ basePath, projectUuid, environments, available, 
                     <div>
                         <p className="text-xs font-semibold text-accent">منبع کد پروژه</p>
                         <h2 className="mt-1 text-xl font-semibold">استقرار از Git یا فایل ZIP</h2>
-                        <p className="mt-1 max-w-2xl text-sm leading-7 text-muted">برای این پروژه می‌توان منبع Git متصل کرد یا یک نسخه ثابت از کد را به‌صورت ZIP خصوصی فرستاد.</p>
+                        <p className="mt-1 max-w-2xl text-sm leading-7 text-muted">روش دریافت کد را بررسی کنید؛ برای فایل ZIP، مقصد و فایل را انتخاب و سپس درخواست را تأیید کنید.</p>
                     </div>
                     <Badge tone="info">آپلود خصوصی</Badge>
                 </div>
@@ -104,7 +108,7 @@ export function ArchiveUpload({ basePath, projectUuid, environments, available, 
                             <Badge>در حال ساخت</Badge>
                         </div>
                         <h3 className="mt-3 font-semibold">GitHub، GitLab و GitLab شخصی</h3>
-                        <p className="mt-1 text-sm leading-7 text-muted">از بخش «حساب‌های گیت» حساب را متصل و مخزن‌های مجاز را انتخاب کنید. اتصال مخزن به این پروژه هنوز از این فرم انجام نمی‌شود.</p>
+                        <p className="mt-1 text-sm leading-7 text-muted">اتصال حساب و انتخاب مخزن‌ها آماده است؛ اتصال منبع به این پروژه هنوز از این فرم انجام نمی‌شود.</p><Button asChild variant="secondary" className="mt-3"><Link href={`${basePath}/git`}>مدیریت حساب‌های گیت</Link></Button>
                     </div>
                     <div className="rounded-2xl border border-accent/35 bg-accent-soft/55 p-4 shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--color-accent)_8%,transparent)]">
                         <div className="flex items-center justify-between gap-3">
@@ -124,6 +128,8 @@ export function ArchiveUpload({ basePath, projectUuid, environments, available, 
                     <Alert tone="neutral">برای آپلود ZIP ابتدا باید حداقل یک environment واقعی برای پروژه ثبت شود.</Alert>
                 ) : (
                     <Form className="space-y-4" onSubmit={submit}>
+                        <ol className="grid grid-cols-2 gap-2 text-xs" aria-label="مراحل دریافت منبع"><li aria-current={!reviewing ? 'step' : undefined} className={`border-t-2 pt-3 ${!reviewing ? 'border-accent text-accent' : 'border-line text-muted'}`}>۱. انتخاب فایل و محیط</li><li aria-current={reviewing ? 'step' : undefined} className={`border-t-2 pt-3 ${reviewing ? 'border-accent text-accent' : 'border-line text-muted'}`}>۲. بررسی و ثبت درخواست</li></ol>
+                        <div hidden={reviewing} className="space-y-4">
                         <label className="block text-sm" htmlFor="archive-environment">
                             <span className="mb-1.5 block font-medium text-ink">محیط مقصد</span>
                             <select id="archive-environment" className="min-h-11 w-full rounded-xl border border-line bg-surface px-3.5 py-2 text-ink shadow-sm outline-none focus:border-accent focus:ring-4 focus:ring-accent/10" value={environmentUuid} onChange={(event) => setEnvironmentUuid(event.target.value)}>
@@ -147,6 +153,8 @@ export function ArchiveUpload({ basePath, projectUuid, environments, available, 
                             <span className="mt-1 block text-sm text-muted">{form.data.archive ? formatBytes(form.data.archive.size) : `حداکثر ${formatBytes(maxBytes)}؛ فقط یک فایل ZIP`}</span>
                         </label>
 
+                        </div>
+                        {reviewing && form.data.archive ? <div className="rounded-xl border border-line bg-surface-muted p-4"><h3 className="font-semibold">بررسی درخواست</h3><dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2"><div><dt className="text-muted">فایل</dt><dd className="break-all">{form.data.archive.name}</dd></div><div><dt className="text-muted">اندازه</dt><dd>{formatBytes(form.data.archive.size)}</dd></div><div><dt className="text-muted">محیط مقصد</dt><dd>{environments.find(environment => environment.uuid === environmentUuid)?.name}</dd></div></dl><p className="mt-4 text-xs leading-7 text-muted">فایل پس از ارسال بررسی می‌شود. ثبت درخواست به معنی اجرای موفق یا فعال‌شدن نسخه نیست.</p><Button className="mt-3" variant="secondary" disabled={form.processing} onClick={() => setReviewing(false)}>ویرایش انتخاب‌ها</Button></div> : null}
                         {form.errors.archive ? <p className="text-sm text-danger" role="alert">{form.errors.archive}</p> : null}
                         {form.progress ? (
                             <div className="space-y-1.5" role="status" aria-live="polite">
@@ -157,7 +165,7 @@ export function ArchiveUpload({ basePath, projectUuid, environments, available, 
 
                         <div className="flex flex-col gap-3 rounded-2xl border border-line bg-surface-muted/55 p-3 text-xs leading-6 text-muted sm:flex-row sm:items-center sm:justify-between">
                             <span className="flex items-start gap-2"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-success" aria-hidden="true" />مسیرهای خروجی، symlink، فایل رمز‌شده، تعداد ورودی و بمب فشرده‌سازی پیش از ذخیره رد می‌شوند.</span>
-                            <Button type="submit" loading={form.processing} loadingLabel="در حال آپلود" disabled={!form.data.archive}>آپلود و ثبت استقرار دستی</Button>
+                            <Button type="submit" loading={form.processing} loadingLabel="در حال آپلود" disabled={!form.data.archive}>{reviewing ? "تأیید، آپلود و ثبت درخواست" : "بررسی و ادامه"}</Button>
                         </div>
                     </Form>
                 )}

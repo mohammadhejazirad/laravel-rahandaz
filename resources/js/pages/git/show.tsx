@@ -66,7 +66,7 @@ export default function GitShow({
     return (
         <AppLayout
             title="مخزن‌ها و دسترسی حساب"
-            description="انتخاب مخزن‌های قابل استفاده در پنل و مشاهدهٔ تاریخچهٔ مرحله‌به‌مرحله."
+            description="مخزن‌های موردنیاز را پیدا کنید، دسترسی‌ها را ذخیره و اتصال را تست کنید."
         >
             <Head title={`حساب ${connection.account_label}`} />
             <Link className="text-sm text-accent" href={`${base}/git`}>

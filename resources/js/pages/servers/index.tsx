@@ -21,8 +21,8 @@ export default function ServersIndex({ hosts }: { hosts: { data: HostRow[]; meta
     const base = usePage<SharedProps>().props.app.base_path;
 
     return (
-        <AppLayout title="سرورها" description="موجودی میزبان‌های قابل مشاهده در این فضای کاری؛ نسخه اول تنها میزبان محلی را پشتیبانی می‌کند.">
-            <Head title="سرورها" />
+        <AppLayout title="میزبان محلی" description="مشخصات و آخرین وضعیت ثبت‌شدهٔ همان سروری که راه‌انداز روی آن نصب است.">
+            <Head title="میزبان محلی" />
             <Alert tone="info">نسخه اول فقط میزبان محلی همین نصب را می‌شناسد. افزودن سرور راه‌دور در این نسخه انجام نمی‌شود.</Alert>
             {hosts.data.length === 0 ? (
                 <EmptyState title="میزبانی ثبت نشده است">راه‌اندازی فقط خواندنی است و از این صفحه میزبان ساخته نمی‌شود.</EmptyState>
