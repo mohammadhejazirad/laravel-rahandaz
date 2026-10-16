@@ -12,10 +12,8 @@ services:
       POSTGRES_PASSWORD: replace-local-only
       POSTGRES_DB: rahandaz
     ports:
-      # 127.0.0.1 serves host-native PHP. 192.0.2.1 is lerd0, the only
-      # address the Lerd/Podman PHP container can use to reach the host.
+      # PHP runs on the host; publish development services on loopback only.
       - "127.0.0.1:5432:5432"
-      - "192.0.2.1:5432:5432"
     volumes:
       - rahandaz-pg:/var/lib/postgresql/data
       - ./infrastructure/docker/postgres-init:/docker-entrypoint-initdb.d:ro
@@ -40,7 +38,6 @@ services:
       - noeviction
     ports:
       - "127.0.0.1:6379:6379"
-      - "192.0.2.1:6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -61,7 +58,6 @@ services:
       - allkeys-lru
     ports:
       - "127.0.0.1:6380:6379"
-      - "192.0.2.1:6380:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
