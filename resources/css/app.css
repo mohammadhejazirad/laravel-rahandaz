@@ -314,3 +314,11 @@
     .page-content :where(section[data-slot='card']) > dl > div { border-radius: .75rem; background: var(--color-surface-muted); padding: .875rem; }
     @media (min-width: 768px) { .resource-table table { table-layout: fixed; } }
 }
+
+/* Preserve usable controls around notches in installed and browser modes. */
+body {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+}

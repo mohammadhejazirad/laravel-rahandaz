@@ -344,3 +344,10 @@ ADR-0006 و SSH_ACCESS_POLICY تصمیم مالک را ثبت کردند: رمز
 قالب account-scoped candidate اضافه شد؛ فایل کلید root-managed و روش publickey، بدون منابع خارجی AuthorizedKeysCommand/CA. قالب عمداً روی میزبان فعال نمی‌شود. hardening sandbox اکنون AuthenticationMethods publickey صریح دارد. هیچ مسیر وب/اسکریپت live برای خاموش‌کردن ناگهانی SSH فعال نشد و موتور disabled باقی ماند.
 
 در هر سه Ubuntu کانتینری، پنج security contract و دو آزمون واقعی parser OpenSSH/config مؤثر موفق شدند؛ عملیات harness میزبان نیز موفق بود. Include ابتدا/انتها، حفظ policy root/حساب دیگر برای candidate، و config hardening تولیدشده sandbox آزموده شدند. YAML/syntax/diff-check موفق. UI/PHP تغییر نکرد. endpoint/صفحه enrollment، رسید اتصال واقعی، helper live و آزمون SSH/systemd/recovery در VM هنوز کامل نیستند؛ این برش اجرای کامل مدیریت SSH از پنل یا hardening عملیاتی را ادعا نمی‌کند.
+## 2026-10-17 — نصب اختیاری پنل به‌صورت PWA
+
+Manifest عمومی با scope مسیر پنل، آیکون‌های مشتق از برند رسمی، متادیتای iOS، Service Worker و کنترل مشترک نصب/راهنما در ورود و پنل اضافه شدند؛ پکیج تازه‌ای نصب نشد. راهنمای فارسی RTL در موبایل کوتاه اسکرول‌پذیر است. ثبت Worker فقط در build تولید و secure context انجام می‌شود. مسیر نصب و محدودیت مرورگرها در `docs/PWA.md` ثبت است.
+
+کش Worker فقط شامل صفحه آفلاین عمومی و نشان رسمی است؛ صفحات خصوصی، Inertia، API و عملیات مدیریتی cache/replay نمی‌شوند. پاسخ HTML/Inertia/احراز هویت‌شده no-store است. نسخه تازه بدون reload فرم باز منتظر تأیید کاربر می‌ماند؛ این قابلیت عملیات به‌روزرسانی سرور را فعال نمی‌کند.
+
+lint، TypeScript و production build موفق شدند. کل مجموعه PHP با PostgreSQL/Redis آزمایشی loopback: ۱۴۹ آزمون و ۳۶۰۳ assertion موفق؛ زیرمجموعه PWA/Brand: ۱۰ آزمون و ۴۹۷ assertion. Chrome واقعی headless نصب‌پذیری manifest، ثبت Worker، لغو prompt، عرض‌های ۳۲۰/۳۹۰/۷۶۸/۱۴۴۰، حفظ فرم هنگام update، تأیید reload، کش عمومی و قطع واقعی origin را آزمود و موفق بود؛ screenshot موبایل نیز بررسی شد. PHP محیط 8.5.11 است و گواهی runtime هدف 8.4 محسوب نمی‌شود. نصب روی دستگاه فیزیکی iOS/Android/macOS/Windows و HTTPS دامنه نهایی هنوز اجرا نشده است. Installer/میزبان تغییر نکردند و Matrix Ubuntu در این برش دوباره اجرا نشد.

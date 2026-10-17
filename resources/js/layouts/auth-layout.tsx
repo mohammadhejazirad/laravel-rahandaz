@@ -4,6 +4,8 @@ import { AppLogo } from "@/components/branding/app-logo";
 import { FlashToaster } from "@/components/flash-toaster";
 import { ThemeToggle } from "@/components/theme-toggle";
 
+import { PwaControls } from "@/components/pwa/pwa-controls";
+
 export function AuthLayout({ title, children }: { title: string; children: ReactNode }) {
     return (
         <main className="relative flex min-h-dvh w-full items-center justify-center overflow-hidden px-4 py-8 sm:px-6">
@@ -30,6 +32,7 @@ export function AuthLayout({ title, children }: { title: string; children: React
                     <div className="mx-auto max-w-md">
                         <p className="text-xs font-semibold text-accent">دسترسی امن</p>
                         <h1 className="mt-1 text-2xl font-bold sm:text-3xl">{title}</h1>
+                        <PwaControls />
                         <div className="mt-7">{children}</div>
                     </div>
                 </section>

@@ -14,6 +14,8 @@ final class ContentSecurityPolicy
             "style-src 'self' 'unsafe-inline'",
             "script-src 'self'",
             "font-src 'self'",
+            "worker-src 'self'",
+            "manifest-src 'self'",
             "object-src 'none'",
             "base-uri 'self'",
             "frame-ancestors 'none'",

@@ -75,7 +75,7 @@
 | `public/og-image.png` | تصویر اشتراک‌گذاری ۱۲۰۰×۶۳۰ |
 | `assets/branding/og-image.svg` | منبع قابل ویرایش تصویر Open Graph |
 
-پروژه PWA نیست؛ بنابراین manifest، service worker و iconهای ۱۹۲/۵۱۲ فقط برای پر کردن فهرست فایل‌ها اضافه نشده‌اند.
+با درخواست مالک در 2026-10-17 قابلیت PWA اضافه شد. آیکون‌های معمولی ۱۹۲/۵۱۲ و maskable ۵۱۲ در `public/branding/pwa` مستقیماً از نشان رسمی مشتق شده‌اند؛ زمینه maskable رنگ رسمی برند و نشان داخل safe zone است. manifest/Worker و محدودیت آفلاین در `docs/PWA.md` مستند شده‌اند.
 
 ## استفاده در React
 

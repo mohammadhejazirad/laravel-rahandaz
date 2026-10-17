@@ -2,7 +2,13 @@
 <html lang="fa" dir="rtl" data-theme-source="{{ auth()->check() ? 'user' : 'guest' }}" data-theme-preference="{{ auth()->user()?->theme?->value ?? 'system' }}">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+        <link rel="manifest" href="{{ route('pwa.manifest', [], false) }}">
+        <meta name="rahandaz-pwa-scope" content="{{ rtrim(config('rahandaz.base_path'), '/') }}/">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-title" content="راه‌انداز">
+        <meta name="apple-mobile-web-app-status-bar-style" content="default">
+        <meta name="mobile-web-app-capable" content="yes">
         <meta name="application-name" content="راه‌انداز">
         <meta name="description" content="راه‌انداز؛ پنل مدیریت فارسی و خودمیزبان برای همان سرور Ubuntu.">
         <meta name="color-scheme" content="light dark">

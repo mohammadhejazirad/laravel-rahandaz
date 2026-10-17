@@ -3,6 +3,8 @@ import { createRoot } from "react-dom/client";
 import { StrictMode } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
+import { PwaProvider } from "@/components/pwa/pwa-provider";
+
 const pages = import.meta.glob("./pages/**/*.tsx");
 
 createInertiaApp({
@@ -22,7 +24,7 @@ createInertiaApp({
         createRoot(el).render(
             <StrictMode>
                 <TooltipProvider>
-                    <App {...props} />
+                    <PwaProvider><App {...props} /></PwaProvider>
                 </TooltipProvider>
             </StrictMode>,
         );

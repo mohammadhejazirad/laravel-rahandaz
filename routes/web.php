@@ -16,6 +16,7 @@ use App\Http\Controllers\MonitoringController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProjectArchiveController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\PwaController;
 use App\Http\Controllers\ServerController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SetupController;
@@ -32,6 +33,9 @@ Route::get('/', function () {
 });
 
 Route::prefix(trim((string) config('rahandaz.base_path'), '/'))->group(function () {
+    Route::get('/manifest.webmanifest', [PwaController::class, 'manifest'])->name('pwa.manifest');
+    Route::get('/service-worker.js', [PwaController::class, 'worker'])->name('pwa.worker');
+
     Route::get('/', fn () => redirect()->route('dashboard'))->name('home');
 
     Route::middleware('guest')->group(function () {

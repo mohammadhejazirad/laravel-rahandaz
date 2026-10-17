@@ -47,3 +47,7 @@ Primitiveهای Radix به‌صورت بسته‌های مستقل Avatar، Dial
 ## بازچینی سراسری — ۲۰۲۶-۱۰-۱۶
 
 وابستگی تازه نصب نشد. QuickNavigation با Input/Modal موجود، metadata تایپ‌شده و لینک استاندارد کار می‌کند؛ کتابخانهٔ command palette اضافه نشد. PageSections از hash/hidden با حفظ mount فرم، ActionPanel از details و خطاهای Inertia، و TableFrame از cloneElement محدود برای برچسب‌گذاری ردیف موجود استفاده می‌کنند. جدول دو نسخهٔ desktop/mobile ندارد. React، TypeScript strict، Radix، Lucide و formatter جلالی موجود حفظ شدند. اندازه‌ها و محدودیت measurement در PERFORMANCE.md هستند.
+
+## PWA — ۲۰۲۶-۱۰-۱۷
+
+پکیج تازه نصب نشد. Web App Manifest و Service Worker کوچک با Web API بومی، PwaProvider تایپ‌شده، Button/Modal مشترک و Lucide موجود استفاده شدند. Workbox/vite-plugin-pwa اضافه نشدند چون precache باندل‌ها یا cache صفحات خصوصی برای این پنل مطلوب نیست؛ فقط دو فایل عمومی آفلاین cache می‌شوند. تولید PNG رسمی با ImageMagick ابزار توسعه است، نه وابستگی runtime/build روی VPS. پذیرش نصب مرورگر و محدودیت دستگاه واقعی در PWA.md ثبت شده است.

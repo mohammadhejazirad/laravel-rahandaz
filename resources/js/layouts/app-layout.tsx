@@ -42,6 +42,8 @@ import { cn } from "@/lib/cn";
 import { notify } from "@/lib/notify";
 import type { AuthUser, SharedProps } from "@/types";
 
+import { PwaControls } from "@/components/pwa/pwa-controls";
+
 interface AppLayoutProps {
     title: string;
     description?: string;
@@ -186,6 +188,7 @@ export function AppLayout({
                             </div>
                             <div className="flex flex-wrap items-center gap-3"><ContextualHelp path={path} /><span className="rounded-lg border border-line bg-surface px-3 py-2 text-xs text-muted">میزبان همین نصب</span></div>
                         </header>
+                        <PwaControls />
                         <div className="page-content space-y-5">
                             <SectionNavigation path={path} base={base} canManage={canAudit} />
                             {page.props.execution.mode === "disabled" ? (
