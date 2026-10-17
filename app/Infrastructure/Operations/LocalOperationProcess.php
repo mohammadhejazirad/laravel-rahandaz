@@ -42,8 +42,8 @@ final class LocalOperationProcess
         $this->guard->assert($input);
         $binary = $this->catalog->root().'/bin/rahandaz-ops';
 
-        if (! is_file($binary) || is_link($binary)) {
-            throw new OperationRejected('TOOL_MISSING', 'Operations dispatcher is not a regular file.');
+        if (! is_file($binary) || is_link($binary) || ! is_executable($binary)) {
+            throw new OperationRejected('TOOL_MISSING', 'Operations dispatcher is not an executable regular file.');
         }
 
         $process = new Process(

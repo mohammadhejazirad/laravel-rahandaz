@@ -97,6 +97,7 @@ jobs:
           npm run lint
           npm run typecheck
           npm run build
+          cp .env.example .env
           php artisan test --compact
           node --experimental-strip-types --test tests/js/datetime.test.ts
           bash installer/tests/run.sh

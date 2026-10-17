@@ -64,7 +64,9 @@ jobs:
       - name: Check the declared platform
         run: composer check-platform-reqs --no-interaction
       - name: Run all PHP tests against isolated PostgreSQL and Redis
-        run: php artisan test
+        run: |
+          cp .env.example .env
+          php artisan test
       - uses: actions/setup-node@v4
         with:
           node-version: "22"

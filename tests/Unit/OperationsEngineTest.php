@@ -9,6 +9,7 @@ use App\Infrastructure\Operations\HostExecutionDenied;
 use App\Infrastructure\Operations\LocalOperationProcess;
 use App\Infrastructure\Operations\OperationCatalog;
 use App\Infrastructure\Operations\OperationDispatcher;
+use App\Infrastructure\Operations\OperationInputGuard;
 use App\Infrastructure\Operations\OperationRejected;
 use App\Infrastructure\Operations\OperationResultParser;
 use Tests\TestCase;
@@ -118,6 +119,42 @@ class OperationsEngineTest extends TestCase
         $this->assertFalse($result->mutated);
         $this->assertNull($result->errorCode);
         $this->assertFalse(app(ExecutionGate::class)->allowsHostMutation());
+    }
+
+    public function test_process_rejects_a_non_executable_dispatcher_before_parsing_output(): void
+    {
+        $directory = sys_get_temp_dir().'/rh-executable-'.bin2hex(random_bytes(4));
+        mkdir($directory.'/bin', 0700, true);
+        mkdir($directory.'/contracts', 0700);
+        $binary = $directory.'/bin/rahandaz-ops';
+        $registry = $directory.'/contracts/registry.json';
+        file_put_contents($binary, "#!/usr/bin/env bash\nexit 99\n");
+        chmod($binary, 0600);
+        file_put_contents($registry, json_encode([
+            'schema_version' => '1.0',
+            'operations' => [[
+                'name' => 'host.facts', 'version' => '1', 'privilege' => 'read',
+                'timeout_seconds' => 30, 'mutating' => false,
+                'idempotency' => 'read', 'script' => 'bin/rahandaz-ops',
+            ]],
+        ], JSON_THROW_ON_ERROR));
+
+        try {
+            $process = new LocalOperationProcess(
+                new OperationCatalog($registry),
+                app(OperationInputGuard::class),
+                app(OperationResultParser::class),
+            );
+            $this->expectException(OperationRejected::class);
+            $this->expectExceptionMessage('Operations dispatcher is not an executable regular file.');
+            $process->run('host.facts', ['execution_id' => self::EXECUTION_ID]);
+        } finally {
+            unlink($binary);
+            unlink($registry);
+            rmdir($directory.'/bin');
+            rmdir($directory.'/contracts');
+            rmdir($directory);
+        }
     }
 
     public function test_process_rejects_an_environment_key_outside_the_allowlist(): void
