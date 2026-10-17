@@ -40,3 +40,14 @@ bash installer/tests/container-plan.sh
 ```
 
 جزئیات در `docs/INSTALLER_ARCHITECTURE.md`، `docs/INSTALLER_SECURITY.md`، `docs/INSTALLER_RECOVERY.md` و `docs/INSTALLER_TEST_MATRIX.md` است. این README نصب production را تأیید نمی‌کند.
+
+## حساب‌ها و امنیت اولیه
+
+پس از prerequisites، اجرای تعاملی مرحله امنیت را پیشنهاد می‌کند؛ اجرای مستقل:
+
+```bash
+bash installer/bin/rahandaz-security --plan
+sudo bash installer/bin/rahandaz-security --apply
+```
+
+مدیر Ubuntu با نام `rahandaz` و sudo رمزدار از سرویس محدود `rahandaz-svc` جداست. PostgreSQL و Redisهای اختصاصی نام ثابت `rahandaz` و رمزهای مستقل تصادفی ۱۲ کاراکتری دارند. رمز موجود در rerun تغییر نمی‌کند؛ تحویل در فایل root-only و نمایش اختیاری مستقیم ترمینال انجام می‌شود. تنظیمات SSH تغییر نمی‌کنند. فعال‌سازی UFW تأیید جدا، timer بازگشت و اتصال SSH دوم دارد. دستورها و محدودیت‌های VM/rotation در [قرارداد امنیت bootstrap](../docs/INSTALLER_BOOTSTRAP_SECURITY.md) هستند؛ این مرحله به‌تنهایی نصب پنل نیست.

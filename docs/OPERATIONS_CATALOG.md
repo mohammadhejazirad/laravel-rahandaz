@@ -6,7 +6,7 @@
 
 | گروه | تعداد | نکته ایمنی |
 | --- | ---: | --- |
-| account | 4 | حساب `rahandaz` بدون sudo و با `nologin`. کاربر پروژه فقط `rhproj_` به‌علاوه ۶ تا ۱۶ نویسه کوچک یا رقم |
+| account | 4 | حساب سرویس `rahandaz-svc` بدون sudo و با `nologin`؛ شناسه عملیات قدیمی حفظ شده است. کاربر پروژه فقط `rhproj_` به‌علاوه ۶ تا ۱۶ نویسه کوچک یا رقم |
 | ssh | 5 | کلید خصوصی رد می‌شود. harden بدون recovery و اتصال دوم اعمال نمی‌شود. توقف sshd عملیات نیست |
 | package | 4 | کاتالوگ تولید `untested` است و apt را صدا نمی‌زند |
 | service | 10 | stop و disable و remove برای nginx، PostgreSQL، Redis، ssh و PHP-FPM و واحد `rahandaz*` رد می‌شود |

@@ -5,6 +5,7 @@ if [[ -n "${INSTALLER_LIB_ENGINE:-}" ]]; then
     return 0
 fi
 INSTALLER_LIB_ENGINE=1
+source "${INSTALLER_HOME}/lib/security.sh"
 
 installer_root_path() {
     local root
@@ -84,13 +85,13 @@ installer_apt_install() {
 
 stage_03_system_packages() {
     if [[ "$MODE" == "plan" ]]; then
-        installer_say "PLAN base packages: ca-certificates curl gnupg ubuntu-keyring git unzip tar openssl python3 acl"
+        installer_say "PLAN base packages: sudo ufw ca-certificates curl gnupg ubuntu-keyring git unzip tar openssl python3 acl"
         return 0
     fi
     if [[ "$(installer_sysroot)" == "/" && "${INSTALLER_OFFLINE:-}" != "1" ]]; then
         DEBIAN_FRONTEND=noninteractive apt-get update -o Acquire::Retries=3
     fi
-    installer_apt_install ca-certificates curl gnupg ubuntu-keyring git unzip tar openssl python3 acl
+    installer_apt_install sudo ufw ca-certificates curl gnupg ubuntu-keyring git unzip tar openssl python3 acl
 }
 
 stage_04_runtime_installation() {
@@ -112,35 +113,18 @@ stage_04_runtime_installation() {
 }
 
 stage_05_operational_account() {
-    local root passwd_file shell groups
-    root="$(installer_sysroot)"
-    if [[ "$MODE" == "plan" ]]; then
-        installer_say "PLAN account rahandaz: system user, nologin, password locked, no sudo."
+    if [[ "$MODE" == plan ]]; then
+        installer_say 'PLAN administrator rahandaz (SSH, password sudo); separate locked nologin service rahandaz-svc.'
         return 0
     fi
-    if [[ "$root" != "/" ]]; then
+    if [[ "$(installer_sysroot)" != / || "${INSTALLER_OFFLINE:-}" == 1 ]]; then
         mkdir -p "$(installer_root_path /var/lib/rahandaz)"
-        printf '%s\n' 'user=rahandaz shell=nologin locked=yes sudo=no password_file=no' >"$(installer_root_path /var/lib/rahandaz/account.contract)"
+        printf '%s\n' 'admin=rahandaz service=rahandaz-svc shell=nologin locked=yes sudo=no' >"$(installer_root_path /var/lib/rahandaz/account.contract)"
         return 2
     fi
-    if id rahandaz >/dev/null 2>&1; then
-        shell="$(getent passwd rahandaz | awk -F: '{ print $7 }')"
-        groups="$(id -nG rahandaz)"
-        [[ "$shell" == */nologin ]] || {
-            installer_error ACCOUNT_CONFLICT "The rahandaz account exists with a login shell."
-            return 1
-        }
-        case " $groups " in
-            *" sudo "* | *" adm "* | *" docker "*)
-                installer_error ACCOUNT_CONFLICT "The rahandaz account is in a privileged group."
-                return 1
-                ;;
-        esac
-        return 0
-    fi
-    useradd --system --create-home --home-dir /var/lib/rahandaz --shell /usr/sbin/nologin --user-group rahandaz
-    passwd -l rahandaz >/dev/null
-    return 0
+    security_accounts || return 1
+    security_credentials
+
 }
 
 installer_tar_members_safe() {
@@ -199,7 +183,7 @@ stage_06_application_release() {
 }
 
 stage_07_postgresql_setup() {
-    local root password_file
+    local root password_file role_exists database_exists
     root="$(installer_sysroot)"
     if [[ "$MODE" == "plan" ]]; then
         installer_say "PLAN create database rahandaz and role rahandaz if they are absent. An existing password is not rotated."
@@ -213,13 +197,25 @@ stage_07_postgresql_setup() {
         printf '%s\n' 'create_if_absent role=rahandaz database=rahandaz rotate_password=no' >"$plan"
         return 2
     fi
-    if ! runuser -u postgres -- psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='rahandaz'" | grep -q 1; then
-        installer_create_secret_once "$password_file" || return 1
+    security_lock || return 1
+    role_exists=$(runuser -u postgres -- psql -X -v ON_ERROR_STOP=1 -tAc "SELECT 1 FROM pg_roles WHERE rolname='rahandaz'") || return 1
+    if [[ "$role_exists" != 1 ]]; then
+        security_password_once "$password_file" || return 1
         local sql password
         sql="$(mktemp)"
         chmod 0600 "$sql"
-        password="$(tr -d '\n' <"$password_file")"
-        printf '%s\n' "CREATE ROLE rahandaz LOGIN PASSWORD '${password}';" >"$sql"
+        password="$(python3 - "$password_file" <<'PYHASH'
+import base64, hashlib, hmac, pathlib, secrets, sys
+password = pathlib.Path(sys.argv[1]).read_text().strip().encode()
+salt = secrets.token_bytes(16)
+salted = hashlib.pbkdf2_hmac('sha256', password, salt, 4096)
+client = hmac.digest(salted, b'Client Key', 'sha256')
+server = hmac.digest(salted, b'Server Key', 'sha256')
+b64 = lambda value: base64.b64encode(value).decode()
+print('SCRAM-SHA-256$4096:' + b64(salt) + '$' + b64(hashlib.sha256(client).digest()) + ':' + b64(server))
+PYHASH
+)"
+        printf '%s\n' "CREATE ROLE rahandaz LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION PASSWORD '${password}';" >"$sql"
         unset password
         chgrp postgres "$sql" 2>/dev/null || true
         chmod 0640 "$sql"
@@ -234,32 +230,33 @@ stage_07_postgresql_setup() {
         installer_error DATABASE_PASSWORD_UNKNOWN "The role exists and the saved password is missing. The installer will not rotate it."
         return 1
     fi
-    if ! runuser -u postgres -- psql -tAc "SELECT 1 FROM pg_database WHERE datname='rahandaz'" | grep -q 1; then
+    database_exists=$(runuser -u postgres -- psql -X -v ON_ERROR_STOP=1 -tAc "SELECT 1 FROM pg_database WHERE datname='rahandaz'") || return 1
+    if [[ "$database_exists" != 1 ]]; then
         runuser -u postgres -- psql -v ON_ERROR_STOP=1 -c 'CREATE DATABASE rahandaz OWNER rahandaz;' || {
             installer_error POSTGRES_START_FAILED "Creating the database failed."
             return 1
         }
         installer_state_set database_created yes
     fi
+    security_postgres_health || return 1
+    security_credentials
     return 0
 }
 
 stage_08_redis_setup() {
-    local root conf
-    root="$(installer_sysroot)"
-    if [[ "$MODE" == "plan" ]]; then
-        installer_say "PLAN Redis queue stays on 127.0.0.1:6379 and a separate cache instance listens on 127.0.0.1:6380."
+    if [[ "$MODE" == plan ]]; then
+        installer_say 'PLAN dedicated authenticated Redis queue 127.0.0.1:6381 and cache 127.0.0.1:6380; existing Redis unchanged.'
         return 0
     fi
-    conf="$(installer_root_path /etc/redis/redis-rahandaz-cache.conf)"
-    mkdir -p "$(installer_root_path /var/lib/redis-rahandaz-cache)" "$(dirname "$conf")"
-    installer_render_template "${INSTALLER_HOME}/templates/redis/rahandaz-cache.conf.tpl" "$conf" \
-        CACHE_PORT 6380 \
-        DATA_DIR /var/lib/redis-rahandaz-cache || return 1
-    if [[ "$root" != "/" || "${INSTALLER_OFFLINE:-}" == "1" ]]; then
+    if [[ "$(installer_sysroot)" != / || "${INSTALLER_OFFLINE:-}" == 1 ]]; then
         return 2
     fi
-    return 0
+    security_lock || return 1
+    security_redis_config queue 6381 || return 1
+    security_redis_config cache 6380 || return 1
+    security_redis_units || return 1
+    security_credentials
+
 }
 
 stage_09_laravel_configuration() {
@@ -298,10 +295,14 @@ QUEUE_CONNECTION=redis
 CACHE_STORE=redis
 REDIS_CLIENT=phpredis
 REDIS_QUEUE_HOST=127.0.0.1
-REDIS_QUEUE_PORT=6379
+REDIS_QUEUE_PORT=6381
+REDIS_QUEUE_USERNAME=rahandaz
+REDIS_QUEUE_PASSWORD=
 REDIS_QUEUE_DB=0
 REDIS_CACHE_HOST=127.0.0.1
 REDIS_CACHE_PORT=6380
+REDIS_CACHE_USERNAME=rahandaz
+REDIS_CACHE_PASSWORD=
 REDIS_CACHE_DB=0
 RAHANDAZ_EXECUTION_MODE=disabled
 RAHANDAZ_BASE_PATH=/rahandaz
@@ -326,6 +327,23 @@ for line in env.read_text().splitlines():
 env.write_text("\n".join(lines) + "\n")
 PY
         chmod 0600 "$envfile"
+    fi
+    if [[ "$root" == / && "${INSTALLER_OFFLINE:-}" != 1 ]]; then
+        python3 - "$envfile" <<'PYREDIS' || return 1
+import pathlib, sys
+p = pathlib.Path(sys.argv[1])
+text = p.read_text()
+for kind in ('QUEUE', 'CACHE'):
+    key = 'REDIS_' + kind + '_PASSWORD='
+    value = pathlib.Path('/etc/rahandaz/redis-' + kind.lower() + '.password').read_text().strip()
+    lines = text.splitlines()
+    if key + value in lines:
+        continue
+    if key not in lines:
+        raise SystemExit('REDIS_ENV_CONFLICT: explicit migration required')
+    text = text.replace(key + '\n', key + value + '\n')
+p.write_text(text)
+PYREDIS
     fi
     installer_create_secret_once "$keyfile" || return 1
     if [[ "$root" != "/" || "${INSTALLER_OFFLINE:-}" == "1" ]]; then
@@ -430,9 +448,9 @@ stage_12_systemd_services() {
         RELEASE "$release" PHP_BIN "$php_bin" DATA_ROOT /var/lib/rahandaz || return 1
     installer_render_template "${INSTALLER_HOME}/templates/systemd/rahandaz-scheduler.timer.tpl" \
         "$(installer_root_path /etc/systemd/system/rahandaz-scheduler.timer)" || return 1
-    installer_render_template "${INSTALLER_HOME}/templates/systemd/redis-rahandaz-cache.service.tpl" \
-        "$(installer_root_path /etc/systemd/system/redis-rahandaz-cache.service)" \
-        CONFIG /etc/redis/redis-rahandaz-cache.conf || return 1
+    if [[ "$(installer_sysroot)" == / && "${INSTALLER_OFFLINE:-}" != 1 ]]; then
+        security_redis_units || return 1
+    fi
     lib_dest="$(installer_root_path /usr/local/lib/rahandaz)"
     mkdir -p "$lib_dest"
     for item in bin lib templates trust release VERSION; do
@@ -455,7 +473,8 @@ EOF
         return 2
     fi
     systemctl daemon-reload
-    systemctl enable --now redis-rahandaz-cache.service rahandaz-php-fpm.service rahandaz-queue.service rahandaz-scheduler.timer || {
+    security_runtime_permissions || return 1
+    systemctl enable --now redis-rahandaz-queue.service redis-rahandaz-cache.service rahandaz-php-fpm.service rahandaz-queue.service rahandaz-scheduler.timer || {
         installer_error STAGE_FAILED "A Rahandaz unit did not become active."
         return 1
     }
@@ -555,6 +574,8 @@ stage_15_installation_summary() {
     installer_say "PANEL ${PUBLIC_URL}/rahandaz/login"
     installer_say "NEXT create or use the owner, then open the panel. Doctor: rahandaz-install --doctor"
     installer_say "CREDENTIALS /root/rahandaz-initial-credentials.txt is mode 0600 and is not printed again."
+    installer_say 'SYSTEM_CREDENTIALS /root/rahandaz-system-credentials.txt (root only). Reveal locally: sudo bash /usr/local/lib/rahandaz/bin/rahandaz-security --show-credentials'
+    installer_say 'FIREWALL review separately with /usr/local/lib/rahandaz/bin/rahandaz-firewall --plan; activation requires a second SSH session.'
     if [[ "$failed" -eq 0 && "$incomplete" -eq 0 && "$MODE" != "plan" ]]; then
         installer_say "RESULT success"
         INSTALLER_RESULT="success"

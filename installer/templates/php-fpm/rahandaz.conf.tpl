@@ -1,6 +1,6 @@
 [rahandaz]
-user = rahandaz
-group = rahandaz
+user = rahandaz-svc
+group = rahandaz-svc
 listen = @@FPM_SOCK@@
 listen.owner = www-data
 listen.group = www-data

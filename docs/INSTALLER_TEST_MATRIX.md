@@ -103,3 +103,19 @@ IranServer در شبکهٔ بررسی به معنی حذف دائمی آن نی�
 کد مخزن خارجی اجرا نشد، هیچ بسته‌ای روی میزبان نصب نشد و نصب بسته‌ها در این برش تکرار نشد.
 Matrix VM/systemd/reboot و شبکهٔ محدود VPS ایران برای هر سه همچنان **not_run / requires_vm** است.
 26.04 همچنان آزمایشی و غیرپیشنهادی است. این بررسی benchmark عمومی Mirrorها یا گواهی Production نیست.
+
+## Bootstrap امنیتی — 2026-10-17
+
+قرارداد و محدودیت‌ها: [INSTALLER_BOOTSTRAP_SECURITY.md](INSTALLER_BOOTSTRAP_SECURITY.md)، تصمیم ADR-0005.
+
+- Ubuntu 22.04: `test-security.sh 22.04 --live` خروج ۰؛ شاهد `tests/infrastructure/ubuntu-lab/reports/security-22.04-20261017T092036Z/`.
+- Ubuntu 24.04: `test-security.sh 24.04 --live` خروج ۰؛ شاهد `tests/infrastructure/ubuntu-lab/reports/security-24.04-20261017T092037Z/`.
+- Ubuntu 26.04: `test-security.sh 26.04 --live` خروج ۰؛ شاهد `tests/infrastructure/ubuntu-lab/reports/security-26.04-20261017T092039Z/`؛ همچنان آزمایشی/غیرپیشنهادی.
+
+این اجراها داخل کانتینر disposable بدون privilege/host namespace/socket بودند؛ بسته‌های واقعی sudo، PostgreSQL و Redis از APT امضاشده نصب شدند. ایجاد واقعی حساب‌ها، hash رمز Ubuntu، policy صریح PASSWD و visudo، locked/nologin بودن سرویس، حفظ رمز در rerun و پس از تغییر دستی، بازیابی checkpoint ناتمام حساب، اتصال واقعی PostgreSQL با SCRAM، محدودیت role/مالکیت DB، رد Redis بدون AUTH، AUTH/PING هر دو instance، حفظ رمز/config در rerun، رد تصاحب حساب خارجی، credential bundle با 0600 و دسترسی واقعی سرویس/Nginx به فایل‌ها بررسی شدند. افشای `.env` به Nginx و نوشتن کد توسط سرویس رد شد.
+
+دو اجرای اولیهٔ 22.04/26.04 به دلیل قفل reentrant شکست خوردند؛ اصلاح قفل و اجرای مجدد موفق ثبت شده است. گزارش شکست‌ها حفظ شده و passed محسوب نمی‌شوند.
+
+روی میزبان: security contracts پنج آزمون موفق، prerequisites چهل آزمون موفق، installer هفتادودو/۰ (updater بیست‌ویک/۰ زیرمجموعه)، release بیست‌وشش/۰ و operations suite موفق. syntax اسکریپت‌ها، YAML workflowها و diff-check بررسی شدند. CI روی GitHub در این جلسه اجرا نشده است.
+
+**not_run / requires_vm:** systemd startup واقعی، SSH login/اتصال دوم، sudo از session واقعی با PAM، UFW IPv4/IPv6 و timer rollback هنگام قطع اتصال، reboot، نصب کامل signed artifact و health پنل. در کانتینر Redis بدون systemd و PostgreSQL با pg_ctlcluster اجرا شد؛ این نتایج certification میزبان یا Production نیستند. تغییر رمز دیتابیس/Redis از رابط پنل هنوز پیاده نشده است.

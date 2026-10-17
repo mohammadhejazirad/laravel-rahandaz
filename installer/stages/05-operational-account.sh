@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Stable id: 05-operational-account
-# Preconditions: The rahandaz account is nologin, locked, and not in sudo.
+# Preconditions: Administrator rahandaz is separate from locked/nologin rahandaz-svc.
 # Error codes: ACCOUNT_CONFLICT
 # Retry: a failed stage is retried by --resume. A succeeded stage is skipped.
 # Recovery: keep the state directory, fix the reported code, then resume.

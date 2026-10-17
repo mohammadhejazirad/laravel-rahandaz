@@ -32,7 +32,7 @@
 | `02-repository-setup` | انتخاب mirror امضاشده یا نگه‌داشتن منبع رسمی |
 | `03-system-packages` | بسته‌های پایه allowlist |
 | `04-runtime-installation` | PostgreSQL، Redis، Nginx، PHP-FPM و extensionها. Node.js نصب نمی‌شود |
-| `05-operational-account` | کاربر سیستمی `rahandaz` با `nologin` و بدون sudo |
+| `05-operational-account` | مدیر `rahandaz` با sudo رمزدار و سرویس جدا `rahandaz-svc` locked/nologin |
 | `06-application-release` | استخراج artifact امضاشده زیر `releases/<version>` |
 | `07-postgresql-setup` | نقش و پایگاه `rahandaz` فقط اگر نباشند |
 | `08-redis-setup` | قالب cache روی `127.0.0.1:6380` |

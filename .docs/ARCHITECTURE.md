@@ -37,7 +37,7 @@ flowchart LR
 
 ## هویت‌ها و مجوزها
 
-- حساب سیستم `rahandaz` ثابت، بدون sudo/docker، با shell non-login و password locked است؛ هماهنگ‌کننده resourceهای محدود به نصب راه‌انداز، **نه root**. installer در اولین نصب برای packageها به root نیاز دارد؛ عملیات privileged بعدی فقط helper allowlisted.
+- حساب مدیر `rahandaz` با SSH و sudo رمزدار از حساب سرویس `rahandaz-svc` locked/nologin و بدون sudo/docker جدا است. installer در اولین نصب برای packageها به root نیاز دارد؛ عملیات privileged بعدی فقط helper allowlisted.
 - PHP-FPM و workerها با هویت‌های service محدود `rahandaz-web` و `rahandaz-worker` اجرا می‌شوند. UIDهای جدا برای هر environment کاربر (`rhproj_<shortid>`) تعریف می‌شوند؛ کد Git repo هرگز با هویت web/worker یا secret control plane اجرا نشود.
 - ایزولاسیون Unix user + filesystem ACL + systemd cgroup بدون Docker است؛ جایگزین security isolation یک VM در برابر tenant خصمانه نیست. پروژه‌ها متعلق به مالک/تیم مورد اعتماد فرض می‌شوند.
 - `APP_KEY` Laravel و `RAHANDAZ_MASTER_KEY` دو secret مستقل با backup/rotation مشخص‌اند؛ PostgreSQL محل ciphertext و state است، نه جای امن کلید اصلی. همه requestهای عملیاتی resource scope/Policy دارند.

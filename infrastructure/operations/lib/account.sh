@@ -6,7 +6,7 @@ ops_account_plan() {
 
 ops_account_create_rahandaz() {
     local plan
-    plan="$(ops_account_plan create rahandaz)"
+    plan="$(ops_account_plan create rahandaz-svc)"
     if ! ops_wants_apply; then
         ops_preview "$plan"
     fi
@@ -22,19 +22,19 @@ ops_account_create_rahandaz() {
     mkdir -p "$OPS_SANDBOX/root" "$home"
     chmod 0700 "$OPS_SANDBOX/root"
     if [[ -f "$OPS_SANDBOX/var/lib/rahandaz/account.stamp" && ! -L "$OPS_SANDBOX/var/lib/rahandaz/account.stamp" ]]; then
-        ops_succeed "$plan" '{"account":"rahandaz","login":"locked","sudo":false,"idempotent":true}' false
+        ops_succeed "$plan" '{"account":"rahandaz-svc","login":"locked","sudo":false,"idempotent":true}' false
     fi
-    ops_exec useradd --create-home --home-dir "$home" --shell /usr/sbin/nologin --user-group --comment "Rahandaz orchestration" rahandaz
+    ops_exec useradd --create-home --home-dir "$home" --shell /usr/sbin/nologin --user-group --comment "Rahandaz orchestration" rahandaz-svc
     ops_py_value password-file "$secret" >/dev/null
-    ops_exec passwd --lock rahandaz >/dev/null
+    ops_exec passwd --lock rahandaz-svc >/dev/null
     printf '%s\n' 'created' >"$OPS_SANDBOX/var/lib/rahandaz/account.stamp"
     chmod 0600 "$OPS_SANDBOX/var/lib/rahandaz/account.stamp"
-    ops_succeed "$plan" '{"account":"rahandaz","login":"locked","sudo":false}' true
+    ops_succeed "$plan" '{"account":"rahandaz-svc","login":"locked","sudo":false}' true
 }
 
 ops_account_verify_rahandaz() {
     local plan
-    plan="$(ops_account_plan verify rahandaz)"
+    plan="$(ops_account_plan verify rahandaz-svc)"
     if ! ops_wants_apply; then
         ops_preview "$plan" '{"compatibility":"untested"}'
     fi
@@ -42,12 +42,12 @@ ops_account_verify_rahandaz() {
     if [[ ! -f "$OPS_SANDBOX/var/lib/rahandaz/account.stamp" ]]; then
         ops_fail VERIFICATION_FAILED "The rahandaz account stamp was not observed."
     fi
-    ops_succeed "$plan" '{"account":"rahandaz","observed":true}' false
+    ops_succeed "$plan" '{"account":"rahandaz-svc","observed":true}' false
 }
 
 ops_account_rotate_password() {
     local plan secret
-    plan="$(ops_account_plan rotate rahandaz)"
+    plan="$(ops_account_plan rotate rahandaz-svc)"
     if ! ops_wants_apply; then
         ops_preview "$plan"
     fi
@@ -57,8 +57,8 @@ ops_account_rotate_password() {
     mkdir -p "$OPS_SANDBOX/root"
     chmod 0700 "$OPS_SANDBOX/root"
     ops_py_value password-file "$secret" >/dev/null
-    ops_exec passwd --lock rahandaz >/dev/null
-    ops_succeed "$plan" '{"account":"rahandaz","login":"locked"}' true
+    ops_exec passwd --lock rahandaz-svc >/dev/null
+    ops_succeed "$plan" '{"account":"rahandaz-svc","login":"locked"}' true
 }
 
 ops_account_create_project() {

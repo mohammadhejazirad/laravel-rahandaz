@@ -46,3 +46,7 @@ bootstrap GitHub فقط پس از امضای manifest، pin نسخه/نام، ch
 اگر نقش PostgreSQL از قبل باشد و هم فایل گذرواژه و هم `.env` غایب باشند، نصب‌کننده رمز را نمی‌چرخاند و `DATABASE_PASSWORD_UNKNOWN` می‌دهد. migration روی پایگاهی که همین نصب نساخته، بدون `--approve-migrations` کد `MIGRATION_REFUSED` است. upgrade هم بدون همین پرچم migration را رد می‌کند. repair پایگاه را حذف نمی‌کند.
 
 سرویس موجود nginx، postgresql، redis-server، php-fpm و php-cli در حالت apply بدون `--acknowledge-existing` کد `EXISTING_SERVICE` می‌دهد. حالت plan تعارض را چاپ می‌کند و ادامه می‌دهد. سایت پیش‌فرض Nginx حذف نمی‌شود. نصب‌کننده `sshd` را متوقف نمی‌کند و قانون sudo عمومی نمی‌سازد.
+
+## بازنگری حساب‌ها (ADR-0005)
+
+به درخواست مالک، `rahandaz` مدیر انسانی Ubuntu با sudo رمزدار است؛ پنل فقط با `rahandaz-svc` locked/nologin اجرا می‌شود. هیچ NOPASSWD ایجاد نمی‌شود. حساب قدیمی به مدیر ارتقا نمی‌یابد. PostgreSQL و Redis اختصاصی credential مستقل با نام ثابت دارند. تحویل مستقیم TTY فقط پس از درخواست اپراتور، خارج از stdout/log، و فایل root-only مجاز است. جزئیات permission، resume، سیاست UFW، اتصال دوم، محدودیت migration حساب قبلی و rotation در [قرارداد bootstrap](INSTALLER_BOOTSTRAP_SECURITY.md) ثبت شده است. این تصمیم جای سیاست قبلی ممنوعیت مطلق رمز Linux را برای حساب مدیر انسانی می‌گیرد؛ حساب سرویس همچنان رمز ورود ندارد.

@@ -7,6 +7,8 @@ fi
 INSTALLER_LIB_RUNTIME=1
 
 INSTALLER_PACKAGES=(
+    sudo
+    ufw
     ca-certificates
     curl
     gnupg

@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+# Firewall bootstrap contract v1: operator only; real systemd VM required.
+# Never flush rules, disable SSH, open DB/Redis, or adopt an active firewall.
+set -Eeuo pipefail
+export LC_ALL=C LANG=C
+umask 077
+home="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$home/lib/common.sh"
+source "$home/lib/gate.sh"
+source "$home/lib/os.sh"
+mode="${1:---plan}"
+[[ $# -le 1 ]] || { echo 'ERROR INVALID_INPUT: one option only.' >&2; exit 2; }
+case "$mode" in --plan|--apply|--confirm) ;; *) echo 'Usage: rahandaz-firewall [--plan|--apply|--confirm]' >&2; exit 2 ;; esac
+INSTALLER_OS_RELEASE=/etc/os-release
+INSTALLER_PROC_ROOT=/proc
+unset RAHANDAZ_INSTALLER_SYSROOT
+installer_detect_os
+if [[ "$mode" == --plan ]]; then
+    echo 'PLAN: preserve all rules; allow actual sshd TCP ports, HTTP 80 and HTTPS 443.'
+    echo 'No public PostgreSQL/Redis ports. Activation requires explicit approval and a new SSH connection within 120 seconds.'
+    echo 'Existing active UFW or another firewall requires a separate reviewed adoption plan.'
+    exit 0
+fi
+installer_mutation_allowed
+[[ "$(installer_sysroot)" == / && "$(installer_pid1_name)" == systemd ]] || { echo 'ERROR VM_REQUIRED: firewall activation requires a real systemd VM.' >&2; exit 1; }
+[[ -n "${SSH_CONNECTION:-}" ]] || { echo 'ERROR SSH_REQUIRED: use a verified SSH session; retain provider console recovery.' >&2; exit 1; }
+state=/var/lib/rahandaz-firewall-v1
+install -d -m 0700 "$state"
+exec 9>"$state/lock"
+flock -n 9 || exit 1
+if [[ "$mode" == --confirm ]]; then
+    [[ -f "$state/original-connection" && "$(cat "$state/original-connection")" != "$SSH_CONNECTION" ]] || { echo 'ERROR SECOND_CONNECTION_REQUIRED: confirm from a new SSH connection.' >&2; exit 1; }
+    ufw status | grep -qx 'Status: active' || { echo 'ERROR FIREWALL_INACTIVE: rollback may already have run.' >&2; exit 1; }
+    systemctl is-active --quiet rahandaz-firewall-rollback.timer || { echo 'ERROR ROLLBACK_EXPIRED: inspect firewall state.' >&2; exit 1; }
+    systemctl stop rahandaz-firewall-rollback.timer
+    # Wait for any racing rollback; never claim success if it disabled UFW.
+    systemctl stop rahandaz-firewall-rollback.service
+    ufw status | grep -qx 'Status: active' || exit 1
+    rm -f "$state/original-connection"
+    printf '%s confirmed_from_second_ssh\n' "$(date -u +%FT%TZ)" >>"$state/audit"
+    echo 'UFW verified active from a second SSH connection. Keep console recovery available.'
+    exit 0
+fi
+command -v ufw >/dev/null || { echo 'ERROR MISSING_DEPENDENCY: install ufw first.' >&2; exit 1; }
+[[ ! -f "$state/original-connection" ]] || { echo 'ERROR PENDING_FIREWALL: confirm from another SSH connection or wait for rollback, then inspect state.' >&2; exit 1; }
+if ufw status | grep -qx 'Status: active'; then
+    echo 'Existing active UFW preserved. Review its rules separately; no adoption performed.'; exit 0
+fi
+# Fail closed on other rulesets: UFW must not silently take ownership of another manager.
+if command -v nft >/dev/null && [[ -n "$(nft list tables)" ]]; then
+    echo 'ERROR EXTERNAL_FIREWALL: existing nftables rules require review.' >&2; exit 1
+fi
+for tool in iptables-save ip6tables-save; do
+    if command -v "$tool" >/dev/null && "$tool" | grep -Eq '^(-A|:[^ ]+ (DROP|REJECT))'; then
+        echo 'ERROR EXTERNAL_FIREWALL: existing iptables policy requires review.' >&2; exit 1
+    fi
+done
+grep -Eq '^IPV6=yes$' /etc/default/ufw || { echo 'ERROR IPV6_POLICY: UFW IPv6 protection must be reviewed/enabled first.' >&2; exit 1; }
+mapfile -t ports < <(/usr/sbin/sshd -T | awk '$1 == "port" {print $2}' | sort -nu)
+read -r client_ip client_port server_ip server_port <<<"$SSH_CONNECTION"
+[[ "$server_port" =~ ^[0-9]+$ && ${#ports[@]} -gt 0 ]] || exit 1
+ports+=("$server_port")
+for port in "${ports[@]}"; do
+    [[ "$port" =~ ^[0-9]+$ ]] && ((port > 0 && port < 65536)) || exit 1
+    ss -H -ltn "sport = :$port" | grep -q . || { echo 'ERROR SSH_PORT_NOT_LISTENING' >&2; exit 1; }
+done
+printf 'Will allow TCP SSH ports: %s; HTTP 80; HTTPS 443. Preserve existing rules, deny other inbound traffic, allow outbound.\n' "${ports[*]}"
+echo 'Keep this SSH session and provider console open. Automatic UFW disable after 120 seconds unless confirmed from a NEW SSH session.'
+printf 'Enable UFW with these policies? [y/n]: '
+read -r answer
+[[ "$answer" == y || "$answer" == Y ]] || exit 1
+ufw status numbered >"$state/before.txt"
+cp -a /etc/ufw "$state/config-before-$(date -u +%Y%m%dT%H%M%SZ)"
+for port in "${ports[@]}" 80 443; do ufw allow "$port/tcp" comment 'Rahandaz bootstrap'; done
+ufw default deny incoming
+ufw default allow outgoing
+printf '%s\n' "$SSH_CONNECTION" >"$state/original-connection"
+# The independent systemd timer survives SSH disconnect and this script's termination.
+systemctl reset-failed rahandaz-firewall-rollback.service 2>/dev/null || true
+systemd-run --collect --unit=rahandaz-firewall-rollback --on-active=120s /usr/bin/flock --close "$state/lock" /usr/sbin/ufw --force disable
+ufw --force enable
+printf '%s activation_pending_second_ssh\n' "$(date -u +%FT%TZ)" >>"$state/audit"
+printf 'Open a NEW SSH connection now, then run: sudo --preserve-env=SSH_CONNECTION bash %q --confirm\n' "$home/bin/rahandaz-firewall"
+echo 'If rollback occurs, inspect UFW and remove the root-owned pending marker before retrying. Never close your recovery session yet.'

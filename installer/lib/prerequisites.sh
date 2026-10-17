@@ -462,7 +462,7 @@ prereq_main() {
     prereq_select_sources
     prereq_mark_new_services
     prereq_repair_packages
-    prereq_install_packages ca-certificates curl gnupg python3 acl iproute2
+    prereq_install_packages ca-certificates curl gnupg python3 acl iproute2 sudo ufw
     prereq_audit base_packages_verified
     prereq_php_source
     prereq_audit php_repository_verified
@@ -484,4 +484,9 @@ prereq_main() {
     prereq_health
     prereq_audit prerequisites_verified
     printf 'Prerequisites verified. The Rahandaz application has not been installed.\n'
+    if [[ "$PREREQ_YES" != 1 ]] && prereq_confirm 'Continue with administrator and private database security bootstrap?'; then
+        bash "${INSTALLER_HOME}/bin/rahandaz-security" --apply
+    else
+        printf 'Security bootstrap pending: sudo bash installer/bin/rahandaz-security --apply\n'
+    fi
 }

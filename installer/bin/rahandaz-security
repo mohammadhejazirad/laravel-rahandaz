@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# Security bootstrap contract v1. Root operator only; no web operation entry point.
+set -Eeuo pipefail
+set +x
+export LC_ALL=C LANG=C
+umask 077
+INSTALLER_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+for lib in common state os gate render runtime engine; do source "$INSTALLER_HOME/lib/$lib.sh"; done
+mode="${1:---plan}"
+[[ $# -le 1 ]] || { echo 'ERROR INVALID_INPUT' >&2; exit 2; }
+case "$mode" in --plan|--apply|--show-credentials) ;; *) echo 'Usage: rahandaz-security [--plan|--apply|--show-credentials]' >&2; exit 2 ;; esac
+# Privileged entry points do not accept fixture overrides.
+INSTALLER_OS_RELEASE=/etc/os-release
+INSTALLER_PROC_ROOT=/proc
+unset RAHANDAZ_INSTALLER_SYSROOT INSTALLER_OFFLINE INSTALLER_STATE_FILE INSTALLER_LOG
+installer_detect_os
+if [[ "$mode" == --plan ]]; then
+    echo 'PLAN: rahandaz SSH/password-sudo administrator; locked nologin rahandaz-svc for the panel.'
+    echo 'PostgreSQL role/database rahandaz; dedicated authenticated Redis queue 6381/cache 6380, loopback only.'
+    echo 'Independent random 12-character initial passwords; reruns preserve passwords; existing accounts/configuration are not adopted.'
+    echo 'Credentials are delivered only to root-owned 0600 files and, on request, directly to the local terminal.'
+    echo 'Firewall is a separate guarded step: rahandaz-firewall --plan. No SSH policy changes.'
+    exit 0
+fi
+installer_mutation_allowed
+[[ "$(installer_pid1_name)" == systemd ]] || { echo 'ERROR VM_REQUIRED: service bootstrap requires a systemd VM.' >&2; exit 1; }
+INSTALLER_STATE_DIR=/var/lib/rahandaz-bootstrap-security-v1
+installer_state_init
+security_lock
+if [[ "$mode" == --show-credentials ]]; then
+    security_credentials / yes
+    exit 0
+fi
+printf 'Create/verify administrator, restricted panel account and private datastore credentials? [y/n]: '
+read -r answer
+[[ "$answer" == y || "$answer" == Y ]] || exit 1
+MODE=apply
+trap 'printf "%s failed\n" "$(date -u +%FT%TZ)" >>"$INSTALLER_STATE_DIR/audit"' ERR
+security_accounts
+stage_07_postgresql_setup
+security_postgres_health
+stage_08_redis_setup
+security_redis_units
+security_credentials
+printf '%s verified\n' "$(date -u +%FT%TZ)" >>"$INSTALLER_STATE_DIR/audit"
+echo 'Security bootstrap verified. Application installation and firewall activation are separate steps.'
+printf 'Display initial passwords directly on your terminal now? [y/n]: '
+read -r answer || answer=n
+if [[ "$answer" == y || "$answer" == Y ]]; then security_credentials / yes; fi
+
+printf 'Review and configure UFW now with SSH recovery protection? [y/n]: '
+read -r answer || answer=n
+if [[ "$answer" == y || "$answer" == Y ]]; then
+    bash "$INSTALLER_HOME/bin/rahandaz-firewall" --apply
+else
+    echo 'Firewall unchanged. Review: bash installer/bin/rahandaz-firewall --plan'
+fi

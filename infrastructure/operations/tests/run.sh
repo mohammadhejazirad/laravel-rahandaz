@@ -139,10 +139,10 @@ EOF
 account="$(RAHANDAZ_OPS_APPLY=1 RAHANDAZ_OPS_HELPER_CONFIRMED=1 RAHANDAZ_OPS_SANDBOX="$tmp" RAHANDAZ_OPS_BIN_DIR="$tmp/bin" run_op account.create_rahandaz_user "$tmp/input-account.json")"
 assert_eq "account status" "succeeded" "$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["status"])' "$account")"
 assert_eq "account mutated" "True" "$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["mutated"])' "$account")"
-if grep -q nologin "$tmp/account.mark" && ! grep -q sudo "$tmp/account.mark"; then
-    pass "rahandaz useradd is nologin without sudo"
+if grep -q nologin "$tmp/account.mark" && grep -q "rahandaz-svc$" "$tmp/account.mark" && ! grep -q sudo "$tmp/account.mark"; then
+    pass "rahandaz-svc useradd is nologin without sudo"
 else
-    fail "rahandaz useradd arguments"
+    fail "rahandaz-svc useradd arguments"
 fi
 secret="$(cat "$tmp/root/rahandaz-account.secret")"
 mode="$(stat -c '%a' "$tmp/root/rahandaz-account.secret")"

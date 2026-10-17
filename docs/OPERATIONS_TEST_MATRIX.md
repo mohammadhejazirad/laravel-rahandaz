@@ -58,3 +58,7 @@
 
 وضعیت systemd/health میزبان/reboot/شبکهٔ محدود ایران در هر سه نسخه همچنان **requires_vm / not_run**
 است؛ هیچ خانهٔ پشتیبانی عملیات میزبان با آزمون package/container به supported ارتقا نیافت.
+
+## تغییر هویت bootstrap — 2026-10-17
+
+طبق ADR-0005، شناسه‌های قدیمی عملیات account حفظ شده‌اند ولی target آنها `rahandaz-svc` locked/nologin است؛ حساب مدیر `rahandaz` هدف ساخت/قفل/rotation موتور عملیات نیست. `bash infrastructure/operations/tests/run.sh` موفق شد و آزمون useradd هدف سرویس را نیز بررسی می‌کند. این مسیر همچنان fail-closed است؛ حساب مدیریتی فقط از bootstrap اپراتور ساخته می‌شود. آزمون واقعی حساب‌ها، PostgreSQL/Redis و permission در سه Ubuntu container-lab در INSTALLER_TEST_MATRIX ثبت است. پذیرش sudo/SSH/UFW/systemd/reboot نیازمند VM و اجرا نشده است.

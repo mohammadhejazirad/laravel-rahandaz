@@ -158,3 +158,7 @@ verifies signed Iranian APT indexes from the current lab network.
 and host namespaces/privileged mode are not used. Reports are in the lab's ignored `reports/` directory.
 Systemd/service activation, reboot, real VPS resource measurements and restricted Iranian networks
 require separate VM/network tests. See `INSTALLER_TEST_MATRIX.md` for actual results.
+
+## مرحله امنیت پس از dependencyها
+
+بسته‌های `sudo` و `ufw` نیز نصب/تأیید می‌شوند؛ نصب بسته UFW به معنی فعال‌سازی آن نیست. بعد از healthcheck واقعی، اجرای تعاملی ادامه به `rahandaz-security --apply` را پیشنهاد می‌کند. مدیر `rahandaz`، سرویس محدود `rahandaz-svc`، نقش PostgreSQL و Redisهای اختصاصی طبق [قرارداد امنیت bootstrap](INSTALLER_BOOTSTRAP_SECURITY.md) ایجاد می‌شوند. در `--yes`، مرحله امنیت صریح و جدا اجرا می‌شود. UFW فعال‌سازی جدا با حفظ SSH و rollback دارد. رمزها فقط فایل خصوصی/TTY و بدون بازتولید در rerun تحویل می‌شوند.

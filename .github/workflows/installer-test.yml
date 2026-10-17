@@ -11,6 +11,7 @@ on:
     paths:
       - "installer/**"
       - "tests/infrastructure/ubuntu-lab/scripts/test-prerequisites.sh"
+      - "tests/infrastructure/ubuntu-lab/scripts/test-security.sh"
       - ".github/workflows/installer-test.yml"
 
 permissions:
@@ -26,6 +27,7 @@ jobs:
           bash installer/tests/run.sh
           python3 installer/tests/release_test.py
           python3 installer/tests/prerequisites_test.py
+          python3 installer/tests/security_test.py
 
   prerequisite-lab:
     runs-on: ubuntu-latest
@@ -46,6 +48,15 @@ jobs:
         env:
           UBUNTU_VERSION: ${{ matrix.ubuntu }}
         run: bash tests/infrastructure/ubuntu-lab/scripts/test-prerequisites.sh "$UBUNTU_VERSION" --fixtures
+      - name: Run security contracts on target Ubuntu
+        env:
+          UBUNTU_VERSION: ${{ matrix.ubuntu }}
+        run: bash tests/infrastructure/ubuntu-lab/scripts/test-security.sh "$UBUNTU_VERSION" --fixtures
+      - name: Install and verify real accounts and datastores inside lab container
+        if: github.event_name == 'workflow_dispatch' && inputs.live_packages
+        env:
+          UBUNTU_VERSION: ${{ matrix.ubuntu }}
+        run: bash tests/infrastructure/ubuntu-lab/scripts/test-security.sh "$UBUNTU_VERSION" --live
       - name: Install real packages and rerun inside lab container
         if: github.event_name == 'workflow_dispatch' && inputs.live_packages
         env:
@@ -55,5 +66,7 @@ jobs:
         if: always()
         with:
           name: prerequisite-lab-${{ matrix.ubuntu }}
-          path: tests/infrastructure/ubuntu-lab/reports/prerequisites-*/**
+          path: |
+            tests/infrastructure/ubuntu-lab/reports/prerequisites-*/**
+            tests/infrastructure/ubuntu-lab/reports/security-*/**
           if-no-files-found: warn

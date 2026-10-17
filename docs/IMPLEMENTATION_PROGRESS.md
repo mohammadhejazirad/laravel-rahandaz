@@ -326,3 +326,13 @@ security امضاشده اما چندماه قدیمی در کاتالوگ غی�
 موفق بودند؛ regression نصب‌کننده ۷۱/۰ (updater زیرمجموعه ۲۱/۰) و diff-check موفق بود. ماتریس VM و
 شبکهٔ محدود ایران همچنان not_run/requires_vm است. منطق Bash، PHP و UI تغییر نکرد؛ تغییر اجرایی
 این برش فقط غیرفعال‌کردن provider کهنه در کاتالوگ است و حالت عملیات disabled باقی ماند.
+
+## 2026-10-17 — bootstrap امنیتی و جداسازی مدیر از سرویس
+
+به درخواست صریح مالک، مدیر انسانی `rahandaz` برای SSH/sudo با رمز از سرویس `rahandaz-svc` locked/nologin جدا شد؛ ADR-0005 و مشخصات مرجع به‌روزرسانی شدند. نصب‌کننده اولیه sudo/UFW را نصب/تأیید و ادامه به security bootstrap را پیشنهاد می‌کند. full installer از همان قرارداد حساب/permission/datastore استفاده می‌کند. موتور عملیات disabled ماند و actionهای account با شناسه‌های قدیمی فقط سرویس را هدف می‌گیرند.
+
+چهار رمز اولیه مستقل ۱۲ کاراکتری CSPRNG برای Ubuntu، PostgreSQL و ACLهای دو Redis ساخته و اتمیک/private ذخیره می‌شوند؛ rerun آنها یا کلیدهای رمزنگاری را عوض نمی‌کند. تحویل root-only و نمایش اختیاری مستقیم TTY است؛ secret به log/argv/API اضافه نشد. PostgreSQL SCRAM و role محدود دارد؛ Redis queue/cache اختصاصی روی loopback 6381/6380 با default user خاموش و hash ACL هستند. Redis موجود سرور تغییر نکرد. کد root-owned و permission اجرای سرویس/خواندن public توسط Nginx تنظیم شد.
+
+UFW اپراتوری plan/apply/confirm با کشف SSH، حفظ قوانین، مجوز HTTP/HTTPS، رد firewall خارجی، backup و timer مستقل disable پس از ۱۲۰ ثانیه تا تأیید اتصال SSH دوم اضافه شد. اجرا/پذیرش واقعی آن به VM نیاز دارد؛ این برش چنین تأییدی ندارد. هیچ SSH/root login خاموش نشد. تغییر رمز Ubuntu با passwd حفظ می‌شود؛ rotation هماهنگ PostgreSQL/Redis از داخل پنل هنوز پیاده نشده است و ادعای قابلیت UI ندارد.
+
+آزمون واقعی account/hash/PostgreSQL/Redis/permission، rerun و حفظ تغییر دستی رمز در Ubuntu 22.04/24.04/26.04 container-lab موفق شد؛ جزئیات و شکست اولیهٔ اصلاح‌شده قفل در INSTALLER_TEST_MATRIX ثبت است. میزبان: security پنج، prerequisites چهل، release بیست‌وشش و installer هفتادودو آزمون موفق (updater بیست‌ویک زیرمجموعه)؛ operations suite، syntax/YAML و diff-check موفق. UI/PHP تغییر نکرد. SSH، PAM، UFW، startup systemd، reboot و نصب کامل artifact نیازمند VM هستند؛ Production-ready اعلام نمی‌شود.

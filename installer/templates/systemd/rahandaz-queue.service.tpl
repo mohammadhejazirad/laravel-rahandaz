@@ -1,11 +1,11 @@
 [Unit]
 Description=Rahandaz queue worker
-After=network.target postgresql.service redis-server.service redis-rahandaz-cache.service
+After=network.target postgresql.service redis-rahandaz-queue.service redis-rahandaz-cache.service
 
 [Service]
 Type=simple
-User=rahandaz
-Group=rahandaz
+User=rahandaz-svc
+Group=rahandaz-svc
 WorkingDirectory=@@RELEASE@@
 ExecStart=@@PHP_BIN@@ artisan queue:work redis --sleep=3 --tries=3 --timeout=60 --max-time=3600
 Restart=always
