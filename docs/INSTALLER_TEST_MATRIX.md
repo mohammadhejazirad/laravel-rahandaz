@@ -127,3 +127,24 @@ Matrix VM/systemd/reboot و شبکهٔ محدود VPS ایران برای هر �
 قالب candidate برای `rahandaz`، publickey-only بودن، رد password/keyboard-interactive، مسیر root-managed کلیدها و خاموش‌بودن AuthorizedKeysCommand/TrustedUserCAKeys را در config مؤثر بررسی کرد؛ policy سایر حساب‌ها/root حفظ شد. Include ابتدا/انتها با config کامل آزموده شد. تولید config hardening از تابع sandbox نیز با `sshd -t/-T` بررسی شد: AuthenticationMethods publickey و رد password/keyboard-interactive/root؛ reload systemd در fixture عمداً اجرا نشد. سه اجرای اولیه به علت فرض نادرست آزمون درباره context فایل Include شکست خوردند؛ آزمون اصلاح شد و نتایج اولیه passed محسوب نمی‌شوند.
 
 این آزمون‌ها نه daemon را اجرا/reload کردند و نه SSH session داشتند. عملیات SSH روی میزبان توسعه اجرا نشد. قالب روی سرور نصب نشده است. enrollment پنل، proof واقعی اتصال، live helper، rollback و پذیرش VM همچنان ناقص/not_run هستند. نتیجه‌های parser گواهی امنیت SSH یا پشتیبانی Production هیچ Ubuntu نیستند.
+
+
+## انتشار خودکار candidate و رفع first boot — 2026-10-17
+
+Release workflow به push روی main متصل شد؛ نسخه beta شامل run/attempt است و stable/latest تغییر نمی‌کنند. Apache-2.0 و public trust pin با تصمیم مالک ثبت شدند. تنظیم Environment فقط main، secret امضا و متغیر انتشار خودکار در GitHub انجام شد؛ خود workflow جدید هنوز push/remote-run نشده است.
+
+دو نقص نصب اصلاح شد: first boot اکنون مسیر فایل **ناموجود** داخل دایرکتوری 0700 به CLI مالک می‌دهد (CLI فایل موجود را رد می‌کند)؛ Nginx بعد از نصب سایت و سرویس‌های پنل enable/reload می‌شود و شکست reload موفقیت نیست. bootstrap نام میزبان را از origin می‌گیرد و healthcheck با Host مشخص localhost به سایت مدیریت‌شده می‌رسد؛ تنظیم server-name صریح اپراتور حفظ می‌شود.
+
+شواهد سه Ubuntu container-lab:
+
+- 22.04: `reports/release-22.04-20261017T112422Z/`؛ installer ۷۲/۰، release ۲۹/۰.
+- 24.04: `reports/release-24.04-20261017T112422Z/`؛ installer ۷۲/۰، release ۲۹/۰.
+- 26.04: `reports/release-26.04-20261017T112422Z/`؛ installer ۷۲/۰، release ۲۹/۰؛ همچنان آزمایشی.
+
+هر سه plan خروج صفر و RESULT plan داشتند؛ چهار آزمون انتخاب نسخه نیز روی هر سه Python اوبونتو موفق بود. suite میزبان release ۲۹/۰ و candidate چهار/۰؛ PHPUnit زیرمجموعه bootstrap/update برابر ۲۱ آزمون و ۹۴ assertion موفق بود. YAML و Bash inline و actionlint 1.7.7 موفق شدند. بسته واقعی با vendor تولید و assets موجود، خارج مخزن assemble، امضا و صحت manifest/checksum آن تأیید شد؛ هیچ کلید خصوصی در بسته نیست.
+
+**requires_vm/not_run:** first boot با Laravel واقعی در نصب کامل، Nginx/systemd زنده، health/login پس از reboot، SSH/recovery و نصب تک‌فرمانی عمومی روی VM. تست رگرسیون first boot قرارداد CLI را fixture می‌کند و آزمون reload از stub استفاده می‌کند؛ این موارد ادعای VM certification ندارند. راهنمای آزمون شخصی در `KVM_INSTALLATION_TEST.md` است.
+
+بازخوانی نهایی تنظیمات GitHub پس از پاسخ موفق عملیات ثبت، به دلیل timeout/no-route شبکه انجام نشد؛ تأیید اجرای workflow روی GitHub همچنان باقی است.
+
+پس از ثبت public pin، اجرای مجدد یک تست قدیمی «نبود کلید پیش‌فرض» شکست خورد؛ تست به مسیر کلید ناموجود صریح تغییر کرد تا نبود trust root را مستقل از تنظیم واقعی پروژه بسنجد. suite نهایی میزبان و هر سه Ubuntu مجدداً ۷۲/۰ و release ۲۹/۰ شدند؛ شکست اولیه موفق محسوب نشد.

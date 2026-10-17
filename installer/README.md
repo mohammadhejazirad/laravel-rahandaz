@@ -20,9 +20,9 @@ sudo bash installer/bin/rahandaz-prerequisites
 bash installer/bin/rahandaz-install --plan --state-dir /tmp/rahandaz-plan
 ```
 
-اعمال روی `/` به artifact، manifest چهارخطی، امضای `openssl dgst -sha256` و کلید عمومی از پیش مورد اعتماد نیاز دارد. کلید `installer/trust/rahandaz-release.pub` هنوز در مخزن نیست. مخزن واقعی `mohammadhejazirad/laravel-rahandaz` بررسی شده، اما Release عمومی ندارد و فرمانی برای `curl | bash` وجود ندارد.
+اعمال روی `/` به artifact، manifest چهارخطی، امضای `openssl dgst -sha256` و کلید عمومی از پیش مورد اعتماد نیاز دارد. کلید عمومی انتشار در `installer/trust/rahandaz-release.pub` ثبت شده است؛ کلید خصوصی خارج مخزن نگهداری می‌شود. مخزن واقعی `mohammadhejazirad/laravel-rahandaz` بررسی شده، اما Release عمومی ندارد و فرمانی برای `curl | bash` وجود ندارد.
 
-`release/assemble.sh` runtime شامل vendor/assets را بدون داده/کلید/لینک بسته‌بندی می‌کند. `release/prepare-github.sh` از بستهٔ امضاشده، bootstrap مستقل `install.sh` و فرمان یک‌خطی با هش واقعی در `INSTALL.md` تولید می‌کند. template در `bootstrap/github-install.sh.in` است و مستقیم اجرا نمی‌شود. workflow `release-build.yml` فقط candidate و Draft prerelease می‌سازد؛ stable/انتشار عمومی ندارد. تنظیم secret، کلید و مجوز در [مدیریت Release](../docs/RELEASE_MANAGEMENT.md) آمده است.
+`release/assemble.sh` runtime شامل vendor/assets را بدون داده/کلید/لینک بسته‌بندی می‌کند. `release/prepare-github.sh` از بستهٔ امضاشده، bootstrap مستقل `install.sh` و فرمان یک‌خطی با هش واقعی در `INSTALL.md` تولید می‌کند. template در `bootstrap/github-install.sh.in` است و مستقیم اجرا نمی‌شود. workflow `release-build.yml` با هر push به main candidate می‌سازد و با تنظیم کلید و متغیر انتشار، prerelease امضاشده منتشر می‌کند؛ stable منتشر نمی‌کند. اجرای دستی Draft نیز حفظ شده است. تنظیم secret، کلید و مجوز در [مدیریت Release](../docs/RELEASE_MANAGEMENT.md) آمده است.
 
 `installer/bootstrap/install.sh` فایل را به پوسته pipe نمی‌کند. اگر URL داده شود، دانلود جدا انجام می‌شود، امضا بررسی می‌شود، بعد `exec` به `rahandaz-install` می‌رسد.
 
@@ -54,3 +54,5 @@ sudo bash installer/bin/rahandaz-security --apply
 
 
 سیاست SSH در [SSH_ACCESS_POLICY.md](../docs/SSH_ACCESS_POLICY.md) تکمیل شده است: رمز Ubuntu برای sudo است؛ ورود SSH هدف فقط با کلید عمومی ثبت‌شده از پنل است. مسیر کامل ثبت/اعمال کلید و اثبات اتصال هنوز تکمیل نشده و دسترسی bootstrap تا تأیید recovery و اتصال دوم حفظ می‌شود؛ نصب امن از نظر SSH هنوز تأیید نشده است.
+
+آزمون اولین نصب native روی VM شخصی و مسیر استفاده از artifactهای Actions در [راهنمای KVM](../docs/KVM_INSTALLATION_TEST.md) توضیح داده شده است.

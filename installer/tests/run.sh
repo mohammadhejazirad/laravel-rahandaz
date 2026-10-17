@@ -263,6 +263,7 @@ fi
 if ! bash "${INSTALLER_HOME}/bootstrap/verify-release.sh" \
     --manifest "${tmp}/signed/release.manifest" \
     --signature "${tmp}/signed/release.manifest.sig" \
+    --public-key "${tmp}/absent-release.pub" \
     --artifact "${tmp}/signed/$(basename "$archive")" >"${tmp}/trust.out" 2>"${tmp}/trust.err"; then
     grep -q TRUST_ROOT_MISSING "${tmp}/trust.err" && ok "missing trust root fails closed" || bad "missing trust root fails closed"
 else

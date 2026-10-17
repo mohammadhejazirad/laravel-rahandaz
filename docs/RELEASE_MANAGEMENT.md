@@ -6,7 +6,7 @@
 
 کانال‌ها: `stable`، `beta`، و `development` فقط برای توسعه. پیش‌فرض نصب عمومی `stable` است. مقایسه نسخه عددی است. `1.10` از `1.9` بزرگ‌تر است. پیش‌انتشار از انتشار همان هسته کوچک‌تر است. شناسه عددی پیش‌انتشار از شناسه غیرعددی کوچک‌تر است. صفر پیشرو در جزء هسته رد می‌شود.
 
-`installer/trust/rahandaz-release.pub` هنوز در مخزن نیست. کلید Sury فقط pin بسته PHP است، نه کلید امضای راه‌انداز. workflow `release-build.yml` اکنون بستهٔ candidate می‌سازد و می‌تواند Draft prerelease ایجاد کند؛ نسخهٔ stable یا انتشار عمومی خودکار ندارد. اجرای remote این workflow هنوز تأیید نشده است.
+`installer/trust/rahandaz-release.pub` با مجوز صریح مالک ایجاد و ثبت شده است؛ کلید خصوصی خارج مخزن و در Environment secret نگهداری می‌شود. کلید Sury فقط pin بسته PHP است، نه کلید امضای راه‌انداز. مجوز Apache-2.0 با انتخاب صریح مالک در `LICENSE` ثبت شده است. workflow `release-build.yml` با هر push به main بسته candidate می‌سازد و پس از تنظیم انتشار، prerelease امضاشده منتشر می‌کند؛ نسخه stable نمی‌سازد. اجرای remote نسخه جدید workflow هنوز تأیید نشده است.
 
 نسخه نصب‌شده از `RAHANDAZ_RELEASE_FILE`، سپس `/var/lib/rahandaz/release.json`، و در توسعه از `installer/release/development.json` خوانده می‌شود. حدس از `composer.json` کافی نیست. نسخه توسعه فعلی `1.0.0` و کانال `development` است.
 
@@ -33,17 +33,37 @@
 
 `prepare-github.sh` فقط بستهٔ از قبل امضاشده را می‌پذیرد و نسخه، repository و کلید را بررسی می‌کند. SHA256SUMS را workflow با همان کلید خصوصی امضا می‌کند. این ابزار کلید تولید نمی‌کند و به GitHub چیزی نمی‌فرستد.
 
-## تنظیم GitHub توسط مالک
+## یک‌بار تنظیم GitHub توسط مالک
 
-1. مجوز OSI را انتخاب و `LICENSE` را ثبت کنید؛ agent مجوز را حدس نمی‌زند.
-2. کلید امضای RSA بررسی‌شده (حداقل ۲۰۴۸ بیت) را بیرون مخزن نگه دارید. فقط public key با PEM استاندارد SPKI در `installer/trust/rahandaz-release.pub` ثبت شود؛ اثرانگشت از کانال مستقل مورد اعتماد اعلام شود.
-3. در Settings → Environments محیط `release-signing` را ایجاد کنید. Required reviewers و محدودیت branch به `main` را تنظیم کنید؛ صرف نام Environment تضمین تأیید انسانی نیست.
-4. متن PEM کلید خصوصی را فقط به Environment secret با نام `RAHANDAZ_RELEASE_SIGNING_KEY` بدهید؛ نه repository، artifact، issue، log یا chat.
-5. یک tag موجود از کد بررسی‌شده مانند `v1.0.0-rc.1` لازم است. workflow tag را ایجاد نمی‌کند. اجرای دستی از `main` با input همان tag انجام شود؛ نسخهٔ بدون prerelease مانند `v1.0.0` عمداً رد می‌شود.
-6. با `create_draft=false` فقط build، tests، audits و Actions artifact بدون امضا تولید می‌شود؛ این artifact فرمان نصب عمومی ندارد.
-7. با `create_draft=true` پس از build و approval، signing انجام می‌شود. کلید مشتق‌شده از secret باید دقیقاً با public key ثبت‌شده برابر باشد. خروجی فقط Draft prerelease است؛ Release موجود جایگزین نمی‌شود و `latest` تغییر نمی‌کند.
+1. مجوز Apache-2.0 انتخاب و ثبت شده است. آن را با مجوز dependencyها یکی ندانید؛ مجوزهای همراه vendor و فونت در بسته حفظ می‌شوند.
+2. کلید RSA حداقل ۲۰۴۸ بیت را خارج مخزن ایجاد و امن پشتیبان‌گیری کنید. نمونه زیر روی سیستم مالک، نه روی VPS کاربران، اجرا می‌شود؛ فایل موجود را بازنویسی نکنید:
 
-نبود مجوز یا کلید مرحلهٔ Draft را متوقف می‌کند. build/tests به secret خصوصی دسترسی ندارند. signing ابزار بررسی‌شدهٔ `main` را اجرا می‌کند، نه کد داخل بسته. actionها و supply chain قبل از stable همچنان review/provenance نهایی لازم دارند.
+   ```bash
+   umask 077
+   rahandaz_signing_dir=$(mktemp -d)
+   openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:3072 -out "$rahandaz_signing_dir/release.key"
+   openssl pkey -in "$rahandaz_signing_dir/release.key" -pubout -out "$rahandaz_signing_dir/release.pub"
+   cp "$rahandaz_signing_dir/release.pub" installer/trust/rahandaz-release.pub
+   sha256sum installer/trust/rahandaz-release.pub
+   ```
+
+   کلید خصوصی را پیش از پاک‌شدن مسیر موقت به محل امن خارج repository منتقل و backup کنید؛ آن را commit، upload artifact یا ارسال در chat نکنید. فقط public key استاندارد SPKI به Git می‌رود. fingerprint فایل public را از کانال مستقل مورد اعتماد اعلام کنید. تولید کلید تازه برای هر push ممنوع است.
+3. در Settings → Environments محیط `release-signing` را بسازید و deployment branches را فقط `main` قرار دهید. برای انتشار کاملاً خودکار required reviewer تعیین نکنید؛ اگر reviewer تنظیم شود، هر انتشار تا تأیید او منتظر می‌ماند. محافظت branch اصلی و review تغییرات workflow/signing tooling همچنان لازم است.
+4. متن PEM کلید خصوصی را به Environment secret با نام `RAHANDAZ_RELEASE_SIGNING_KEY` بدهید. build/test به این secret دسترسی ندارد. مرحله امضا public key مشتق از secret را با فایل pin‌شده مقایسه می‌کند و عدم تطابق شکست است.
+5. در Settings → Secrets and variables → Actions → Variables متغیر Repository با نام `RAHANDAZ_AUTOMATIC_PRERELEASES` و مقدار دقیق `true` بسازید. نبودن آن، ساخت خودکار را متوقف نمی‌کند ولی انتشار را غیرفعال نگه می‌دارد. این متغیر باید Repository-level باشد، نه صرفاً Environment-level؛ شرط job پیش از ورود به Environment ارزیابی می‌شود.
+6. workflow، public key و تغییرات پروژه را به `main` push کنید. همه pushها، حتی تغییر docs، build/test تازه دارند؛ branchهای دیگر و pull requestها وارد workflow امضای Release نمی‌شوند. هیچ tag دستی برای مسیر خودکار لازم نیست.
+
+## رفتار هر push و اجرای دستی
+
+نسخه خودکار `v<installer/VERSION>-beta.<github.run_number>.<github.run_attempt>` است؛ مثلاً `v1.0.0-beta.123.1`. `installer/VERSION` فقط هسته SemVer مانند `1.0.0` است. اجرای مجدد نسخه جدا دارد و هیچ Release قبلی بازنویسی نمی‌شود. شماره run نسخه commit نیست؛ tag هر Release به SHA دقیق همان push اشاره می‌کند، حتی اگر در فاصله build، main جلو برود. هر run مستقل است و push بعدی run قبلی را cancel نمی‌کند.
+
+پس از موفقیت lint، typecheck، build، PHP/JS، قراردادهای installer/operations و audit وابستگی‌ها، بسته بدون dependency توسعه ساخته و در artifact به نام `unsigned-v…` برای ۱۴ روز نگهداری می‌شود. نسخه، commit و وضعیت build قابل بررسی در صفحه همان اجرای Actions است. در صورت شکست هر check، انتشار انجام نمی‌شود؛ خطا را رفع کنید، gate را حذف نکنید.
+
+اگر متغیر انتشار فعال باشد، job محیط `release-signing` بسته را امضا می‌کند و artifact `signed-v…` با همه فایل‌های نصب برای ۳۰ روز می‌سازد. سپس GitHub prerelease عمومی در مخزن عمومی (یا قابل دسترسی فقط برای اعضا در مخزن خصوصی) ایجاد می‌شود؛ stable و latest تغییر نمی‌کنند. شکست شبکه/امضا/مجوز GitHub به معنی انتشار موفق نیست. assetهای Release مستقل از انقضای Actions artifact باقی می‌مانند. اگر tag یا Release نامتجانس قبلاً موجود باشد، انتشار را متوقف و بررسی کنید؛ فایل‌های قبلی را جایگزین نکنید.
+
+اجرای دستی از `main` با tag موجود مانند `v1.0.0-rc.1` همچنان پشتیبانی می‌شود. نسخه stable رد می‌شود و commit tag باید ancestor همان main بررسی‌شده باشد. `create_draft=false` فقط build است؛ `true` خروجی امضاشده را به شکل Draft prerelease نگه می‌دارد. Draft دانلود anonymous ندارد؛ برای آزمایش از artifact امضاشده Actions و مسیر محلی راهنمای KVM استفاده کنید.
+
+اگر Release خودکار ناقص مانده باشد، آن را به‌جای نصب استفاده نکنید؛ run کامل را دوباره اجرا کنید تا نسخه attempt جدید تولید شود. کلید خصوصی هرگز وارد job build، لاگ یا بسته runtime نمی‌شود. محافظت Environment/branch باید واقعاً در GitHub تنظیم شود؛ صرف YAML این محافظت را ایجاد نمی‌کند.
 
 ## تجربهٔ نصب کاربر پس از انتشار معتبر
 
@@ -62,7 +82,19 @@
 - نصب واقعی، rerun، شکست/ادامه، health/login، reboot و recovery روی VM هر سه Ubuntu هدف تأیید شوند.
 - asset عمومی واقعاً موجود باشد و فرمان تولیدشده روی VM تازه copy/paste آزموده شود.
 - readiness، security، مجوز، compatibility، امضا، checksum، release notes و provenance پذیرفته شوند.
-- سپس workflow stable در review جدا توسعه یابد؛ محدودیت candidate فعلی با flag عمومی bypass نمی‌شود.
+- سپس workflow stable در review جدا توسعه یابد؛ انتشار خودکار فعلی فقط prerelease است و کانال stable را فعال نمی‌کند.
 - پس از انتشار تأییدشده، فرمان دقیق با نسخه/هش واقعی به بالای README منتقل شود؛ URL یا checksum فرضی نمی‌گذاریم.
 
-هنوز مجوز، کلید Production، بستهٔ عمومی، VM certification، اجرای remote Actions و تکمیل موتور میزبان نداریم. این تغییر زیرساخت توزیع است، نه ادعای «نصب بدون مشکل در همهٔ سرورها».
+مجوز Apache-2.0 و کلید انتشار تنظیم شده‌اند؛ وجود بسته عمومی معتبر، VM certification، اجرای remote Actions و تکمیل موتور میزبان هنوز باید تأیید شوند. این تغییر زیرساخت توزیع است، نه ادعای «نصب بدون مشکل در همهٔ سرورها».
+
+## آزمون روی KVM
+
+راهنمای قدم‌به‌قدم ساخت VM، SSH tunnel، امضای خصوصی بسته Actions، نصب، اعتبار owner، resume و پذیرش reboot در [KVM_INSTALLATION_TEST.md](KVM_INSTALLATION_TEST.md) است. نصب پنل به معنی فعال‌شدن executor یا قابلیت استقرار واقعی نیست.
+
+## وضعیت تنظیم در این برش — 2026-10-17
+
+با درخواست صریح مالک، کلید RSA-3072 خارج مخزن ساخته و public pin ثبت شد. محیط `release-signing` در مخزن `mohammadhejazirad/laravel-rahandaz` با branch policy فقط `main` و بدون reviewer اجباری تنظیم شد؛ secret امضا و Repository variable انتشار خودکار نیز ثبت شدند. این تنظیم‌ها به‌تنهایی workflow محلی را به GitHub منتقل نمی‌کنند؛ commit/push تغییرات به main لازم است. fingerprint فایل public در `installer/trust/README.md` آمده است. backup امن کلید خصوصی بر عهده مالک است؛ GitHub امکان بازیابی متن secret را نمی‌دهد.
+
+هیچ tag یا Release در این برش روی GitHub ایجاد نشد. اجرای واقعی workflow پس از push و نصب روی VM همچنان نیازمند مشاهده نتیجه‌اند.
+
+بازخوانی نهایی تنظیمات GitHub پس از پاسخ موفق عملیات ثبت، به دلیل timeout/no-route شبکه انجام نشد؛ تأیید اجرای workflow روی GitHub همچنان باقی است.

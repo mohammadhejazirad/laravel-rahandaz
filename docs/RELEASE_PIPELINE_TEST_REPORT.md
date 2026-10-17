@@ -46,3 +46,8 @@ vendor و پوشه‌های runtime، تکرارپذیری، حذف داده/ف�
 GitHub API: repository عمومی `mohammadhejazirad/laravel-rahandaz`، branch اصلی `main`، مجوز `null`، Releases لیست خالی. مستند رسمی Coolify در `https://coolify.io/docs/start-with-self-hosted` خوانده شد. درخواست تکمیلی ثبت workflowهای remote timeout شد؛ نتیجه‌ای از آن ادعا نمی‌شود.
 
 تغییرات این برش محلی‌اند؛ push، تغییر Settings، secret، tag، Draft یا public Release انجام نشد. LICENSE و public-key Production هنوز نیازمند تصمیم/تنظیم مالک‌اند. metadata امضاشدهٔ updater جزو خروجی جدید نصب اولیه نیست و باید برای انتشار update جدا آماده شود. نصب VM سه Ubuntu، TLS پنل، compatibility مخزن PHP 8.4، helper/executor و سایر gateهای `V1_RELEASE_READINESS.md` باز مانده‌اند. فرمان عمومی README فقط پس از asset واقعی و آزمون copy/paste روی VM درج می‌شود.
+
+
+## تکمیل 2026-10-17
+
+وضعیت تاریخی بالا مربوط به برش قبلی است. اکنون Apache-2.0، public pin و Environment secret با تأیید مالک تنظیم شده‌اند؛ push main به build و انتشار prerelease امضاشده متصل شده است. هیچ stable منتشر نمی‌شود. actionlint 1.7.7 این workflow را پذیرفت. release suite اکنون ۲۹ تست و candidate suite چهار تست دارد؛ هر دو روی هر سه Ubuntu container-lab موفق بودند. installer ۷۲/۰ و plan هر سه نسخه نیز موفق ماندند. اصلاح first boot و Nginx و مسیر گزارش‌ها در INSTALLER_TEST_MATRIX ثبت‌اند. بسته واقعی vendor تولید و assets خارج مخزن assemble/sign/verify شد. اجرای remote workflow و نصب کامل KVM هنوز not_run هستند؛ هیچ Release واقعی یا فرمان دانلود حدسی در README ثبت نشد.

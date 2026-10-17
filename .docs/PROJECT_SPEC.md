@@ -91,7 +91,7 @@
 
 ### 2.4 انتشار عمومی و متن‌باز
 
-نسخه اول پس از تکمیل به‌صورت public و open-source در GitHub منتشر می‌شود. پیش از انتشار باید مجوز OSI-approved با تصمیم صریح مالک انتخاب و در `LICENSE` ثبت شود؛ تا پیش از آن نباید نوع مجوز حدس زده شود.
+نسخه اول پس از تکمیل به‌صورت public و open-source در GitHub منتشر می‌شود. مالک در ۲۰۲۶-۱۰-۱۷ مجوز Apache-2.0 را صریحاً انتخاب کرد و متن آن در `LICENSE` ثبت شد. انتشار candidate با هر push به main، پس از موفقیت checks و تنظیم کلید signing، به‌صورت prerelease امضاشده است؛ این مسیر مجوز انتشار stable یا دورزدن readiness نیست.
 
 - repository فاقد secret، credential، داده شخصی، artifact حجیم و config محیط واقعی باشد.
 - هر release دارای tag امضاشده یا provenance قابل بررسی، checksum مستقل، changelog، compatibility matrix و artifact آماده نصب باشد.

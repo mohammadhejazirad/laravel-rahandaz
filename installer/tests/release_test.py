@@ -119,6 +119,82 @@ raise SystemExit(subprocess.call(sys.argv[1:] + ["--plan", "--public-url", "http
         command = guide.split("```bash\n", 1)[1].split("\n```", 1)[0]
         return self.command("bash", "-c", command)
 
+    def test_origin_routes_to_managed_nginx_host_unless_explicitly_overridden(self):
+        self.prepare()
+        self.mock_downloads()
+        result = self.bootstrap("--plan", "--public-url", "http://127.0.0.1:8080")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        arguments = self.marker.read_text().splitlines()
+        self.assertEqual(arguments[arguments.index("--server-name") + 1], "127.0.0.1")
+        result = self.bootstrap("--plan", "--public-url", "https://panel.example.org", "--server-name", "panel.internal")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        arguments = self.marker.read_text().splitlines()
+        self.assertEqual(arguments.count("--server-name"), 1)
+        self.assertEqual(arguments[arguments.index("--server-name") + 1], "panel.internal")
+
+    def test_initial_owner_receives_new_private_path_and_rerun_preserves_credentials(self):
+        root = self.work / "root"
+        (root / "var/lib/rahandaz/current").mkdir(parents=True)
+        php = self.work / "php-fixture"
+        php.write_text("""#!/usr/bin/env python3
+import os, pathlib, sys
+path = pathlib.Path(next(a.split('=', 1)[1] for a in sys.argv if a.startswith('--credentials-file=')))
+if path.exists() or path.parent.stat().st_mode & 0o077:
+    raise SystemExit(1)
+path.write_text('fixture-owner-credential')
+os.chmod(path, 0o600)
+""")
+        php.chmod(0o755)
+        result = self.command("bash", "-c", """
+set -euo pipefail
+INSTALLER_HOME="$1/installer"
+source "$INSTALLER_HOME/lib/common.sh"
+source "$INSTALLER_HOME/lib/engine.sh"
+TEST_ROOT="$3"
+installer_root_path() { printf '%s%s' "$TEST_ROOT" "$1"; }
+installer_state_get() { printf succeeded; }
+MODE=apply
+INSTALLER_PHP_BIN="$2"
+stage_13_first_boot
+stage_13_first_boot
+""", "fixture", ROOT, php, root)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        credentials = root / "root/rahandaz-initial-credentials.txt"
+        self.assertEqual(credentials.read_text(), "fixture-owner-credential")
+        self.assertEqual(credentials.stat().st_mode & 0o777, 0o600)
+        self.assertNotIn("fixture-owner-credential", result.stdout + result.stderr)
+
+    def test_nginx_is_loaded_after_services_and_reload_failure_is_not_success(self):
+        script = """
+set -euo pipefail
+INSTALLER_HOME="$1/installer"
+source "$INSTALLER_HOME/lib/common.sh"
+source "$INSTALLER_HOME/lib/render.sh"
+source "$INSTALLER_HOME/lib/engine.sh"
+TEST_ROOT="$2"
+installer_sysroot() { printf /; }
+installer_root_path() { printf '%s%s' "$TEST_ROOT" "$1"; }
+installer_pid1_name() { printf systemd; }
+security_runtime_permissions() { :; }
+security_redis_units() { :; }
+systemctl() {
+    printf '%s\n' "$*" >> "$TEST_ROOT/systemctl.log"
+    if [[ "$*" == 'reload nginx' && "$FAIL_RELOAD" == 1 ]]; then return 1; fi
+}
+MODE=apply
+INSTALLER_PHP_BIN=/usr/bin/php8.4
+INSTALLER_PHP_FPM_BIN=/usr/sbin/php-fpm8.4
+FAIL_RELOAD="$3"
+stage_12_systemd_services
+"""
+        for fail in ("0", "1"):
+            root = self.work / ("systemd-" + fail)
+            root.mkdir()
+            result = self.command("bash", "-c", script, "fixture", ROOT, root, fail)
+            self.assertEqual(result.returncode, int(fail), result.stderr)
+            calls = (root / "systemctl.log").read_text().splitlines()
+            self.assertEqual(calls[-2:], ["enable --now nginx", "reload nginx"])
+
     def test_exact_generated_command_downloads_verifies_and_runs_plan(self):
         self.prepare()
         self.mock_downloads()

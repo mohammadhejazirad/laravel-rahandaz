@@ -28,13 +28,13 @@ bash installer/bin/rahandaz-install --plan --state-dir /tmp/rahandaz-plan
 
 **پس از انتشار و تأیید نصب نسخهٔ عمومی**، کاربر به سرور SSH می‌زند، فرمان همان نسخه را کپی می‌کند و با حساب root یا دارای sudo اجرا می‌کند. بسته شامل وابستگی‌های PHP و رابط build‌شده است؛ نصب Node.js، npm یا Composer روی سرور صرفاً برای پنل لازم نیست. نصب‌کننده PHP 8.4، Nginx، PostgreSQL، Redis، workerها و scheduler را نصب/تأیید و سلامت را بررسی می‌کند. اطلاعات ورود اولیه فقط در فایل خصوصی مالک ذخیره می‌شود. نصب روی سرور تازه توصیه می‌شود؛ سرویس موجود بدون تأیید پذیرفته نمی‌شود.
 
-workflow فعلی فقط candidateهای `alpha`، `beta` یا `rc` را build می‌کند و با تأیید دستی می‌تواند **Draft prerelease** بسازد؛ Draft برای دانلود عمومی در دسترس نیست و نسخهٔ پایدار خودکار منتشر نمی‌شود. HTTPS پنل و تکمیل executor هنوز مانع انتشارند؛ نصب‌کننده قابلیت‌های پیاده‌سازی‌نشده را فعال نمی‌کند. راهنمای آماده‌سازی GitHub، امضا، آزمون VM و انتشار در [مدیریت Release](docs/RELEASE_MANAGEMENT.md) است.
+هر push به `main`، آزمون و build یک candidate نسخه‌دار را آغاز می‌کند؛ با تنظیم یک‌باره کلید و متغیر انتشار در GitHub، **prerelease امضاشده** خودکار منتشر می‌شود. نسخهٔ پایدار خودکار منتشر نمی‌شود. HTTPS پنل و تکمیل executor هنوز مانع انتشارند؛ نصب‌کننده قابلیت‌های پیاده‌سازی‌نشده را فعال نمی‌کند. راهنمای آماده‌سازی GitHub، امضا، آزمون VM و انتشار در [مدیریت Release](docs/RELEASE_MANAGEMENT.md) است.
 
 صفحات استقرار، دامنه، دیتابیس، پشتیبان‌گیری و پایش اکنون به Backend و PostgreSQL متصل‌اند؛ درخواست‌های عملیاتی Job/Outbox/Audit واقعی دارند، ولی executor میزبان هنوز بسته است. مرکز آموزش‌ها جست‌وجو و نشان‌گذاری واقعی دارد. [گیت‌های انتشار](docs/V1_RELEASE_READINESS.md) و [گزارش آزمون](docs/V1_TEST_REPORT.md) محدوده تأییدشده و مانع‌ها را مشخص می‌کنند. این مخزن هنوز Production-ready نیست.
 
-درخت `installer/` در مخزن است، ولی نصب‌کنندهٔ عمومی و Release امضاشده منتشر نشده و مجوز OSI هم نیست. حالت پیش‌فرض `RAHANDAZ_EXECUTION_MODE=disabled` است. در این حالت پنل دستور میزبان اجرا نمی‌کند و هیچ عملیات یا deployment را موفق اعلام نمی‌کند. جدول وضعیت پایین، قابلیت آماده را از طرح محصول جدا می‌کند. جزئیات پیشرفت در [docs/IMPLEMENTATION_PROGRESS.md](docs/IMPLEMENTATION_PROGRESS.md) و مشخصات در [.docs/PROJECT_SPEC.md](.docs/PROJECT_SPEC.md) است.
+درخت `installer/` در مخزن است، ولی نصب‌کنندهٔ عمومی و Release امضاشده منتشر نشده و مجوز پروژه [Apache-2.0](LICENSE) است. حالت پیش‌فرض `RAHANDAZ_EXECUTION_MODE=disabled` است. در این حالت پنل دستور میزبان اجرا نمی‌کند و هیچ عملیات یا deployment را موفق اعلام نمی‌کند. جدول وضعیت پایین، قابلیت آماده را از طرح محصول جدا می‌کند. جزئیات پیشرفت در [docs/IMPLEMENTATION_PROGRESS.md](docs/IMPLEMENTATION_PROGRESS.md) و مشخصات در [.docs/PROJECT_SPEC.md](.docs/PROJECT_SPEC.md) است.
 
-نشان‌های بالا فقط نسخه قفل‌شده Laravel و محدودیت PHP را می‌گویند. تصویر PostgreSQL به image توسعه `postgres:16-alpine` در `compose.dev.yml` اشاره دارد، نه به یک نسخه production آزموده‌شده روی Ubuntu. نشان License، Release و CI ساخته نشده است. فایل مجوز و Release عمومی نیستند. فایل‌های workflow در `.github/workflows/` هستند و در این مخزن اجرا نشده‌اند، پس نشان سبز CI معنا ندارد.
+نشان‌های بالا فقط نسخه قفل‌شده Laravel و محدودیت PHP را می‌گویند. تصویر PostgreSQL به image توسعه `postgres:16-alpine` در `compose.dev.yml` اشاره دارد، نه به یک نسخه production آزموده‌شده روی Ubuntu. فایل مجوز Apache-2.0 موجود است؛ وجود Release عمومی و موفقیت CI باید از GitHub بررسی شود. فایل‌های workflow در `.github/workflows/` هستند و در این مخزن اجرا نشده‌اند، پس نشان سبز CI معنا ندارد.
 
 ## فهرست
 
@@ -219,7 +219,7 @@ Helper ممتاز در طرح، یک برنامه root-owned با اسکیمای
 <a id="install"></a>
 ## نصب
 
-نصب تولید هنوز منتشر نشده است. اینجا فرمان دانلود یا `curl | bash` نیست، چون Release امضاشده و کلید عمومی `installer/trust/rahandaz-release.pub` وجود ندارند و URL انتشار حدس زده نمی‌شود.
+نصب تولید هنوز منتشر نشده است. اینجا فرمان دانلود یا `curl | bash` نیست، چون Release عمومی امضاشده و آزمون‌شده هنوز تأیید نشده است و URL انتشار حدس زده نمی‌شود.
 
 فرمان عمومی نصب، پس از قبولی Gateها، از `INSTALL.md` تولیدشده برای همان Release به بالای این README منتقل خواهد شد. وجود کد bootstrap یا Draft Release به معنی نصب Production تأییدشده نیست.
 
@@ -229,18 +229,28 @@ Helper ممتاز در طرح، یک برنامه root-owned با اسکیمای
 bash installer/bin/rahandaz-install --plan --state-dir /tmp/rahandaz-plan
 ```
 
-اعمال بعدی باید نسخه‌دار باشد، قبل از هر تغییر امضا و SHA-256 را بررسی کند، قابل ادامه باشد، سایت و سرویس موجود را بی‌اجازه عوض نکند، SSH جاری را نبندد، و حساب لینوکسی `rahandaz` را بدون sudo و بدون shell ورود بسازد. عملیات ممتاز بعد از بالا آمدن پنل فقط از helper می‌گذرد و امروز آن سوکت نصب نیست. سلامت نصب تولید از روی این فایل تأیید نمی‌شود.
+اعمال بعدی باید نسخه‌دار باشد، قبل از هر تغییر امضا و SHA-256 را بررسی کند، قابل ادامه باشد، سایت و سرویس موجود را بی‌اجازه عوض نکند، SSH جاری را نبندد، و مدیر انسانی `rahandaz` با sudo رمزدار و حساب سرویس محدود `rahandaz-svc` را جدا بسازد. عملیات ممتاز بعد از بالا آمدن پنل فقط از helper می‌گذرد و امروز آن سوکت نصب نیست. سلامت نصب تولید از روی این فایل تأیید نمی‌شود.
 
-پیش‌نیاز هدف: Ubuntu Server 22.04، 24.04 یا 26.04 روی x86_64، حداقل ۱ GiB RAM و ۵ GiB دیسک آزاد، و دسترسی root برای اعمال. PHP خود راه‌انداز 8.4 است و از مخزن امضاشده `packages.sury.org` می‌آید؛ PHP پروژه‌های کاربر عوض نمی‌شود. نصب کامل این سه نسخه هنوز اجرا نشده است. Node.js برای اجرای پنل لازم نیست. راهنمای کامل در [docs/INSTALLATION.md](docs/INSTALLATION.md) و به‌روزرسانی در [docs/SELF_UPDATE.md](docs/SELF_UPDATE.md) است.
+انتخاب پیشنهادی فعلی Ubuntu Server 22.04 یا 24.04 است؛ 26.04 آزمایشی و غیرپیشنهادی است. پیش‌نیاز هدف روی x86_64، حداقل ۱ GiB RAM و ۵ GiB دیسک آزاد، و دسترسی root برای اعمال. PHP خود راه‌انداز 8.4 است و از مخزن امضاشده `packages.sury.org` می‌آید؛ PHP پروژه‌های کاربر عوض نمی‌شود. نصب کامل این سه نسخه هنوز اجرا نشده است. Node.js برای اجرای پنل لازم نیست. راهنمای کامل در [docs/INSTALLATION.md](docs/INSTALLATION.md) و به‌روزرسانی در [docs/SELF_UPDATE.md](docs/SELF_UPDATE.md) است.
 
 <a id="github-releases"></a>
 ### انتشار و نصب از GitHub
 
-بستهٔ آمادهٔ نصب با Source ZIP خودکار GitHub متفاوت است: باید `vendor` تولید و `public/build` را همراه داشته باشد. workflow [Build release candidate](.github/workflows/release-build.yml) از tag موجود آزمون و build می‌گیرد. ساخت Draft به انتخاب مجوز `LICENSE`، کلید عمومی بررسی‌شده در `installer/trust/rahandaz-release.pub` و secret خصوصی در Environment محافظت‌شدهٔ `release-signing` نیاز دارد. هیچ کلید خصوصی در Git ثبت نمی‌شود.
+بستهٔ آمادهٔ نصب با Source ZIP خودکار GitHub متفاوت است: باید `vendor` تولید و `public/build` را همراه داشته باشد. workflow [Build and publish release candidate](.github/workflows/release-build.yml) هر push به main را با نسخه `v1.0.0-beta.<run>.<attempt>` آزمون و build می‌کند. انتشار خودکار prerelease به متغیر `RAHANDAZ_AUTOMATIC_PRERELEASES=true`، کلید عمومی بررسی‌شده در `installer/trust/rahandaz-release.pub` و secret خصوصی در Environment محافظت‌شدهٔ `release-signing` نیاز دارد. هیچ کلید خصوصی در Git ثبت نمی‌شود.
 
 خروجی امضاشده شامل بستهٔ نسخه‌دار، `release.manifest` و امضای آن، `install.sh`، `INSTALL.md`، کلید عمومی و `SHA256SUMS` امضاشده است. کلید عمومی همراه دانلود صرفاً برای مشاهده است؛ اعتماد bootstrap از کلید pin‌شده داخل اسکریپت و هش اسکریپت در راهنمای بررسی‌شده می‌آید. مراحل تنظیم و محدودیت‌ها در [docs/RELEASE_MANAGEMENT.md](docs/RELEASE_MANAGEMENT.md) آمده است.
 
 برای دسترسی اولیهٔ HTTP از شبکهٔ مورد اعتماد یا SSH tunnel استفاده کنید؛ اعتبار ورود را روی HTTP عمومی نفرستید. TLS پنل در نصب‌کنندهٔ فعلی خودکار آماده نمی‌شود. بعد از قبولی نصب، مسیر ورود `/rahandaz/login` و فایل اعتبار اولیه `/root/rahandaz-initial-credentials.txt` است؛ رمز در لاگ یا خروجی عمومی چاپ نمی‌شود.
+
+### مسیر نصب کاربر بعد از انتشار امضاشده
+
+1. با SSH و حساب root یا sudo وارد Ubuntu تازه شوید؛ 24.04 انتخاب پیشنهادی برای اولین آزمون است.
+2. از صفحه همان نسخه در GitHub Releases، فایل `INSTALL.md` را باز کنید و فرمان یک‌خطی تولیدشده را اجرا کنید. این فرمان اسکریپت نسخه ثابت را دانلود، SHA-256 آن را بررسی و سپس اجرا می‌کند؛ bootstrap امضای manifest و صحت کل بسته را بررسی می‌کند. تا انتشار واقعی و آزمون فرمان، URL/هش ساختگی در این README قرار نمی‌گیرد.
+3. نصب‌کننده وابستگی‌های کنترل‌پلین، PHP 8.4، Nginx، PostgreSQL، Redisهای اختصاصی، سرویس‌ها و پنل build‌شده را نصب/بررسی می‌کند؛ نصب در Production native است و به Docker نیاز ندارد. Mirror ایران با گزینه `--prefer-iranian-mirrors` قابل انتخاب است؛ این گزینه جای تضمین دسترسی GitHub یا مخزن PHP نیست.
+4. پس از healthcheck موفق، حساب اولیه پنل خودکار ساخته شده و مسیر ورود و فایل root-only اعتبار اعلام می‌شود. در اتصال SSH امن، اعتبار را با `sudo cat /root/rahandaz-initial-credentials.txt` ببینید، وارد پنل شوید و رمز اولیه را عوض کنید. رمزها وارد لاگ نصب نمی‌شوند و اجرای مجدد آنها را بازتولید نمی‌کند.
+5. در وضعیت فعلی می‌توانید پنل و ثبت درخواست‌ها را تست کنید؛ **مدیریت و نصب/استقرار واقعی از پنل هنوز به تکمیل helper/executor وابسته است**. پیام اجرای میزبان غیرفعال، خطای نصب نیست و با تغییر env دور زده نمی‌شود.
+
+اولین آزمایش شخصی را مطابق [راهنمای نصب روی KVM](docs/KVM_INSTALLATION_TEST.md) انجام دهید. مسیر دریافت بسته Actions و امضای آزمایشی قبل از راه‌اندازی انتشار عمومی نیز در همان سند آمده است. HTTP اولیه فقط از tunnel یا شبکه trusted استفاده شود؛ HTTPS پنل هنوز خودکار صادر نمی‌شود.
 
 ### بالا آوردن محیط توسعه
 
@@ -546,4 +556,4 @@ php artisan rahandaz:doctor
 <a id="license"></a>
 ## مجوز
 
-مجوز OSI انتخاب نشده و فایل `LICENSE` در مخزن نیست. عمومی بودن یک مخزن، به‌تنهایی حق استفاده، تغییر یا توزیع نمی‌دهد. تا وقتی مالک مجوز را در `LICENSE` ثبت کند، این پروژه مجوز مشخصی ندارد. توضیح بسته Composer هم همین را می‌گوید.
+این پروژه با انتخاب مالک تحت [Apache License 2.0](LICENSE) منتشر می‌شود. مجوزهای dependencyها، فونت و دارایی‌های ثالث مستقل‌اند و باید حفظ شوند. انتخاب مجوز به معنی گواهی امنیت، پشتیبانی Production یا تکمیل قابلیت‌های برنامه نیست.

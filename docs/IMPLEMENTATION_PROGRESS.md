@@ -351,3 +351,16 @@ Manifest عمومی با scope مسیر پنل، آیکون‌های مشتق ا
 کش Worker فقط شامل صفحه آفلاین عمومی و نشان رسمی است؛ صفحات خصوصی، Inertia، API و عملیات مدیریتی cache/replay نمی‌شوند. پاسخ HTML/Inertia/احراز هویت‌شده no-store است. نسخه تازه بدون reload فرم باز منتظر تأیید کاربر می‌ماند؛ این قابلیت عملیات به‌روزرسانی سرور را فعال نمی‌کند.
 
 lint، TypeScript و production build موفق شدند. کل مجموعه PHP با PostgreSQL/Redis آزمایشی loopback: ۱۴۹ آزمون و ۳۶۰۳ assertion موفق؛ زیرمجموعه PWA/Brand: ۱۰ آزمون و ۴۹۷ assertion. Chrome واقعی headless نصب‌پذیری manifest، ثبت Worker، لغو prompt، عرض‌های ۳۲۰/۳۹۰/۷۶۸/۱۴۴۰، حفظ فرم هنگام update، تأیید reload، کش عمومی و قطع واقعی origin را آزمود و موفق بود؛ screenshot موبایل نیز بررسی شد. PHP محیط 8.5.11 است و گواهی runtime هدف 8.4 محسوب نمی‌شود. نصب روی دستگاه فیزیکی iOS/Android/macOS/Windows و HTTPS دامنه نهایی هنوز اجرا نشده است. Installer/میزبان تغییر نکردند و Matrix Ubuntu در این برش دوباره اجرا نشد.
+
+
+## 2026-10-17 — انتشار خودکار prerelease و آزمون نصب KVM
+
+با تصمیم مالک Apache-2.0 در LICENSE و Composer ثبت شد. هر push main، candidate با نسخه beta/run/attempt می‌سازد؛ پس از checks و signing، prerelease نسخه‌دار منتشر می‌شود و stable/latest دست‌نخورده‌اند. مسیر دستی Draft حفظ شد. tag به SHA آزموده‌شده متصل است، build به secret دسترسی ندارد و Release قبلی بازنویسی نمی‌شود. کلید RSA-3072 بیرون مخزن ایجاد شد؛ فقط public pin وارد Git است. Environment امضا با branch policy فقط main، secret و متغیر Repository انتشار خودکار واقعاً در GitHub تنظیم شدند؛ تغییرات کد هنوز push نشده و Release/remote-run ایجاد نشده است.
+
+README، راهنمای انتشار/نصب و راهنمای جدید KVM، نصب پس از SSH، فرمان واقعی تولیدشده در INSTALL.md هر نسخه، owner خودکار و فایل اعتبار، تعویض رمز، tunnel، resume و تفاوت نصب پنل با اجرای عملیات میزبان را توضیح می‌دهند. executor همچنان fail-closed است؛ ادعای استقرار واقعی اضافه نشد. نقص فایل موقت موجود در first boot و بارگذاری‌نشدن سایت جدید Nginx اصلاح و تست شد؛ نام میزبان از origin دریافت می‌شود.
+
+Matrix: هر سه Ubuntu 22.04/24.04/26.04 container-lab، installer ۷۲/۰ و release ۲۹/۰ و candidate چهار/۰ و plan موفق. میزبان: release ۲۹، candidate چهار و PHPUnit bootstrap/update ۲۱ آزمون/۹۴ assertion موفق؛ actionlint، YAML/Bash syntax، composer validate و assemble/sign/verify بسته واقعی تولید موفق. جزئیات شواهد در INSTALLER_TEST_MATRIX است. PHP میزبان 8.5.11 است؛ runtime هدف 8.4 و نصب کامل systemd/Nginx/health/reboot/SSH در VM هنوز تأیید نشده‌اند. راهنما و تنظیم GitHub جای اجرای واقعی CI یا VM نیستند.
+
+بازخوانی نهایی تنظیمات GitHub پس از پاسخ موفق عملیات ثبت، به دلیل timeout/no-route شبکه انجام نشد؛ تأیید اجرای workflow روی GitHub همچنان باقی است.
+
+برای آزمایش فوری مالک، candidate محلی امضاشده `1.0.0-alpha.0` با vendor تولید و assets در `var/release-test/signed/` و دستور انتقال در `var/release-test/README.md` آماده شد؛ این مسیر gitignored است، Release عمومی نیست و نصب VM آن not_run است.

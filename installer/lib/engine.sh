@@ -478,6 +478,12 @@ EOF
         installer_error STAGE_FAILED "A Rahandaz unit did not become active."
         return 1
     }
+    # APT may have started Nginx before the Rahandaz site existed.
+    systemctl enable --now nginx || return 1
+    systemctl reload nginx || {
+        installer_error STAGE_FAILED "Nginx did not load the verified Rahandaz site."
+        return 1
+    }
     return 0
 }
 
@@ -496,22 +502,25 @@ stage_13_first_boot() {
         installer_say "Owner credential file already exists. It was not rewritten."
         return 0
     fi
-    local tmp
-    tmp="$(mktemp)"
-    chmod 0600 "$tmp"
+    local tmp private_dir
+    private_dir="$(mktemp -d)"
+    chmod 0700 "$private_dir"
+    tmp="$private_dir/owner.txt"
+    # The CLI refuses an existing file; reserve a private directory, not the file.
     if ! (cd "$current" && "${INSTALLER_PHP_BIN}" artisan rahandaz:bootstrap-owner --credentials-file="$tmp" --no-interaction); then
-        rm -f "$tmp"
+        rm -rf -- "$private_dir"
         installer_error OWNER_FAILED "The initial owner was not created."
         return 1
     fi
     if [[ ! -s "$tmp" ]]; then
-        rm -f "$tmp"
+        rm -rf -- "$private_dir"
         installer_say "Owner already exists. No credential file was written."
         return 0
     fi
     mkdir -p "$(dirname "$creds")"
     mv "$tmp" "$creds"
     chmod 0600 "$creds"
+    rmdir "$private_dir"
     installer_say "Owner credentials written to ${creds}. The password was not printed."
     return 0
 }
@@ -526,11 +535,11 @@ stage_14_health_verification() {
     if [[ "$(installer_sysroot)" != "/" || "${INSTALLER_OFFLINE:-}" == "1" ]]; then
         return 2
     fi
-    installer_curl --fail --silent --show-error --max-time 15 "${base}/up" >/dev/null || {
+    installer_curl --fail --silent --show-error --max-time 15 --header "Host: localhost" "${base}/up" >/dev/null || {
         installer_error HEALTHCHECK_FAILED "Laravel /up did not succeed."
         return 1
     }
-    installer_curl --fail --silent --show-error --max-time 15 "${base}/rahandaz/login" >/dev/null || {
+    installer_curl --fail --silent --show-error --max-time 15 --header "Host: localhost" "${base}/rahandaz/login" >/dev/null || {
         installer_error HEALTHCHECK_FAILED "The panel login URL did not succeed."
         return 1
     }
@@ -546,7 +555,7 @@ stage_14_health_verification() {
     content="${content//\{\{HEALTH_MARKER\}\}/verified}"
     content="${content//\{\{SETUP_STATUS_LABEL\}\}/نصب بررسی شد}"
     printf '%s\n' "$content" >"$welcome"
-    installer_curl --fail --silent --show-error --max-time 15 "${base}/" | grep -q 'data-health-marker="verified"' || {
+    installer_curl --fail --silent --show-error --max-time 15 --header "Host: localhost" "${base}/" | grep -q 'data-health-marker="verified"' || {
         rm -f "$welcome"
         installer_error HEALTHCHECK_FAILED "The welcome page did not serve the verified marker."
         return 1

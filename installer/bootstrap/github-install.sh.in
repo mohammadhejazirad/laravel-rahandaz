@@ -7,6 +7,7 @@ release_version='@@VERSION@@'
 release_base='https://github.com/@@REPOSITORY@@/releases/download/v@@VERSION@@'
 mode=apply
 public_url=''
+server_name_set=0
 forward=()
 
 fail() { printf '%s\n' "${1}: ${2}" >&2; exit 1; }
@@ -31,6 +32,7 @@ while (( $# )); do
             (( $# >= 2 )) || fail INVALID_INPUT 'Missing option value.'
             case "$1" in
                 --server-name)
+                    server_name_set=1
                     [[ "$2" == _ || "$2" =~ ^[A-Za-z0-9][A-Za-z0-9.-]{0,252}$ ]] \
                         || fail INVALID_INPUT 'Server name must be a hostname or _.' ;;
                 --http-port)
@@ -74,6 +76,10 @@ except ValueError:
 raise SystemExit(0 if valid else 1)
 PY
     forward+=(--public-url "$public_url")
+    if [[ "$server_name_set" == 0 ]]; then
+        host="$(python3 -c 'import sys; from urllib.parse import urlsplit; print(urlsplit(sys.argv[1]).hostname)' "$public_url")"
+        forward+=(--server-name "$host")
+    fi
     if [[ "$public_url" == http://* ]]; then
         printf '%s\n' 'WARNING: HTTP is for trusted networks/SSH tunnels only. Do not expose panel credentials over public HTTP.' >&2
     fi

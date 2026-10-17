@@ -1,6 +1,8 @@
-name: Build release candidate
+name: Build and publish release candidate
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       tag:
@@ -16,11 +18,39 @@ permissions:
   contents: read
 
 concurrency:
-  group: release-candidate-${{ inputs.tag }}
+  group: release-candidate-${{ github.run_id }}
   cancel-in-progress: false
 
 jobs:
+  candidate:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      commit: ${{ steps.version.outputs.commit }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Select an immutable candidate version
+        id: version
+        env:
+          CANDIDATE_EVENT: ${{ github.event_name }}
+          CANDIDATE_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          python3 installer/release/candidate.py >> "$GITHUB_OUTPUT"
+          if [[ "$CANDIDATE_EVENT" == workflow_dispatch ]]; then
+            commit=$(git rev-parse --verify "refs/tags/$CANDIDATE_TAG^{commit}")
+            git merge-base --is-ancestor "$commit" "$GITHUB_SHA"
+          else
+            commit="$GITHUB_SHA"
+          fi
+          printf 'commit=%s\n' "$commit" >> "$GITHUB_OUTPUT"
+
   build:
+    needs: candidate
     runs-on: ubuntu-24.04
     if: github.ref == 'refs/heads/main'
     services:
@@ -41,20 +71,14 @@ jobs:
         ports: ["6380:6379"]
         options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
     env:
-      RELEASE_TAG: ${{ inputs.tag }}
+      RELEASE_TAG: ${{ needs.candidate.outputs.tag }}
       DB_HOST: 127.0.0.1
       REDIS_QUEUE_HOST: 127.0.0.1
       REDIS_CACHE_HOST: 127.0.0.1
     steps:
-      - name: Accept candidate versions only
-        run: |
-          [[ "$RELEASE_TAG" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)-(alpha|beta|rc)\.(0|[1-9][0-9]*)$ ]] || {
-            echo 'Only alpha/beta/rc tags are allowed. Stable release gates are still blocked.' >&2
-            exit 1
-          }
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.tag }}
+          ref: ${{ needs.candidate.outputs.commit }}
           persist-credentials: false
       - uses: shivammathur/setup-php@v2
         with:
@@ -77,6 +101,7 @@ jobs:
           node --experimental-strip-types --test tests/js/datetime.test.ts
           bash installer/tests/run.sh
           python3 installer/tests/release_test.py
+          python3 installer/tests/candidate_test.py
           python3 installer/tests/prerequisites_test.py
           python3 installer/tests/security_test.py
           bash infrastructure/operations/tests/run.sh
@@ -95,21 +120,25 @@ jobs:
           bash installer/release/assemble.sh --from "$staging/application" --version "${RELEASE_TAG#v}" --output dist
       - uses: actions/upload-artifact@v4
         with:
-          name: unsigned-${{ inputs.tag }}
+          name: unsigned-${{ needs.candidate.outputs.tag }}
           path: dist/rahandaz-*.tar.gz
           if-no-files-found: error
           retention-days: 14
 
-  draft:
-    needs: build
-    if: inputs.create_draft && github.ref == 'refs/heads/main'
+  publish:
+    needs: [candidate, build]
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      ((github.event_name == 'push' && vars.RAHANDAZ_AUTOMATIC_PRERELEASES == 'true') ||
+       (github.event_name == 'workflow_dispatch' && inputs.create_draft))
     runs-on: ubuntu-24.04
-    # Maintainer must configure required reviewers and branch restrictions for this environment.
+    # Restrict this environment to main. Optional reviewers pause automatic publication.
     environment: release-signing
     permissions:
       contents: write
     env:
-      RELEASE_TAG: ${{ inputs.tag }}
+      RELEASE_TAG: ${{ needs.candidate.outputs.tag }}
+      RELEASE_COMMIT: ${{ needs.candidate.outputs.commit }}
     steps:
       # Use reviewed tooling from main, not executable code from the candidate artifact.
       - uses: actions/checkout@v4
@@ -118,7 +147,7 @@ jobs:
           persist-credentials: false
       - uses: actions/download-artifact@v4
         with:
-          name: unsigned-${{ inputs.tag }}
+          name: unsigned-${{ needs.candidate.outputs.tag }}
           path: unsigned
       - name: Require a license and a separately pinned public key
         run: |
@@ -151,8 +180,23 @@ jobs:
           bash installer/release/prepare-github.sh --repository "$GITHUB_REPOSITORY" --manifest signed/release.manifest --signature signed/release.manifest.sig --public-key installer/trust/rahandaz-release.pub --artifact "signed/rahandaz-${version}.tar.gz" --output assets
           openssl dgst -sha256 -sign "$key_dir/release.key" -out assets/SHA256SUMS.sig assets/SHA256SUMS
           openssl dgst -sha256 -verify installer/trust/rahandaz-release.pub -signature assets/SHA256SUMS.sig assets/SHA256SUMS
-      - name: Create draft only (never publish or mark latest)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: signed-${{ needs.candidate.outputs.tag }}
+          path: assets/*
+          if-no-files-found: error
+          retention-days: 30
+      - name: Publish a test prerelease (never stable or latest)
         env:
           GH_TOKEN: ${{ github.token }}
+          CANDIDATE_EVENT: ${{ github.event_name }}
         run: |
-          gh release create "$RELEASE_TAG" assets/* --repo "$GITHUB_REPOSITORY" --verify-tag --draft --prerelease --latest=false --title "Rahandaz $RELEASE_TAG — test candidate" --notes-file assets/INSTALL.md
+          set -euo pipefail
+          options=(--verify-tag)
+          if [[ "$CANDIDATE_EVENT" == workflow_dispatch ]]; then
+            options+=(--draft)
+          else
+            # Create the tag at the tested commit; an existing tag is a conflict, never reused.
+            gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f "ref=refs/tags/$RELEASE_TAG" -f "sha=$RELEASE_COMMIT" >/dev/null
+          fi
+          gh release create "$RELEASE_TAG" assets/* --repo "$GITHUB_REPOSITORY" "${options[@]}" --prerelease --latest=false --title "Rahandaz $RELEASE_TAG — test candidate" --notes-file assets/INSTALL.md

@@ -9,9 +9,9 @@ Production نیست؛ وضعیت واقعی آزمون‌ها در [INSTALLER_TE
 
 نتیجه تازه در V1_TEST_REPORT: installer harness دوباره ۶۹ passed/۰ failed (updater زیرمجموعه ۲۱/۰)؛ full PHP suite اجرا شده، اما fresh install/health/login در VM همچنان requires_vm است. وجود صفحات درخواست و آموزش‌ها نصب عمومی را معتبر نمی‌کند؛ V1_RELEASE_READINESS مرجع gate است.
 
-درخت `installer/` در مخزن است و Release امضاشدهٔ عمومی نیست. `scripts/install.sh` وجود ندارد. فرمان `curl | bash` و URL دانلود GitHub در README نیست، چون کلید `installer/trust/rahandaz-release.pub` عمداً غایب است و artifact تأییدشده منتشر نشده است.
+درخت `installer/` در مخزن است و Release امضاشدهٔ عمومی نیست. `scripts/install.sh` وجود ندارد. فرمان `curl | bash` و URL دانلود GitHub در README نیست، چون artifact عمومی تأییدشده و آزمون VM هنوز نداریم؛ کلید عمومی انتشار اکنون در `installer/trust/rahandaz-release.pub` ثبت شده است.
 
-زیرساخت GitHub Releases و bootstrap نسخه‌دار اضافه شده است. `install.sh` فایل **تولیدشده برای بستهٔ امضاشده** است، نه raw روی main. `INSTALL.md` فرمان قابل‌کپی با هش واقعی دارد. workflow تنها candidate/Draft است؛ دانلود anonymous از Draft ممکن نیست. تنظیم و شرایط اضافه‌شدن فرمان عمومی به README در [RELEASE_MANAGEMENT.md](RELEASE_MANAGEMENT.md) آمده است. نصب‌کننده هنوز TLS پنل یا executor پیاده‌سازی‌نشده را آماده نمی‌کند؛ HTTP اولیه فقط از tunnel/شبکه trusted استفاده شود.
+زیرساخت GitHub Releases و bootstrap نسخه‌دار اضافه شده است. `install.sh` فایل **تولیدشده برای بستهٔ امضاشده** است، نه raw روی main. `INSTALL.md` فرمان قابل‌کپی با هش واقعی دارد. workflow با هر push به main بسته candidate می‌سازد و پس از تنظیم signing و متغیر انتشار، prerelease امضاشده منتشر می‌کند؛ اجرای دستی Draft نیز باقی است و دانلود anonymous از Draft ممکن نیست. تنظیم و شرایط اضافه‌شدن فرمان عمومی به README در [RELEASE_MANAGEMENT.md](RELEASE_MANAGEMENT.md) آمده است. نصب‌کننده هنوز TLS پنل یا executor پیاده‌سازی‌نشده را آماده نمی‌کند؛ HTTP اولیه فقط از tunnel/شبکه trusted استفاده شود.
 
 طرح بدون تغییر سرور:
 
@@ -35,3 +35,5 @@ bash installer/bin/rahandaz-install --plan --state-dir /tmp/rahandaz-plan
 ## تجربهٔ شروع در پنل
 
 پس از نصب معتبر و ورود مالک، در صورت الزام گذرواژهٔ اولیه تغییر می‌کند. «راه‌اندازی» مشخصات همان میزبان را فقط می‌خواند؛ مرحلهٔ نصب پنهان یا دکمهٔ پایان ساختگی ندارد. مسیرهای راهنما، اتصال حساب گیت و پروژه‌ها کنار مشخصات در دسترس‌اند. داشبورد نیز همین مسیر شروع و نتیجه‌های واقعی اخیر را نشان می‌دهد. اتصال حساب، ثبت پروژه، درخواست استقرار و اجرای موفق میزبان چهار وضعیت متفاوت‌اند. مستندات رابط در UX_SYSTEM.md و وضعیت قابلیت‌ها در IMPLEMENTATION_PROGRESS.md است.
+
+برای اولین نصب شخصی روی Ubuntu در KVM، [راهنمای آزمون VM](KVM_INSTALLATION_TEST.md) را دنبال کنید؛ مسیر عمومی و مسیر artifact خصوصی Actions جدا توضیح داده شده‌اند.
