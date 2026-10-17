@@ -1,5 +1,12 @@
 # نصب
 
+برای انتخاب سرور فعلاً **Ubuntu Server 22.04 LTS یا 24.04 LTS (amd64)** پیشنهاد می‌شود.
+**Ubuntu 26.04 فعلاً آزمایشی است و برای نصب راه‌انداز توصیه نمی‌شود**؛ ارزیابی سازگاری آن کامل نشده
+و گزینه‌های Mirror تأییدشده، به‌ویژه برای سرورهای ایران، محدودتر است. وجود آزمون کانتینری یا یک Mirror
+قابل دسترس به معنی آمادگی نصب کامل نیست. 26.04 در ماتریس آزمون باقی می‌ماند تا پس از تکمیل آزمون‌های
+VM و بررسی مخازن و Mirrorها دوباره ارزیابی شود. پیشنهاد 22.04/24.04 نیز به معنی تأیید نهایی نصب
+Production نیست؛ وضعیت واقعی آزمون‌ها در [INSTALLER_TEST_MATRIX.md](INSTALLER_TEST_MATRIX.md) ثبت شده است.
+
 نتیجه تازه در V1_TEST_REPORT: installer harness دوباره ۶۹ passed/۰ failed (updater زیرمجموعه ۲۱/۰)؛ full PHP suite اجرا شده، اما fresh install/health/login در VM همچنان requires_vm است. وجود صفحات درخواست و آموزش‌ها نصب عمومی را معتبر نمی‌کند؛ V1_RELEASE_READINESS مرجع gate است.
 
 درخت `installer/` در مخزن است و Release امضاشدهٔ عمومی نیست. `scripts/install.sh` وجود ندارد. فرمان `curl | bash` و URL دانلود GitHub در README نیست، چون کلید `installer/trust/rahandaz-release.pub` عمداً غایب است و artifact تأییدشده منتشر نشده است.

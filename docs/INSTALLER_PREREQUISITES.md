@@ -6,7 +6,15 @@ require an application artifact because it does not install application code. It
 the signed-release gate of `rahandaz-install`, enable the operations engine, migrate a database,
 create an application key, change SSH/firewall/DNS, or reboot the server.
 
-Target platforms are Ubuntu Server **22.04 (jammy), 24.04 (noble), 26.04 (resolute), amd64**.
+For current server selection, prefer **Ubuntu Server 22.04 LTS or 24.04 LTS (amd64)**.
+**Ubuntu 26.04 is experimental and is not currently recommended for installing Rahandaz**, especially
+on Iranian servers: compatibility assessment is incomplete and verified mirror choices are more
+limited. Successful container tests or one reachable mirror do not certify complete installation.
+Reconsider this recommendation after VM and repository/mirror acceptance. The recommendation for
+22.04/24.04 is not a claim of production certification.
+
+The installer still recognizes Ubuntu Server **22.04 (jammy), 24.04 (noble), 26.04 (resolute), amd64**
+as test targets; 26.04 remains in the test matrix.
 Other distributions, Ubuntu versions and architectures fail closed. A target is not a claim of VM
 certification. Production is native; unmarked containers are rejected for apply.
 All terminal prompts, errors and comments in the executable implementation are English/ASCII.
