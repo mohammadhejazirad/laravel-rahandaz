@@ -46,3 +46,15 @@
 ## آنچه اجرا نشد
 
 `shellcheck`، `shfmt` و `bats` نصب نیستند. reboot واقعی، تغییر فایروال، harden واقعی SSH، حذف پایگاه، حذف سرویس، ارتقای بسته و rollback روی سیستم واقعی اجرا نشدند و نباید روی این میزبان توسعه اجرا شوند. تا عبور یک VM ایزوله، هیچ عملیات نصبی production-ready نیست.
+
+## آماده‌سازی وابستگی‌ها — ۲۰۲۶-۱۰-۱۷
+
+`installer/bin/rahandaz-prerequisites` یک فاز اپراتوری پیش از پنل است و Operations Engine را
+باز نمی‌کند. نصب واقعی بسته‌ها، rerun و recovery بستهٔ unpacked در container-lab هر سه Ubuntu
+22.04/24.04/26.04 و ۳۸ آزمون قرارداد اجرا شدند؛ جزئیات و شواهد در
+[INSTALLER_TEST_MATRIX](INSTALLER_TEST_MATRIX.md) و
+[قرارداد فاز اولیه](INSTALLER_PREREQUISITES.md) است. دریافت indexهای امضاشدهٔ Mirror ایرانی
+نیز از شبکهٔ آزمایشگاه اجرا شد. نتیجهٔ apply کانتینر `incomplete / exit 10` است.
+
+وضعیت systemd/health میزبان/reboot/شبکهٔ محدود ایران در هر سه نسخه همچنان **requires_vm / not_run**
+است؛ هیچ خانهٔ پشتیبانی عملیات میزبان با آزمون package/container به supported ارتقا نیافت.

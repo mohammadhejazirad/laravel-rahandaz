@@ -2,9 +2,15 @@ name: Installer tests
 
 on:
   workflow_dispatch:
+    inputs:
+      live_packages:
+        description: "Install prerequisites and rerun inside disposable Ubuntu lab containers (not VM certification)"
+        type: boolean
+        default: false
   pull_request:
     paths:
       - "installer/**"
+      - "tests/infrastructure/ubuntu-lab/scripts/test-prerequisites.sh"
       - ".github/workflows/installer-test.yml"
 
 permissions:
@@ -19,3 +25,35 @@ jobs:
         run: |
           bash installer/tests/run.sh
           python3 installer/tests/release_test.py
+          python3 installer/tests/prerequisites_test.py
+
+  prerequisite-lab:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ubuntu: ["22.04", "24.04", "26.04"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build disposable Ubuntu lab image
+        env:
+          UBUNTU_VERSION: ${{ matrix.ubuntu }}
+        run: |
+          docker build --tag "rahandaz-ubuntu-lab:$UBUNTU_VERSION" \
+            --file "tests/infrastructure/ubuntu-lab/docker/Dockerfile.ubuntu-$UBUNTU_VERSION" \
+            tests/infrastructure/ubuntu-lab/docker
+      - name: Run prerequisite contracts on target Ubuntu
+        env:
+          UBUNTU_VERSION: ${{ matrix.ubuntu }}
+        run: bash tests/infrastructure/ubuntu-lab/scripts/test-prerequisites.sh "$UBUNTU_VERSION" --fixtures
+      - name: Install real packages and rerun inside lab container
+        if: github.event_name == 'workflow_dispatch' && inputs.live_packages
+        env:
+          UBUNTU_VERSION: ${{ matrix.ubuntu }}
+        run: bash tests/infrastructure/ubuntu-lab/scripts/test-prerequisites.sh "$UBUNTU_VERSION" --live
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: prerequisite-lab-${{ matrix.ubuntu }}
+          path: tests/infrastructure/ubuntu-lab/reports/prerequisites-*/**
+          if-no-files-found: warn

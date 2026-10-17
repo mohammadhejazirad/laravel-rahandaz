@@ -77,6 +77,7 @@ jobs:
           node --experimental-strip-types --test tests/js/datetime.test.ts
           bash installer/tests/run.sh
           python3 installer/tests/release_test.py
+          python3 installer/tests/prerequisites_test.py
           bash infrastructure/operations/tests/run.sh
           composer audit --locked --no-interaction
           npm audit --audit-level=high

@@ -277,3 +277,30 @@ Migration افزایشی `2026_10_16_200000_add_self_managed_gitlab` origin تن
 مسیر افزودن حساب از سه کارت فنی هم‌زمان به Modal انتخاب سرویس و فرم همان سرویس تبدیل شد. GitHub بدون برنامه از Manifest با تأیید در GitHub و دریافت مستقیم/رمزگذاری راز در Backend استفاده می‌کند؛ اطلاعات Client ID/Secret نیازی به کپی ندارند. state ده‌دقیقه‌ای و یک‌بارمصرف به user/workspace/session متصل است؛ جایگزینی خودکار برنامهٔ موجود ممنوع است. برنامهٔ خودکار خصوصی است و تنظیم پیشرفته برای برنامهٔ موجود/سازمانی باقی است. GitLab عمومی/شخصی مسیر سریع توکن دارند؛ OAuth پس از تنظیم اولیه با مرورگر ادامه می‌یابد. انتخاب مخزن‌ها جست‌وجوی واقعی، انتخاب گروهی همان صفحه، مراحل و وضعیت ذخیره دارد. تست اتصال و تاریخچهٔ تمام رویدادها حفظ شدند. ساخت پروژه/clone/deployment و پوستهٔ همهٔ صفحات در این برش بازطراحی نشده‌اند. هیچ تصویر خصوصی به مخزن یا public اضافه نشد. آزمون زندهٔ provider و QA مرورگر انجام نشده‌اند؛ Matrix Ubuntu در این تغییر اجرا نشد و نصب‌کننده/عملیات میزبان تغییر نکردند.
 
 اعتبارسنجی این برش: full suite با PHP توسعه 8.5 و PostgreSQL/Redis ایزوله، ۱۴۱ آزمون و ۳۵۰۸ assertion موفق؛ پس از اصلاح نهایی Manifest، ۲۵ آزمون Git با ۲۶۲ assertion دوباره موفق شدند. lint، TypeScript، build، Pint و diff-check موفق بودند. آزمون‌ها API ساختگی دارند؛ ساخت App واقعی یا ورود زنده انجام نشد. مرورگر متصل موجود نبود.
+
+## اسکریپت تعاملی پیش‌نیازهای Ubuntu — ۲۰۲۶-۱۰-۱۷
+
+ورودی `installer/bin/rahandaz-prerequisites` و منطق `lib/prerequisites.sh` اضافه شدند. تمام خروجی
+و سؤال‌ها انگلیسی‌اند: تشخیص Ubuntu هدف/amd64، گزارش CPU/RAM/swap/disk/kernel/load، تأیید منابع،
+انتخاب y/n برای ایران، سپس تأیید نصب. Nginx/PostgreSQL/Redis و PHP 8.4 با extensionها نصب یا از
+وضعیت واقعی dpkg تأیید می‌شوند. Node/npm/Composer برای پنل نصب نمی‌شوند. این فاز کد برنامه،
+migration یا secret تولید نمی‌کند و دروازهٔ عملیات disabled باقی است.
+
+APT فقط source/index/archive اختصاصی را مصرف می‌کند؛ sourceهای سیستم بازنویسی نمی‌شوند. Mirror
+ایران opt-in و بدون fallback خاموش به خارج است. signature/TLS و سن metadata کنترل می‌شوند.
+بستهٔ نیمه‌نصب‌شده با installed اشتباه نمی‌شود؛ recovery سراسری بسته‌ها تأیید جدا، حفظ conffile
+و ممنوعیت removal دارد. قفل، audit، cache و اجرای دوباره وجود دارد. policy موقت جلوی شروع سرویس
+از maintainer script استاندارد را می‌گیرد؛ policy خارجی، سرویس masked، پورت اشغال و PHP پیش‌فرض
+حفاظت‌نشده باعث توقف امن می‌شوند. سرویس فعال restart نمی‌شود. تنظیمات خارجی حفظ می‌شوند.
+
+آزمون واقعی APT نشان داد pin قبلی PHP وابستگی‌ها را مسدود می‌کند؛ فقط در source محدود همین فاز
+`php-common` و برای jammy `libgd3` به‌صورت مستند مجاز شدند. نصب/rerun/recovery ACL و حفظ configها
+روی هر سه Ubuntu container-lab اجرا شدند؛ indexهای امضاشدهٔ Liara برای هر سه نیز بررسی شدند.
+۳۸ تست جدید روی میزبان/سه Ubuntu، regression نصب‌کننده ۷۱/۰ (updater زیرمجموعه ۲۱/۰)، bootstrap
+۲۶ تست، Bash syntax، ASCII، YAML parse و diff-check موفق بودند. CI این آزمون‌ها را دارد ولی remote
+Actions اجرا نشد. shellcheck/shfmt موجود نبودند. کد PHP/UI تغییر نکرد و آزمون PHP/UI اجرا نشد.
+
+مرجع قرارداد `docs/INSTALLER_PREREQUISITES.md` و شواهد در `docs/INSTALLER_TEST_MATRIX.md` است.
+Matrix هر سه VM همچنان requires_vm/not_run؛ خروج apply در کانتینر عمداً ۱۰ است و موفقیت سرویس
+یا نصب پنل محسوب نمی‌شود. Production، reboot، شبکهٔ محدود ایران، انتشار عمومی و فرمان curl
+تأیید نشده‌اند. برای صدور فرمان رسمی همچنان Release امضاشده و gateهای انتشار لازم‌اند.
