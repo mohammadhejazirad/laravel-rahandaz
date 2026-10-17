@@ -37,7 +37,7 @@ flowchart LR
 
 ## هویت‌ها و مجوزها
 
-- حساب مدیر `rahandaz` با SSH و sudo رمزدار از حساب سرویس `rahandaz-svc` locked/nologin و بدون sudo/docker جدا است. installer در اولین نصب برای packageها به root نیاز دارد؛ عملیات privileged بعدی فقط helper allowlisted.
+- حساب مدیر `rahandaz` با SSH مبتنی بر کلید و sudo رمزدار از حساب سرویس `rahandaz-svc` locked/nologin و بدون sudo/docker جدا است. installer در اولین نصب برای packageها به root نیاز دارد؛ عملیات privileged بعدی فقط helper allowlisted.
 - PHP-FPM و workerها با هویت‌های service محدود `rahandaz-web` و `rahandaz-worker` اجرا می‌شوند. UIDهای جدا برای هر environment کاربر (`rhproj_<shortid>`) تعریف می‌شوند؛ کد Git repo هرگز با هویت web/worker یا secret control plane اجرا نشود.
 - ایزولاسیون Unix user + filesystem ACL + systemd cgroup بدون Docker است؛ جایگزین security isolation یک VM در برابر tenant خصمانه نیست. پروژه‌ها متعلق به مالک/تیم مورد اعتماد فرض می‌شوند.
 - `APP_KEY` Laravel و `RAHANDAZ_MASTER_KEY` دو secret مستقل با backup/rotation مشخص‌اند؛ PostgreSQL محل ciphertext و state است، نه جای امن کلید اصلی. همه requestهای عملیاتی resource scope/Policy دارند.
@@ -77,3 +77,6 @@ GitHub README یک دستور واحد برای دانلود **release امضا�
 ## وضعیت برش ۲۰۲۶-۱۰-۱۴
 
 صفحات deployment/domain/database/backup/monitoring اکنون request/DB/Job/Audit واقعی دارند، نه host executor. شکست Job به deployment و restore مرتبط منتقل می‌شود و notification/audit واقعی یکتا ثبت می‌شود. نمودار/collector و نتیجه host ساخته نشده‌اند. آموزش‌ها Markdown نسخه‌دار و bookmark PG با pivot فاقد شناسه عمومی مستقل‌اند؛ ADR 0004 و `docs/TUTORIALS_ARCHITECTURE.md` قرارداد را ثبت کرده‌اند. retained metrics روزانه با batch محدود پاک می‌شوند. ResourceGrant جامع و مرز helper/socket همچنان blockerند. `docs/V1_RELEASE_READINESS.md` وضعیت اجرای واقعی را از معماری هدف جدا می‌کند.
+
+
+سیاست SSH در [SSH_ACCESS_POLICY.md](../docs/SSH_ACCESS_POLICY.md) تکمیل شده است: رمز Ubuntu برای sudo است؛ ورود SSH هدف فقط با کلید عمومی ثبت‌شده از پنل است. مسیر کامل ثبت/اعمال کلید و اثبات اتصال هنوز تکمیل نشده و دسترسی bootstrap تا تأیید recovery و اتصال دوم حفظ می‌شود؛ نصب امن از نظر SSH هنوز تأیید نشده است.

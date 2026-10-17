@@ -114,7 +114,7 @@ stage_04_runtime_installation() {
 
 stage_05_operational_account() {
     if [[ "$MODE" == plan ]]; then
-        installer_say 'PLAN administrator rahandaz (SSH, password sudo); separate locked nologin service rahandaz-svc.'
+        installer_say 'PLAN administrator rahandaz (password sudo; SSH key onboarding pending); separate locked nologin service rahandaz-svc.'
         return 0
     fi
     if [[ "$(installer_sysroot)" != / || "${INSTALLER_OFFLINE:-}" == 1 ]]; then

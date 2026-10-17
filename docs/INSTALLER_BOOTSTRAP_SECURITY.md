@@ -57,3 +57,6 @@ sudo --preserve-env=SSH_CONNECTION bash installer/bin/rahandaz-firewall --confir
 ## پذیرش
 
 آزمون‌های secret/permission/idempotency و نصب واقعی account/PostgreSQL/Redis در کانتینرهای آزمایشگاه اجرا می‌شوند. activation واحدهای systemd، SSH جدید، sudo/PAM، UFW IPv4/IPv6، rollback هنگام قطع اتصال، reboot و نصب کامل artifact نیازمند VM واقعی‌اند. تا ثبت موفق این موارد در Matrix، این تغییر production-ready یا Ubuntu supported اعلام نمی‌شود.
+
+
+سیاست SSH در [SSH_ACCESS_POLICY.md](SSH_ACCESS_POLICY.md) تکمیل شده است: رمز Ubuntu برای sudo است؛ ورود SSH هدف فقط با کلید عمومی ثبت‌شده از پنل است. مسیر کامل ثبت/اعمال کلید و اثبات اتصال هنوز تکمیل نشده و دسترسی bootstrap تا تأیید recovery و اتصال دوم حفظ می‌شود؛ نصب امن از نظر SSH هنوز تأیید نشده است.

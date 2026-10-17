@@ -62,3 +62,7 @@
 ## تغییر هویت bootstrap — 2026-10-17
 
 طبق ADR-0005، شناسه‌های قدیمی عملیات account حفظ شده‌اند ولی target آنها `rahandaz-svc` locked/nologin است؛ حساب مدیر `rahandaz` هدف ساخت/قفل/rotation موتور عملیات نیست. `bash infrastructure/operations/tests/run.sh` موفق شد و آزمون useradd هدف سرویس را نیز بررسی می‌کند. این مسیر همچنان fail-closed است؛ حساب مدیریتی فقط از bootstrap اپراتور ساخته می‌شود. آزمون واقعی حساب‌ها، PostgreSQL/Redis و permission در سه Ubuntu container-lab در INSTALLER_TEST_MATRIX ثبت است. پذیرش sudo/SSH/UFW/systemd/reboot نیازمند VM و اجرا نشده است.
+
+## SSH key-only — 2026-10-17
+
+`AuthenticationMethods publickey` به config hardening sandbox اضافه شد تا خاموش‌کردن password/keyboard-interactive به‌تنهایی با روش‌های دیگر authentication اشتباه نشود. operations harness میزبان موفق بود. تولید config همین تابع و parsing واقعی `sshd -t/-T` در Ubuntuهای 22.04/24.04/26.04 container-lab موفق شد؛ systemctl reload در این تست stub است و booleanهای sandbox مدرک اتصال نیستند. موتور live همچنان disabled است. شواهد و محدودیت‌ها در INSTALLER_TEST_MATRIX و SSH_ACCESS_POLICY ثبت شده‌اند.

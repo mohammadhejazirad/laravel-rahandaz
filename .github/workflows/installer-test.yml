@@ -12,6 +12,7 @@ on:
       - "installer/**"
       - "tests/infrastructure/ubuntu-lab/scripts/test-prerequisites.sh"
       - "tests/infrastructure/ubuntu-lab/scripts/test-security.sh"
+      - "tests/infrastructure/ubuntu-lab/scripts/inside/ssh-policy-test.py"
       - ".github/workflows/installer-test.yml"
 
 permissions:
@@ -57,6 +58,11 @@ jobs:
         env:
           UBUNTU_VERSION: ${{ matrix.ubuntu }}
         run: bash tests/infrastructure/ubuntu-lab/scripts/test-security.sh "$UBUNTU_VERSION" --live
+      - name: Verify candidate policy with real OpenSSH parser inside lab container
+        if: github.event_name == 'workflow_dispatch' && inputs.live_packages
+        env:
+          UBUNTU_VERSION: ${{ matrix.ubuntu }}
+        run: bash tests/infrastructure/ubuntu-lab/scripts/test-security.sh "$UBUNTU_VERSION" --ssh-config
       - name: Install real packages and rerun inside lab container
         if: github.event_name == 'workflow_dispatch' && inputs.live_packages
         env:

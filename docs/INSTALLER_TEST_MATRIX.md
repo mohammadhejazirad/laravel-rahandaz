@@ -119,3 +119,11 @@ Matrix VM/systemd/reboot و شبکهٔ محدود VPS ایران برای هر �
 روی میزبان: security contracts پنج آزمون موفق، prerequisites چهل آزمون موفق، installer هفتادودو/۰ (updater بیست‌ویک/۰ زیرمجموعه)، release بیست‌وشش/۰ و operations suite موفق. syntax اسکریپت‌ها، YAML workflowها و diff-check بررسی شدند. CI روی GitHub در این جلسه اجرا نشده است.
 
 **not_run / requires_vm:** systemd startup واقعی، SSH login/اتصال دوم، sudo از session واقعی با PAM، UFW IPv4/IPv6 و timer rollback هنگام قطع اتصال، reboot، نصب کامل signed artifact و health پنل. در کانتینر Redis بدون systemd و PostgreSQL با pg_ctlcluster اجرا شد؛ این نتایج certification میزبان یا Production نیستند. تغییر رمز دیتابیس/Redis از رابط پنل هنوز پیاده نشده است.
+
+## سیاست SSH key-only — 2026-10-17
+
+`test-security.sh <version> --ssh-config` روی Ubuntu 22.04، 24.04 و 26.04 با خروج ۰ اجرا شد. شواهد به‌ترتیب در `security-22.04-20261017T093020Z/`، `security-24.04-20261017T093021Z/` و `security-26.04-20261017T093022Z/` زیر reports آزمایشگاه هستند. هر اجرا پنج security contract و دو آزمون parser واقعی OpenSSH را گذراند؛ بسته واقعی openssh-server از APT امضاشده داخل کانتینر نصب شد.
+
+قالب candidate برای `rahandaz`، publickey-only بودن، رد password/keyboard-interactive، مسیر root-managed کلیدها و خاموش‌بودن AuthorizedKeysCommand/TrustedUserCAKeys را در config مؤثر بررسی کرد؛ policy سایر حساب‌ها/root حفظ شد. Include ابتدا/انتها با config کامل آزموده شد. تولید config hardening از تابع sandbox نیز با `sshd -t/-T` بررسی شد: AuthenticationMethods publickey و رد password/keyboard-interactive/root؛ reload systemd در fixture عمداً اجرا نشد. سه اجرای اولیه به علت فرض نادرست آزمون درباره context فایل Include شکست خوردند؛ آزمون اصلاح شد و نتایج اولیه passed محسوب نمی‌شوند.
+
+این آزمون‌ها نه daemon را اجرا/reload کردند و نه SSH session داشتند. عملیات SSH روی میزبان توسعه اجرا نشد. قالب روی سرور نصب نشده است. enrollment پنل، proof واقعی اتصال، live helper، rollback و پذیرش VM همچنان ناقص/not_run هستند. نتیجه‌های parser گواهی امنیت SSH یا پشتیبانی Production هیچ Ubuntu نیستند.

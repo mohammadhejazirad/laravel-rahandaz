@@ -15,10 +15,11 @@ INSTALLER_PROC_ROOT=/proc
 unset RAHANDAZ_INSTALLER_SYSROOT INSTALLER_OFFLINE INSTALLER_STATE_FILE INSTALLER_LOG
 installer_detect_os
 if [[ "$mode" == --plan ]]; then
-    echo 'PLAN: rahandaz SSH/password-sudo administrator; locked nologin rahandaz-svc for the panel.'
+    echo 'PLAN: rahandaz password-sudo administrator; locked nologin rahandaz-svc for the panel.'
     echo 'PostgreSQL role/database rahandaz; dedicated authenticated Redis queue 6381/cache 6380, loopback only.'
     echo 'Independent random 12-character initial passwords; reruns preserve passwords; existing accounts/configuration are not adopted.'
     echo 'Credentials are delivered only to root-owned 0600 files and, on request, directly to the local terminal.'
+    echo 'SSH key enrollment and key-only hardening are pending; bootstrap does not certify secure SSH onboarding.'
     echo 'Firewall is a separate guarded step: rahandaz-firewall --plan. No SSH policy changes.'
     exit 0
 fi

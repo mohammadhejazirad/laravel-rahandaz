@@ -50,3 +50,6 @@ bootstrap GitHub فقط پس از امضای manifest، pin نسخه/نام، ch
 ## بازنگری حساب‌ها (ADR-0005)
 
 به درخواست مالک، `rahandaz` مدیر انسانی Ubuntu با sudo رمزدار است؛ پنل فقط با `rahandaz-svc` locked/nologin اجرا می‌شود. هیچ NOPASSWD ایجاد نمی‌شود. حساب قدیمی به مدیر ارتقا نمی‌یابد. PostgreSQL و Redis اختصاصی credential مستقل با نام ثابت دارند. تحویل مستقیم TTY فقط پس از درخواست اپراتور، خارج از stdout/log، و فایل root-only مجاز است. جزئیات permission، resume، سیاست UFW، اتصال دوم، محدودیت migration حساب قبلی و rotation در [قرارداد bootstrap](INSTALLER_BOOTSTRAP_SECURITY.md) ثبت شده است. این تصمیم جای سیاست قبلی ممنوعیت مطلق رمز Linux را برای حساب مدیر انسانی می‌گیرد؛ حساب سرویس همچنان رمز ورود ندارد.
+
+
+سیاست SSH در [SSH_ACCESS_POLICY.md](SSH_ACCESS_POLICY.md) تکمیل شده است: رمز Ubuntu برای sudo است؛ ورود SSH هدف فقط با کلید عمومی ثبت‌شده از پنل است. مسیر کامل ثبت/اعمال کلید و اثبات اتصال هنوز تکمیل نشده و دسترسی bootstrap تا تأیید recovery و اتصال دوم حفظ می‌شود؛ نصب امن از نظر SSH هنوز تأیید نشده است.

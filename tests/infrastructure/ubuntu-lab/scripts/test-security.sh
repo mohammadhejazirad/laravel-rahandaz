@@ -4,7 +4,7 @@ set -Eeuo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 version="$(lab_version "${1:-}")"
 mode="${2:---fixtures}"
-case "$mode" in --fixtures|--live) ;; *) lab_die 'Use --fixtures or --live.' ;; esac
+case "$mode" in --fixtures|--live|--ssh-config) ;; *) lab_die 'Use --fixtures, --live or --ssh-config.' ;; esac
 repo="$(cd "$LAB_ROOT/../../.." && pwd)"
 stamp="$(date -u +%Y%m%dT%H%M%SZ)"
 report="$LAB_ROOT/reports/security-${version}-${stamp}"
@@ -20,7 +20,7 @@ docker run --name "$name" --cpus=1 --memory=2g --pids-limit=512 \
     python3 installer/tests/security_test.py
     bash installer/bin/rahandaz-security --plan
     bash installer/bin/rahandaz-firewall --plan
-    if [[ "$1" == --live ]]; then
+    if [[ "$1" == --live || "$1" == --ssh-config ]]; then
         INSTALLER_HOME=/opt/rahandaz/installer
         for lib in common state os gate render runtime engine prerequisites; do source "$INSTALLER_HOME/lib/$lib.sh"; done
         installer_detect_os
@@ -29,6 +29,12 @@ docker run --name "$name" --cpus=1 --memory=2g --pids-limit=512 \
         PREREQ_IRAN=yes
         prereq_init
         prereq_select_sources
+        if [[ "$1" == --ssh-config ]]; then
+            prereq_install_packages openssh-server
+            python3 tests/infrastructure/ubuntu-lab/scripts/inside/ssh-policy-test.py
+            echo "OPENSSH_EFFECTIVE_CONFIG_VERIFIED; LIVE_SSH_LOGIN_HARDENING_REQUIRE_VM"
+            exit 0
+        fi
         prereq_install_packages sudo postgresql postgresql-client redis-server iproute2 acl
         security_accounts
         [[ "$(getent passwd rahandaz | cut -d: -f7)" == /bin/bash ]]

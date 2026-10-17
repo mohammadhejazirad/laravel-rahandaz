@@ -51,3 +51,6 @@ sudo bash installer/bin/rahandaz-security --apply
 ```
 
 مدیر Ubuntu با نام `rahandaz` و sudo رمزدار از سرویس محدود `rahandaz-svc` جداست. PostgreSQL و Redisهای اختصاصی نام ثابت `rahandaz` و رمزهای مستقل تصادفی ۱۲ کاراکتری دارند. رمز موجود در rerun تغییر نمی‌کند؛ تحویل در فایل root-only و نمایش اختیاری مستقیم ترمینال انجام می‌شود. تنظیمات SSH تغییر نمی‌کنند. فعال‌سازی UFW تأیید جدا، timer بازگشت و اتصال SSH دوم دارد. دستورها و محدودیت‌های VM/rotation در [قرارداد امنیت bootstrap](../docs/INSTALLER_BOOTSTRAP_SECURITY.md) هستند؛ این مرحله به‌تنهایی نصب پنل نیست.
+
+
+سیاست SSH در [SSH_ACCESS_POLICY.md](../docs/SSH_ACCESS_POLICY.md) تکمیل شده است: رمز Ubuntu برای sudo است؛ ورود SSH هدف فقط با کلید عمومی ثبت‌شده از پنل است. مسیر کامل ثبت/اعمال کلید و اثبات اتصال هنوز تکمیل نشده و دسترسی bootstrap تا تأیید recovery و اتصال دوم حفظ می‌شود؛ نصب امن از نظر SSH هنوز تأیید نشده است.

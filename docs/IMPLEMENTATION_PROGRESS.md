@@ -336,3 +336,11 @@ security امضاشده اما چندماه قدیمی در کاتالوگ غی�
 UFW اپراتوری plan/apply/confirm با کشف SSH، حفظ قوانین، مجوز HTTP/HTTPS، رد firewall خارجی، backup و timer مستقل disable پس از ۱۲۰ ثانیه تا تأیید اتصال SSH دوم اضافه شد. اجرا/پذیرش واقعی آن به VM نیاز دارد؛ این برش چنین تأییدی ندارد. هیچ SSH/root login خاموش نشد. تغییر رمز Ubuntu با passwd حفظ می‌شود؛ rotation هماهنگ PostgreSQL/Redis از داخل پنل هنوز پیاده نشده است و ادعای قابلیت UI ندارد.
 
 آزمون واقعی account/hash/PostgreSQL/Redis/permission، rerun و حفظ تغییر دستی رمز در Ubuntu 22.04/24.04/26.04 container-lab موفق شد؛ جزئیات و شکست اولیهٔ اصلاح‌شده قفل در INSTALLER_TEST_MATRIX ثبت است. میزبان: security پنج، prerequisites چهل، release بیست‌وشش و installer هفتادودو آزمون موفق (updater بیست‌ویک زیرمجموعه)؛ operations suite، syntax/YAML و diff-check موفق. UI/PHP تغییر نکرد. SSH، PAM، UFW، startup systemd، reboot و نصب کامل artifact نیازمند VM هستند؛ Production-ready اعلام نمی‌شود.
+
+## 2026-10-17 — سیاست ثبت کلید از پنل و SSH فقط publickey
+
+ADR-0006 و SSH_ACCESS_POLICY تصمیم مالک را ثبت کردند: رمز Ubuntu برای sudo است؛ SSH مدیر باید با کلید محلیِ عمومیِ ثبت‌شده از پنل و proof واقعی اتصال مجاز شود. هیچ private key/passphrase وارد پنل نمی‌شود. onboarding امن تا آزمون اتصال دوم/recovery و گذار قابل rollback به رد root/password کامل نیست؛ skip این مرحله تکمیل امن محسوب نمی‌شود. متن credential bundle و plan دیگر رمز Ubuntu را SSH credential معرفی نمی‌کند.
+
+قالب account-scoped candidate اضافه شد؛ فایل کلید root-managed و روش publickey، بدون منابع خارجی AuthorizedKeysCommand/CA. قالب عمداً روی میزبان فعال نمی‌شود. hardening sandbox اکنون AuthenticationMethods publickey صریح دارد. هیچ مسیر وب/اسکریپت live برای خاموش‌کردن ناگهانی SSH فعال نشد و موتور disabled باقی ماند.
+
+در هر سه Ubuntu کانتینری، پنج security contract و دو آزمون واقعی parser OpenSSH/config مؤثر موفق شدند؛ عملیات harness میزبان نیز موفق بود. Include ابتدا/انتها، حفظ policy root/حساب دیگر برای candidate، و config hardening تولیدشده sandbox آزموده شدند. YAML/syntax/diff-check موفق. UI/PHP تغییر نکرد. endpoint/صفحه enrollment، رسید اتصال واقعی، helper live و آزمون SSH/systemd/recovery در VM هنوز کامل نیستند؛ این برش اجرای کامل مدیریت SSH از پنل یا hardening عملیاتی را ادعا نمی‌کند.

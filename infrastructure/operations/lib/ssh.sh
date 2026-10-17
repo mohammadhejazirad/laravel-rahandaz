@@ -68,6 +68,7 @@ ops_ssh_harden() {
     snapshot="$(ops_snapshot_file "$config")"
     cat >"$config" <<'EOF'
 # rahandaz-managed: ssh
+AuthenticationMethods publickey
 PasswordAuthentication no
 KbdInteractiveAuthentication no
 PermitRootLogin no

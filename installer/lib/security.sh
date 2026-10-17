@@ -113,13 +113,14 @@ security_credentials() {
     python3 - "$root" "$reveal" <<'PY' || return 1
 import os, pathlib, sys, tempfile
 root = pathlib.Path(sys.argv[1] or '/')
-items = [('Ubuntu SSH/sudo', 'var/lib/rahandaz-bootstrap-security-v1/ubuntu.password'),
+items = [('Ubuntu sudo (not SSH authentication)', 'var/lib/rahandaz-bootstrap-security-v1/ubuntu.password'),
          ('PostgreSQL', 'etc/rahandaz/database.password'),
          ('Redis queue', 'etc/rahandaz/redis-queue.password'),
          ('Redis cache', 'etc/rahandaz/redis-cache.password')]
 lines = ['Rahandaz bootstrap credentials (private; store in a password manager).',
          'Username: rahandaz (fixed). Passwords are independent.',
-         'SSH access depends on existing sshd policy; it has not been weakened.',
+         'Target SSH policy: public key only, enrolled through the panel. Bootstrap does not yet enforce it.',
+         'Keep bootstrap access until a second key-authenticated connection and recovery are verified.',
          'This file records initial passwords; subsequent rotations may make it stale.', '']
 for label, relative in items:
     p = root / relative

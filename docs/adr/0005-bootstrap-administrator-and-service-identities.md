@@ -11,3 +11,5 @@ Credentials are persisted privately before mutation, preserved across reruns and
 UFW activation is explicit, preserves existing rules, discovers SSH ports and requires a second connection with independent timed disable recovery. Active third-party firewalls require separate adoption. No SSH policy is weakened. Operations Engine remains disabled; legacy account action identifiers now target the restricted service identity, never the human administrator.
 
 See `docs/INSTALLER_BOOTSTRAP_SECURITY.md` for commands, failure recovery, test scope and outstanding VM acceptance. This ADR supersedes earlier locked/no-sudo statements about the human `rahandaz` account; that restriction now applies to `rahandaz-svc`.
+
+Clarification: ADR-0006 requires panel-enrolled public-key-only SSH; the Ubuntu password is for sudo. Live enrollment and hardening remain pending, and bootstrap access is preserved until a verified second connection and recovery exist.
