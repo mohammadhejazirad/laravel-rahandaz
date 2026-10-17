@@ -48,7 +48,8 @@ if (not key.startswith("-----BEGIN PUBLIC KEY-----") or not key.endswith("-----E
         or "PRIVATE" in key or "RAHANDAZ_PINNED_RELEASE_KEY" in key):
     raise ValueError("Use an SPKI PEM public key, never a private key")
 destination = Path(output)
-destination.mkdir(parents=True, exist_ok=True)
+# A fresh directory prevents mixing repository assets into Release uploads.
+destination.mkdir(parents=True, exist_ok=False)
 names = ["install.sh", "release.manifest", "release.manifest.sig", Path(artifact).name,
          "rahandaz-release.pub", "SHA256SUMS", "INSTALL.md"]
 if any((destination / name).exists() or (destination / name).is_symlink() for name in names):

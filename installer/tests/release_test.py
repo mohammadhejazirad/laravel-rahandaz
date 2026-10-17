@@ -413,6 +413,24 @@ stage_12_systemd_services
         self.assertNotEqual(self.bootstrap("--plan").returncode, 0)
         self.assertFalse(self.marker.exists())
 
+    def test_release_output_refuses_existing_repository_asset_directory(self):
+        self.prepare()
+        occupied = self.work / "repository-assets"
+        (occupied / "branding").mkdir(parents=True)
+        marker = occupied / "branding/logo.svg"
+        marker.write_text("repository asset")
+        signed = self.work / "signed"
+        result = self.command("bash", "installer/release/prepare-github.sh",
+                              "--repository", "mohammadhejazirad/laravel-rahandaz",
+                              "--manifest", signed / "release.manifest",
+                              "--signature", signed / "release.manifest.sig",
+                              "--public-key", self.public_key,
+                              "--artifact", signed / f"rahandaz-{self.version}.tar.gz",
+                              "--output", occupied)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(marker.read_text(), "repository asset")
+        self.assertFalse((occupied / "install.sh").exists())
+
     def test_generated_checksums_cover_all_release_files(self):
         assets = self.prepare()
         lines = (assets / "SHA256SUMS").read_text().splitlines()

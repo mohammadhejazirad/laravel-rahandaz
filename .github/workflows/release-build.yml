@@ -167,6 +167,7 @@ jobs:
           RELEASE_SIGNING_KEY: ${{ secrets.RAHANDAZ_RELEASE_SIGNING_KEY }}
         run: |
           set -euo pipefail
+          release_assets="$RUNNER_TEMP/rahandaz-release-assets"
           umask 077
           test -n "$RELEASE_SIGNING_KEY"
           key_dir=$(mktemp -d)
@@ -178,13 +179,13 @@ jobs:
           version="${RELEASE_TAG#v}"
           artifact="unsigned/rahandaz-${version}.tar.gz"
           bash installer/release/sign-manifest.sh --key "$key_dir/release.key" --artifact "$artifact" --version "$version" --output signed
-          bash installer/release/prepare-github.sh --repository "$GITHUB_REPOSITORY" --manifest signed/release.manifest --signature signed/release.manifest.sig --public-key installer/trust/rahandaz-release.pub --artifact "signed/rahandaz-${version}.tar.gz" --output assets
-          openssl dgst -sha256 -sign "$key_dir/release.key" -out assets/SHA256SUMS.sig assets/SHA256SUMS
-          openssl dgst -sha256 -verify installer/trust/rahandaz-release.pub -signature assets/SHA256SUMS.sig assets/SHA256SUMS
+          bash installer/release/prepare-github.sh --repository "$GITHUB_REPOSITORY" --manifest signed/release.manifest --signature signed/release.manifest.sig --public-key installer/trust/rahandaz-release.pub --artifact "signed/rahandaz-${version}.tar.gz" --output "$release_assets"
+          openssl dgst -sha256 -sign "$key_dir/release.key" -out "$release_assets/SHA256SUMS.sig" "$release_assets/SHA256SUMS"
+          openssl dgst -sha256 -verify installer/trust/rahandaz-release.pub -signature "$release_assets/SHA256SUMS.sig" "$release_assets/SHA256SUMS"
       - uses: actions/upload-artifact@v4
         with:
           name: signed-${{ needs.candidate.outputs.tag }}
-          path: assets/*
+          path: ${{ runner.temp }}/rahandaz-release-assets/*
           if-no-files-found: error
           retention-days: 30
       - name: Publish a test prerelease (never stable or latest)
@@ -193,6 +194,7 @@ jobs:
           CANDIDATE_EVENT: ${{ github.event_name }}
         run: |
           set -euo pipefail
+          release_assets="$RUNNER_TEMP/rahandaz-release-assets"
           options=(--verify-tag)
           if [[ "$CANDIDATE_EVENT" == workflow_dispatch ]]; then
             options+=(--draft)
@@ -200,4 +202,4 @@ jobs:
             # Create the tag at the tested commit; an existing tag is a conflict, never reused.
             gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f "ref=refs/tags/$RELEASE_TAG" -f "sha=$RELEASE_COMMIT" >/dev/null
           fi
-          gh release create "$RELEASE_TAG" assets/* --repo "$GITHUB_REPOSITORY" "${options[@]}" --prerelease --latest=false --title "Rahandaz $RELEASE_TAG — test candidate" --notes-file assets/INSTALL.md
+          gh release create "$RELEASE_TAG" "$release_assets"/* --repo "$GITHUB_REPOSITORY" "${options[@]}" --prerelease --latest=false --title "Rahandaz $RELEASE_TAG — test candidate" --notes-file "$release_assets/INSTALL.md"

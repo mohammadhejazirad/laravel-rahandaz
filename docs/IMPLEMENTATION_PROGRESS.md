@@ -369,3 +369,8 @@ Matrix: هر سه Ubuntu 22.04/24.04/26.04 container-lab، installer ۷۲/۰ و 
 ## 2026-10-17 — رفع شکست CI در اجرای process
 
 اجرای Release شماره 39044785982 در host.facts شکست خورد: executable bit ورودی‌های operations/helper در Git برابر 100644 بود و checkout لینوکس اجازه اجرا نداشت؛ روی filesystem ایستگاه توسعه این تفاوت پنهان مانده بود. mode هر دو entrypoint به 100755 تغییر کرد. LocalOperationProcess فایل غیرقابل‌اجرا را پیش از parser با TOOL_MISSING رد می‌کند و تست رگرسیون مسیر غیرقابل‌اجرا اضافه شد؛ parser JSON و ExecutionGate تضعیف نشدند. workflowها پیش از PHPUnit فایل .env.example را به .env موقت CI کپی می‌کنند؛ رازهای واقعی در Git وارد نشدند. تست محلی کامل پیش از افزودن رگرسیون ۱۴۹/۳۶۰۳ و زیرمجموعه نهایی OperationsEngine هشت/۲۶ و harness operations موفق بود. نتیجه اجرای remote جدید پس از push باید بررسی شود؛ این تغییر گواهی نصب VM نیست.
+
+
+## 2026-10-17 — جداسازی خروجی Release از assets مخزن
+
+پس از commit 292bb18، اجرای GitHub شماره 39045153606 همه آزمون‌ها، build، bundle و signing را گذراند؛ publication به علت انتخاب پوشه‌های موجود assets/branding و assets/welcome-site در glob آپلود شکست خورد. خروجی نصب اکنون در RUNNER_TEMP/rahandaz-release-assets ساخته/امضا/آپلود می‌شود. prepare-github خروجی از قبل موجود را رد می‌کند و تست برخورد با پوشه branding اضافه شد؛ suite انتشار محلی ۳۰ تست موفق است. کل suite PHP نهایی ۱۵۰ تست و ۳۶۰۵ assertion موفق بود. بازخوانی Environment policy، نام secret و متغیر true در GitHub نیز موفق شد؛ timeout گزارش‌شده در برش قبلی رفع شده است. هیچ دروازه ایمنی، audit یا آزمونی برای عبور CI حذف نشد.

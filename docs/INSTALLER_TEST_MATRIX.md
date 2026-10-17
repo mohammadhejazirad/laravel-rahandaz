@@ -148,3 +148,8 @@ Release workflow به push روی main متصل شد؛ نسخه beta شامل ru
 بازخوانی نهایی تنظیمات GitHub پس از پاسخ موفق عملیات ثبت، به دلیل timeout/no-route شبکه انجام نشد؛ تأیید اجرای workflow روی GitHub همچنان باقی است.
 
 پس از ثبت public pin، اجرای مجدد یک تست قدیمی «نبود کلید پیش‌فرض» شکست خورد؛ تست به مسیر کلید ناموجود صریح تغییر کرد تا نبود trust root را مستقل از تنظیم واقعی پروژه بسنجد. suite نهایی میزبان و هر سه Ubuntu مجدداً ۷۲/۰ و release ۲۹/۰ شدند؛ شکست اولیه موفق محسوب نشد.
+
+
+## 2026-10-17 — regression خروجی publication
+
+پس از رفع executable bit ورودی operations/helper و جداکردن خروجی Release از assets مخزن، harness روی Ubuntu 22.04، 24.04 و 26.04 دوباره اجرا شد: installer ۷۲/۰ و release ۳۰/۰ در هر سه نسخه. گزارش‌ها: `reports/release-22.04-20261017T153116Z/`، `reports/release-24.04-20261017T153116Z/` و `reports/release-26.04-20261017T153116Z/`. آزمون تازه رد پوشه خروجی موجود را می‌سنجد تا پوشه‌های برند وارد upload نشوند. actionlint و diff-check موفق؛ full PHP میزبان ۱۵۰/۳۶۰۵. نصب کامل VM، systemd/reboot و HTTP واقعی همچنان requires_vm است. CI شماره 39045153606 در build/bundle/sign موفق و در upload publication شکست داشت؛ اجرای اصلاح‌شده باید مستقل بررسی شود.
