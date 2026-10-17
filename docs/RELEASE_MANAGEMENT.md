@@ -98,3 +98,10 @@
 هیچ tag یا Release در این برش روی GitHub ایجاد نشد. اجرای واقعی workflow پس از push و نصب روی VM همچنان نیازمند مشاهده نتیجه‌اند.
 
 بازخوانی نهایی تنظیمات GitHub پس از پاسخ موفق عملیات ثبت، به دلیل timeout/no-route شبکه انجام نشد؛ تأیید اجرای workflow روی GitHub همچنان باقی است.
+
+
+## اولین انتشار موفق — 2026-10-17
+
+اجرای [39045447762](https://github.com/mohammadhejazirad/laravel-rahandaz/actions/runs/39045447762) با commit `36d7143` در candidate/build/publish موفق شد و [v1.0.0-beta.5.1](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.5.1) را با هشت asset منتشر کرد؛ Draft=false و prerelease=true است. ابتدا مجوز executable در Git و سپس برخورد خروجی Release با assets مخزن اصلاح شدند؛ شکست‌های قبلی حذف یا موفق معرفی نشدند. تست‌های PHP در CI برابر ۱۵۰/۳۶۰۵ و auditهای Composer/npm بدون advisory بودند. نصب VM همچنان requires_vm است.
+
+workflow اکنون پس از publication در مخزن عمومی، هر هشت فایل را بدون token از URL واقعی دانلود، کلید را با pin مخزن تطبیق، امضای SHA256SUMS و checksum فایل‌ها را بررسی و bootstrap را با `--verify-only` اجرا می‌کند. این مرحله هیچ نصب یا mutation میزبان ندارد؛ Draft و مخزن خصوصی وارد دانلود anonymous نمی‌شوند. بررسی این مرحله در اجرای بعدی ثبت می‌شود.

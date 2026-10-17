@@ -9,7 +9,7 @@ Production نیست؛ وضعیت واقعی آزمون‌ها در [INSTALLER_TE
 
 نتیجه تازه در V1_TEST_REPORT: installer harness دوباره ۶۹ passed/۰ failed (updater زیرمجموعه ۲۱/۰)؛ full PHP suite اجرا شده، اما fresh install/health/login در VM همچنان requires_vm است. وجود صفحات درخواست و آموزش‌ها نصب عمومی را معتبر نمی‌کند؛ V1_RELEASE_READINESS مرجع gate است.
 
-درخت `installer/` در مخزن است و Release امضاشدهٔ عمومی نیست. `scripts/install.sh` وجود ندارد. فرمان `curl | bash` و URL دانلود GitHub در README نیست، چون artifact عمومی تأییدشده و آزمون VM هنوز نداریم؛ کلید عمومی انتشار اکنون در `installer/trust/rahandaz-release.pub` ثبت شده است.
+درخت `installer/` و prerelease عمومی امضاشده [v1.0.0-beta.5.1](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.5.1) موجودند. `scripts/install.sh` وجود ندارد. فرمان `curl | bash` و URL دانلود GitHub در README نیست، چون نصب کامل در VM هنوز تأیید نشده است؛ کلید عمومی انتشار اکنون در `installer/trust/rahandaz-release.pub` ثبت شده است.
 
 زیرساخت GitHub Releases و bootstrap نسخه‌دار اضافه شده است. `install.sh` فایل **تولیدشده برای بستهٔ امضاشده** است، نه raw روی main. `INSTALL.md` فرمان قابل‌کپی با هش واقعی دارد. workflow با هر push به main بسته candidate می‌سازد و پس از تنظیم signing و متغیر انتشار، prerelease امضاشده منتشر می‌کند؛ اجرای دستی Draft نیز باقی است و دانلود anonymous از Draft ممکن نیست. تنظیم و شرایط اضافه‌شدن فرمان عمومی به README در [RELEASE_MANAGEMENT.md](RELEASE_MANAGEMENT.md) آمده است. نصب‌کننده هنوز TLS پنل یا executor پیاده‌سازی‌نشده را آماده نمی‌کند؛ HTTP اولیه فقط از tunnel/شبکه trusted استفاده شود.
 
@@ -29,7 +29,7 @@ bash installer/bin/rahandaz-install --plan --state-dir /tmp/rahandaz-plan
 
 بسته‌های پنل، از جمله Nginx و PostgreSQL و Redis، تا آزمون VM نصب موفق گزارش نمی‌شوند. Docker برای نصب پنل لازم نیست. آزمایشگاه `tests/infrastructure/ubuntu-lab/` موتور عملیات را داخل ایمیج رسمی Ubuntu اجرا می‌کند و نتیجه را `container-lab` می‌نامد، نه نصب production. در ۲۰۲۶-۱۰-۱۳ آن اجرا روی 22.04 و 24.04 و 26.04 خروج ۰ داشت و همچنان گواهی نصب سرور نیست. طرح نصب‌کننده در همان کانتینرها جدا است و در [UBUNTU_COMPATIBILITY.md](UBUNTU_COMPATIBILITY.md) ثبت شده است.
 
-نصب نسخه‌دار باید امضا و SHA-256 را پیش از تغییر بررسی کند، سایت موجود را بی‌اجازه عوض نکند، SSH جاری را نبندد، و helper را فقط به‌صورت سوکت محدود root نصب کند. آن Release هنوز ساخته نشده است. سوکت helper همچنان نصب نیست.
+نصب نسخه‌دار باید امضا و SHA-256 را پیش از تغییر بررسی کند، سایت موجود را بی‌اجازه عوض نکند، SSH جاری را نبندد، و helper را فقط به‌صورت سوکت محدود root نصب کند. بسته candidate امضاشده منتشر شده، ولی این قرارداد در نصب کامل VM هنوز تأیید نشده است. سوکت helper همچنان نصب نیست.
 
 
 ## تجربهٔ شروع در پنل

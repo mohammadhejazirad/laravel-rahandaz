@@ -22,7 +22,7 @@ bash installer/bin/rahandaz-install --plan --state-dir /tmp/rahandaz-plan
 
 ### نصب تک‌دستوری از GitHub
 
-مسیر توزیع راه‌انداز **[GitHub Releases](https://github.com/mohammadhejazirad/laravel-rahandaz/releases)** است؛ به CDN یا Docker برای نصب پنل نیاز نیست. در بررسی ۲۰۲۶-۱۰-۱۴، مخزن عمومی بود ولی هیچ Release منتشرشده‌ای نداشت. بنابراین فعلاً فرمان دانلودی که واقعاً پنل را روی سرور نصب کند وجود ندارد.
+مسیر توزیع راه‌انداز **[GitHub Releases](https://github.com/mohammadhejazirad/laravel-rahandaz/releases)** است؛ به CDN یا Docker برای نصب پنل نیاز نیست. نسخه آزمایشی امضاشدهٔ [v1.0.0-beta.5.1](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.5.1) در ۲۰۲۶-۱۰-۱۷ منتشر شد. این prerelease برای آزمون VM است؛ نصب Production هنوز تأیید نشده است. برای فایل‌های نسخه‌های بعدی، صفحه Releases را بررسی کنید.
 
 زیرساخت ساخت این فرمان اضافه شده است: هر بستهٔ امضاشده یک `install.sh` مستقل و راهنمای `INSTALL.md` با **یک فرمان قابل‌کپی مخصوص همان نسخه و هش واقعی آن** دارد. فرمان ابتدا اسکریپت را از GitHub دانلود و هش آن را بررسی می‌کند؛ سپس bootstrap با کلید عمومی ثابت، امضای manifest و SHA-256 بسته را تأیید می‌کند و نصب‌کننده را اجرا می‌کند. کدِ دانلودشده مستقیماً به shell pipe نمی‌شود و از شاخهٔ متغیر `main` نصب نمی‌کنیم.
 
@@ -32,7 +32,7 @@ bash installer/bin/rahandaz-install --plan --state-dir /tmp/rahandaz-plan
 
 صفحات استقرار، دامنه، دیتابیس، پشتیبان‌گیری و پایش اکنون به Backend و PostgreSQL متصل‌اند؛ درخواست‌های عملیاتی Job/Outbox/Audit واقعی دارند، ولی executor میزبان هنوز بسته است. مرکز آموزش‌ها جست‌وجو و نشان‌گذاری واقعی دارد. [گیت‌های انتشار](docs/V1_RELEASE_READINESS.md) و [گزارش آزمون](docs/V1_TEST_REPORT.md) محدوده تأییدشده و مانع‌ها را مشخص می‌کنند. این مخزن هنوز Production-ready نیست.
 
-درخت `installer/` در مخزن است، ولی نصب‌کنندهٔ عمومی و Release امضاشده منتشر نشده و مجوز پروژه [Apache-2.0](LICENSE) است. حالت پیش‌فرض `RAHANDAZ_EXECUTION_MODE=disabled` است. در این حالت پنل دستور میزبان اجرا نمی‌کند و هیچ عملیات یا deployment را موفق اعلام نمی‌کند. جدول وضعیت پایین، قابلیت آماده را از طرح محصول جدا می‌کند. جزئیات پیشرفت در [docs/IMPLEMENTATION_PROGRESS.md](docs/IMPLEMENTATION_PROGRESS.md) و مشخصات در [.docs/PROJECT_SPEC.md](.docs/PROJECT_SPEC.md) است.
+درخت `installer/` و prerelease عمومی امضاشده موجودند؛ نصب کامل Production هنوز تأیید نشده و مجوز پروژه [Apache-2.0](LICENSE) است. حالت پیش‌فرض `RAHANDAZ_EXECUTION_MODE=disabled` است. در این حالت پنل دستور میزبان اجرا نمی‌کند و هیچ عملیات یا deployment را موفق اعلام نمی‌کند. جدول وضعیت پایین، قابلیت آماده را از طرح محصول جدا می‌کند. جزئیات پیشرفت در [docs/IMPLEMENTATION_PROGRESS.md](docs/IMPLEMENTATION_PROGRESS.md) و مشخصات در [.docs/PROJECT_SPEC.md](.docs/PROJECT_SPEC.md) است.
 
 نشان‌های بالا فقط نسخه قفل‌شده Laravel و محدودیت PHP را می‌گویند. تصویر PostgreSQL به image توسعه `postgres:16-alpine` در `compose.dev.yml` اشاره دارد، نه به یک نسخه production آزموده‌شده روی Ubuntu. فایل مجوز Apache-2.0 موجود است؛ وجود Release عمومی و موفقیت CI باید از GitHub بررسی شود. فایل‌های workflow در `.github/workflows/` هستند و در این مخزن اجرا نشده‌اند، پس نشان سبز CI معنا ندارد.
 
@@ -219,7 +219,7 @@ Helper ممتاز در طرح، یک برنامه root-owned با اسکیمای
 <a id="install"></a>
 ## نصب
 
-نصب تولید هنوز منتشر نشده است. اینجا فرمان دانلود یا `curl | bash` نیست، چون Release عمومی امضاشده و آزمون‌شده هنوز تأیید نشده است و URL انتشار حدس زده نمی‌شود.
+نصب Production هنوز تأیید نشده است. برای آزمون VM، بسته و راهنمای `INSTALL.md` نسخهٔ [v1.0.0-beta.5.1](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.5.1) موجود است. فرمان رسمی دانلود در README فقط پس از پذیرش آزمون‌های نصب درج می‌شود؛ URL یا checksum حدسی استفاده نمی‌شود.
 
 فرمان عمومی نصب، پس از قبولی Gateها، از `INSTALL.md` تولیدشده برای همان Release به بالای این README منتقل خواهد شد. وجود کد bootstrap یا Draft Release به معنی نصب Production تأییدشده نیست.
 

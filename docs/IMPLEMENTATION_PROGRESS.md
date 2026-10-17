@@ -374,3 +374,8 @@ Matrix: هر سه Ubuntu 22.04/24.04/26.04 container-lab، installer ۷۲/۰ و 
 ## 2026-10-17 — جداسازی خروجی Release از assets مخزن
 
 پس از commit 292bb18، اجرای GitHub شماره 39045153606 همه آزمون‌ها، build، bundle و signing را گذراند؛ publication به علت انتخاب پوشه‌های موجود assets/branding و assets/welcome-site در glob آپلود شکست خورد. خروجی نصب اکنون در RUNNER_TEMP/rahandaz-release-assets ساخته/امضا/آپلود می‌شود. prepare-github خروجی از قبل موجود را رد می‌کند و تست برخورد با پوشه branding اضافه شد؛ suite انتشار محلی ۳۰ تست موفق است. کل suite PHP نهایی ۱۵۰ تست و ۳۶۰۵ assertion موفق بود. بازخوانی Environment policy، نام secret و متغیر true در GitHub نیز موفق شد؛ timeout گزارش‌شده در برش قبلی رفع شده است. هیچ دروازه ایمنی، audit یا آزمونی برای عبور CI حذف نشد.
+
+
+## 2026-10-17 — نخستین prerelease عمومی موفق
+
+Actions شماره 39045447762 برای commit 36d7143 کاملاً موفق شد؛ [v1.0.0-beta.5.1](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.5.1) با هشت فایل نصب/امضا/checksum به‌صورت public prerelease منتشر شد. خواندن تنظیمات GitHub و secret metadata نیز موفق بود. نصب واقعی VM همچنان not_run است. دانلود anonymous از ایستگاه توسعه با TLS connection reset مواجه شد؛ بررسی دانلود عمومی، امضا/checksum و `--verify-only` به انتهای workflow اضافه شد تا روی runner اجرا شود. این تغییر host executor یا Production certification را فعال نمی‌کند.

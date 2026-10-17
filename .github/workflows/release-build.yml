@@ -203,3 +203,19 @@ jobs:
             gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f "ref=refs/tags/$RELEASE_TAG" -f "sha=$RELEASE_COMMIT" >/dev/null
           fi
           gh release create "$RELEASE_TAG" "$release_assets"/* --repo "$GITHUB_REPOSITORY" "${options[@]}" --prerelease --latest=false --title "Rahandaz $RELEASE_TAG — test candidate" --notes-file "$release_assets/INSTALL.md"
+      - name: Verify published public assets without authentication
+        if: github.event_name == 'push' && !github.event.repository.private
+        run: |
+          set -euo pipefail
+          public_assets=$(mktemp -d "$RUNNER_TEMP/rahandaz-public.XXXXXX")
+          public_key="$GITHUB_WORKSPACE/installer/trust/rahandaz-release.pub"
+          version="${RELEASE_TAG#v}"
+          base="https://github.com/$GITHUB_REPOSITORY/releases/download/$RELEASE_TAG"
+          for name in INSTALL.md install.sh release.manifest release.manifest.sig rahandaz-release.pub SHA256SUMS SHA256SUMS.sig "rahandaz-${version}.tar.gz"; do
+            curl --proto '=https' --proto-redir '=https' --tlsv1.2 --fail --location --silent --show-error \
+              --retry 3 --connect-timeout 15 --max-time 180 "$base/$name" --output "$public_assets/$name"
+          done
+          cmp "$public_key" "$public_assets/rahandaz-release.pub"
+          openssl dgst -sha256 -verify "$public_key" -signature "$public_assets/SHA256SUMS.sig" "$public_assets/SHA256SUMS"
+          (cd "$public_assets" && sha256sum --check SHA256SUMS)
+          bash "$public_assets/install.sh" --verify-only

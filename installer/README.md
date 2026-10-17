@@ -20,7 +20,7 @@ sudo bash installer/bin/rahandaz-prerequisites
 bash installer/bin/rahandaz-install --plan --state-dir /tmp/rahandaz-plan
 ```
 
-اعمال روی `/` به artifact، manifest چهارخطی، امضای `openssl dgst -sha256` و کلید عمومی از پیش مورد اعتماد نیاز دارد. کلید عمومی انتشار در `installer/trust/rahandaz-release.pub` ثبت شده است؛ کلید خصوصی خارج مخزن نگهداری می‌شود. مخزن واقعی `mohammadhejazirad/laravel-rahandaz` بررسی شده، اما Release عمومی ندارد و فرمانی برای `curl | bash` وجود ندارد.
+اعمال روی `/` به artifact، manifest چهارخطی، امضای `openssl dgst -sha256` و کلید عمومی از پیش مورد اعتماد نیاز دارد. کلید عمومی انتشار در `installer/trust/rahandaz-release.pub` ثبت شده است؛ کلید خصوصی خارج مخزن نگهداری می‌شود. مخزن `mohammadhejazirad/laravel-rahandaz` اکنون prerelease عمومی امضاشده [v1.0.0-beta.5.1](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.5.1) دارد؛ راهنمای `INSTALL.md` همان نسخه برای آزمون VM است و نصب Production هنوز تأیید نشده است.
 
 `release/assemble.sh` runtime شامل vendor/assets را بدون داده/کلید/لینک بسته‌بندی می‌کند. `release/prepare-github.sh` از بستهٔ امضاشده، bootstrap مستقل `install.sh` و فرمان یک‌خطی با هش واقعی در `INSTALL.md` تولید می‌کند. template در `bootstrap/github-install.sh.in` است و مستقیم اجرا نمی‌شود. workflow `release-build.yml` با هر push به main candidate می‌سازد و با تنظیم کلید و متغیر انتشار، prerelease امضاشده منتشر می‌کند؛ stable منتشر نمی‌کند. اجرای دستی Draft نیز حفظ شده است. تنظیم secret، کلید و مجوز در [مدیریت Release](../docs/RELEASE_MANAGEMENT.md) آمده است.
 
