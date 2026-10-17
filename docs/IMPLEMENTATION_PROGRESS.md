@@ -312,3 +312,17 @@ Matrix هر سه VM همچنان requires_vm/not_run؛ خروج apply در کا�
 فعلاً آزمایشی و غیرپیشنهادی است. شواهد آزمون آن حفظ شده‌اند؛ پذیرش نسخه در اسکریپت و ماتریس
 CI تغییر نکرده است. این توصیه، هیچ نسخه‌ای را production-certified اعلام نمی‌کند. تغییر فقط
 مستندات است؛ آزمون اجرایی و Matrix اوبونتو در این برش دوباره اجرا نشد.
+
+## بازبینی Mirror ایرانی — ۲۰۲۶-۱۰-۱۷
+
+مخزن معرفی‌شدهٔ `hosseinit1988/Ubuntu-Repository-iran` بدون اجرای کد خارجی بررسی شد. probe واقعی
+HTTPS و امضای InRelease برای security همهٔ URLهای معرفی‌شده و شش suite jammy/noble چهار provider
+فعلی و مرجع رسمی انجام شد. اولویت Liara/Arvan حفظ شد: Liara در snapshot این بررسی از نظر تاریخ
+metadata با مرجع برابر بود؛ Arvan security برابر و updates چند ساعت عقب‌تر داشت. Chabokan با
+security امضاشده اما چندماه قدیمی در کاتالوگ غیرفعال شد. نتیجه و محدودیت زمان‌گیری در
+`docs/IRANIAN_MIRRORS.md` ثبت شد؛ رتبه‌بندی جهانی سرعت یا تضمین همهٔ شبکه‌های ایران ادعا نشد.
+
+۴۰ تست prerequisites روی میزبان/هر سه Ubuntu و APT واقعی indexهای Liara در هر سه container-lab
+موفق بودند؛ regression نصب‌کننده ۷۱/۰ (updater زیرمجموعه ۲۱/۰) و diff-check موفق بود. ماتریس VM و
+شبکهٔ محدود ایران همچنان not_run/requires_vm است. منطق Bash، PHP و UI تغییر نکرد؛ تغییر اجرایی
+این برش فقط غیرفعال‌کردن provider کهنه در کاتالوگ است و حالت عملیات disabled باقی ماند.

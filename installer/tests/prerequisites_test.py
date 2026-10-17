@@ -172,6 +172,22 @@ grep -q 'Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg' "$PREREQ_APT
 grep -q 'archive.ubuntu.com' "$PREREQ_APT_DIR/ubuntu.sources"
 '''))
 
+    def test_iranian_primary_is_liara(self):
+        self.good(self.run_bash('''INSTALLER_OS_CODENAME=noble PREREQ_IRAN=yes
+prereq_freshness() { :; }
+prereq_apt() { :; }
+prereq_select_sources
+grep -q mirror_selected=liara "$PREREQ_STATE/audit.log"
+grep -q linux-mirror.liara.ir "$PREREQ_APT_DIR/ubuntu.sources"
+'''))
+
+    def test_disabled_stale_mirror_is_never_attempted(self):
+        self.good(self.run_bash('''INSTALLER_OS_CODENAME=noble PREREQ_IRAN=yes
+prereq_apt() { cat "$PREREQ_APT_DIR/ubuntu.sources" >>"$TEST_WORK/attempts"; return 1; }
+if prereq_select_sources; then exit 99; fi
+! grep -q chabokan "$TEST_WORK/attempts"
+'''))
+
     def test_iranian_fallback_no_silent_upstream(self):
         self.good(self.run_bash('''INSTALLER_OS_CODENAME=noble PREREQ_IRAN=yes
 prereq_freshness() { :; }

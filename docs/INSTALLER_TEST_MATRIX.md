@@ -83,3 +83,23 @@ Ubuntu 26.04 با Nginx 1.28.3، PostgreSQL 18.6 و Redis 8.0.5 (revisionهای 
 **Matrix VM برای 22.04، 24.04 و 26.04: not_run / requires_vm.** فعال‌سازی واقعی systemd،
 health زندهٔ PostgreSQL/Redis/Nginx، reboot، حفظ runtime پروژه‌های موجود، نصب کامل پنل و شبکهٔ
 محدود ایران گواهی نشده‌اند. این برش production-ready یا supported بودن نصب کامل را اعلام نمی‌کند.
+
+## بازبینی انتخاب Mirror — ۲۰۲۶-۱۰-۱۷
+
+پس از بررسی مخزن `hosseinit1988/Ubuntu-Repository-iran` و probeهای HTTPS فقط‌خواندنی، اولویت
+Liara سپس Arvan حفظ شد. برای jammy/noble هر شش suite این دو با keyring آرشیو Ubuntu معتبر
+بودند؛ تاریخ updates در Liara با مرجع رسمی برابر و در Arvan چند ساعت عقب‌تر بود. Chabokan
+security معتبر از نظر امضا اما با تاریخ مارس ۲۰۲۶ برگرداند و `selectable=no` شد. شکست اتصال
+IranServer در شبکهٔ بررسی به معنی حذف دائمی آن نیست؛ fallback آن همچنان runtime بررسی می‌شود.
+
+- تست‌های prerequisites: **۴۰ آزمون موفق** روی میزبان و هر سه Ubuntu container-lab؛ دو تست تازه
+  اولویت Liara و عدم تلاش برای Chabokan غیرفعال را بررسی می‌کنند.
+- اجرای `--mirrors` آزمایشگاه برای **22.04، 24.04 و 26.04 موفق** بود: indexهای واقعی Liara برای
+  base/updates/security با امضا و تازگی از APT عبور کردند. نتیجه نصب بسته یا سلامت سرویس نیست.
+- regression نصب‌کننده **۷۱/۰** (updater زیرمجموعه **۲۱/۰**) و `git diff --check` موفق بود.
+- شواهد: `tests/infrastructure/ubuntu-lab/reports/prerequisites-{22.04,24.04,26.04}-20261017T090534Z/`
+  و `reports/mirror-review-20261017/probes.json` در همان آزمایشگاه (محلی و gitignored).
+
+کد مخزن خارجی اجرا نشد، هیچ بسته‌ای روی میزبان نصب نشد و نصب بسته‌ها در این برش تکرار نشد.
+Matrix VM/systemd/reboot و شبکهٔ محدود VPS ایران برای هر سه همچنان **not_run / requires_vm** است.
+26.04 همچنان آزمایشی و غیرپیشنهادی است. این بررسی benchmark عمومی Mirrorها یا گواهی Production نیست.

@@ -1,12 +1,13 @@
 # Rahandaz APT mirror catalog v1
 # id|selectable|resource|provider|archive_uri|security_uri|codenames|arch|trust|last_verified|notes
-# selectable=yes only when InRelease verified against Ubuntu archive keyring on 2026-10-13.
+# selectable=yes requires Ubuntu archive signatures; runtime availability/freshness checks still apply.
+# 2026-10-17: Chabokan disabled after signed jammy/noble security metadata was found months stale.
 # A mirror operator is not trusted. Do not add trusted=yes.
 ubuntu-archive|yes|apt|Ubuntu|https://archive.ubuntu.com/ubuntu|https://security.ubuntu.com/ubuntu|jammy,noble,resolute|amd64|ubuntu-archive-keyring|2026-10-13|official HTTPS InRelease verified for jammy noble resolute and noble-security
 liara|yes|apt|Liara|https://linux-mirror.liara.ir/repository/ubuntu|https://linux-mirror.liara.ir/repository/ubuntu-security|jammy,noble,resolute|amd64|ubuntu-archive-keyring|2026-10-13|archive and security InRelease verified for jammy noble resolute
 arvan|yes|apt|ArvanCloud|https://mirror.arvancloud.ir/ubuntu|https://mirror.arvancloud.ir/ubuntu|jammy,noble,resolute|amd64|ubuntu-archive-keyring|2026-10-13|mirror.arvancloud.com did not resolve; ir endpoint verified including security suites
 iranserver|yes|apt|IranServer|https://mirror.iranserver.com/ubuntu|https://mirror.iranserver.com/ubuntu|jammy,noble,resolute|amd64|ubuntu-archive-keyring|2026-10-13|archive and security InRelease verified for jammy noble resolute
-chabokan|yes|apt|Chabokan|https://mirror2.chabokan.net/ubuntu|https://mirror2.chabokan.net/ubuntu|jammy,noble|amd64|ubuntu-archive-keyring|2026-10-13|resolute InRelease was signed but older than official on the same day so resolute is not selectable
+chabokan|no|apt|Chabokan|https://mirror2.chabokan.net/ubuntu|https://mirror2.chabokan.net/ubuntu|jammy,noble|amd64|ubuntu-archive-keyring|2026-10-17|disabled: jammy-security dated 2026-03-02 and noble-security 2026-03-04; signatures valid but metadata months stale; resolute already excluded
 runflare|no|none|Runflare|-|-|-|-|none|2026-10-13|https://runflare.com/ubuntu returned HTTP 404; not an APT mirror here
 megan|no|none|MeganHub|-|-|-|-|none|2026-10-13|https://megan.ir/ubuntu returned HTTP 404; documented role is a container registry
 arvan-com|no|apt|ArvanCloud|-|-|-|-|none|2026-10-13|mirror.arvancloud.com DNS failed from this network

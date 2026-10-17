@@ -76,7 +76,10 @@ Normal system APT commands continue to use the operator's existing sources; this
 system-wide mirror migration.
 
 Official mode uses the official archive/security sources. Iranian mode tries cataloged Liara,
-Arvan, IranServer and Chabokan in order, only for their declared codenames. It does not silently
+Arvan and IranServer in order, only for their declared codenames. Chabokan was disabled on
+2026-10-17 after signed security indexes dated March 2026 were observed. Liara remains the first
+choice: jammy/noble moving metadata matched the official reference during that review; Arvan is
+the next fallback. This is a practical preference, not a universal speed ranking for Iranian VPSs. It does not silently
 fall back to an international archive. Each attempt uses APT's Ubuntu-keyring signature checking,
 HTTPS certificate verification and strict update error handling for base, updates and security.
 Moving security metadata must be at most 7 days old, updates metadata at most 14 days old;
