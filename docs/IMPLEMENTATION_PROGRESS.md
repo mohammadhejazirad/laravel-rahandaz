@@ -2,6 +2,24 @@
 
 این فایل گزارش واقعیت مخزن است. نقشه در `.docs/ROADMAP.md` و مشخصات در `.docs/PROJECT_SPEC.md` است.
 
+## ۲۰۲۶-۱۰-۱۸ — فرمان کوتاه نصب در README
+
+به درخواست مالک، فرمان قابل‌کپی با شروع `curl -fsSL` و پایان `| sudo bash` نزدیک ابتدای
+README اضافه شد. URL به `v1.0.0-beta.5.1/install.sh` عمومی و نسخه‌دار اشاره دارد؛ هیچ
+اسکریپت از main/latest اجرا نمی‌شود. روش مستقیم با pipe به اعتماد اولیه HTTPS و bootstrap
+همان نسخه متکی است؛ روش جایگزین با بررسی SHA-256 پیش از اجرا در INSTALL.md حفظ شد.
+وابستگی‌های خودکار پنل، ابزارهای اولیهٔ bootstrap، SSH tunnel، فایل credential خصوصی، beta
+بودن و بسته‌ماندن موتور عملیات در کنار فرمان روشن شدند. کد installer تغییر نکرد.
+
+API عمومی وجود Release غیرDraft و هشت asset را تأیید کرد. SHA256SUMS.sig با کلید اعتماد
+مخزن `Verified OK` شد و SHA-256 فایل install.sh برابر
+`62cfb9744ec056c0d8572c6d44ad2190a56f6d4eab40a00e04354fdda37cf631`
+با checksum امضاشده یکسان بود. دریافت عمومی با pipe و اجرای `bash -s -- --verify-only`
+exit 0 و تأیید signature/checksum/archive داد؛ نصب root یا تغییر میزبان اجرا نشد.
+`git diff --check` موفق بود. تغییر فقط مستندات است؛ PHP/UI و Matrix سه Ubuntu دوباره
+اجرا نشدند. این راستی‌آزمایی دانلود جای گواهی نصب VM یا Production نیست.
+
+
 ## ۲۰۲۶-۱۰-۱۸ — شناخت مأموریت عملیاتی و پایهٔ مجوز منبع
 
 مبنا `116ec9e` با working tree پاک بازاعتبارسنجی شد. برنامه، معماری، threat model و
