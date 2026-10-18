@@ -18,6 +18,7 @@ use App\Models\Environment;
 use App\Models\NginxSite;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 final class DomainRegistrar
 {
@@ -35,6 +36,7 @@ final class DomainRegistrar
     ): Domain {
         $hostname = strtolower(trim($hostname));
         $environment->loadMissing('project.workspace', 'localHost');
+        Gate::forUser($actor)->authorize('deploy', $environment->project);
 
         if (preg_match('/^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$/', $hostname) !== 1
             || strlen($hostname) > 253
@@ -156,6 +158,7 @@ final class DomainRegistrar
         ?string $sourceIp,
     ): Certificate {
         $domain->loadMissing('environment.project.workspace');
+        Gate::forUser($actor)->authorize('deploy', $domain->environment->project);
 
         if ($domain->tls_mode !== TlsMode::Off || $domain->certificate_id !== null) {
             throw new DomainRejected('برای این دامنه از قبل حالت TLS ثبت شده است.');
@@ -242,6 +245,7 @@ final class DomainRegistrar
     public function remove(Domain $domain, User $actor, ?string $requestId, ?string $sourceIp): void
     {
         $domain->loadMissing('certificate', 'environment.project.workspace');
+        Gate::forUser($actor)->authorize('deploy', $domain->environment->project);
         $certificate = $domain->certificate;
 
         if ($certificate instanceof Certificate && $certificate->install_state === CertificateInstallState::Installed) {

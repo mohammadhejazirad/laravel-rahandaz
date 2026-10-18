@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Jobs;
 
+use App\Domain\Access\OperationAccess;
 use App\Domain\Jobs\Enums\JobStatus;
 use App\Domain\Jobs\Enums\StepStatus;
 use App\Domain\Projects\Enums\DeploymentStatus;
@@ -19,6 +20,7 @@ final class OperationRunner
         private readonly ExecutionGate $gate,
         private readonly JobLogger $logger,
         private readonly JobLifecycleRecorder $lifecycle,
+        private readonly OperationAccess $access,
     ) {}
 
     public function run(int|string $operationJobId): void
@@ -36,6 +38,7 @@ final class OperationRunner
                 return;
             }
 
+            $authorized = $this->access->mayExecute($job);
             $job->forceFill([
                 'status' => JobStatus::Running,
                 'attempt' => $job->attempt + 1,
@@ -47,7 +50,7 @@ final class OperationRunner
             $finishedAt = now();
             $job->forceFill([
                 'status' => JobStatus::Failed,
-                'error_code' => $this->gate->denialCode(),
+                'error_code' => $authorized ? $this->gate->denialCode() : 'AUTHORIZATION_REVOKED',
                 'finished_at' => $finishedAt,
             ])->save();
 
@@ -62,7 +65,7 @@ final class OperationRunner
                 ])->save();
             }
 
-            $this->logger->append($job, 'error', $this->gate->denialMessage(), 'gate');
+            $this->logger->append($job, 'error', $authorized ? $this->gate->denialMessage() : 'مجوز اجرای درخواست دیگر معتبر نیست؛ هیچ فرمان میزبان اجرا نشد.', 'gate');
             $this->lifecycle->record($job, 'failed');
 
             // Failure of the transport operation must release the domain mutation lock.

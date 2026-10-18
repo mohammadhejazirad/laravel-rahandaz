@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Domain\Access\ProjectAccess;
 use App\Domain\Databases\DatabaseRegistrar;
 use App\Domain\Databases\Exceptions\DatabaseRejected;
 use App\Http\CurrentWorkspace;
@@ -26,12 +27,12 @@ final class DatabaseController extends Controller
     public function index(Request $request): Response
     {
         $workspace = CurrentWorkspace::get($request);
-        $rows = ProjectDatabase::query()->forWorkspace($workspace->id)->with('databaseInstance', 'environment.project', 'ownerUser')->orderByDesc('id')->paginate(20)->withQueryString();
+        $rows = ProjectDatabase::query()->forWorkspace($workspace->id)->when(! WorkspaceAccess::membership($request->user(), $workspace)->role->managesHost(), fn ($q) => $q->where('protected', false)->whereHas('environment', fn ($q) => $q->whereIn('project_id', app(ProjectAccess::class)->query($request->user(), $workspace->id)->select('projects.id'))))->with('databaseInstance', 'environment.project', 'ownerUser')->orderByDesc('id')->paginate(20)->withQueryString();
 
         return Inertia::render('databases/index', [
             'databases' => ['data' => $rows->getCollection()->map(fn (ProjectDatabase $d): array => $this->summary($d))->all(), 'meta' => PaginatorPayload::meta($rows)],
-            'instances' => DatabaseInstance::query()->forWorkspace($workspace->id)->where('protected', false)->limit(100)->get()->map(fn (DatabaseInstance $i): array => ['uuid' => $i->uuid, 'engine' => $i->engine->value, 'version' => $i->version, 'observed_state' => $i->observed_state])->all(),
-            'environments' => Environment::query()->forWorkspace($workspace->id)->with('project')->limit(100)->get()->map(fn (Environment $e): array => ['uuid' => $e->uuid, 'name' => $e->project?->name.' / '.$e->name])->all(),
+            'instances' => DatabaseInstance::query()->when(! WorkspaceAccess::membership($request->user(), $workspace)->role->managesHost(), fn ($q) => $q->whereRaw('false'))->forWorkspace($workspace->id)->where('protected', false)->limit(100)->get()->map(fn (DatabaseInstance $i): array => ['uuid' => $i->uuid, 'engine' => $i->engine->value, 'version' => $i->version, 'observed_state' => $i->observed_state])->all(),
+            'environments' => Environment::query()->forWorkspace($workspace->id)->whereIn('project_id', app(ProjectAccess::class)->query($request->user(), $workspace->id)->select('projects.id'))->with('project')->limit(100)->get()->map(fn (Environment $e): array => ['uuid' => $e->uuid, 'name' => $e->project?->name.' / '.$e->name])->all(),
             'can_manage' => WorkspaceAccess::membership($request->user(), $workspace)->role->mayDecryptSecrets(),
         ]);
     }
@@ -39,6 +40,10 @@ final class DatabaseController extends Controller
     public function show(Request $request, ProjectDatabase $database): Response
     {
         abort_unless((string) $database->workspace_id === (string) CurrentWorkspace::get($request)->id, 404);
+        if (! WorkspaceAccess::membership($request->user(), CurrentWorkspace::get($request))->role->managesHost()) {
+            abort_if($database->protected || $database->environment === null, 403);
+            $this->authorize('view', $database->environment->project);
+        }
         $database->load('databaseInstance', 'environment.project', 'ownerUser');
 
         return Inertia::render('databases/show', ['database' => $this->summary($database)]);

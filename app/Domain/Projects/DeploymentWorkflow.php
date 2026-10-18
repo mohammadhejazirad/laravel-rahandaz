@@ -25,6 +25,7 @@ use App\Models\Release;
 use App\Models\RemoteRepository;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 final class DeploymentWorkflow
 {
@@ -166,6 +167,7 @@ final class DeploymentWorkflow
     public function cancel(Deployment $deployment, User $actor, ?string $requestId, ?string $sourceIp): Deployment
     {
         $deployment->loadMissing('environment.project.workspace');
+        Gate::forUser($actor)->authorize('deploy', $deployment->environment->project);
 
         return DB::transaction(function () use ($deployment, $actor, $requestId, $sourceIp): Deployment {
             // Same lock order as worker: operation first, then deployment.
@@ -254,6 +256,9 @@ final class DeploymentWorkflow
         ?string $sourceIp,
         ?string $idempotencyKey = null,
     ): QueuedDeployment {
+        $environment->loadMissing('project');
+        Gate::forUser($actor)->authorize('deploy', $environment->project);
+
         try {
             return DB::transaction(function () use ($environment, $actor, $commitSha, $trigger, $rollbackOf, $operationType, $auditAction, $requestId, $sourceIp, $idempotencyKey): QueuedDeployment {
                 DB::select('select pg_advisory_xact_lock(hashtextextended(?, 0))', ['deployment-environment:'.$environment->id]);

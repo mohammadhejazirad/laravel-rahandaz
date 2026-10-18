@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Domain\Access\Enums\GrantPermission;
+use App\Domain\Access\ProjectAccess;
 use App\Domain\Projects\DeploymentWorkflow;
 use App\Domain\Projects\Exceptions\DeploymentRejected;
 use App\Http\CurrentWorkspace;
@@ -25,16 +27,16 @@ final class DeploymentController extends Controller
     {
         $workspace = CurrentWorkspace::get($request);
         $filters = $request->validate(['status' => ['nullable', 'in:queued,running,verifying,rolling_back,succeeded,failed,cancelled'], 'environment' => ['nullable', 'uuid:7']]);
-        $rows = Deployment::query()->forWorkspace($workspace->id)->with('environment.project', 'operationJob')
+        $rows = Deployment::query()->forWorkspace($workspace->id)->whereHas('environment', fn ($q) => $q->whereIn('project_id', app(ProjectAccess::class)->query($request->user(), $workspace->id)->select('projects.id')))->with('environment.project', 'operationJob')
             ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
             ->when($filters['environment'] ?? null, fn ($q, $uuid) => $q->whereHas('environment', fn ($e) => $e->where('uuid', $uuid)))
             ->orderByDesc('id')->paginate(20)->withQueryString();
-        $options = Environment::query()->forWorkspace($workspace->id)->with('project')->orderBy('name')->limit(100)->get();
+        $options = Environment::query()->forWorkspace($workspace->id)->whereIn('project_id', app(ProjectAccess::class)->query($request->user(), $workspace->id, GrantPermission::Deploy)->select('projects.id'))->with('project')->orderBy('name')->limit(100)->get();
 
         return Inertia::render('deployments/index', [
             'deployments' => ['data' => $rows->getCollection()->map(fn (Deployment $d): array => $this->summary($d))->all(), 'meta' => PaginatorPayload::meta($rows)],
             'environments' => $options->map(fn (Environment $e): array => ['uuid' => $e->uuid, 'name' => $e->project?->name.' / '.$e->name, 'branch' => $e->branch_name])->all(),
-            'can_operate' => in_array(WorkspaceAccess::membership($request->user(), $workspace)->role->value, ['owner', 'admin', 'operator'], true),
+            'can_operate' => app(ProjectAccess::class)->query($request->user(), $workspace->id, GrantPermission::Deploy)->exists(),
             'filters' => $filters,
         ]);
     }
@@ -48,7 +50,7 @@ final class DeploymentController extends Controller
             'deployment' => [...$this->summary($deployment), 'build_status' => $deployment->build_status->value, 'health_status' => $deployment->health_status->value,
                 'rollback_status' => $deployment->rollback_status->value, 'active_release_uuid' => $deployment->environment?->activeRelease?->uuid,
                 'previous_release_uuid' => $deployment->previousRelease?->uuid, 'target_release_uuid' => $deployment->targetRelease?->uuid],
-            'can_operate' => in_array(WorkspaceAccess::membership($request->user(), CurrentWorkspace::get($request))->role->value, ['owner', 'admin', 'operator'], true),
+            'can_operate' => $request->user()->can('deploy', $deployment->environment->project),
             'rollback_block_reason' => $workflow->rollbackBlockReason($deployment),
         ]);
     }

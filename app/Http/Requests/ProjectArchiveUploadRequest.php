@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
-use App\Domain\Accounts\Enums\MembershipRole;
 use App\Models\Environment;
 use App\Models\Project;
 use Illuminate\Foundation\Http\FormRequest;
@@ -25,7 +24,7 @@ class ProjectArchiveUploadRequest extends FormRequest
             && $membership !== null
             && (string) $membership->workspace_id === (string) $project->workspace_id
             && (string) $environment->project_id === (string) $project->id
-            && in_array($membership->role, [MembershipRole::Owner, MembershipRole::Admin, MembershipRole::Operator], true);
+            && $user->can('deploy', $project);
     }
 
     public function rules(): array

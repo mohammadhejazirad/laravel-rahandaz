@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Domain\Access\Enums\GrantPermission;
+use App\Domain\Access\ProjectAccess;
 use App\Domain\Edge\DomainRegistrar;
 use App\Domain\Edge\Exceptions\DomainRejected;
 use App\Http\CurrentWorkspace;
@@ -25,23 +27,24 @@ final class DomainController extends Controller
     {
         $workspace = CurrentWorkspace::get($request);
         $filters = $request->validate(['q' => ['nullable', 'string', 'max:100']]);
-        $rows = Domain::query()->forWorkspace($workspace->id)->with('environment.project', 'certificate')
+        $rows = Domain::query()->forWorkspace($workspace->id)->whereHas('environment', fn ($q) => $q->whereIn('project_id', app(ProjectAccess::class)->query($request->user(), $workspace->id)->select('projects.id')))->with('environment.project', 'certificate')
             ->when($filters['q'] ?? null, fn ($q, $term) => $q->where('hostname', 'ilike', '%'.str_replace(['%', '_'], ['\\%', '\\_'], $term).'%'))
             ->orderByDesc('id')->paginate(20)->withQueryString();
 
         return Inertia::render('domains/index', [
             'domains' => ['data' => $rows->getCollection()->map(fn (Domain $d): array => $this->summary($d))->all(), 'meta' => PaginatorPayload::meta($rows)],
-            'environments' => Environment::query()->forWorkspace($workspace->id)->with('project')->limit(100)->get()->map(fn (Environment $e): array => ['uuid' => $e->uuid, 'name' => $e->project?->name.' / '.$e->name])->all(),
-            'can_operate' => in_array(WorkspaceAccess::membership($request->user(), $workspace)->role->value, ['owner', 'admin', 'operator'], true),
+            'environments' => Environment::query()->forWorkspace($workspace->id)->whereIn('project_id', app(ProjectAccess::class)->query($request->user(), $workspace->id, GrantPermission::Deploy)->select('projects.id'))->with('project')->limit(100)->get()->map(fn (Environment $e): array => ['uuid' => $e->uuid, 'name' => $e->project?->name.' / '.$e->name])->all(),
+            'can_operate' => app(ProjectAccess::class)->query($request->user(), $workspace->id, GrantPermission::Deploy)->exists(),
         ]);
     }
 
     public function show(Request $request, Domain $domain): Response
     {
         abort_unless((string) $domain->workspace_id === (string) CurrentWorkspace::get($request)->id, 404);
+        $this->authorize('view', $domain->environment->project);
         $domain->load('environment.project', 'certificate');
 
-        return Inertia::render('domains/show', ['domain' => $this->summary($domain), 'can_operate' => in_array(WorkspaceAccess::membership($request->user(), CurrentWorkspace::get($request))->role->value, ['owner', 'admin', 'operator'], true)]);
+        return Inertia::render('domains/show', ['domain' => $this->summary($domain), 'can_operate' => $request->user()->can('deploy', $domain->environment->project)]);
     }
 
     public function store(DomainStoreRequest $request, DomainRegistrar $registrar): RedirectResponse

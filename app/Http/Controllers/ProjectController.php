@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Domain\Access\ProjectAccess;
 use App\Http\CurrentWorkspace;
 use App\Http\PaginatorPayload;
 use App\Models\Environment;
@@ -22,8 +23,7 @@ class ProjectController extends Controller
 
         $filters = $request->validate(['q' => ['nullable', 'string', 'max:120']]);
         $query = trim($filters['q'] ?? '');
-        $projects = Project::query()
-            ->forWorkspace($workspace->id)
+        $projects = app(ProjectAccess::class)->query($request->user(), $workspace->id)
             ->when($query !== '', fn ($q) => $q->where(fn ($q) => $q->whereRaw('strpos(lower(name), lower(?)) > 0', [$query])->orWhereRaw('strpos(lower(slug), lower(?)) > 0', [$query])))
             ->withCount('environments')
             ->orderByDesc('id')
@@ -51,6 +51,8 @@ class ProjectController extends Controller
     public function show(Request $request, Project $project): JsonResponse|Response
     {
         $this->authorize('view', $project);
+        $workspace = CurrentWorkspace::get($request);
+        abort_unless((string) $project->workspace_id === (string) $workspace->id, 404);
         $project->loadMissing('workspace');
 
         if ($request->wantsJson() && ! $request->header('X-Inertia')) {
@@ -60,9 +62,6 @@ class ProjectController extends Controller
                 'workspace_uuid' => $project->workspace?->uuid,
             ]);
         }
-
-        $workspace = CurrentWorkspace::get($request);
-        abort_unless((string) $project->workspace_id === (string) $workspace->id, 404);
 
         $environments = $project->environments()->orderBy('name')->get();
         $archives = ProjectSourceArchive::query()

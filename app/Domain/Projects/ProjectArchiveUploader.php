@@ -17,6 +17,7 @@ use App\Models\User;
 use App\Support\Identifiers;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
@@ -37,6 +38,11 @@ final class ProjectArchiveUploader
         ?string $requestId,
         ?string $sourceIp,
     ): StoredArchiveDeployment {
+        Gate::forUser($actor)->authorize('deploy', $project);
+        if ((string) $environment->project_id !== (string) $project->id || (string) $environment->workspace_id !== (string) $project->workspace_id) {
+            throw new \InvalidArgumentException('Environment and archive must belong to the same project.');
+        }
+
         $inspection = $this->inspector->inspect($file->getPathname());
         $disk = (string) config('rahandaz.project_archives.disk');
         $archiveUuid = Identifiers::uuid7();

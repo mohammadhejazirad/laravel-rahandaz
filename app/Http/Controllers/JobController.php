@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Domain\Access\OperationAccess;
 use App\Domain\Jobs\Enums\JobStatus;
 use App\Http\CurrentWorkspace;
 use App\Http\PaginatorPayload;
@@ -22,8 +23,7 @@ class JobController extends Controller
 
         $filters = $request->validate(['status' => ['nullable', Rule::enum(JobStatus::class)]]);
         $status = $filters['status'] ?? '';
-        $jobs = OperationJob::query()
-            ->where('workspace_id', $workspace->id)
+        $jobs = app(OperationAccess::class)->visibleQuery($request->user(), $workspace->id)
             ->when($status !== '', fn ($q) => $q->where('status', $status))
             ->orderByDesc('id')
             ->paginate(20)

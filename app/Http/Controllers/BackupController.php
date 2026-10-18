@@ -26,6 +26,7 @@ final class BackupController extends Controller
     public function index(Request $request): Response
     {
         $workspace = CurrentWorkspace::get($request);
+        abort_unless(WorkspaceAccess::membership($request->user(), $workspace)->role->managesHost(), 403);
         $rows = Backup::query()->forWorkspace($workspace->id)->with('projectDatabase', 'operationJob')->orderByDesc('id')->paginate(20)->withQueryString();
         $targets = LocalHost::query()->forWorkspace($workspace->id)->limit(10)->get()->map(fn (LocalHost $h): array => ['uuid' => $h->uuid, 'type' => 'local_host', 'name' => 'پنل مدیریت / '.$h->display_name])->all();
         $targets = [...$targets, ...ProjectDatabase::query()->forWorkspace($workspace->id)->where('status', 'ready')->where('protected', false)->limit(100)->get()->map(fn (ProjectDatabase $d): array => ['uuid' => $d->uuid, 'type' => 'project_database', 'name' => $d->name])->all()];
@@ -39,6 +40,7 @@ final class BackupController extends Controller
     public function show(Request $request, Backup $backup): Response
     {
         abort_unless((string) $backup->workspace_id === (string) CurrentWorkspace::get($request)->id, 404);
+        abort_unless(WorkspaceAccess::membership($request->user(), CurrentWorkspace::get($request))->role->managesHost(), 403);
         $backup->load('projectDatabase', 'operationJob');
         $restores = $backup->restores()->orderByDesc('id')->paginate(20)->withQueryString();
 
@@ -52,6 +54,7 @@ final class BackupController extends Controller
     public function store(BackupStoreRequest $request, BackupWorkflow $workflow): RedirectResponse
     {
         $workspace = CurrentWorkspace::get($request);
+        abort_unless(WorkspaceAccess::membership($request->user(), $workspace)->role->managesHost(), 403);
         $data = $request->validated();
         try {
             if ($data['target_type'] === 'local_host') {
@@ -71,6 +74,7 @@ final class BackupController extends Controller
     public function schedules(Request $request): Response
     {
         $workspace = CurrentWorkspace::get($request);
+        abort_unless(WorkspaceAccess::membership($request->user(), $workspace)->role->managesHost(), 403);
         $rows = Schedule::query()->forWorkspace($workspace->id)->whereIn('operation_key', ['backup.database', 'backup.control_plane'])->orderByDesc('id')->paginate(20)->withQueryString();
 
         return Inertia::render('backups/schedules', ['schedules' => ['data' => $rows->getCollection()->map(fn (Schedule $s): array => ['uuid' => $s->uuid, 'operation_key' => $s->operation_key, 'cron_expression' => $s->cron_expression, 'timezone' => $s->timezone, 'enabled' => (bool) $s->enabled])->all(), 'meta' => PaginatorPayload::meta($rows)]]);

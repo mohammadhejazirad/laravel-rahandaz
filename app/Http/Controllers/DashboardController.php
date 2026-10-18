@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Domain\Access\OperationAccess;
+use App\Domain\Access\ProjectAccess;
 use App\Domain\Jobs\Enums\JobStatus;
 use App\Http\CurrentWorkspace;
 use App\Infrastructure\Updates\UpdateStatusService;
@@ -21,8 +23,7 @@ class DashboardController extends Controller
     {
         $workspace = CurrentWorkspace::get($request);
 
-        $counts = OperationJob::query()
-            ->where('workspace_id', $workspace->id)
+        $counts = app(OperationAccess::class)->visibleQuery($request->user(), $workspace->id)
             ->selectRaw('status, count(*) as aggregate')
             ->groupBy('status')
             ->get()
@@ -45,18 +46,18 @@ class DashboardController extends Controller
                 'failed' => (int) ($counts['failed'] ?? 0),
             ],
             'inventory' => [
-                'projects' => Project::query()->forWorkspace($workspace->id)->count(),
+                'projects' => app(ProjectAccess::class)->query($request->user(), $workspace->id)->count(),
                 'servers' => LocalHost::query()->forWorkspace($workspace->id)->count(),
                 'metric_samples' => MetricSample::query()
                     ->whereIn('local_host_id', LocalHost::query()->forWorkspace($workspace->id)->select('id'))
                     ->count(),
             ],
-            'recent_projects' => Project::query()->forWorkspace($workspace->id)->select(['id', 'uuid', 'name', 'slug', 'status', 'declared_type'])->withCount('environments')->latest('id')->limit(6)->get()->map(fn (Project $project): array => [
+            'recent_projects' => app(ProjectAccess::class)->query($request->user(), $workspace->id)->select(['id', 'uuid', 'name', 'slug', 'status', 'declared_type'])->withCount('environments')->latest('id')->limit(6)->get()->map(fn (Project $project): array => [
                 'uuid' => $project->uuid, 'name' => $project->name, 'slug' => $project->slug,
                 'status' => $project->status->value, 'declared_type' => $project->declared_type->value,
                 'environment_count' => (int) $project->environments_count,
             ])->all(),
-            'recent_jobs' => OperationJob::query()->where('workspace_id', $workspace->id)->select(['uuid', 'type', 'status', 'created_at'])->latest('id')->limit(6)->get()->map(fn (OperationJob $job): array => [
+            'recent_jobs' => app(OperationAccess::class)->visibleQuery($request->user(), $workspace->id)->select(['uuid', 'type', 'status', 'created_at'])->latest('id')->limit(6)->get()->map(fn (OperationJob $job): array => [
                 'uuid' => $job->uuid, 'type' => $job->type, 'status' => $job->status->value,
                 'created_at' => $job->created_at?->utc()->toIso8601ZuluString(),
             ])->all(),
