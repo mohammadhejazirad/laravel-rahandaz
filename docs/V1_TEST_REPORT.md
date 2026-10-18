@@ -1,5 +1,7 @@
 # گزارش آزمون واقعی — ۲۰۲۶-۱۰-۱۴
 
+> این سند گزارش تاریخی است. وضعیت بازاعتبارسنجی ۲۰۲۶-۱۰-۱۸ و commit آزموده‌شده در [OPERATIONAL_TEST_REPORT.md](OPERATIONAL_TEST_REPORT.md)، ماتریس/برنامه در [OPERATIONAL_COMPLETION_PLAN.md](OPERATIONAL_COMPLETION_PLAN.md) است. ادعاهای قدیمی درباره نبود LICENSE، OAuth یا انتشار عمومی، وضعیت جاری محسوب نمی‌شوند.
+
 ## محیط و محدوده
 
 PHP توسعه 8.5.11 با pdo_pgsql/Redis/Sodium در محیط Lerd موجود؛ PostgreSQL 16 و دو Redis توسعه. suite فقط `rahandaz_test` را هدف گرفت. DB جدا و تازه `rahandaz_v1_ui_20261014` برای Chrome از migrationهای پروژه ساخته شد؛ به دیتابیس کاربر migrate:fresh زده نشد. اجرای میزبان disabled و هیچ سایت، سرویس خارجی، Git repository یا runtime کاربر تغییر نکرد. این محیط گواهی PHP 8.4/Ubuntu VM نیست.

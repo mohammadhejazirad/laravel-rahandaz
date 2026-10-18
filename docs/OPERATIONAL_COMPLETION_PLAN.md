@@ -2,7 +2,8 @@
 
 مرجع وضعیت جاری این مأموریت است؛ گزارش‌های V1 قدیمی شواهد تاریخی‌اند. مبنا:
 `116ec9e38bfe08c30650cfd90ee7f2009e53c2ca`، working tree در آغاز پاک.
-این سند پیش از تغییر کد نوشته شد. وضعیت Production: **blocked**.
+نسخه نخست این سند پیش از تغییر کد نوشته شد (commit `7e35436`). وضعیت Production: **blocked**.
+مرجع نتایج جاری [OPERATIONAL_TEST_REPORT.md](OPERATIONAL_TEST_REPORT.md) است.
 
 ## شناخت معماری
 
@@ -23,17 +24,17 @@ Redis → OperationRunner. رابط Inertia/React/TypeScript است. شناسه 
 | --- | --- | --- | --- |
 | ورود/تغییر رمز/session | پیاده‌سازی‌شده و آزموده‌شده در suite قبلی | PanelHttp/JobLifecycle | MFA، recovery و reauth حساس پیاده نشده |
 | GitHub Manifest/GitLab OAuth/token | پیاده‌سازی‌شده ولی نیازمند آزمون محیط واقعی | GitAccounts، GitConnectionController | provider زنده، revoke/expire و deploy واقعی |
-| Project/ResourceGrant | پیاده‌سازی ناقص | ProjectPolicy عضویت را کافی می‌داند | query، action، job و log باید مجوز منبع داشته باشند |
+| Project/ResourceGrant | پیاده‌سازی‌نشده (کنترل جامع در مبنا) | ProjectPolicy عضویت را کافی می‌داند | query، action، job و log باید مجوز منبع داشته باشند |
 | Job/Outbox/Lease | پیاده‌سازی‌شده و آزموده‌شده در کنترل‌پلین | OperationEngine/RedisQueue | executor/crash/reconcile واقعی نیست |
 | helper/socket/UID isolation | پیاده‌سازی‌نشده در production | OperationDispatcher، operations sandbox | peer credentials، fencing، OS isolation و VM |
-| استقرار ZIP/Git/release | پیاده‌سازی ناقص | DeploymentWorkflow/ProjectArchiveUploader | checkout/build/shared/activate/health/rollback واقعی نیست |
-| دامنه/SSL | پیاده‌سازی ناقص | DomainRegistrar | DNS/ACME/Nginx/renew/recovery واقعی نیست |
-| دیتابیس/backup/restore | پیاده‌سازی ناقص | DatabaseRegistrar/BackupWorkflow | engine adapters، artifact و isolated restore واقعی نیست |
-| runtime/PHP/Nginx/Supervisor/Cron/SSH | پیاده‌سازی ناقص | catalog، contracts و installer templates | اجرای پنلی و recovery در VM باقی است |
-| monitoring/notification | پیاده‌سازی ناقص | MetricBoard/JobLifecycleRecorder | collector/alerts و کانال خارجی واقعی باقی است |
+| استقرار ZIP/Git/release | پیاده‌سازی‌نشده (اجرای میزبان) | DeploymentWorkflow/ProjectArchiveUploader | checkout/build/shared/activate/health/rollback واقعی نیست |
+| دامنه/SSL | پیاده‌سازی‌نشده (اجرای میزبان) | DomainRegistrar | DNS/ACME/Nginx/renew/recovery واقعی نیست |
+| دیتابیس/backup/restore | پیاده‌سازی‌نشده (اجرای میزبان) | DatabaseRegistrar/BackupWorkflow | engine adapters، artifact و isolated restore واقعی نیست |
+| runtime/PHP/Nginx/Supervisor/Cron/SSH | پیاده‌سازی‌نشده (اجرای پنلی) | catalog، contracts و installer templates | اجرای پنلی و recovery در VM باقی است |
+| monitoring/notification | پیاده‌سازی‌نشده (collector و کانال خارجی) | MetricBoard/JobLifecycleRecorder | collector/alerts و کانال خارجی واقعی باقی است |
 | نصب/update/release | پیاده‌سازی‌شده ولی نیازمند آزمون محیط واقعی | installer harness، prerelease تاریخی beta.5.1 | VM سه Ubuntu، PHP 8.4 و recovery واقعی |
-| شبکه ایران/mirror | پیاده‌سازی ناقص | prerequisites و mirror catalog | یکپارچگی Composer/npm/pip/Git و شبکه محدود واقعی |
-| benchmark/ممیزی کامل | پیاده‌سازی‌نشده | PERFORMANCE و V1_SECURITY_AUDIT | اندازه‌گیری VM و audit جامع |
+| شبکه ایران/mirror | پیاده‌سازی‌شده ولی نیازمند آزمون محیط واقعی (APT) | prerequisites و mirror catalog | یکپارچگی Composer/npm/pip/Git و شبکه محدود واقعی |
+| benchmark/ممیزی کامل | مسدود به علت محیط یا وابستگی | PERFORMANCE و V1_SECURITY_AUDIT | اندازه‌گیری VM و audit جامع |
 
 ## Threat model
 
@@ -53,7 +54,8 @@ Redis → OperationRunner. رابط Inertia/React/TypeScript است. شناسه 
 PHP میزبان 8.5.11 و Composer 2.9.5 موجودند؛ `/usr/bin/php8.4` موجود نیست.
 vendor/node_modules موجودند. `/tmp` noexec نیست. Docker و ایمیج‌های PostgreSQL/Redis و
 سه Ubuntu lab موجودند؛ container فعالی دیده نشد. QEMU و `/dev/kvm` موجودند، اما VM
-آماده/مجوز تغییر سرور داده‌دار یا credential/provider آزمایشی معرفی نشده است.
+آماده یا credential/provider آزمایشی معرفی نشده است. مالک در پاسخ اعلام کرد VM آماده ندارد
+و ثبت سناریوها/مانع محیط را خواست. هیچ مجوز تغییر سرور داده‌دار صادر نشده است.
 آزمون برنامه فقط با دیتابیس و Redis disposable و loopback انجام می‌شود؛ `.env` واقعی
 خوانده یا بازنویسی نمی‌شود. اجرای suite با PHP 8.5 گواهی PHP 8.4 نیست.
 
@@ -75,4 +77,6 @@ vendor/node_modules موجودند. `/tmp` noexec نیست. Docker و ایمیج
 
 ## نتایج این مأموریت
 
-در حال اجرا؛ هیچ سناریوی VM یا عملیات میزبان در این مأموریت passed اعلام نشده است.
+برش پایهٔ authorization در commit `c9fa7119b593653edcd014d2efe5ae1780751682` پیاده شد.
+نتایج و کار باقی‌مانده در [گزارش آزمون جاری](OPERATIONAL_TEST_REPORT.md) است.
+هیچ سناریوی VM یا عملیات میزبان در این مأموریت passed اعلام نشده است.

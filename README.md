@@ -18,7 +18,7 @@
 
 ## نصب سریع و وضعیت نسخه اول
 
-نسخه فعلی `1.0.0-development` است، نه Release پایدار. نصب تک‌دستوری عمومی تا وجود artifact امضاشده، کلید اعتماد و آزمون VM منتشر نمی‌شود. برای بررسی امن طرح نصب، بدون تغییر میزبان:
+نسخه کد `1.0.0-development` است و prerelease امضاشده برای آزمون وجود دارد؛ Release پایدار و نصب Production هنوز تأیید نشده‌اند. وضعیت جاری، آزمون‌ها و موانع در [گزارش تکمیل عملیاتی](docs/OPERATIONAL_TEST_REPORT.md) و [برنامه اجرایی](docs/OPERATIONAL_COMPLETION_PLAN.md) ثبت شده‌اند. برای بررسی امن طرح نصب، بدون تغییر میزبان:
 
 ```bash
 bash installer/bin/rahandaz-install --plan --state-dir /tmp/rahandaz-plan

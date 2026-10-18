@@ -1,5 +1,7 @@
 # ممیزی نسخه اول — ۲۰۲۶-۱۰-۱۴
 
+> این سند گزارش تاریخی است. وضعیت بازاعتبارسنجی ۲۰۲۶-۱۰-۱۸ و commit آزموده‌شده در [OPERATIONAL_TEST_REPORT.md](OPERATIONAL_TEST_REPORT.md)، ماتریس/برنامه در [OPERATIONAL_COMPLETION_PLAN.md](OPERATIONAL_COMPLETION_PLAN.md) است. ادعاهای قدیمی درباره نبود LICENSE، OAuth یا انتشار عمومی، وضعیت جاری محسوب نمی‌شوند.
+
 مرجع: `.docs/PROJECT_SPEC.md`. این گزارش وضعیت قابل مشاهده مخزن است، نه گواهی انتشار. فایل‌های خواسته‌شده `docs/PROJECT_SPEC.md`، `docs/ARCHITECTURE.md`، `docs/DEVELOPMENT.md` و `docs/ROADMAP.md` در `.docs/` موجودند. در شروع ممیزی LICENSE، SECURITY.md، CONTRIBUTING.md، CHANGELOG.md، CLI_REFERENCE و گزارش آمادگی نسخه اول وجود نداشتند.
 
 ## موجودی آغاز ممیزی

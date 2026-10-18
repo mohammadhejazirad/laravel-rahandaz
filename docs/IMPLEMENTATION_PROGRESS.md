@@ -2,6 +2,28 @@
 
 این فایل گزارش واقعیت مخزن است. نقشه در `.docs/ROADMAP.md` و مشخصات در `.docs/PROJECT_SPEC.md` است.
 
+## ۲۰۲۶-۱۰-۱۸ — شناخت مأموریت عملیاتی و پایهٔ مجوز منبع
+
+مبنا `116ec9e` با working tree پاک بازاعتبارسنجی شد. برنامه، معماری، threat model و
+ADR-0007 در commit `7e35436` ثبت شدند. در `c9fa711` query/policy پروژه با ResourceGrant
+مشترک شد؛ لیست/جزئیات استقرار، دامنه، metadata دیتابیس و داشبورد scope دارند. Job/log
+و backup فعلاً فقط برای مالک/مدیر بازند؛ مجوز مستقل آنها باقی است. Domain workflow و
+ZIP پیش از اثر جانبی مجوز را کنترل می‌کنند. worker مجوز actor را از پایگاه دوباره
+می‌خواند؛ revoke/suspend/demotion با `AUTHORIZATION_REVOKED`، audit و آزادسازی قفل
+استقرار شکست می‌خورد. Gate disabled ماند؛ هیچ executor/SSH/package/service فعال نشد.
+
+آزمون کامل روی commit کد: ۱۷۶ تست/۳۸۱۷ assertion؛ ۲۶ تست/۲۱۲ assertion جدید مجوزها.
+Pint، lint، TypeScript، build، harness sandbox عملیات، Composer/npm audit و اسکن محدود
+رازها موفق شدند. PHP محیط 8.5.11 است و گواهی 8.4 نیست. UI/package تازه اضافه نشد؛ QA
+مرورگر تازه اجرا نشد. VM آماده نیست؛ مالک ثبت سناریوها و موانع را خواست. Matrix سه
+Ubuntu، installer و update در این برش دوباره اجرا نشدند. Production همچنان blocked است.
+
+مرجع جاری و تفکیک چهار وضعیت در [OPERATIONAL_TEST_REPORT.md](OPERATIONAL_TEST_REPORT.md)،
+برنامه در [OPERATIONAL_COMPLETION_PLAN.md](OPERATIONAL_COMPLETION_PLAN.md) و سناریوهای
+VM در [OPERATIONAL_VM_ACCEPTANCE.md](OPERATIONAL_VM_ACCEPTANCE.md) است. R02 جامع، helper
+واقعی و مسیر عمودی میزبان هنوز تکمیل نشده‌اند؛ متن تاریخی زیر ادعای وضعیت امروز نیست.
+
+
 ## بازچینی سراسری رابط — ۲۰۲۶-۱۰-۱۶
 
 قرارداد جاری در `docs/UX_SYSTEM.md` و اندازه‌ها/محدودیت‌های عملکرد در `docs/PERFORMANCE.md` هستند. تمام مسیرهای موجود از پوستهٔ یکپارچه، ناوبری مرتبط و راهنمای زمینه‌ای بهره می‌برند؛ ورود/گذرواژه/خطا اجزای متناسب مستقل دارند. Sidebar راست واقعاً fixed است، Drawer راست و ناوبری مشترک‌اند. جست‌وجوی بخش‌ها با Ctrl/Cmd+K و بر اساس metadata واحد انجام می‌شود. جدول‌های مشترک با یک درخت semantic در موبایل کارت می‌شوند؛ فرم درخواستِ دامنه، دیتابیس، استقرار و پشتیبان جمع‌شونده است و در خطای سرور باز می‌شود.

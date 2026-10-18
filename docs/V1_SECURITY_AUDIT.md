@@ -1,5 +1,7 @@
 # ممیزی امنیتی این برش — ۲۰۲۶-۱۰-۱۴
 
+> این سند گزارش تاریخی است. وضعیت بازاعتبارسنجی ۲۰۲۶-۱۰-۱۸ و commit آزموده‌شده در [OPERATIONAL_TEST_REPORT.md](OPERATIONAL_TEST_REPORT.md)، ماتریس/برنامه در [OPERATIONAL_COMPLETION_PLAN.md](OPERATIONAL_COMPLETION_PLAN.md) است. ادعاهای قدیمی درباره نبود LICENSE، OAuth یا انتشار عمومی، وضعیت جاری محسوب نمی‌شوند.
+
 این ممیزی اصلاحات و شکاف‌های قابل مشاهده را ثبت می‌کند؛ pentest جامع یا گواهی OS نیست. هیچ root executor فعال نشده و Secret واقعی منتشر/rotate نشده است.
 
 | یافته | شدت | اصلاح / وضعیت | اثبات |

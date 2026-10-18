@@ -1,5 +1,7 @@
 # آزمون مسیر GitHub Releases — ۲۰۲۶-۱۰-۱۴
 
+> این سند گزارش تاریخی است. وضعیت بازاعتبارسنجی ۲۰۲۶-۱۰-۱۸ و commit آزموده‌شده در [OPERATIONAL_TEST_REPORT.md](OPERATIONAL_TEST_REPORT.md)، ماتریس/برنامه در [OPERATIONAL_COMPLETION_PLAN.md](OPERATIONAL_COMPLETION_PLAN.md) است. ادعاهای قدیمی درباره نبود LICENSE، OAuth یا انتشار عمومی، وضعیت جاری محسوب نمی‌شوند.
+
 نتیجه: **منطق بسته‌سازی و bootstrap در محدودهٔ fixture پذیرفته شد؛ نصب کامل و انتشار عمومی blocked / requires_vm است.** این سند نتیجهٔ آزمون انجام‌شده است، نه گواهی Production.
 
 ## تغییرات
