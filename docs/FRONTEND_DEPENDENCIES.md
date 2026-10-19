@@ -58,3 +58,7 @@ Primitiveهای Radix به‌صورت بسته‌های مستقل Avatar، Dial
 ## ۲۰۲۶-۱۰-۱۹ — کارت Chrome پروژه
 
 بدون پکیج تازه؛ از Inertia، React و Card/Button/Form/StatusBadge مشترک استفاده می‌کند. Clipboard API برای کپی مسیر و focus/select برای کپی دستی است. Chrome یا Puppeteer به dependencyهای frontend یا installer پنل اضافه نشدند.
+
+## تنظیم پورت پنل — ۲۰۲۶-۱۰-۱۹
+
+کارت پورت در صفحهٔ تنظیمات موجود با Form/Input/Button/Card مشترک، useForm اینرسی و Fetch مرورگر ساخته شد؛ dependency یا صفحهٔ تازه اضافه نشد. انتقال origin فقط پس از نتیجهٔ واقعی Job انجام می‌شود.

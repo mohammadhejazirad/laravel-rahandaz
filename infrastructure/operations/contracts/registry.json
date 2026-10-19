@@ -1331,6 +1331,17 @@
       "mutating": false,
       "script": "automation/refuse-system-cron.sh",
       "entry": "ops_automation_refuse_cron"
+    },
+    {
+      "name": "panel.port.update",
+      "version": "1",
+      "privilege": "helper",
+      "timeout_seconds": 50,
+      "lock": "panel-listener",
+      "idempotency": "execution_id",
+      "mutating": true,
+      "script": "panel/listener.py",
+      "entry": "main"
     }
   ]
 }

@@ -28,6 +28,13 @@ cleanup() {
 trap cleanup EXIT
 cat >"$input"
 
+# The panel capability has its own live contract and root-owned enrollment.
+# All other operations keep their existing sandbox-only execution boundary.
+if [[ "$script" == panel/listener.py ]]; then
+    /usr/bin/timeout --signal=TERM --kill-after=5s "${timeout_seconds}s" /usr/bin/python3 -I "$target" <"$input"
+    exit $?
+fi
+
 if [[ -x /usr/bin/timeout ]]; then
     exec /usr/bin/timeout --signal=TERM --kill-after=5s "${timeout_seconds}s" /usr/bin/env bash "$target" "$input"
 fi

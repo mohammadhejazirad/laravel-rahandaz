@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Infrastructure\Executor;
 
 /**
- * This slice has no host executor. Every operation fails closed.
+ * General host execution stays closed. The separately enrolled panel-port
+ * capability has its own narrow worker and privileged contract.
  */
 final class ExecutionGate
 {

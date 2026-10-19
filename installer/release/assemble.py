@@ -34,7 +34,7 @@ def assemble(source: Path, version: str, output: Path) -> Path:
     roots = (
         "app", "bootstrap", "config", "database", "installer", "public", "resources",
         "routes", "vendor", "artisan", "composer.json", "composer.lock", ".env.example",
-        "README.md", "LICENSE", "SECURITY.md", "CHANGELOG.md",
+        "README.md", "LICENSE", "SECURITY.md", "CHANGELOG.md", "infrastructure/operations/panel",
     )
     paths = []
     for name in roots:

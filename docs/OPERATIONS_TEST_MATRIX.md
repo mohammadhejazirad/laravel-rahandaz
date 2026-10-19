@@ -1,5 +1,11 @@
 # ماتریس آزمون عملیات
 
+## ۲۰۲۶-۱۰-۱۹ — قرارداد پورت پنل
+
+قرارداد Python (۱۰ آزمون شامل rollback، crash recovery، idempotency، مالکیت و ورودی نامعتبر)، syntax فایل‌های Bash تغییریافته و dispatch ورودی خراب روی هر سه کانتینر 22.04/24.04/26.04 موفق شدند؛ گزارش نهایی `panel-port-<version>-20261019T124915Z`، exit_code=0 است. اجرای اول harness عمومی به‌علت نبود PHP در image شکست خورد؛ آن شکست passed نیست. harness اختصاصی سپس فقط قرارداد و dispatcher همین قابلیت را سنجید؛ harness کامل عمومی روی میزبان دارای PHP موفق بود و در CI هم اجرا می‌شود. این نتیجه اجرای systemd/Nginx واقعی در سه VM نیست. آزمون VPS پس از انتشار جدا ثبت می‌شود.
+
+PHP کامل محلی ۲۰۴ آزمون / ۴۰۳۷ assertion، lint، TypeScript و build موفق‌اند؛ installer ۷۹/۰ و release tests سی/۰ موفق بودند. قابلیت live پورت opt-in مستقل است؛ بقیهٔ عملیات disabled مانده‌اند.
+
 به‌روزرسانی کنترل‌پلین ۲۰۲۶-۱۰-۱۴ در V1_TEST_REPORT است: operations Bash harness دوباره خروج صفر و full PHP/Redis suite موفق داشت. ماتریس Ubuntu/VM زیر به supported تبدیل نمی‌شود؛ apply، Boot و Recovery واقعی آزموده نشده‌اند.
 
 تاریخ این ثبت ۲۰۲۶-۱۰-۱۲ است. میزبان توسعه این مخزن یک Ubuntu Server آزمایشی نیست. هیچ خانه‌ای را `supported` نکنید.

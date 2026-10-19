@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Domain\Settings\PanelListener;
 use App\Http\Security\ContentSecurityPolicy;
 use Closure;
 use Illuminate\Http\Request;
@@ -23,7 +24,8 @@ class SecurityHeaders
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 
         if (app()->environment('production')) {
-            $response->headers->set('Content-Security-Policy', ContentSecurityPolicy::production());
+            $listener = app(PanelListener::class)->state();
+            $response->headers->set('Content-Security-Policy', ContentSecurityPolicy::production($listener['host'] ?? null));
         }
 
         return $response;

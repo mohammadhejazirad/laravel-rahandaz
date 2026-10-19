@@ -12,6 +12,8 @@ return [
 
     'php_series' => '8.4',
 
+    'panel_listener_file' => '/etc/rahandaz/panel-listener.json',
+
     'release_file' => env('RAHANDAZ_RELEASE_FILE', ''),
 
     'update_channel' => env('RAHANDAZ_UPDATE_CHANNEL', 'stable'),

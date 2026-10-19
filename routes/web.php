@@ -106,6 +106,8 @@ Route::prefix(trim((string) config('rahandaz.base_path'), '/'))->group(function 
                 Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
                 Route::post('/notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
                 Route::get('/audit', [AuditController::class, 'index'])->name('audit.index');
+                Route::post('/settings/panel-port', [\App\Http\Controllers\PanelPortController::class, 'update'])->middleware('throttle:3,1')->name('settings.panel-port');
+                Route::get('/settings/panel-port/status', [\App\Http\Controllers\PanelPortController::class, 'status'])->name('settings.panel-port.status');
                 Route::get('/settings/profile', [SettingsController::class, 'profile'])->name('settings.profile');
                 Route::get('/settings/updates', [SystemUpdateController::class, 'show'])->name('settings.updates');
                 Route::post('/settings/updates/check', [SystemUpdateController::class, 'check'])

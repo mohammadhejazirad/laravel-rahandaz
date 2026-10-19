@@ -1,3 +1,4 @@
+import { PanelPortCard, type PanelPortState } from '@/components/panel-port-card';
 import { PageSections } from '@/components/ui/page-sections';
 import { Head, Link, usePage } from "@inertiajs/react";
 import { UserRound } from "lucide-react";
@@ -13,6 +14,7 @@ export default function ProfileSettings({
     profile,
     workspace,
     mfa_available,
+    panel_port,
 }: {
     profile: {
         username: string;
@@ -26,6 +28,7 @@ export default function ProfileSettings({
         name: string;
     };
     mfa_available: false;
+    panel_port: PanelPortState;
 }) {
     const { app, enum_labels: labels } = usePage<SharedProps>().props;
     const base = app.base_path;
@@ -102,6 +105,7 @@ export default function ProfileSettings({
                 </div>
             </Card>
                 </> },
+                { id: 'panel-port', label: 'پورت پنل', content: <PanelPortCard panel={panel_port} /> },
                 { id: 'security', label: 'امنیت حساب', content: <><Card><h2 className="font-semibold">گذرواژه و دسترسی</h2><p className="mt-2 text-sm leading-7 text-muted">گذرواژهٔ پنل را از مسیر امن تغییر دهید. این کار گذرواژهٔ سرور یا پروژه‌ها را تغییر نمی‌دهد.</p><Button asChild className="mt-4" variant="secondary"><Link href={`${base}/password`}>تغییر گذرواژه</Link></Button></Card>
             {mfa_available ? null : (
                 <Alert tone="info">

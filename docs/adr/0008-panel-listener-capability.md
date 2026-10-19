@@ -1,0 +1,15 @@
+# 0008 — قابلیت محدود تغییر پورت پنل
+
+تاریخ: ۲۰۲۶-۱۰-۱۹. تصمیم به درخواست صریح مالک برای دسترسی عمومی با IP و پورت 8080 و تغییر پورت از GUI.
+
+این تصمیم فقط عملیات `panel.port.update` را فعال می‌کند. `RAHANDAZ_EXECUTION_MODE=disabled`، ExecutionGate عمومی و تمام عملیات دیگر بسته می‌مانند. تغییر پورت از HTTP اجرا نمی‌شود: مالک نصب، میزبان محلی workspace، validation، dedup سراسری، Job/Outbox و audit لازم‌اند؛ worker مالکیت/عضویت و لغو را دوباره بررسی می‌کند. پس از قفل مستقل worker، فقط helper ثابت از stdin قرارداد v1 را می‌گیرد.
+
+helper در `infrastructure/operations/panel/listener.py` است. نصب آن با `provision.py` فقط توسط root از artifact امضاشده انجام می‌شود. sudoers فقط همان فایل root-owned با argv خالی را برای rahandaz-svc مجاز می‌کند؛ sudo آزاد، shell آزاد، path/host/service دریافتی از HTTP و NOPASSWD: ALL وجود ندارند. Python به‌شکل isolated اجرا می‌شود. ثبت root-owned در `/etc/rahandaz/panel-listener.json` opt-in مستقل است؛ نبود آن به PANEL_LISTENER_DISABLED می‌انجامد.
+
+قرارداد فقط JSON شامل schema_version، operation، execution_id از نوع UUIDv7، expected_port و port است. پورت جدید 1024..65535 به‌استثنای پورت‌های محدود مرورگر است؛ port اشغال‌شده، expected_port قدیمی، فایل خارجی، symlink ناشناخته و مالکیت ناامن رد می‌شوند. عملیات فقط فایل Nginx خودش، APP_URL همان release، config cache، رکورد پورت و journal بازیابی را تغییر می‌دهد. Nginx و PHP-FPM اختصاصی graceful reload می‌شوند؛ ماشین، SSH، پروژه‌ها، firewall، queue و datastores reboot/restart نمی‌شوند.
+
+پشتیبان خصوصی پیش از تغییر ثبت می‌شود. validate واقعی Nginx قبل از reload لازم است؛ موفقیت به مالکیت socket توسط باینری Nginx و HTTP /up و login روی پورت جدید وابسته است. شکست، config و APP_URL را بازمی‌گرداند. intent پایدار برای recovery پس از قطع ناگهانی باقی می‌ماند؛ درخواست بعدی پیش از ادامه recovery را انجام می‌دهد. بازگشت ناموفق MANUAL_RECOVERY_REQUIRED دارد. retry همان execution_id پس از موفقیت دوباره reload نمی‌کند. این rollback پیکربندی است و schema/DB را تغییر نمی‌دهد.
+
+برای انتقال مرورگر، endpoint فقط‌خواندنی وضعیت، احراز هویت و workspace مالک را لازم دارد. CORS credentials فقط برای origin قبلی ثبت‌شده توسط root مجاز است؛ origin دلخواه پذیرفته نمی‌شود. CSP فقط در صورت enrollment، connect-src را برای IP ثبت‌شدهٔ خود پنل و پورت‌های همان IP باز می‌کند؛ script-src و سایر میزبان‌ها محدود می‌مانند. redirect پس از succeeded واقعی انجام می‌شود، نه پس از ثبت درخواست. SSH و سایت loopback قدیمی، مسیر بازیابی مستقل می‌مانند.
+
+نسخهٔ نخست این قابلیت فقط IPv4 و HTTP صریحاً پذیرفته‌شده را مدیریت می‌کند. درخواست فعلی مالک برای `http://IP:8080` استثنای مستند قاعدهٔ عمومی HTTPS محصول است؛ تغییر پورت هیچ رمزگذاری‌ای ایجاد نمی‌کند. TLS/دامنه و firewall خارج از این قراردادند و بدون workflow جدا تغییر نمی‌کنند. UI این محدودیت را نمایش می‌دهد. انتشار نسخهٔ پایدار یا supported شدن سه Ubuntu از این تصمیم نتیجه نمی‌شود.

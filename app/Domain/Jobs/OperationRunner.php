@@ -8,6 +8,7 @@ use App\Domain\Access\OperationAccess;
 use App\Domain\Jobs\Enums\JobStatus;
 use App\Domain\Jobs\Enums\StepStatus;
 use App\Domain\Projects\Enums\DeploymentStatus;
+use App\Domain\Settings\RunPanelPort;
 use App\Infrastructure\Executor\ExecutionGate;
 use App\Models\Deployment;
 use App\Models\OperationJob;
@@ -26,6 +27,12 @@ final class OperationRunner
     public function run(int|string $operationJobId): void
     {
         $operationJobId = (string) $operationJobId;
+
+        if (OperationJob::query()->whereKey($operationJobId)->where('type', 'panel.port.update')->exists()) {
+            app(RunPanelPort::class)->run($operationJobId);
+
+            return;
+        }
 
         DB::transaction(function () use ($operationJobId): void {
             $job = OperationJob::query()->lockForUpdate()->find($operationJobId);

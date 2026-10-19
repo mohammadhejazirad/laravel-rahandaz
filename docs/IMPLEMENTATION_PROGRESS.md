@@ -2,6 +2,10 @@
 
 این فایل گزارش واقعیت مخزن است. نقشه در `.docs/ROADMAP.md` و مشخصات در `.docs/PROJECT_SPEC.md` است.
 
+## ۲۰۲۶-۱۰-۱۹ — قابلیت محدود پورت پنل
+
+به درخواست مالک، تنظیم owner-only پورت پنل، Job/Outbox/Audit و helper محدود با قرارداد v1، expected-port، قفل، health، rollback و journal recovery اضافه شدند. HTTP هیچ فرمان بلند اجرا نمی‌کند؛ worker عضویت را دوباره بررسی می‌کند و موفقیت بدون شاهد helper پذیرفته نمی‌شود. Operations عمومی disabled باقی می‌مانند؛ enrollment مستقل root و استثنای HTTP/IPv4 در ADR 0008 و PANEL_PORT ثبت شدند. PHP کامل ۲۰۴ آزمون/۴۰۳۷ assertion، lint، typecheck، build، installer ۷۹/۰ و release سی/۰ موفق‌اند. Matrix اختصاصی قرارداد و dispatch روی سه Ubuntu کانتینری موفق و در OPERATIONS_TEST_MATRIX ثبت شد. آزمون VPS و نسخهٔ انتشار پس از اجرا ثبت می‌شوند.
+
 ## ۲۰۲۶-۱۰-۱۹ — انتشار و ارتقای کنترل‌شدهٔ VPS
 
 انتشار عمومی امضاشدهٔ beta16 از commit `7a2ec63` و CI موفق بررسی شد؛ SHA256SUMS، امضا، manifest و bootstrap با کلید pin‌شده تأیید شدند. ارتقای واقعی VPS Ubuntu 24.04 از beta14 به beta16 با قفل، توقف writerهای خود پنل، `pg_dump` با فرمت custom، اعتبارسنجی فهرست restore و archive پیکربندی/runtime انجام شد. migration و seed یکسان بودند و اجرا نشدند؛ کلیدها و credentials بدون تغییر ماندند. سلامت HTTP، doctor با service user و سرویس‌ها پس از فعال‌سازی موفق شد. تونل خصوصی SSH و صفحهٔ ورود در Chrome مالک باز شدند.

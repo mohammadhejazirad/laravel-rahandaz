@@ -27,6 +27,8 @@ while IFS= read -r script; do
     bash -n "$script"
 done < <(find "$ROOT" -name '*.sh' -type f | sort)
 pass "bash -n"
+python3 "$ROOT/panel/test_listener.py"
+pass "panel listener contract and recovery"
 
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
