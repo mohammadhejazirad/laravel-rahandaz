@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Domain\Catalog\Enums\ServiceKind;
 use App\Models\MirrorEndpoint;
 use App\Models\PackageDefinition;
 use App\Models\PackageVersion;
@@ -25,7 +26,8 @@ class CatalogSeederTest extends TestCase
         $this->assertSame(0, PackageVersion::query()->where('lifecycle', 'active')->count());
         $this->assertSame(0, MirrorEndpoint::query()->where('software_kind', 'pypi')->count());
         $this->assertSame(10, MirrorEndpoint::query()->count());
-        $this->assertSame(9, PackageDefinition::query()->count());
+        $this->assertSame(10, PackageDefinition::query()->count());
+        $this->assertSame(ServiceKind::Tool, PackageDefinition::query()->where('key', 'google-chrome')->value('service_kind'));
         $this->assertSame(
             ['nginx', 'postgresql', 'redis'],
             PackageDefinition::query()->where('control_plane_candidate', true)->orderBy('key')->pluck('key')->all(),
