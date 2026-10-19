@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Domain\Access\OperationAccess;
+use App\Domain\Catalog\SoftwareCapability;
 use App\Domain\Jobs\Enums\JobStatus;
 use App\Http\CurrentWorkspace;
 use App\Http\PaginatorPayload;
@@ -52,6 +53,7 @@ class JobController extends Controller
 
         return Inertia::render('jobs/show', [
             'job' => $this->summary($job),
+            'software' => in_array($job->type, ['software.install', 'setup.initialize'], true) ? app(SoftwareCapability::class)->payload($job) : null,
             'logs' => [
                 'data' => $logs->getCollection()->map(fn (OperationJobLog $log): array => [
                     'sequence' => $log->sequence,

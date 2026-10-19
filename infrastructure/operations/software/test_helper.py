@@ -5,6 +5,10 @@ import json
 import os
 from pathlib import Path
 import tempfile
+import io
+import tarfile
+import zipfile
+import hashlib
 import socket
 import signal
 import time
@@ -130,11 +134,88 @@ class ContractTests(unittest.TestCase):
                 helper.verify_services()
             self.assertEqual(calls[-1][-1], missing)
 
+    def test_setup_excludes_every_non_setup_package_and_catalog_has_categories(self):
+        for key, entry in helper.catalog().items():
+            self.assertIn('category', entry)
+            self.assertTrue(entry['executable_path'].startswith('/'))
+            if not entry['setup']:
+                with self.assertRaises(helper.Refused):
+                    helper.request(self.data() | {'operation': 'setup.initialize', 'packages': [key]})
+
+    def test_archive_traversal_links_devices_and_duplicate_members_are_rejected(self):
+        for unsafe in ('../escape', 'root/../../escape', '/root/escape', 'root//escape'):
+            with tempfile.TemporaryDirectory() as name:
+                archive = Path(name)/'archive.zip'
+                with zipfile.ZipFile(archive, 'w') as output:
+                    output.writestr(unsafe, b'x')
+                with self.assertRaises(helper.Refused):
+                    helper.safe_extract(archive, Path(name)/'out', {'archive_root': 'root', 'format': 'zip'})
+        for kind, target in ((tarfile.SYMTYPE, '../../escape'), (tarfile.LNKTYPE, 'root/bin'), (tarfile.CHRTYPE, '')):
+            with tempfile.TemporaryDirectory() as name:
+                archive = Path(name)/'archive.tar'
+                with tarfile.open(archive, 'w') as output:
+                    item = tarfile.TarInfo('root/link'); item.type = kind; item.linkname = target
+                    output.addfile(item)
+                with self.assertRaises(helper.Refused):
+                    helper.safe_extract(archive, Path(name)/'out', {'archive_root': 'root', 'format': 'tar.gz'})
+
+    def test_extraction_strips_setid_and_retains_only_internal_relative_symlinks(self):
+        with tempfile.TemporaryDirectory() as name:
+            archive = Path(name)/'archive.tar'
+            with tarfile.open(archive, 'w') as output:
+                item = tarfile.TarInfo('root/bin/node'); item.mode = 0o6777; item.size = 3
+                output.addfile(item, io.BytesIO(b'bin'))
+                item = tarfile.TarInfo('root/bin/node-link'); item.type = tarfile.SYMTYPE; item.linkname = 'node'
+                output.addfile(item)
+            destination = Path(name)/'out'
+            old_umask = os.umask(0o077)
+            try:
+                helper.safe_extract(archive, destination, {'archive_root': 'root', 'format': 'tar.gz'})
+            finally:
+                os.umask(old_umask)
+            self.assertEqual((destination/'root/bin').stat().st_mode & 0o7777, 0o755)
+            self.assertEqual((destination/'root/bin/node').stat().st_mode & 0o7777, 0o755)
+            self.assertEqual((destination/'root/bin/node-link').read_bytes(), b'bin')
+
+    def test_download_checks_combined_hash_and_refuses_non_https_without_network(self):
+        with tempfile.TemporaryDirectory() as name:
+            entry = {'url': 'http://example.invalid/installer', 'sha256': '0'*64}
+            with patch.object(helper.urllib.request, 'build_opener') as opener, self.assertRaises(helper.Refused):
+                helper.download_archive(entry, Path(name)/'download')
+            opener.return_value.open.assert_not_called()
+        with tempfile.TemporaryDirectory() as name:
+            entry = {'url': 'https://example.invalid/archive', 'sha256': '0'*64}
+            with patch.object(helper.urllib.request, 'build_opener') as opener:
+                opener.return_value.open.return_value = io.BytesIO(b'wrong bytes')
+                with self.assertRaisesRegex(helper.Refused, 'CHECKSUM_MISMATCH'):
+                    helper.download_archive(entry, Path(name)/'download')
+
+    def test_timeout_kills_descendants_holding_output_pipes(self):
+        started = time.monotonic()
+        with tempfile.TemporaryDirectory() as name, patch.object(helper, 'RELEASE', Path(name)):
+            with self.assertRaisesRegex(helper.Refused, '^COMMAND_TIMEOUT$'):
+                helper.run(['/usr/bin/python3', '-c', 'import subprocess; subprocess.Popen(["/usr/bin/python3", "-c", "import time; time.sleep(60)"])'], timeout=0.2)
+        self.assertLess(time.monotonic()-started, 3)
+
+    def test_private_apt_preferences_preserve_installed_versions_without_global_writes(self):
+        with tempfile.TemporaryDirectory() as name:
+            data = self.data(); (Path(name)/data['execution_id']).mkdir()
+            with patch.object(helper, 'ROOT', Path(name)), patch.object(helper.subprocess, 'run', return_value=SimpleNamespace(stdout=b'libc6:amd64\t2.39-1\tinstalled\nremoved\t1\tconfig-files\n')):
+                preference = helper.preserve_installed_versions(data)
+            self.assertTrue(preference.is_relative_to(Path(name)))
+            self.assertIn('Package: libc6:amd64\nPin: version 2.39-1\nPin-Priority: 10001', preference.read_text())
+            self.assertNotIn('Package: removed', preference.read_text())
+
+    def test_optional_service_failure_cannot_report_installation_success(self):
+        with patch.object(helper, 'run', side_effect=helper.Refused('COMMAND_FAILED')):
+            with self.assertRaisesRegex(helper.Refused, '^PACKAGE_SERVICE_FAILED$'):
+                helper.verify_optional_service('mysql')
+
     @unittest.skipUnless(os.geteuid() == 0, 'Real root state ownership is tested in the Ubuntu lab.')
     def test_real_socket_peer_rejection_async_ack_idempotency_and_crash_reconcile(self):
         with tempfile.TemporaryDirectory() as name:
             state = Path(name)/'state'
-            def exchange(data, deny=False, slow=False):
+            def exchange(data, deny=False, slow=False, fail=None):
                 client, server = socket.socketpair()
                 pid = os.fork()
                 if pid == 0:
@@ -148,7 +229,11 @@ class ContractTests(unittest.TestCase):
                         if slow: time.sleep(10)
                         return {'os': '24.04', 'control_plane_verified': True}
                     helper.readiness = readiness
-                    helper.install = lambda package, data: {'package': package, 'version': '1.7', 'verified': True, 'changed': True}
+                    def install(package, data, progress):
+                        progress('download')
+                        if package == 'ffmpeg' and fail: raise helper.Refused(fail)
+                        return {'package': package, 'version': '1.7', 'verified': True, 'changed': True}
+                    helper.install = install
                     helper.pwd.getpwnam = lambda _: SimpleNamespace(pw_uid=os.getuid() + (1 if deny else 0))
                     helper.main(); os._exit(0)
                 server.close(); client.settimeout(2)
@@ -183,6 +268,16 @@ class ContractTests(unittest.TestCase):
             self.assertTrue(result['verified'])
             result, pid = exchange(data | {'packages': ['htop']}); os.waitpid(pid, 0)
             self.assertEqual(result['error_code'], 'REQUEST_CONFLICT')
+            for index, failure in enumerate(('PACKAGE_DOWNLOAD_FAILED', 'AUTHORIZATION_REVOKED'), start=3):
+                batch = self.data() | {'execution_id': '01999694-d50a-7000-8000-'+str(index).zfill(12), 'packages': ['ffmpeg', 'jq']}
+                _, pid = exchange(batch, fail=failure); os.waitpid(pid, 0)
+                result, pid = exchange(batch); os.waitpid(pid, 0)
+                self.assertEqual(result['status'], 'failed')
+                self.assertEqual(result['packages'][0]['status'], 'failed')
+                self.assertEqual(result['packages'][1]['status'], 'skipped' if failure == 'AUTHORIZATION_REVOKED' else 'succeeded')
+                self.assertEqual(result['summary']['failed'], 1)
+                self.assertEqual(result['summary']['total'], 2)
+                self.assertGreater(len(result['events']), 1)
 
 
 if __name__ == '__main__': unittest.main()

@@ -17,6 +17,7 @@ use App\Models\Deployment;
 use App\Models\Environment;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -34,6 +35,7 @@ final class DeploymentController extends Controller
         $options = Environment::query()->forWorkspace($workspace->id)->whereIn('project_id', app(ProjectAccess::class)->query($request->user(), $workspace->id, GrantPermission::Deploy)->select('projects.id'))->with('project')->orderBy('name')->limit(100)->get();
 
         return Inertia::render('deployments/index', [
+            'request_key' => (string) Str::uuid(),
             'deployments' => ['data' => $rows->getCollection()->map(fn (Deployment $d): array => $this->summary($d))->all(), 'meta' => PaginatorPayload::meta($rows)],
             'environments' => $options->map(fn (Environment $e): array => ['uuid' => $e->uuid, 'name' => $e->project?->name.' / '.$e->name, 'branch' => $e->branch_name])->all(),
             'can_operate' => app(ProjectAccess::class)->query($request->user(), $workspace->id, GrantPermission::Deploy)->exists(),

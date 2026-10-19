@@ -1,3 +1,5 @@
+import { SoftwareProgress, type SoftwareJob } from '@/components/catalog/software-picker';
+import { useSoftwareCompletion } from '@/lib/software-jobs';
 import { router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { useVisiblePoll } from '@/hooks/use-visible-poll';
@@ -23,6 +25,7 @@ export default function JobShow({
     job,
     logs,
     cancel_available,
+    software,
 }: {
     job: {
         uuid: string;
@@ -36,11 +39,13 @@ export default function JobShow({
     };
     logs: { data: LogRow[]; meta: PageMeta };
     cancel_available: false;
+    software: SoftwareJob | null;
 }) {
     const base = usePage<SharedProps>().props.app.base_path;
 
     const active = !['failed', 'succeeded', 'cancelled'].includes(job.status);
-    useVisiblePoll(active, 'job,logs', 10000);
+    useVisiblePoll(active, 'job,logs,software', 5000);
+    useSoftwareCompletion(software);
 
     return (
         <AppLayout title="جزئیات عملیات" description="وضعیت، زمان‌بندی و خروجی پالایش‌شده این Job." eyebrow="عملیات">
@@ -90,6 +95,7 @@ export default function JobShow({
                 {job.cancel_requested ? <p className="mt-3 text-sm text-warning">درخواست لغو ثبت شده است. این به‌معنی توقف اثبات‌شده فرایند نیست.</p> : null}
                 {cancel_available ? null : <p className="mt-3 text-sm text-muted">دکمه لغو اینجا نیست، چون نقطه امن لغو هنوز پیاده‌سازی نشده است.</p>}
             </Card>
+            {software && <Card><SoftwareProgress job={software} /></Card>}
             {logs.data.length === 0 ? (
                 <EmptyState title="لاگی ثبت نشده است">خروجی این عملیات پس از نوشته شدن در پایگاه اینجا می‌آید.</EmptyState>
             ) : (
@@ -103,7 +109,7 @@ export default function JobShow({
                                 </span>
                                 <PersianDate iso={log.recorded_at} />
                             </div>
-                            <pre className="mt-1 whitespace-pre-wrap font-mono text-sm text-ink" dir="ltr">
+                            <pre className="mt-1 whitespace-pre-wrap break-words text-sm leading-7 text-ink" dir="auto">
                                 {log.message}
                             </pre>
                         </li>
@@ -112,7 +118,7 @@ export default function JobShow({
             )}
             <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-sm font-semibold">لاگ‌ها از قدیم به جدید · صفحهٔ {logs.meta.current_page.toLocaleString('fa-IR')}</h2>{logs.meta.current_page < logs.meta.last_page ? <Button asChild variant="secondary"><Link href={`${base}/jobs/${job.uuid}?page=${logs.meta.last_page}#operation-logs`}>رفتن به آخرین لاگ‌ها</Link></Button> : null}</div>
             <Pagination meta={logs.meta} />
-            <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-xs text-muted">{active ? 'تا پایان عملیات، لاگ‌های همین صفحه هنگام بازبودن پنجره هر ۱۰ ثانیه تازه می‌شوند.' : 'عملیات در وضعیت پایانی است؛ دریافت دوره‌ای متوقف شده است.'}</p><Button variant="secondary" onClick={() => router.reload({ only: ['job', 'logs'] })}>تازه‌سازی لاگ‌ها</Button></div>
+            <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-xs text-muted">{active ? 'تا پایان عملیات، لاگ‌های همین صفحه هنگام بازبودن پنجره هر ۵ ثانیه تازه می‌شوند.' : 'عملیات در وضعیت پایانی است؛ دریافت دوره‌ای متوقف شده است.'}</p><Button variant="secondary" onClick={() => router.reload({ only: ['job', 'logs', 'software'] })}>تازه‌سازی لاگ‌ها</Button></div>
         </AppLayout>
     );
 }

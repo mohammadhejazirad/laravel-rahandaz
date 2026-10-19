@@ -29,14 +29,14 @@ class SetupController extends Controller
             'holding' => ! $owner,
             'workspace' => ['uuid' => $workspace->uuid, 'name' => $workspace->name, 'setup_completed_at' => $workspace->setup_completed_at?->toIso8601String()],
             'facts' => $owner ? $probe->collect() : null,
-            'software' => ['available' => $owner && $software->available(), 'catalog' => $owner ? $software->catalog() : [], 'request_key' => (string) Str::uuid()],
+            'software' => ['available' => $owner && $software->available(), 'catalog' => $owner ? $software->setupCatalog() : [], 'request_key' => (string) Str::uuid()],
             'session' => $session === null ? null : ['uuid' => $session->uuid, 'state' => $session->state->value, 'answers' => $session->answers, 'job' => $software->payload($session->operationJob)],
         ]);
     }
 
     public function save(Request $request, InitializePanel $setup): RedirectResponse
     {
-        $data = $request->validate(['display_name' => ['required', 'string', 'max:100'], 'packages' => ['present', 'array', 'max:4'], 'packages.*' => ['string', 'distinct']]);
+        $data = $request->validate(['display_name' => ['required', 'string', 'max:100'], 'packages' => ['present', 'array', 'max:32'], 'packages.*' => ['string', 'distinct']]);
         $setup->save(CurrentWorkspace::get($request), $request->user(), $data['display_name'], $data['packages']);
 
         return redirect()->route('setup.show');
@@ -44,7 +44,7 @@ class SetupController extends Controller
 
     public function apply(Request $request, InitializePanel $setup): RedirectResponse
     {
-        $data = $request->validate(['display_name' => ['required', 'string', 'max:100'], 'packages' => ['present', 'array', 'max:4'], 'packages.*' => ['string', 'distinct'], 'idempotency_key' => ['required', 'uuid']]);
+        $data = $request->validate(['display_name' => ['required', 'string', 'max:100'], 'packages' => ['present', 'array', 'max:32'], 'packages.*' => ['string', 'distinct'], 'idempotency_key' => ['required', 'uuid']]);
         $setup->apply(CurrentWorkspace::get($request), $request->user(), $data['display_name'], $data['packages'], $data['idempotency_key']);
 
         return redirect()->route('setup.show');

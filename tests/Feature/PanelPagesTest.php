@@ -14,6 +14,7 @@ use App\Models\PackageDefinition;
 use App\Models\PanelNotification;
 use App\Models\Project;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Concerns\CreatesPanelAccount;
 use Tests\TestCase;
@@ -21,6 +22,15 @@ use Tests\TestCase;
 class PanelPagesTest extends TestCase
 {
     use CreatesPanelAccount, RefreshDatabase;
+
+    public function test_http_ip_forms_receive_server_generated_request_keys(): void
+    {
+        [$owner] = $this->panelAccount(setupComplete: true);
+        foreach (['deployments.index', 'backups.index'] as $route) {
+            $this->actingAs($owner)->get(route($route))->assertOk()->assertInertia(fn (Assert $page) => $page
+                ->where('request_key', fn ($key) => is_string($key) && Str::isUuid($key)));
+        }
+    }
 
     public function test_workspace_pages_list_real_rows_without_numeric_ids(): void
     {

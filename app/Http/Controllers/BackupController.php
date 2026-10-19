@@ -17,6 +17,7 @@ use App\Models\ProjectDatabase;
 use App\Models\Schedule;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -32,6 +33,7 @@ final class BackupController extends Controller
         $targets = [...$targets, ...ProjectDatabase::query()->forWorkspace($workspace->id)->where('status', 'ready')->where('protected', false)->limit(100)->get()->map(fn (ProjectDatabase $d): array => ['uuid' => $d->uuid, 'type' => 'project_database', 'name' => $d->name])->all()];
 
         return Inertia::render('backups/index', [
+            'request_key' => (string) Str::uuid(),
             'backups' => ['data' => $rows->getCollection()->map(fn (Backup $b): array => $this->summary($b))->all(), 'meta' => PaginatorPayload::meta($rows)],
             'targets' => $targets, 'can_manage' => WorkspaceAccess::membership($request->user(), $workspace)->role->mayDecryptSecrets(),
         ]);

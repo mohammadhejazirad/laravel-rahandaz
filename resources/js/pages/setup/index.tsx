@@ -1,6 +1,6 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import { isSoftwarePending, useSoftwarePolling } from '@/lib/software-jobs';
+import { isSoftwarePending, useSoftwarePolling, useSoftwareCompletion } from '@/lib/software-jobs';
 import { SoftwarePicker, SoftwareProgress, type SoftwareState, type SoftwareJob } from '@/components/catalog/software-picker';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -30,13 +30,14 @@ export default function Setup({ holding, workspace, facts, software, session }: 
         return () => window.clearTimeout(timer);
     }, [holding, complete, pending, review, form, session, base]);
     useSoftwarePolling(pending, ['session', 'workspace', 'software']);
+    useSoftwareCompletion(session?.job);
     return <AppLayout title="راه‌اندازی اولیه" description="سرور را بررسی کنید، نرم‌افزارهای مورد نیاز را انتخاب کنید و وارد پنل مدیریت شوید.">
         <Head title="راه‌اندازی اولیه" />
         <div className="mx-auto max-w-4xl space-y-5">
             {holding ? <Card><h2 className="font-semibold">راه‌اندازی در انتظار مالک است</h2><p className="mt-2 text-sm leading-7 text-muted">مالک فضای «{workspace.name}» باید راه‌اندازی اولیه را تکمیل کند.</p></Card> : complete ? <Card className="space-y-4"><h2 className="text-lg font-semibold">راه‌اندازی اولیه تکمیل شد</h2><SoftwareProgress job={session?.job} /><p className="text-sm leading-7 text-muted">سرویس‌های اصلی پنل بررسی شدند. می‌توانید نرم‌افزارهای اختیاری را بعداً از بخش نرم‌افزارها نصب کنید.</p><Button asChild><Link href={`${base}/dashboard`}>ورود به پنل مدیریت</Link></Button></Card> : <>
                 <ol className="grid gap-2 text-sm" aria-label="مراحل راه‌اندازی">{['۱. سرور و نرم‌افزارها', '۲. بازبینی انتخاب‌ها', '۳. بررسی و پایان'].map((title, index) => <li key={title} aria-current={(pending ? 2 : review ? 1 : 0) === index ? 'step' : undefined} className={`rounded-xl border p-3 ${(pending ? 2 : review ? 1 : 0) === index ? 'border-accent bg-accent/10' : 'border-line text-muted'}`}>{title}</li>)}</ol>
                 {facts && <Card><h2 className="mb-3 font-semibold">مشخصات سرور</h2><dl className="grid gap-4 text-sm sm:grid-cols-2">{[['سیستم‌عامل', `${facts.os?.name ?? ''} ${facts.os?.version ?? ''}`], ['نام میزبان', facts.hostname], ['معماری', facts.architecture], ['حافظه', facts.memory.total_kib === null ? '—' : `${Math.round(facts.memory.total_kib / 1024)} MiB`]].map(([label, value]) => <div key={label}><dt className="text-muted">{label}</dt><dd dir="ltr" className="mt-1 break-all font-mono">{value}</dd></div>)}</dl></Card>}
-                {pending ? <Card><h2 className="mb-4 font-semibold">راه‌اندازی در حال انجام است</h2><SoftwareProgress job={session?.job} /></Card> : <Card className="space-y-5">
+                {pending ? <Card><h2 className="mb-4 font-semibold">راه‌اندازی در حال انجام است</h2><SoftwareProgress job={session?.job} /><Button className="mt-4" loading loadingLabel="در حال راه‌اندازی و بررسی…">شروع راه‌اندازی</Button></Card> : <Card className="space-y-5">
                     {session?.job?.status === 'failed' && <SoftwareProgress job={session.job} />}
                     {!software.available && <Alert tone="warning">سرویس نصب در دسترس نیست. سلامت سرویس‌های راه‌انداز باید بررسی شود؛ انتخاب‌های شما قابل ذخیره است.</Alert>}
                     <Form className="space-y-5" onSubmit={event => {

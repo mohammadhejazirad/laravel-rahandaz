@@ -17,11 +17,11 @@ def main():
             connection.shutdown(socket.SHUT_WR)
             response = bytearray()
             while True:
-                part = connection.recv(16385 - len(response))
+                part = connection.recv(65537 - len(response))
                 if not part:
                     break
                 response.extend(part)
-                if len(response) > 16384:
+                if len(response) > 65536:
                     raise ValueError()
         output = json.loads(response)
         print(json.dumps(output))

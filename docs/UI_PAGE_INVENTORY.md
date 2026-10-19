@@ -87,3 +87,7 @@
 ## ۲۰۲۶-۱۰-۱۹ — راه‌اندازی اولیه و نصب ابزارها
 
 صفحات موجود `setup/index` و `catalog/index` اکنون انتخاب ابزار، بازبینی، Job پس‌زمینه، وضعیت و نسخهٔ تأییدشده دارند. راه‌اندازی، ذخیرهٔ پاسخ/ادامه پس از refresh و پایان متصل به healthcheck دارد؛ نقش غیرمالک صفحهٔ انتظار می‌بیند. کامپوننت‌های مشترک SoftwarePicker/SoftwareProgress/SoftwareInstallationCard از Form/Input/Button/Card و tokenها استفاده می‌کنند؛ دادهٔ فنی LTR است. فرم HTML required ندارد. بنر سراسری تشخیص داخلی حذف شد؛ Chrome و قابلیت‌های فاقد اجرا در محل خود غیرفعال‌اند. آزمون محلی lint/tsc/build و PHP گذشت؛ QA مرورگر سرور روی نسخهٔ امضاشده beta34، پایان واقعی راه‌اندازی و ورود به داشبورد را تأیید کرد؛ جزئیات و محدودیت‌ها در گزارش قابلیت ثبت شده‌اند.
+
+## Categorized software and live resources — 2026-10-19
+
+Existing `/catalog`: shared categorized picker, execution-long loading, verified terminal Toast, per-package phases/outcomes/counts, job-log link and copyable verified versioned executable paths. Existing `/setup` keeps only its four optional tools and the same real progress component. Existing `/monitoring`: responsive resource cards, actual CPU history and timestamps, bounded three-second visible/online polling, stale/offline handling. Existing `/jobs/{uuid}` renders Persian log messages with automatic text direction. No new page or UI dependency. Browser/VM verification is recorded separately from compilation and automated contract tests.

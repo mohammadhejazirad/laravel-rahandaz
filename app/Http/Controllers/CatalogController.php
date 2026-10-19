@@ -59,6 +59,8 @@ class CatalogController extends Controller
                 'available' => $host !== null && app(SoftwareCapability::class)->available(),
                 'can_request' => app(OperationAccess::class)->managesWorkspace($request->user(), $workspace->id),
                 'catalog' => app(SoftwareCapability::class)->catalog(),
+                'categories' => app(SoftwareCapability::class)->categories(),
+                'installed' => app(SoftwareCapability::class)->installed($workspace),
                 'job' => app(SoftwareCapability::class)->payload(app(SoftwareCapability::class)->latest($workspace)),
             ],
             'chrome' => [
@@ -75,7 +77,7 @@ class CatalogController extends Controller
     {
         $workspace = CurrentWorkspace::get($request);
         abort_unless(app(OperationAccess::class)->managesWorkspace($request->user(), $workspace->id), 403);
-        $data = $request->validate(['packages' => ['required', 'array', 'min:1', 'max:4'], 'packages.*' => ['string', 'distinct'], 'idempotency_key' => ['required', 'uuid']]);
+        $data = $request->validate(['packages' => ['required', 'array', 'min:1', 'max:32'], 'packages.*' => ['string', 'distinct'], 'idempotency_key' => ['required', 'uuid']]);
         $host = LocalHost::query()->forWorkspace($workspace->id)->where('slug', 'local-host')->firstOrFail();
         $software->request($workspace, $host, $request->user(), $data['packages'], $data['idempotency_key']);
 

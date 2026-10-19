@@ -19,7 +19,7 @@ final class InitializePanel
     {
         abort_unless(app(PanelListener::class)->owner($actor, $workspace), 403);
         abort_if($workspace->setupIsComplete(), 409);
-        $packages = app(SoftwareCapability::class)->validate($packages);
+        $packages = app(SoftwareCapability::class)->validateSetup($packages);
 
         return DB::transaction(function () use ($workspace, $actor, $name, $packages): SetupSession {
             Workspace::query()->whereKey($workspace->id)->lockForUpdate()->firstOrFail();
@@ -39,7 +39,7 @@ final class InitializePanel
             Workspace::query()->whereKey($workspace->id)->lockForUpdate()->firstOrFail();
             $existing = SetupSession::query()->forWorkspace($workspace->id)->whereHas('operationJob', fn ($q) => $q->where('idempotency_key', $key))->first();
             if ($existing !== null) {
-                abort_unless($existing->answers === ['display_name' => $name, 'packages' => app(SoftwareCapability::class)->validate($packages)], 409);
+                abort_unless($existing->answers === ['display_name' => $name, 'packages' => app(SoftwareCapability::class)->validateSetup($packages)], 409);
 
                 return $existing;
             }

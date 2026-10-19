@@ -1,9 +1,276 @@
 {
   "schema_version": "1",
   "packages": {
-    "htop": {"name": "htop", "description": "پایش تعاملی پردازش‌های سرور", "apt": "htop"},
-    "jq": {"name": "jq", "description": "پردازش داده‌های JSON در پروژه‌ها", "apt": "jq"},
-    "ffmpeg": {"name": "FFmpeg", "description": "پردازش و تبدیل صوت و تصویر", "apt": "ffmpeg"},
-    "unzip": {"name": "Unzip", "description": "استخراج فایل‌های ZIP", "apt": "unzip"}
+    "htop": {
+      "name": "htop",
+      "description": "پایش تعاملی پردازش‌های سرور",
+      "apt": "htop",
+      "category": "utility",
+      "setup": true,
+      "kind": "apt",
+      "executable_path": "/usr/bin/htop",
+      "version_args": [
+        "--version"
+      ]
+    },
+    "jq": {
+      "name": "jq",
+      "description": "پردازش داده‌های JSON در پروژه‌ها",
+      "apt": "jq",
+      "category": "utility",
+      "setup": true,
+      "kind": "apt",
+      "executable_path": "/usr/bin/jq",
+      "version_args": [
+        "--version"
+      ]
+    },
+    "ffmpeg": {
+      "name": "FFmpeg",
+      "description": "پردازش و تبدیل صوت و تصویر",
+      "apt": "ffmpeg",
+      "category": "utility",
+      "setup": true,
+      "kind": "apt",
+      "executable_path": "/usr/bin/ffmpeg",
+      "version_args": [
+        "-version"
+      ]
+    },
+    "unzip": {
+      "name": "Unzip",
+      "description": "استخراج فایل‌های ZIP",
+      "apt": "unzip",
+      "category": "utility",
+      "setup": true,
+      "kind": "apt",
+      "executable_path": "/usr/bin/unzip",
+      "version_args": [
+        "-v"
+      ]
+    },
+    "nginx": {
+      "name": "Nginx",
+      "description": "وب‌سرور؛ نصب موجود پنل حفظ می‌شود.",
+      "category": "web",
+      "setup": false,
+      "kind": "apt",
+      "apt": "nginx",
+      "executable_path": "/usr/sbin/nginx",
+      "version_args": [
+        "-v"
+      ],
+      "protected": true
+    },
+    "php": {
+      "name": "PHP 8.4",
+      "description": "باینری مستقل PHP 8.4؛ نسخهٔ پیش‌فرض سیستم و pool پروژه‌ها تغییر نمی‌کند.",
+      "category": "runtime",
+      "setup": false,
+      "kind": "apt",
+      "apt": "php8.4-fpm",
+      "executable_path": "/usr/bin/php8.4",
+      "version_args": [
+        "--version"
+      ],
+      "protected": true
+    },
+    "python": {
+      "name": "Python 3",
+      "description": "مفسر سیستم و ابزار venv؛ محیط مجازی هر پروژه جدا ساخته می‌شود.",
+      "category": "runtime",
+      "setup": false,
+      "kind": "apt",
+      "apt": "python3-venv",
+      "executable_path": "/usr/bin/python3",
+      "version_args": [
+        "--version"
+      ]
+    },
+    "postgresql": {
+      "name": "PostgreSQL",
+      "description": "موتور PostgreSQL موجود حفظ می‌شود؛ این انتخاب پایگاه یا کاربر پروژه نمی‌سازد.",
+      "category": "database",
+      "setup": false,
+      "kind": "apt",
+      "apt": "postgresql",
+      "executable_path": "/usr/bin/psql",
+      "version_args": [
+        "--version"
+      ],
+      "protected": true
+    },
+    "mysql": {
+      "name": "MySQL",
+      "description": "موتور MySQL؛ با MariaDB و پورت اشغال‌شده تداخل دارد.",
+      "category": "database",
+      "setup": false,
+      "kind": "apt",
+      "apt": "mysql-server",
+      "executable_path": "/usr/sbin/mysqld",
+      "version_args": [
+        "--version"
+      ],
+      "conflicts": [
+        "mariadb-server",
+        "mariadb-server-core"
+      ],
+      "port": 3306,
+      "service": "mysql"
+    },
+    "mariadb": {
+      "name": "MariaDB",
+      "description": "موتور MariaDB؛ با MySQL و پورت اشغال‌شده تداخل دارد.",
+      "category": "database",
+      "setup": false,
+      "kind": "apt",
+      "apt": "mariadb-server",
+      "executable_path": "/usr/sbin/mariadbd",
+      "version_args": [
+        "--version"
+      ],
+      "conflicts": [
+        "mysql-server",
+        "mysql-server-8.0"
+      ],
+      "port": 3306,
+      "service": "mariadb"
+    },
+    "redis": {
+      "name": "Redis",
+      "description": "باینری Redis موجود؛ instanceهای اختصاصی پنل و داده‌های آن‌ها حفظ می‌شوند.",
+      "category": "cache",
+      "setup": false,
+      "kind": "apt",
+      "apt": "redis-server",
+      "executable_path": "/usr/bin/redis-server",
+      "version_args": [
+        "--version"
+      ],
+      "protected": true
+    },
+    "memcached": {
+      "name": "Memcached",
+      "description": "کش حافظه؛ بدون افزودن اتصال یا تنظیم پروژه.",
+      "category": "cache",
+      "setup": false,
+      "kind": "apt",
+      "apt": "memcached",
+      "executable_path": "/usr/bin/memcached",
+      "version_args": [
+        "--version"
+      ],
+      "port": 11211,
+      "service": "memcached"
+    },
+    "clamav": {
+      "name": "ClamAV",
+      "description": "اسکنر فایل؛ دریافت امضاهای ویروس مرحلهٔ جداست و نصب به معنی محافظت فعال نیست.",
+      "category": "antivirus",
+      "setup": false,
+      "kind": "apt",
+      "apt": "clamav",
+      "executable_path": "/usr/bin/clamscan",
+      "version_args": [
+        "--version"
+      ]
+    },
+    "clamav-freshclam": {
+      "name": "FreshClam",
+      "description": "ابزار به‌روزرسانی امضاهای ClamAV؛ موفقیت نصب ابزار تضمین دسترسی به مخزن امضا نیست.",
+      "category": "antivirus",
+      "setup": false,
+      "kind": "apt",
+      "apt": "clamav-freshclam",
+      "executable_path": "/usr/bin/freshclam",
+      "version_args": [
+        "--version"
+      ],
+      "service": "clamav-freshclam"
+    },
+    "supervisor": {
+      "name": "Supervisor",
+      "description": "مدیریت پردازش؛ هیچ برنامه یا worker پروژه خودکار اضافه نمی‌شود.",
+      "category": "process",
+      "setup": false,
+      "kind": "apt",
+      "apt": "supervisor",
+      "executable_path": "/usr/bin/supervisord",
+      "version_args": [
+        "--version"
+      ],
+      "service": "supervisor"
+    },
+    "node": {
+      "name": "Node.js 24 LTS",
+      "description": "runtime مستقل در مسیر نسخه‌دار؛ Node پیش‌فرض و پروژه‌های موجود تغییر نمی‌کنند.",
+      "category": "runtime",
+      "setup": false,
+      "kind": "archive",
+      "version": "24.22.0",
+      "format": "tar.xz",
+      "url": "https://nodejs.org/dist/v24.22.0/node-v24.22.0-linux-x64.tar.xz",
+      "sha256": "cc2f601cee82d9a5a233302fe307abc600727035fd7d2c3a3571755989e95008",
+      "archive_root": "node-v24.22.0-linux-x64",
+      "destination": "/opt/rahandaz/runtimes/node/24.22.0",
+      "executable_path": "/opt/rahandaz/runtimes/node/24.22.0/bin/node",
+      "version_args": [
+        "--version"
+      ]
+    },
+    "mongodb": {
+      "name": "MongoDB Community 8.0",
+      "description": "باینری مستقل MongoDB؛ پایگاه و سرویس عمومی ساخته نمی‌شود. آزمون موتور روی دادهٔ موقت اجرا می‌شود.",
+      "category": "database",
+      "setup": false,
+      "kind": "archive",
+      "version": "8.0.34",
+      "format": "tar.gz",
+      "builds": {
+        "22.04": {
+          "url": "https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-ubuntu2204-8.0.34.tgz",
+          "sha256": "8eef2a821651ac20f732b6636731a51b407675674ced8d7f1f1578ebc7aced43",
+          "archive_root": "mongodb-linux-x86_64-ubuntu2204-8.0.34"
+        },
+        "24.04": {
+          "url": "https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-ubuntu2404-8.0.34.tgz",
+          "sha256": "3e55cdcf7013fbc805d29d8195230df4b23c7688733ee15ad58ac6bc2a416611",
+          "archive_root": "mongodb-linux-x86_64-ubuntu2404-8.0.34"
+        }
+      },
+      "destination": "/opt/rahandaz/runtimes/mongodb/8.0.34",
+      "executable_path": "/opt/rahandaz/runtimes/mongodb/8.0.34/bin/mongod",
+      "version_args": [
+        "--version"
+      ]
+    },
+    "google-chrome": {
+      "name": "Google Chrome for Testing",
+      "description": "اختیاری برای Browsershot/Puppeteer؛ بررسی واقعی PNG/PDF با sandbox و نمایش مسیر قابل کپی.",
+      "category": "utility",
+      "setup": false,
+      "kind": "chrome",
+      "version": "158.0.8110.0",
+      "format": "zip",
+      "sha256": "5deb7136a8a6cebc148929ed550b38218fc5c963f46a57121da64cd8c1cd0849",
+      "parts": 3,
+      "base_url": "https://raw.githubusercontent.com/mohammadhejazirad/install-googleCrome-server/1d43f51672d283b40a8164ed3928f9352fba9292/chrome/158.0.8110.0/linux64/",
+      "archive_root": "chrome-linux64",
+      "destination": "/opt/rahandaz/browsers/chrome/158.0.8110.0/chrome-linux64",
+      "executable_path": "/opt/rahandaz/browsers/chrome/158.0.8110.0/chrome-linux64/chrome",
+      "version_args": [
+        "--version"
+      ]
+    }
+  },
+  "categories": {
+    "web": "وب‌سرورها",
+    "runtime": "زبان‌ها و runtimeها",
+    "database": "دیتابیس‌ها",
+    "cache": "کش",
+    "utility": "ابزارهای کاربردی",
+    "antivirus": "آنتی‌ویروس‌ها",
+    "security": "ابزارهای امنیتی",
+    "process": "مدیریت پردازش"
   }
 }

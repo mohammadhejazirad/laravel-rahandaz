@@ -11,7 +11,7 @@ final class AllowlistedHostFileReader implements HostFileReader
     /**
      * @param  list<string>  $allow
      */
-    public function __construct(private readonly array $allow = ['/etc/os-release', '/proc/meminfo']) {}
+    public function __construct(private readonly array $allow = ['/etc/os-release', '/proc/meminfo', '/proc/stat', '/proc/uptime', '/proc/loadavg', '/proc/net/dev']) {}
 
     public function read(string $path): ?string
     {

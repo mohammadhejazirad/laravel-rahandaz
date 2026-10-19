@@ -11,6 +11,7 @@ use App\Infrastructure\Executor\ExecutionGate;
 use App\Models\LocalHost;
 use App\Models\Membership;
 use App\Models\OperationJob;
+use App\Models\PanelNotification;
 use App\Models\SetupSession;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Middleware\ThrottleRequests;
@@ -149,7 +150,8 @@ class SoftwareSetupTest extends TestCase
         Process::fake(['*' => Process::result(output: json_encode($evidence))]);
         app(OperationRunner::class)->run($job->id);
         $this->assertSame('failed', $job->fresh()->status->value);
-        $this->assertNull($job->steps()->first()->checkpoint);
+        $this->assertFalse($job->steps()->first()->checkpoint['packages'][0]['verified']);
+        $this->assertSame('skipped', $job->steps()->first()->checkpoint['packages'][0]['status']);
     }
 
     public function test_revoked_software_actor_and_cancelled_job_never_call_helper(): void
@@ -161,5 +163,53 @@ class SoftwareSetupTest extends TestCase
         app(OperationRunner::class)->run($job->id);
         $this->assertSame('AUTHORIZATION_REVOKED', $job->fresh()->error_code);
         Process::assertNothingRan();
+    }
+
+    public function test_partial_batch_has_individual_counts_logs_and_one_terminal_notification(): void
+    {
+        [, $workspace] = $this->account(true);
+        $this->post(route('catalog.software.install'), ['packages' => ['ffmpeg', 'jq'], 'idempotency_key' => (string) Str::uuid()])->assertSessionHasNoErrors();
+        $job = OperationJob::query()->sole();
+        $output = $this->evidence($job);
+        $output['status'] = 'running';
+        $output['verified'] = false;
+        $output['packages'][0] = ['package' => 'ffmpeg', 'version' => null, 'verified' => false, 'changed' => false, 'status' => 'running', 'phase' => 'download'];
+        $output['packages'][1] = ['package' => 'jq', 'version' => null, 'verified' => false, 'changed' => false, 'status' => 'queued'];
+        $output['events'] = [['sequence' => 1, 'package' => 'ffmpeg', 'phase' => 'download']];
+        Process::fake(['*' => Process::result(output: json_encode($output))]);
+        app(OperationRunner::class)->run($job->id);
+        $this->assertSame('running', $job->fresh()->status->value);
+        $this->assertDatabaseMissing('panel_notifications', ['event_key' => 'operation:'.$job->uuid.':terminal']);
+        $logCount = $job->logs()->count();
+        app(OperationRunner::class)->run($job->id);
+        $this->assertSame($logCount, $job->logs()->count());
+        $output['status'] = 'failed';
+        $output['error_code'] = 'PACKAGE_DOWNLOAD_FAILED';
+        $output['packages'][0]['status'] = 'failed';
+        $output['packages'][0]['error_code'] = 'PACKAGE_DOWNLOAD_FAILED';
+        $output['packages'][1] = ['package' => 'jq', 'status' => 'succeeded', 'version' => '1.7', 'verified' => true, 'changed' => false, 'executable_path' => '/usr/bin/jq'];
+        Process::fake(['*' => Process::result(output: json_encode($output))]);
+        app(OperationRunner::class)->run($job->id);
+        $payload = app(SoftwareCapability::class)->payload($job->fresh());
+        $this->assertSame(['total' => 2, 'succeeded' => 1, 'failed' => 1, 'skipped' => 0], $payload['summary']);
+        $this->assertNotEmpty($payload['packages'][0]['message']);
+        $this->assertSame('succeeded', $payload['packages'][1]['status']);
+        $this->assertSame(1, PanelNotification::query()->where('event_key', 'operation:'.$job->uuid.':terminal')->count());
+        app(OperationRunner::class)->run($job->id);
+        $this->assertSame(1, PanelNotification::query()->where('event_key', 'operation:'.$job->uuid.':terminal')->count());
+        $this->assertSame('/usr/bin/jq', app(SoftwareCapability::class)->installed($workspace)[0]['executable_path']);
+        $this->assertFalse(app(ExecutionGate::class)->allowsHostMutation());
+    }
+
+    public function test_setup_cannot_install_runtimes_or_chrome_and_catalog_groups_every_entry(): void
+    {
+        $this->account();
+        $this->post(route('setup.apply'), ['display_name' => 'My server', 'packages' => ['google-chrome'], 'idempotency_key' => (string) Str::uuid()])->assertSessionHasErrors('packages');
+        $this->assertDatabaseCount('operation_jobs', 0);
+        $capability = app(SoftwareCapability::class);
+        foreach ($capability->catalog() as $entry) {
+            $this->assertArrayHasKey($entry['category'], $capability->categories());
+        }
+        $this->assertCount(4, $capability->setupCatalog());
     }
 }
