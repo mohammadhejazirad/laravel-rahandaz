@@ -6,7 +6,7 @@
 
 نصب‌کننده پس از تأیید release و پیش از تغییر بسته‌ها، origin و `Panel port [8080]:` را می‌پرسد؛ Enter پیش‌فرض، پورت سفارشی معتبر، مسیر unattended و resume ثابت پیاده شده‌اند. پورت آزاد و هماهنگی origin بررسی و انتخاب در journal خصوصی ثبت می‌شود. نصب IPv4/HTTP از ابتدا سایت عمومی متعلق به helper و recovery مستقل loopback:80 دارد و همان قابلیت محدود پورت GUI را ثبت می‌کند؛ general executor disabled است. وقفهٔ enrollment نیز قابل تکرار شد.
 
-نتیجه: installer ۸۱/۰ شامل network هفده/۰، release سی/۰، PHP کامل ۲۰۶/۴۰۶۸ و سه Ubuntu container-lab موفق؛ Nginx واقعی در هر سه با رفت‌وبرگشت پورت و جدایی recovery آزموده شد. محدودیت‌ها و شواهد در INSTALLER_TEST_MATRIX ثبت‌اند. نصب تازه روی VPS بازسازی‌شده و سه VM هنوز انجام نشده؛ سرور موجود پاک نشده است.
+نتیجه: installer ۸۱/۰ شامل network هفده/۰، release سی/۰، PHP کامل ۲۰۶/۴۰۶۸ و سه Ubuntu container-lab موفق؛ Nginx واقعی در هر سه با رفت‌وبرگشت پورت و جدایی recovery آزموده شد. محدودیت‌ها و شواهد در INSTALLER_TEST_MATRIX ثبت‌اند. نصب تازهٔ پنل روی VPS بازسازی‌شده و سه VM هنوز انجام نشده است. مالک VPS را بازسازی کرد؛ SSH با کلید اصلاح‌شده، Ubuntu 24.04 تازه، نبود state/پنل و پیش‌نیازهای bootstrap تأیید شدند. agent سرور را پاک نکرد. ساخت artifact beta.24.1 در CI انجام شد، اما انتشار امضاشده به‌علت اختلال رسمی GitHub Actions در اجرای 39281828441 منتظر runner مانده است؛ فرمان README فعلاً beta.23.1 است.
 
 ## ۲۰۲۶-۱۰-۱۹ — قابلیت محدود پورت پنل
 
