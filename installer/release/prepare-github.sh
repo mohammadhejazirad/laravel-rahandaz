@@ -83,8 +83,12 @@ Do not promote this command into README until public assets and release gates ar
 
 Use Bash and a root or sudo-capable account. This downloads a pinned script, checks its
 literal SHA-256 before execution, then verifies the manifest signature and artifact checksum.
-You will be asked for the panel origin. For initial HTTP setup use an SSH tunnel and
-`http://127.0.0.1`, not public HTTP. The installer does not provision panel TLS automatically.
+You will be asked for the panel origin, then `Panel port [8080]: `. Press Enter for
+8080 or enter a browser-safe port from 1024 to 65535. An HTTP origin without a port
+is synchronized with that choice. With an IPv4 origin, the initial installer also enrolls
+the restricted GUI panel-port capability and preserves a loopback recovery site on port 80.
+HTTP does not encrypt credentials; TLS is not provisioned automatically. For trusted SSH
+access use `http://127.0.0.1` with a tunnel to the selected port.
 
 ```bash
 {command}
@@ -100,7 +104,9 @@ Download `install.sh`, check SHA-256 `{digest}`, inspect it, then run
 `bash install.sh --verify-only` (no host mutation). To inspect the installation plan use
 `bash install.sh --plan --public-url http://127.0.0.1`.
 After review, `sudo bash install.sh --public-url http://127.0.0.1` performs installation.
-If it fails, retry this exact version with `--resume`; do not delete keys or regenerate APP_KEY.
+For noninteractive installation add `--http-port 8080`. If it fails, retry this exact
+version with `--resume`; the saved origin and port are retained. Do not delete keys or
+regenerate APP_KEY. A conflicting origin port is refused.
 Updates use the separate signed updater, not a fresh install of a newer version.
 
 Bootstrap prerequisites: Ubuntu x86_64, Bash, curl, CA certificates, OpenSSL, Python 3,

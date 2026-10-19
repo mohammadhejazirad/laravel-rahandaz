@@ -74,3 +74,8 @@ PHP کامل محلی ۲۰۶ آزمون / ۴۰۶۸ assertion، زیرمجموع�
 ## SSH key-only — 2026-10-17
 
 `AuthenticationMethods publickey` به config hardening sandbox اضافه شد تا خاموش‌کردن password/keyboard-interactive به‌تنهایی با روش‌های دیگر authentication اشتباه نشود. operations harness میزبان موفق بود. تولید config همین تابع و parsing واقعی `sshd -t/-T` در Ubuntuهای 22.04/24.04/26.04 container-lab موفق شد؛ systemctl reload در این تست stub است و booleanهای sandbox مدرک اتصال نیستند. موتور live همچنان disabled است. شواهد و محدودیت‌ها در INSTALLER_TEST_MATRIX و SSH_ACCESS_POLICY ثبت شده‌اند.
+
+
+## 2026-10-19 — initial installer panel-port enrollment
+
+Initial root enrollment is now part of the signed installer only for an explicitly selected IPv4/HTTP origin. The general executor stays disabled. Three Ubuntu container runs passed 17 network/enrollment contracts, 12 panel-helper contracts and real Nginx 8080→8081→8080 routing/reload smoke; the detailed report locations and PHP/systemd/VM limitations are in INSTALLER_TEST_MATRIX. Interrupted enrollment before state creation and during socket activation retries without overwriting state or foreign units. These use systemd fixtures; fresh VM/socket activation certification is still not_run. No existing VPS was erased or freshly installed for this change.

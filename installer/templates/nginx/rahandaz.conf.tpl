@@ -1,7 +1,7 @@
 # rahandaz-managed: control-plane
 server {
-    listen @@HTTP_PORT@@;
-    listen [::]:@@HTTP_PORT@@;
+    listen @@HTTP_LISTEN4@@;
+    listen @@HTTP_LISTEN6@@;
     server_name @@SERVER_NAME@@;
     root @@PUBLIC_ROOT@@;
     index index.php;

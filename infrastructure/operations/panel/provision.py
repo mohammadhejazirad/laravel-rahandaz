@@ -61,7 +61,8 @@ def main():
         if existing.get('schema_version') != '1' or existing.get('host') != args.host or existing.get('port') != args.current_port:
             parser.error('Enrollment does not match expected host and port.')
         if state.stat().st_uid != 0 or state.stat().st_mode & 0o022: parser.error('Unsafe listener state.')
-    elif args.upgrade: parser.error('No existing enrollment to upgrade.')
+    # A failed initial enrollment may have written managed units before its state.
+    # --upgrade safely retries those managed files after all ownership checks below.
     destination = Path('/usr/local/lib/rahandaz/operations/panel')
     destination.mkdir(parents=True, exist_ok=True, mode=0o755)
     for path in (destination, destination.parent, destination.parent.parent, state.parent):

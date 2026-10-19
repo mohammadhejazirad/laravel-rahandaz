@@ -188,3 +188,14 @@ PHP کامل: ۱۹۱ آزمون و ۳۹۶۸ assertion موفق با PostgreSQL/R
 برش واقعی beta14 با patch محدود از شکست healthcheck به success رسید. `/up`، login، welcome و build assets با HTTP ۲۰۰، ورود واقعی تا صفحهٔ تغییر گذرواژه، doctor دیتابیس/دو Redis/کلیدها و سرویس‌های systemd بررسی شدند. داده و کلید/credentials حفظ شدند. این اجرای resume واقعی 24.04 است؛ fresh VM سه نسخه، reboot و HTTPS نهایی را passed نمی‌کند.
 
 Matrix کانتینر: هر سه 22.04/24.04/26.04 در `security-<version>-20261019T115012Z` آزمون واقعی ACL/storage/shared/default inheritance/welcome/رد symlink را گذراندند؛ هر سه در `prerequisites-<version>-20261019T115200Z` چهل آزمون پیش‌نیاز، installer هفتادونه/صفر و plan موفق داشتند. میزبان: PHP کامل ۱۹۲/۳۹۷۰، installer ۷۹/۰، release سی، prerequisites چهل و security پنج آزمون موفق. تفصیل و شکست‌های واقعی میانی در [IRAN_VPS_INSTALL_RECOVERY_2026_10_19.md](IRAN_VPS_INSTALL_RECOVERY_2026_10_19.md) است. تست Docker گواهی systemd/VM نیست و 26.04 supported اعلام نشده است.
+
+
+## ۲۰۲۶-۱۰-۱۹ — انتخاب پورت هنگام نصب، network v1
+
+میزبان: installer harness برابر ۸۱ passed/۰ failed شامل ۱۷ آزمون انتخاب پورت/enrollment؛ release سی/۰، prerequisites چهل/۰، security پنج/۰ و PHP کامل ۲۰۶ آزمون/۴۰۶۸ assertion موفق شدند. secret audit الگویی یافته‌ای نداشت. سناریوها: pseudo-TTY واقعی با Enter/8080، پورت سفارشی، retry ورودی نامعتبر، EOF، نبود TTY، plan بدون سؤال/ذخیره، resume با انتخاب ثابت، تناقض origin/port، bind واقعی پورت اشغال، state دستکاری‌شده، config خارجی، enrollment اولیه و دو نقطه وقفه قبل/بعد ثبت state و حفظ sandbox queue. فراخوانی‌های systemd در آزمون enrollment fixture هستند.
+
+Ubuntu 22.04، 24.04 و 26.04 هرکدام با `test-installer-network.sh <version> --fixtures` خروج صفر، installer ۸۱/۰ (network هفده/۰)، release سی/۰ و panel helper دوازده/۰ داشتند. گزارش‌های نهایی: `tests/infrastructure/ubuntu-lab/reports/installer-network-<version>-20261019T155547Z/`.
+
+در اجرای `--live-nginx` روی هر سه نسخه، Nginx واقعی داخل کانتینر نصب و config تولیدشده با site پیش‌فرض Ubuntu بررسی شد. رفت‌وبرگشت 8080→8081→8080، redirect ریشه به login، asset عمومی، رد `.env`، welcome بازیابی روی loopback:80 و عدم ارائهٔ همان recovery روی IP شبکه موفق بودند. شواهد: `installer-network-<version>-20261019T155258Z/`. اجرای Nginx پیش از افزودن چهار سناریوی enrollment انجام شد؛ اجرای fixture نهایی این چهار سناریو را نیز پوشش داد.
+
+محدودیت: PHP-FPM/ورود واقعی، systemd/socket activation، نصب تمیز VM، reboot/recovery و ارتباط بیرونی فایروال در این کانتینرها آزموده نشدند. VPS جاری پاک یا نصب مجدد نشده است. آزمون واقعی پورت نسخهٔ قبلی روی VPS 24.04 همچنان فقط شاهد همان نصب قبلی است. Ubuntu 26.04 هنوز experimental و apply پیش از تغییر متوقف می‌شود؛ این نتیجه supported/production-ready نیست.

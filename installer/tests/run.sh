@@ -342,7 +342,7 @@ fi
 signed_artifact="${tmp}/signed/$(basename "$archive")"
 run_apply() {
     "${apply_env[@]}" bash "${INSTALLER_HOME}/bin/rahandaz-install" \
-        --apply \
+        --apply --public-url http://127.0.0.1 --http-port 8080 \
         "${ack[@]}" \
         --state-dir "${tmp}/apply-state" \
         --artifact "$signed_artifact" \
@@ -460,6 +460,12 @@ if bash "${INSTALLER_HOME}/tests/geo-chrome.sh"; then
     ok "geo and chrome suite"
 else
     bad "geo and chrome suite"
+fi
+
+if python3 "${INSTALLER_HOME}/tests/network_test.py"; then
+    ok "installer network contract suite"
+else
+    bad "installer network contract suite"
 fi
 
 printf 'passed %s\nfailed %s\n' "$pass" "$fail"

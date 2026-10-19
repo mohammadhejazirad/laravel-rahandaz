@@ -13,11 +13,11 @@ forward=()
 fail() { printf '%s\n' "${1}: ${2}" >&2; exit 1; }
 usage() {
     printf '%s\n' "Rahandaz ${release_version} signed GitHub installer" \
-        'Usage: sudo bash install.sh --public-url http://127.0.0.1' \
+        'Usage: sudo bash install.sh [--public-url http://SERVER_IP] [--http-port 8080]' \
         'Options: --plan | --verify-only | --resume, --public-url ORIGIN,' \
         '         --server-name HOST, --http-port PORT, --acknowledge-existing SERVICE,' \
         '         --approve-migrations, --prefer-iranian-mirrors' \
-        'Use an SSH tunnel for HTTP bootstrap. Public production access requires HTTPS.'
+        'Interactive installation asks for the origin and panel port (default 8080).'
 }
 while (( $# )); do
     case "$1" in
@@ -55,11 +55,6 @@ for binary in curl openssl sha256sum python3 mktemp; do
 done
 if [[ "$mode" == apply || "$mode" == resume ]]; then
     (( EUID == 0 )) || fail PRIVILEGE_REQUIRED 'Run the verified installer with sudo or as root.'
-    if [[ -z "$public_url" ]]; then
-        [[ -r /dev/tty ]] || fail INVALID_INPUT 'Provide --public-url; no interactive terminal is available.'
-        printf '%s\n' 'Panel origin (use http://127.0.0.1 with an SSH tunnel for initial setup):' >/dev/tty
-        IFS= read -r public_url </dev/tty || fail INVALID_INPUT 'Panel origin is required.'
-    fi
 fi
 if [[ -n "$public_url" ]]; then
     python3 - "$public_url" <<'PY' || fail INVALID_INPUT 'URL must be an HTTP(S) origin without credentials, path, query or fragment.'

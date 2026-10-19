@@ -2,6 +2,12 @@
 
 این فایل گزارش واقعیت مخزن است. نقشه در `.docs/ROADMAP.md` و مشخصات در `.docs/PROJECT_SPEC.md` است.
 
+## ۲۰۲۶-۱۰-۱۹ — سؤال انگلیسی پورت در نصب تازه
+
+نصب‌کننده پس از تأیید release و پیش از تغییر بسته‌ها، origin و `Panel port [8080]:` را می‌پرسد؛ Enter پیش‌فرض، پورت سفارشی معتبر، مسیر unattended و resume ثابت پیاده شده‌اند. پورت آزاد و هماهنگی origin بررسی و انتخاب در journal خصوصی ثبت می‌شود. نصب IPv4/HTTP از ابتدا سایت عمومی متعلق به helper و recovery مستقل loopback:80 دارد و همان قابلیت محدود پورت GUI را ثبت می‌کند؛ general executor disabled است. وقفهٔ enrollment نیز قابل تکرار شد.
+
+نتیجه: installer ۸۱/۰ شامل network هفده/۰، release سی/۰، PHP کامل ۲۰۶/۴۰۶۸ و سه Ubuntu container-lab موفق؛ Nginx واقعی در هر سه با رفت‌وبرگشت پورت و جدایی recovery آزموده شد. محدودیت‌ها و شواهد در INSTALLER_TEST_MATRIX ثبت‌اند. نصب تازه روی VPS بازسازی‌شده و سه VM هنوز انجام نشده؛ سرور موجود پاک نشده است.
+
 ## ۲۰۲۶-۱۰-۱۹ — قابلیت محدود پورت پنل
 
 به درخواست مالک، تنظیم owner-only «پورت پنل»، Job/Outbox/Audit و helper محدود با قرارداد v1، expected-port، قفل، health، rollback و journal recovery اضافه شدند. HTTP هیچ فرمان بلند اجرا نمی‌کند؛ worker عضویت را دوباره بررسی می‌کند و موفقیت بدون شاهد helper پذیرفته نمی‌شود. socket activation سیستم‌دی جای sudo ناسازگار با NoNewPrivileges را گرفت؛ حفاظت queue حفظ شده است. تنظیمات حساب و پورت پس از تغییر گذرواژهٔ اولیه، قبل از تکمیل setup هم قابل دسترس‌اند؛ ثبت identity میزبان pending_probe/untested است و موفقیت setup نیست. Operations عمومی disabled می‌مانند؛ enrollment مستقل root و استثنای HTTP/IPv4 در ADR 0008 و PANEL_PORT ثبت شدند.

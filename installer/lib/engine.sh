@@ -6,6 +6,7 @@ if [[ -n "${INSTALLER_LIB_ENGINE:-}" ]]; then
 fi
 INSTALLER_LIB_ENGINE=1
 source "${INSTALLER_HOME}/lib/security.sh"
+source "${INSTALLER_HOME}/lib/network.sh"
 
 installer_root_path() {
     local root
@@ -17,6 +18,9 @@ stage_01_preflight() {
     installer_detect_os || return 1
     installer_check_resources || return 1
     installer_check_conflicts || return 1
+    if [[ "$MODE" != plan ]]; then
+        installer_network_preflight || return 1
+    fi
     if ! installer_php_baseline_available; then
         installer_error PHP_BASELINE_UNAVAILABLE "Rahandaz runs on PHP 8.4. This Ubuntu release has no verified PHP 8.4 suite."
         return 1
@@ -392,25 +396,56 @@ stage_10_database_migration() {
 }
 
 stage_11_nginx_php_fpm() {
-    local root site pool pool_dir server_names
+    local root site pool pool_dir server_names listen4 listen6 panel link
+    local bootstrap_link
+    bootstrap_link="$(installer_root_path /etc/nginx/sites-enabled/rahandaz.conf)"
     root="$(installer_sysroot)"
     if [[ "$MODE" == "plan" ]]; then
         installer_say "PLAN a dedicated Nginx site and a private PHP 8.4 FPM pool. Distro PHP-FPM pools are not changed."
         return 0
     fi
     site="$(installer_root_path /etc/nginx/sites-available/rahandaz.conf)"
+    listen4="$HTTP_PORT"
+    listen6="[::]:$HTTP_PORT"
+    if [[ "${PANEL_PUBLIC_IPV4:-0}" == 1 ]]; then
+        listen4=127.0.0.1:80
+        listen6='[::1]:80'
+    fi
+    if [[ -L "$site" || ( -e "$site" && "$(head -n 1 "$site")" != '# rahandaz-managed: control-plane' ) ]]; then
+        installer_error FOREIGN_CONFIG 'The bootstrap site is not managed by Rahandaz.'
+        return 1
+    fi
+    if [[ ( -e "$bootstrap_link" && ! -L "$bootstrap_link" ) || ( -L "$bootstrap_link" && "$(readlink "$bootstrap_link")" != "$site" ) ]]; then
+        installer_error FOREIGN_CONFIG 'The bootstrap site link requires operator review.'
+        return 1
+    fi
     server_names="localhost 127.0.0.1"
     case "$SERVER_NAME" in
         _ | localhost | 127.0.0.1) ;;
         *) server_names="$SERVER_NAME $server_names" ;;
     esac
     installer_render_template "${INSTALLER_HOME}/templates/nginx/rahandaz.conf.tpl" "$site" \
-        HTTP_PORT "${HTTP_PORT}" \
+        HTTP_LISTEN4 "$listen4" HTTP_LISTEN6 "$listen6" \
         SERVER_NAME "$server_names" \
         PUBLIC_ROOT /var/lib/rahandaz/current/public \
         WELCOME_ROOT /var/lib/rahandaz/welcome \
         FPM_SOCK /run/rahandaz/php-fpm.sock \
         CLIENT_MAX_BODY 100m || return 1
+    if [[ "${PANEL_PUBLIC_IPV4:-0}" == 1 ]]; then
+        panel="$(installer_root_path /etc/nginx/sites-available/rahandaz-panel.conf)"
+        link="$(installer_root_path /etc/nginx/sites-enabled/rahandaz-panel.conf)"
+        if [[ -L "$panel" || ( -e "$panel" && "$(head -n 1 "$panel")" != '# rahandaz-managed: panel-listener-v1' ) \
+            || ( -e "$link" && ! -L "$link" ) \
+            || ( -L "$link" && "$(readlink "$link")" != "$panel" ) ]]; then
+            installer_error FOREIGN_CONFIG 'The public panel site is not managed by Rahandaz.'
+            return 1
+        fi
+        python3 "${INSTALLER_HOME}/lib/network.py" site "$SERVER_NAME" "$HTTP_PORT" >"${panel}.pending" || return 1
+        chmod 0644 "${panel}.pending"
+        mv "${panel}.pending" "$panel"
+        mkdir -p "$(dirname "$link")"
+        ln -sfn "$panel" "$link"
+    fi
     pool_dir="$(installer_root_path /etc/rahandaz/php/pool.d)"
     pool="${pool_dir}/rahandaz.conf"
     mkdir -p "$pool_dir" "$(installer_root_path /etc/nginx/sites-enabled)"
@@ -425,6 +460,7 @@ stage_11_nginx_php_fpm() {
     fi
     nginx -t || {
         rm -f "$(installer_root_path /etc/nginx/sites-enabled/rahandaz.conf)"
+        if [[ "${PANEL_PUBLIC_IPV4:-0}" == 1 ]]; then rm -f "$link"; fi
         installer_error NGINX_TEST_FAILED "nginx -t failed. The site was not enabled."
         return 1
     }
@@ -477,6 +513,7 @@ EOF
         installer_state_set systemd_activation requires_vm
         return 2
     fi
+    installer_enroll_panel_listener || return 1
     systemctl daemon-reload
     security_runtime_permissions || return 1
     systemctl enable --now redis-rahandaz-queue.service redis-rahandaz-cache.service rahandaz-php-fpm.service rahandaz-queue.service rahandaz-scheduler.timer || {
@@ -531,8 +568,10 @@ stage_13_first_boot() {
 }
 
 stage_14_health_verification() {
-    local base welcome
+    local base welcome recovery
     base="http://127.0.0.1:${HTTP_PORT}"
+    recovery="$base"
+    if [[ "${PANEL_PUBLIC_IPV4:-0}" == 1 ]]; then recovery=http://127.0.0.1:80; fi
     if [[ "$MODE" == "plan" ]]; then
         installer_say "PLAN healthcheck ${base}/up , ${base}/rahandaz/login , and the static welcome page."
         return 0
@@ -553,6 +592,14 @@ stage_14_health_verification() {
         installer_error HEALTHCHECK_FAILED "The panel login URL did not succeed."
         return 1
     }
+    if [[ "${PANEL_PUBLIC_IPV4:-0}" == 1 ]]; then
+        /usr/bin/python3 -I /var/lib/rahandaz/current/infrastructure/operations/panel/verify.py --port "$HTTP_PORT" || {
+            installer_error HEALTHCHECK_FAILED 'The public panel listener or restricted helper did not verify.'
+            return 1
+        }
+        installer_curl --fail --silent --show-error --max-time 15 --header "Host: localhost" "${recovery}/up" >/dev/null || return 1
+        installer_curl --fail --silent --show-error --max-time 15 --header "Host: localhost" "${recovery}/rahandaz/login" >/dev/null || return 1
+    fi
     welcome="$(installer_root_path /var/lib/rahandaz/welcome/index.html)"
     security_welcome_permissions || return 1
     if [[ ! -f "${INSTALLER_HOME}/templates/welcome/index.html" ]]; then
@@ -566,7 +613,7 @@ stage_14_health_verification() {
     printf '%s\n' "$content" >"$welcome"
     chown root:www-data "$welcome" || return 1
     chmod 0640 "$welcome" || return 1
-    installer_curl --fail --silent --show-error --max-time 15 --header "Host: localhost" "${base}/" | grep -q 'data-health-marker="verified"' || {
+    installer_curl --fail --silent --show-error --max-time 15 --header "Host: localhost" "${recovery}/" | grep -q 'data-health-marker="verified"' || {
         rm -f "$welcome"
         installer_error HEALTHCHECK_FAILED "The welcome page did not serve the verified marker."
         return 1

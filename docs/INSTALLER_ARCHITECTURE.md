@@ -74,3 +74,8 @@
 ## فایل‌های ناموجود در مسیرهای خواسته‌شده
 
 `docs/PROJECT_SPEC.md`، `docs/ARCHITECTURE.md`، `docs/DEVELOPMENT.md` و `docs/ROADMAP.md` نیستند؛ نسخهٔ معتبر زیر `.docs/` است. ADR جدا برای نصب‌کننده نیست. `scripts/install.sh` نیست. `LICENSE` هنوز نیست؛ SECURITY، CHANGELOG و CONTRIBUTING اکنون موجودند. bootstrap عمومی `install.sh` هنگام بسته‌سازی هر نسخه تولید می‌شود. قرارداد pipeline/trust در `RELEASE_MANAGEMENT.md` است.
+
+
+## Network contract v1
+
+`installer/lib/network.sh` and `network.py` validate the English interactive port choice (default 8080), HTTP origin synchronization and private `network.json` resume journal. No packages change before preflight and selection persistence. `--plan` never prompts; unattended apply requires explicit origin/port. An explicit public IPv4/HTTP origin authorizes only the existing restricted panel listener capability. The public site uses the operation helper template; the separate bootstrap recovery site binds loopback port 80. The signed installer enrolls the socket-activated helper before service activation and verifies its identity, permissions and real Nginx/HTTP health before success. This does not enable the general execution gate or change firewall/SSH. Domain/TLS enrollment is outside network v1.

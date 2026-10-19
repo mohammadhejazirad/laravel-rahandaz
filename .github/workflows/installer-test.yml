@@ -11,6 +11,8 @@ on:
     paths:
       - "installer/**"
       - "tests/infrastructure/ubuntu-lab/scripts/test-prerequisites.sh"
+      - "tests/infrastructure/ubuntu-lab/scripts/test-installer-network.sh"
+      - "tests/infrastructure/ubuntu-lab/scripts/inside/installer-network-nginx.py"
       - "tests/infrastructure/ubuntu-lab/scripts/test-security.sh"
       - "tests/infrastructure/ubuntu-lab/scripts/inside/ssh-policy-test.py"
       - ".github/workflows/installer-test.yml"
@@ -49,6 +51,10 @@ jobs:
         env:
           UBUNTU_VERSION: ${{ matrix.ubuntu }}
         run: bash tests/infrastructure/ubuntu-lab/scripts/test-prerequisites.sh "$UBUNTU_VERSION" --fixtures
+      - name: Run installer prompt and network contracts on target Ubuntu
+        env:
+          UBUNTU_VERSION: ${{ matrix.ubuntu }}
+        run: bash tests/infrastructure/ubuntu-lab/scripts/test-installer-network.sh "$UBUNTU_VERSION" --fixtures
       - name: Run security contracts on target Ubuntu
         env:
           UBUNTU_VERSION: ${{ matrix.ubuntu }}
@@ -75,4 +81,5 @@ jobs:
           path: |
             tests/infrastructure/ubuntu-lab/reports/prerequisites-*/**
             tests/infrastructure/ubuntu-lab/reports/security-*/**
+            tests/infrastructure/ubuntu-lab/reports/installer-network-*/**
           if-no-files-found: warn
