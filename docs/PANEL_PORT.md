@@ -1,6 +1,6 @@
 # پورت پنل
 
-در تنظیمات حساب، بخش «پورت پنل» برای مالک نصب قرار دارد. تغییر از طریق queue و Operations Engine انجام می‌شود؛ ثبت درخواست، موفقیت میزبان نیست. پس از healthcheck، Nginx و PHP-FPM اختصاصی graceful reload شده‌اند و مرورگر در نشانی جدید باز می‌شود. reboot سرور انجام نمی‌شود. پورت اشغال‌شده یا محدود مرورگر و درخواست هم‌زمان رد می‌شوند.
+پس از تغییر گذرواژهٔ اولیه، حتی پیش از تکمیل setup میزبان، در تنظیمات حساب بخش «پورت پنل» برای مالک نصب قرار دارد. تغییر از طریق queue و Operations Engine انجام می‌شود؛ ثبت درخواست، موفقیت میزبان نیست. پس از healthcheck، Nginx و PHP-FPM اختصاصی graceful reload شده‌اند و مرورگر در نشانی جدید باز می‌شود. reboot سرور انجام نمی‌شود. پورت اشغال‌شده یا محدود مرورگر و درخواست هم‌زمان رد می‌شوند.
 
 ## ثبت اولیه توسط اپراتور
 
@@ -10,7 +10,7 @@
 /usr/bin/python3 -I /var/lib/rahandaz/current/infrastructure/operations/panel/provision.py --host SERVER_IPV4 --current-port 80 --allow-public-http
 ```
 
-`SERVER_IPV4` باید IPv4 واقعی و `--current-port` پورت فعلی پنل باشد. ثبت اولیه listener یا firewall را تغییر نمی‌دهد. helper از `/usr/local/lib/rahandaz/operations/panel/listener.py`، sudoers فقط با argv خالی، و رکورد root-owned استفاده می‌کند. اجرای دوباره provision روی enrollment موجود عمداً رد می‌شود؛ هنگام ارتقا helper فقط توسط اپراتور و از بستهٔ امضاشده با حفظ state/policy جایگزین شود. هیچ دستور root در HTTP اجرا نمی‌شود.
+`SERVER_IPV4` باید IPv4 واقعی و `--current-port` پورت فعلی پنل باشد. ثبت اولیه listener یا firewall را تغییر نمی‌دهد. helper root-owned با socket activation سیستم‌دی اجرا می‌شود؛ سوکت `/run/rahandaz-panel-helper.sock` فقط برای root و گروه اختصاصی `rahandaz-svc` با حالت 0660 باز است. worker از client ثابت و قرارداد JSON استفاده می‌کند؛ `NoNewPrivileges=true` و sandbox سرویس queue حفظ می‌شوند و sudoers تازه ساخته نمی‌شود. ارتقای ثبت موجود فقط با `--upgrade` و host/port مطابق state، از بستهٔ امضاشده توسط root انجام می‌شود؛ state پورت بازنویسی نمی‌شود. سیاست sudo دقیق beta19 در این ارتقا حذف می‌شود. هیچ دستور root در HTTP اجرا نمی‌شود.
 
 ## اعمال و بازیابی
 
@@ -31,3 +31,5 @@ bash tests/infrastructure/ubuntu-lab/scripts/test-panel-port.sh 26.04
 ```
 
 fixture سرویس‌ها جای systemd/Nginx واقعی یا VM certification نیست. نتیجهٔ اجرا در OPERATIONS_TEST_MATRIX و گزارش VPS ثبت می‌شود.
+
+در نصب تازه، نخستین درخواست معتبر مالک فقط هویت protected میزبان محلی workspace را با وضعیت `pending_probe` و سازگاری `untested` ثبت می‌کند؛ این ثبت، آزمون میزبان یا تکمیل setup نیست. صفحهٔ تنظیمات حساب و endpointهای محدود پورت پیش از تکمیل setup قابل استفاده‌اند؛ سایر صفحه‌های میزبان همچنان پشت setup باقی می‌مانند.

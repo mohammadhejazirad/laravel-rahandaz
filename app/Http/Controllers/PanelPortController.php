@@ -37,7 +37,12 @@ final class PanelPortController extends Controller
             if (OperationJob::query()->where('type', 'panel.port.update')->whereIn('status', ['queued', 'running', 'waiting_retry'])->exists()) {
                 throw ValidationException::withMessages(['port' => 'یک تغییر پورت در حال اجراست؛ تا پایان آن صبر کنید.']);
             }
-            $host = LocalHost::query()->forWorkspace($workspace->id)->where('slug', 'local-host')->firstOrFail();
+            // Fresh installations have an owner before host discovery/setup is complete.
+            // Register identity only; this does not claim a successful probe or support.
+            $host = LocalHost::query()->firstOrCreate(
+                ['workspace_id' => $workspace->id, 'slug' => 'local-host'],
+                ['display_name' => 'میزبان محلی'],
+            );
             $job = app(RecordOperation::class)->record(new RecordOperationData(
                 workspaceId: $workspace->id, actorId: $request->user()->id, type: 'panel.port.update',
                 idempotencyKey: (string) Str::uuid7(),

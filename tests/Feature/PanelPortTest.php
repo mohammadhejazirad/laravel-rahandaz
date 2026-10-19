@@ -65,6 +65,23 @@ class PanelPortTest extends TestCase
         $this->assertSame(1, OperationJob::query()->count());
     }
 
+    public function test_fresh_owner_can_manage_panel_port_before_host_setup_is_complete(): void
+    {
+        [$user, $workspace] = $this->panelAccount(setupComplete: false);
+        $this->actingAs($user);
+        $this->get(route('settings.profile'))->assertOk();
+        $job = $this->submit();
+        $host = LocalHost::query()->forWorkspace($workspace->id)->sole();
+        $this->assertSame('local-host', $host->slug);
+        $this->assertSame('pending_probe', $host->state->value);
+        $this->assertSame('untested', $host->compatibility->value);
+        $this->assertTrue($host->protected);
+        $this->assertSame((string) $host->id, (string) $job->resource_id);
+        $this->getJson(route('settings.panel-port.status', ['job' => $job->uuid]))->assertOk();
+        $this->get(route('dashboard'))->assertRedirect(route('setup.show'));
+        Process::assertNothingRan();
+    }
+
     public function test_only_owner_can_change_port_and_worker_rechecks_membership(): void
     {
         [$user, $workspace] = $this->owner();
@@ -96,7 +113,7 @@ class PanelPortTest extends TestCase
         app(OperationRunner::class)->run($job->id);
         $this->assertSame('succeeded', $job->fresh()->status->value);
         $this->assertTrue($job->steps()->first()->checkpoint['verified']);
-        Process::assertRan(fn ($process) => $process->command === ['/usr/bin/sudo', '-n', '--', '/usr/local/lib/rahandaz/operations/panel/listener.py'] && str_contains($process->input, $job->uuid));
+        Process::assertRan(fn ($process) => $process->command === ['/usr/bin/python3', '-I', '/var/lib/rahandaz/current/infrastructure/operations/panel/client.py'] && str_contains($process->input, $job->uuid));
         $this->assertDatabaseHas('audit_events', ['action' => 'panel.port.applied']);
         app(OperationRunner::class)->run($job->id);
         Process::assertRanTimes(fn () => true, 1);

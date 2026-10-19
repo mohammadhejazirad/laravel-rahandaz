@@ -14,7 +14,7 @@ class EnsureSetupComplete
     {
         $workspace = $request->user()?->currentWorkspace();
 
-        if ($workspace !== null && ! $workspace->setupIsComplete() && ! $request->routeIs('setup.show', 'logout')) {
+        if ($workspace !== null && ! $workspace->setupIsComplete() && ! $request->routeIs('setup.show', 'logout', 'settings.profile', 'settings.panel-port', 'settings.panel-port.status')) {
             return redirect()->route('setup.show');
         }
 

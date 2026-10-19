@@ -57,7 +57,7 @@ final class RunPanelPort
                     $result = Process::timeout(48)->input(json_encode([
                         'schema_version' => '1', 'operation' => 'panel.port.update', 'execution_id' => $job->uuid,
                         'expected_port' => $input['expected_port'], 'port' => $input['port'],
-                    ], JSON_THROW_ON_ERROR))->run(['/usr/bin/sudo', '-n', '--', '/usr/local/lib/rahandaz/operations/panel/listener.py']);
+                    ], JSON_THROW_ON_ERROR))->run(['/usr/bin/python3', '-I', '/var/lib/rahandaz/current/infrastructure/operations/panel/client.py']);
                     $output = json_decode($result->output(), true);
                     if ($result->successful() && is_array($output) && ($output['schema_version'] ?? null) === '1' && ($output['status'] ?? null) === 'succeeded' && ($output['verified'] ?? null) === true && ($output['port'] ?? null) === $input['port']) {
                         $evidence = $output;

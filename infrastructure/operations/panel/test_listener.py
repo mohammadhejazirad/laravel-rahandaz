@@ -1,11 +1,13 @@
 """Contract and recovery tests. Fake services run only in an isolated temp tree."""
 import importlib.util
+import io
 import json
 import os
 from pathlib import Path
 import socket
 import tempfile
 import unittest
+from unittest.mock import patch
 
 spec = importlib.util.spec_from_file_location('listener', Path(__file__).with_name('listener.py'))
 m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
@@ -108,5 +110,37 @@ class ListenerTests(unittest.TestCase):
         with self.assertRaisesRegex(m.Refused,'MANUAL_RECOVERY_REQUIRED'): self.listener.apply(payload())
         self.assertTrue((self.listener.journal/EXEC/'env').is_file())
         self.assertTrue((self.listener.journal/'active.json').exists())
+
+class ClientTests(unittest.TestCase):
+    def test_socket_transport_has_fixed_path_and_preserves_verification(self):
+        spec = importlib.util.spec_from_file_location('client', Path(__file__).with_name('client.py'))
+        client = importlib.util.module_from_spec(spec); spec.loader.exec_module(client)
+        data = json.dumps(payload()).encode()
+        evidence = json.dumps({'schema_version':'1','status':'succeeded','port':8081,'verified':True}).encode()
+        calls = []
+        class Connection:
+            chunks = [evidence, b'']
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+            def settimeout(self, value): calls.append(('timeout',value))
+            def connect(self, value): calls.append(('connect',value))
+            def sendall(self, value): calls.append(('send',value))
+            def shutdown(self, value): calls.append(('shutdown',value))
+            def recv(self, count): return self.chunks.pop(0)
+        output = io.StringIO()
+        with patch.object(client.sys, 'argv', ['client.py']), patch.object(client.sys, 'stdin', io.TextIOWrapper(io.BytesIO(data))), patch.object(client.sys, 'stdout', output), patch.object(client.socket, 'socket', return_value=Connection()):
+            self.assertEqual(client.main(), 0)
+        self.assertIn(('connect','/run/rahandaz-panel-helper.sock'), calls)
+        self.assertIn(('send',data), calls)
+        self.assertIn(('shutdown',socket.SHUT_WR), calls)
+        self.assertTrue(json.loads(output.getvalue())['verified'])
+
+    def test_socket_transport_fails_closed_when_helper_is_unavailable(self):
+        spec = importlib.util.spec_from_file_location('client', Path(__file__).with_name('client.py'))
+        client = importlib.util.module_from_spec(spec); spec.loader.exec_module(client)
+        output = io.StringIO()
+        with patch.object(client.sys, 'argv', ['client.py']), patch.object(client.sys, 'stdin', io.TextIOWrapper(io.BytesIO(b'{}'))), patch.object(client.sys, 'stdout', output), patch.object(client.socket, 'socket', side_effect=OSError('fixture')):
+            self.assertEqual(client.main(), 1)
+        self.assertEqual(json.loads(output.getvalue())['error_code'],'PANEL_HELPER_UNAVAILABLE')
 
 if __name__=='__main__': unittest.main()
