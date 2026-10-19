@@ -200,7 +200,7 @@ jobs:
             gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f "ref=refs/tags/$RELEASE_TAG" -f "sha=$RELEASE_COMMIT" >/dev/null
           fi
           # Keep incomplete uploads private. Retry only this new draft's signed bytes.
-          gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --draft --prerelease --latest=false --title "Rahandaz $RELEASE_TAG — test candidate" --notes-file "$release_assets/INSTALL.md"
+          gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --draft --prerelease --latest=false --title "Rahandaz $RELEASE_TAG - test candidate" --notes-file "$release_assets/INSTALL.md"
           uploaded=false
           for attempt in 1 2 3; do
             test "$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)" = true

@@ -243,6 +243,10 @@ printf '{}\n' >"$app/composer.lock"
 printf '{}\n' >"$app/public/build/manifest.json"
 printf '<?php\n' >"$app/vendor/autoload.php"
 printf '#!/usr/bin/env bash\nexit 10\n' >"$app/installer/bin/rahandaz-install"
+mkdir -p "$app/infrastructure/operations/software"
+for software_file in authorize.php catalog.json client.py helper.py provision.py; do
+    cp "${INSTALLER_HOME}/../infrastructure/operations/software/$software_file" "$app/infrastructure/operations/software/$software_file"
+done
 archive="$(bash "${INSTALLER_HOME}/release/assemble.sh" --from "$app" --version 1.0.0-test --output "${tmp}/pack")"
 bash "${INSTALLER_HOME}/release/sign-manifest.sh" --key "$key" --artifact "$archive" --version 1.0.0-test --output "${tmp}/signed" >/dev/null
 if bash "${INSTALLER_HOME}/bootstrap/verify-release.sh" \
