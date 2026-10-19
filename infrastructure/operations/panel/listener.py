@@ -101,7 +101,10 @@ class Listener:
 
     def port_free(self, number):
         try:
-            with socket.socket() as s: s.bind(('0.0.0.0', number))
+            with socket.socket() as s:
+                # Match Nginx reuse semantics when returning to a recently closed port.
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                s.bind(('0.0.0.0', number))
         except OSError:
             raise Refused('PORT_IN_USE') from None
 

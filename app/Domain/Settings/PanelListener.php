@@ -41,6 +41,8 @@ final class PanelListener
 
     public function origin(array $state, ?int $port = null): string
     {
-        return 'http://'.$state['host'].':'.($port ?? $state['port']);
+        $number = $port ?? $state['port'];
+
+        return 'http://'.$state['host'].($number === 80 ? '' : ':'.$number);
     }
 }

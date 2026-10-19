@@ -134,6 +134,9 @@ class PanelPortTest extends TestCase
         $url = route('settings.panel-port.status', ['job' => $job->uuid]);
         $this->withHeader('Origin', 'http://192.0.2.1:8080')->getJson($url)->assertOk()->assertHeader('Access-Control-Allow-Origin', 'http://192.0.2.1:8080')->assertHeader('Access-Control-Allow-Credentials', 'true');
         $this->withHeader('Origin', 'http://evil.example:8080')->getJson($url)->assertOk()->assertHeaderMissing('Access-Control-Allow-Origin');
+        $state['previous_port'] = 80;
+        file_put_contents($this->state, json_encode($state));
+        $this->withHeader('Origin', 'http://192.0.2.1')->getJson($url)->assertOk()->assertHeader('Access-Control-Allow-Origin', 'http://192.0.2.1');
     }
 
     public function test_another_workspace_cannot_read_the_job_status(): void
