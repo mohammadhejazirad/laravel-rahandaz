@@ -98,6 +98,13 @@ def authorize(data):
         raise Refused('AUTHORIZATION_REVOKED')
 
 
+def verify_services():
+    # is-active with multiple names succeeds when ANY unit is active, not all.
+    for unit in ('nginx', 'rahandaz-php-fpm', 'rahandaz-queue', 'rahandaz-scheduler.timer',
+                 'redis-rahandaz-queue', 'redis-rahandaz-cache'):
+        run(['/usr/bin/systemctl', 'is-active', '--quiet', unit])
+
+
 def readiness():
     info = {}
     for line in Path('/etc/os-release').read_text().splitlines():
@@ -118,8 +125,7 @@ def readiness():
     for unit in ('rahandaz-php-fpm', 'rahandaz-queue'):
         if run(['/usr/bin/systemctl', 'show', '--property=NoNewPrivileges', '--value', unit]).strip() != 'yes':
             raise Refused('SERVICE_ACCOUNT_UNSAFE')
-    run(['/usr/bin/systemctl', 'is-active', '--quiet', 'nginx', 'rahandaz-php-fpm', 'rahandaz-queue',
-         'rahandaz-scheduler.timer', 'redis-rahandaz-queue', 'redis-rahandaz-cache'])
+    verify_services()
     run(['/usr/sbin/runuser', '-u', 'rahandaz-svc', '--', '/usr/bin/php8.4', 'artisan', 'rahandaz:doctor'])
     state = Path('/etc/rahandaz/panel-listener.json')
     port = json.loads(state.read_text())['port'] if state.is_file() else 80

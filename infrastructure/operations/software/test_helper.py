@@ -99,6 +99,18 @@ class ContractTests(unittest.TestCase):
         self.assertFalse(helper.same_request(self.data(), self.data() | {'packages': ['htop']}))
         self.assertFalse(helper.alive({'pid': 0, 'boot_id': 'old-boot', 'pid_start': '1'}))
 
+    def test_each_required_unit_is_checked_individually(self):
+        for missing in ('nginx', 'rahandaz-php-fpm', 'rahandaz-queue', 'rahandaz-scheduler.timer', 'redis-rahandaz-queue', 'redis-rahandaz-cache'):
+            calls = []
+            def run(args, timeout=30):
+                calls.append(args)
+                self.assertEqual(len(args), 4)
+                if args[-1] == missing: raise helper.Refused('COMMAND_FAILED')
+                return ''
+            with self.subTest(missing=missing), patch.object(helper, 'run', side_effect=run), self.assertRaises(helper.Refused):
+                helper.verify_services()
+            self.assertEqual(calls[-1][-1], missing)
+
     @unittest.skipUnless(os.geteuid() == 0, 'Real root state ownership is tested in the Ubuntu lab.')
     def test_real_socket_peer_rejection_async_ack_idempotency_and_crash_reconcile(self):
         with tempfile.TemporaryDirectory() as name:

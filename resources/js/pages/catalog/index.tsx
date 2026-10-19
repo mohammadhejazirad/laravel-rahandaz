@@ -38,7 +38,7 @@ export default function CatalogIndex({
             <SoftwareInstallationCard software={software} />
             <ChromeInstallationCard chrome={chrome} />
             {install_available ? null : (
-                <Alert tone="info">فهرست زیر برای مشاهدهٔ نسخه‌هاست. نصب ابزارهای در دسترس را از بخش بالای صفحه انجام دهید.</Alert>
+                <Alert tone="info">فهرست زیر نرم‌افزارهای دیگر کاتالوگ را نشان می‌دهد. نصب ابزارهای در دسترس را از بخش بالای صفحه انجام دهید.</Alert>
             )}
             {packages.data.length === 0 ? (
                 <EmptyState title="نرم‌افزار دیگری برای نمایش وجود ندارد">ابزارهای قابل نصب در بالای همین صفحه قرار دارند.</EmptyState>
