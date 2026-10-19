@@ -26,6 +26,10 @@ INSTALLER_STATE_DIR="$2"
 source "$INSTALLER_HOME/lib/common.sh"
 source "$INSTALLER_HOME/lib/network.sh"
 installer_sysroot() { printf '%s' "$INSTALLER_STATE_DIR/root"; }
+installer_detect_panel_origin() {
+    [[ ! -e "$INSTALLER_STATE_DIR/no-detection" ]] || return 1
+    printf 'http://194.110.24.123\n'
+}
 MODE="$3"; PUBLIC_URL="$4"; HTTP_PORT="$5"; SERVER_NAME=_
 installer_configure_network
 installer_save_network
@@ -39,10 +43,10 @@ class NetworkTest(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.work = Path(self.temp.name)
 
-    def run_config(self, mode='apply', origin='http://194.110.24.123', port='', state=None):
+    def run_config(self, mode='apply', origin='', port='', state=None):
         return subprocess.run(['bash', '-c', SCRIPT, 'fixture', str(ROOT), str(state or self.work), mode, origin, port], text=True, capture_output=True, stdin=subprocess.DEVNULL)
 
-    def tty_config(self, replies, origin='http://194.110.24.123'):
+    def tty_config(self, replies, origin=''):
         child, fd = pty.fork()
         if child == 0:
             os.execvp('bash', ['bash', '-c', SCRIPT, 'fixture', str(ROOT), str(self.work), 'apply', origin, ''])
@@ -77,6 +81,8 @@ class NetworkTest(unittest.TestCase):
         status, output = self.tty_config([b'\n'])
         self.assertEqual(status, 0, output)
         self.assertIn('Panel port [8080]: ', output)
+        self.assertNotIn('Panel origin', output)
+        self.assertEqual(output.count('Panel port ['), 1)
         self.assertIn('RESULT 8080 http://194.110.24.123:8080', output)
         state = self.work/'network.json'
         self.assertEqual(state.stat().st_mode & 0o777, 0o600)
@@ -95,12 +101,18 @@ class NetworkTest(unittest.TestCase):
         self.assertIn('input was interrupted', output)
         self.assertFalse((self.work/'network.json').exists())
 
-    def test_missing_origin_is_prompted_before_port(self):
-        # Origin is covered through the actual signed bootstrap forwarding tests;
-        # here noninteractive execution must never guess a public address.
-        result = self.run_config(origin='')
+    def test_address_is_detected_without_prompt_or_explicit_public_url(self):
+        result = self.run_config(port='9001')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('RESULT 9001 http://194.110.24.123:9001', result.stdout)
+        self.assertNotIn('Panel origin', result.stdout + result.stderr)
+
+    def test_failed_detection_stops_without_an_address_question_or_journal(self):
+        (self.work/'no-detection').touch()
+        result = self.run_config(port='8080')
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn('Provide --public-url', result.stderr)
+        self.assertIn('ADDRESS_DETECTION_FAILED', result.stderr)
+        self.assertNotIn('Panel origin', result.stdout + result.stderr)
         self.assertFalse((self.work/'network.json').exists())
 
     def test_noninteractive_requires_explicit_port(self):
@@ -118,10 +130,11 @@ class NetworkTest(unittest.TestCase):
         result = self.run_config(port='9001')
         self.assertEqual(result.returncode, 0, result.stderr)
         before = (self.work/'network.json').read_bytes()
+        (self.work/'no-detection').touch()
         result = self.run_config(mode='resume', origin='')
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn('RESULT 9001 http://194.110.24.123:9001', result.stdout)
-        result = self.run_config(mode='resume', port='8080')
+        result = self.run_config(mode='resume', origin='http://194.110.24.123', port='8080')
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('NETWORK_CONFIG_CHANGED', result.stderr)
         self.assertEqual((self.work/'network.json').read_bytes(), before)
@@ -192,6 +205,40 @@ status=$?
         result = subprocess.run(['bash', '-c', SCRIPT + stage, 'fixture', str(ROOT), str(self.work), 'apply', '', ''], text=True, capture_output=True)
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual((available/'rahandaz-panel.conf').read_text(), '# operator config\n')
+
+
+class AddressDetectionTest(unittest.TestCase):
+    def interfaces(self, *addresses):
+        return [{'addr_info': [{'family': 'inet', 'local': address} for address in addresses]}]
+
+    def test_ssh_server_address_must_be_assigned_to_this_host(self):
+        interfaces = self.interfaces('127.0.0.1', '194.110.24.123', '10.0.0.10')
+        routes = [{'prefsrc': '10.0.0.10'}]
+        self.assertEqual(NETWORK.select_host(interfaces, routes, '192.0.2.20 40000 194.110.24.123 22'), '194.110.24.123')
+        self.assertEqual(NETWORK.select_host(interfaces, routes, '192.0.2.20 40000 203.0.113.99 22'), '10.0.0.10')
+
+    def test_route_source_and_single_address_fallback(self):
+        self.assertEqual(NETWORK.select_host(self.interfaces('10.0.0.10', '10.0.0.11'), [{'prefsrc': '10.0.0.11'}]), '10.0.0.11')
+        self.assertEqual(NETWORK.select_host(self.interfaces('127.0.0.1', '194.110.24.123'), []), '194.110.24.123')
+
+    def test_missing_ambiguous_and_unsafe_addresses_fail_closed(self):
+        for values in [[], ['127.0.0.1'], ['0.0.0.0', '169.254.1.1', '224.0.0.1', '255.255.255.255'], ['10.0.0.10', '10.0.0.11']]:
+            with self.subTest(values=values), self.assertRaises(ValueError):
+                NETWORK.select_host(self.interfaces(*values), [])
+
+    def test_detection_uses_only_local_ip_queries_and_validated_ssh_metadata(self):
+        with patch.object(NETWORK.subprocess, 'check_output', side_effect=[
+            json.dumps(self.interfaces('194.110.24.123')).encode(), b'[{"prefsrc":"194.110.24.123"}]'
+        ]) as command, patch.dict(os.environ, {'SSH_CONNECTION': ''}):
+            self.assertEqual(NETWORK.detect_host(), '194.110.24.123')
+        self.assertEqual(command.call_args_list[0].args[0], ['ip', '-j', '-4', 'address', 'show'])
+        self.assertEqual(command.call_args_list[1].args[0], ['ip', '-j', '-4', 'route', 'get', '1.1.1.1'])
+
+    def test_missing_route_can_use_one_assigned_address(self):
+        with patch.object(NETWORK.subprocess, 'check_output', side_effect=[
+            json.dumps(self.interfaces('194.110.24.123')).encode(), subprocess.CalledProcessError(2, ['ip'])
+        ]), patch.dict(os.environ, {'SSH_CONNECTION': ''}):
+            self.assertEqual(NETWORK.detect_host(), '194.110.24.123')
 
 
 class EnrollmentTest(unittest.TestCase):

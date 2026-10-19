@@ -1,0 +1,11 @@
+---
+description: All Bash terminal text and future prompts must be English ASCII
+alwaysApply: true
+---
+
+- Every Bash source, extensionless Bash entry point and generated Bash template must contain English/ASCII text only.
+- Apply this to every future addition or edit: questions, prompts, help, status, errors, warnings, logs, comments and static strings.
+- Never add Persian terminal text. RTL and mixed-script rendering break in terminals. Persian product translations belong in web templates or translation resources.
+- Example: use `Panel port [8080]: ` and `Invalid port.`, with no Persian translation inside Bash.
+- Run `python3 installer/tests/prerequisites_test.py` to enforce the repository ASCII check, including `installer/bootstrap/github-install.sh.in`.
+- The authoritative requirements are in `AGENTS.md` and `.docs/PROJECT_SPEC.md`.

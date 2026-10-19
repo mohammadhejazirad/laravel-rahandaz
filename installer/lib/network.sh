@@ -3,6 +3,10 @@
 if [[ -n "${INSTALLER_LIB_NETWORK:-}" ]]; then return 0; fi
 INSTALLER_LIB_NETWORK=1
 
+installer_detect_panel_origin() {
+    python3 "${INSTALLER_HOME}/lib/network.py" detect
+}
+
 installer_configure_network() {
     local config saved='' candidate default_port answer
     config="${INSTALLER_STATE_DIR}/network.json"
@@ -22,13 +26,10 @@ installer_configure_network() {
         if [[ "$MODE" == plan ]]; then
             PUBLIC_URL=http://127.0.0.1
         else
-            if ! { exec 9<>/dev/tty; } 2>/dev/null; then
-                installer_error INVALID_INPUT 'Provide --public-url and --http-port without an interactive terminal.'
+            PUBLIC_URL="$(installer_detect_panel_origin)" || {
+                installer_error ADDRESS_DETECTION_FAILED 'The server IPv4 address could not be determined. Provide --public-url explicitly and retry.'
                 return 1
-            fi
-            printf '%s' 'Panel origin (for example http://SERVER_IP or http://127.0.0.1 for an SSH tunnel): ' >&9
-            IFS= read -r PUBLIC_URL <&9 || { exec 9>&-; return 1; }
-            exec 9>&-
+            }
         fi
     fi
     default_port="$(python3 "${INSTALLER_HOME}/lib/network.py" default "$PUBLIC_URL")" || return 1

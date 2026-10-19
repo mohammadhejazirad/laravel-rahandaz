@@ -62,6 +62,7 @@ A newer verified release is prepared beside the current one and does not delete 
 Install targets are Ubuntu 22.04 and 24.04 LTS. Ubuntu 26.04 stops before any change.
 --iranian-mirrors yes|no answers the mirror question. On Iran, apply asks before changing mirrors.
 --http-port PORT skips the English prompt; Enter accepts 8080 on a fresh install.
+The server IPv4 address is detected automatically; no origin question is asked.
 Resume keeps the original origin and port. Use panel settings after installation.
 Chrome is optional project software managed from the panel, never installed here.
 EOF

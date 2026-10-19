@@ -747,6 +747,10 @@ healthcheck باید endpoint غیرحساس با status مورد انتظار،
 9. systemd unitهای worker کنترل/اجرا و timer scheduler، readiness و startup order ایجاد می‌شوند. installer health واقعی Laravel، PostgreSQL، Redis queue/cache، Nginx، static asset و end-to-end ثبت Job را با `doctor.sh` بررسی می‌کند. تنها پس از setup Wizard، welcome static site واقعی و قابل حذف روی دامنه پیش‌فرض یا IP سالم، success نهایی onboarding اعلام می‌شود.
 10. تولید credential در log/shell trace/process argv ممنوع. installer خروجی CLI انگلیسی، exit code مشخص، فایل گزارش redacted و recovery/resume plan دارد. upgrade جداگانه و self-update مستقل از worker درحال upgrade است.
 
+الزام دائمی زبان ترمینال: تمام منابع Bash، شامل `.sh`، `.bash`، ورودی بدون پسوند و قالب تولیدشوندهٔ bootstrap، فقط انگلیسی/ASCII باشند. افزودن یا تغییر هر سؤال، prompt، help، پیام وضعیت، warning، خطا، log یا comment در آینده نیز مشمول همین قاعده است؛ فارسی در Bash ممنوع است چون نمایش RTL و ترکیب متن در ترمینال به‌هم می‌ریزد. ترجمهٔ فارسی محصول در منابع وب باقی بماند. بررسی خودکار ASCII بخشی از آزمون تغییر اسکریپت است.
+
+تصمیم مالک در ۲۰۲۶-۱۰-۱۹ برای دسترسی اولیه: در تنظیم آدرس پنل، سؤال `Panel origin` و پرسش IP/دامنه حذف شوند؛ فقط `Panel port [8080]:` نمایش داده شود. Enter پورت 8080 را می‌پذیرد و IP از اطلاعات محلی شبکه تعیین می‌شود: آدرس سمت سرور در `SSH_CONNECTION` فقط اگر به همین میزبان تخصیص یافته باشد، سپس source مسیر پیش‌فرض، سپس تک آدرس معتبر میزبان. سرویس تشخیص IP بیرونی فراخوانی نشود؛ ابهام/نبود آدرس با خطای انگلیسی و override صریح CLI متوقف شود. آدرس، پورت Nginx، `APP_URL` و ثبت helper یک انتخاب هماهنگ‌اند؛ resume انتخاب ثبت‌شده را نگه می‌دارد. این تصمیم فقط پرسش شبکه را تغییر می‌دهد؛ تأییدهای مستقل mirror/migration و قرارداد امنیتی خود را دارند. استثنای دسترسی IPv4/HTTP در ADR 0008 مستند است و به معنی TLS خودکار نیست.
+
 فرمان README باید GitHub public release موجود و نسخه آزموده را هدف بگیرد؛ تا پیش از انتشار، در `README.md` فقط **نمونه معماری فرمان و TODO release** باشد و هیچ فرمان صوری به عنوان «قابل اجرا» معرفی نشود. مرحله نصب سیستم با دسترسی root اجتناب‌ناپذیر است، ولی تمام عملیات روزمره و اجرای پروژه‌ها زیر non-root و helper محدود انجام می‌شود.
 
 ### 13.4 دانلود در شبکه محدود

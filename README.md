@@ -18,7 +18,7 @@
 
 ## نصب سریع و وضعیت نسخه اول
 
-قابلیت جدید پرسش انگلیسی `Panel port [8080]:` و ثبت پورت انتخابی در کد مخزن آماده و آزموده شده است؛ این قابلیت هنوز در بستهٔ منتشرشدهٔ beta.23.1 زیر وجود ندارد. انتشار امضاشدهٔ beta.24.1 در [اجرای GitHub Actions](https://github.com/mohammadhejazirad/laravel-rahandaz/actions/runs/39281828441) به‌علت [اختلال رسمی Actions در ۲۰۲۶-۱۰-۱۹](https://www.githubstatus.com/incidents/8tzbpcnl75jp) منتظر مانده است. نصب تازه با قابلیت جدید و جایگزینی فرمان پایین، به انتشار و تأیید فایل‌های امضاشده وابسته‌اند. وضعیت آزمون‌ها در [ماتریس نصب](docs/INSTALLER_TEST_MATRIX.md) ثبت شده است.
+در کد اصلاح‌شده، IP سرور خودکار تشخیص داده می‌شود و فقط `Panel port [8080]:` پرسیده می‌شود؛ سؤال origin/IP/دامنه حذف شده است. فرمان منتشرشدهٔ beta.23.1 پایین هنوز این اصلاح را ندارد. جایگزینی فرمان به انتشار و تأیید فایل‌های نسخهٔ امضاشدهٔ شامل این تغییر وابسته است؛ وضعیت در [ماتریس نصب](docs/INSTALLER_TEST_MATRIX.md) ثبت می‌شود. انتشار قبلی beta.24.1 نیز هنوز سؤال origin دارد و شامل این اصلاح نهایی نیست.
 
 برای نصب نسخهٔ آزمایشی روی **سرور Ubuntu تازه و آزمایشی**، با SSH وارد سرور شوید و همین فرمان را کپی و اجرا کنید:
 
@@ -26,7 +26,7 @@
 (set -eu; rahandaz_install_dir=$(mktemp -d); trap 'rm -rf -- "$rahandaz_install_dir"' EXIT; curl --proto '=https' --proto-redir '=https' --tlsv1.2 -fsSL --connect-timeout 15 --max-time 120 --retry 3 https://github.com/mohammadhejazirad/laravel-rahandaz/releases/download/v1.0.0-beta.23.1/install.sh -o "$rahandaz_install_dir/install.sh"; printf "69ea2949b55bdf4550c9ba9c3a366cf8f0c957c751cc7393c76cc60e3f5dd051  %s\n" "$rahandaz_install_dir/install.sh" | sha256sum --check --status; if [ "$(id -u)" -eq 0 ]; then bash "$rahandaz_install_dir/install.sh"; else sudo bash "$rahandaz_install_dir/install.sh"; fi)
 ```
 
-فرمان ابتدا اسکریپت نسخهٔ مشخص را دانلود و SHA-256 ثابت آن را بررسی می‌کند؛ فقط پس از تطبیق هش، نصب کامل پنل را آغاز می‌کند: بستهٔ آمادهٔ برنامه و رابط را دریافت می‌کند، امضا و checksum بسته را بررسی می‌کند و PHP 8.4 و افزونه‌ها، Nginx، PostgreSQL، Redisهای اختصاصی، worker و scheduler را نصب یا تأیید می‌کند. Docker، Node.js، npm و Composer برای اجرای پنل لازم نیستند. در شروع، نشانی پنل از شما پرسیده می‌شود؛ برای ورود اولیه با HTTP از SSH tunnel طبق [راهنمای KVM](docs/KVM_INSTALLATION_TEST.md) استفاده کنید. اطلاعات ورود اولیه در فایل خصوصی `/root/rahandaz-initial-credentials.txt` قرار می‌گیرد.
+فرمان ابتدا اسکریپت نسخهٔ مشخص را دانلود و SHA-256 ثابت آن را بررسی می‌کند؛ فقط پس از تطبیق هش، نصب کامل پنل را آغاز می‌کند: بستهٔ آمادهٔ برنامه و رابط را دریافت می‌کند، امضا و checksum بسته را بررسی می‌کند و PHP 8.4 و افزونه‌ها، Nginx، PostgreSQL، Redisهای اختصاصی، worker و scheduler را نصب یا تأیید می‌کند. Docker، Node.js، npm و Composer برای اجرای پنل لازم نیستند. در نسخهٔ منتشرشدهٔ beta.23.1 پایین، نشانی پنل پرسیده می‌شود؛ این سؤال در کد اصلاح‌شده حذف شده و فقط پورت پرسیده می‌شود. برای همین نسخهٔ قدیمی، برای ورود اولیه با HTTP از SSH tunnel طبق [راهنمای KVM](docs/KVM_INSTALLATION_TEST.md) استفاده کنید. اطلاعات ورود اولیه در فایل خصوصی `/root/rahandaz-initial-credentials.txt` قرار می‌گیرد.
 
 پیش‌نیاز شروع این فرمان: Ubuntu Server نسخهٔ 22.04 یا 24.04 با معماری x86_64، دسترسی sudo، اینترنت و ابزارهای `curl`، CA certificates، `openssl`، `python3` و ابزارهای پایهٔ Ubuntu. این ابزارهای bootstrap باید از قبل موجود باشند؛ بقیهٔ وابستگی‌های پنل را نصب‌کننده مدیریت می‌کند. Ubuntu 26.04 فعلاً آزمایشی و غیرپیشنهادی است.
 

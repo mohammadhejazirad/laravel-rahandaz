@@ -17,7 +17,7 @@ usage() {
         'Options: --plan | --verify-only | --resume, --public-url ORIGIN,' \
         '         --server-name HOST, --http-port PORT, --acknowledge-existing SERVICE,' \
         '         --approve-migrations, --prefer-iranian-mirrors' \
-        'Interactive installation asks for the origin and panel port (default 8080).'
+        'The server IPv4 address is detected automatically. Only the panel port is requested (default 8080).'
 }
 while (( $# )); do
     case "$1" in

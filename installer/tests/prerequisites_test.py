@@ -294,7 +294,7 @@ false
                 path = Path(directory) / name
                 if path.is_symlink() or not path.is_file():
                     continue
-                if path.suffix in ('.sh', '.bash') or (
+                if path.suffix in ('.sh', '.bash') or name.endswith('.sh.in') or (
                     not path.suffix and b'bash' in path.read_bytes().split(b'\n', 1)[0]
                 ):
                     with self.subTest(path=str(path.relative_to(ROOT))):

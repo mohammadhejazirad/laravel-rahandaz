@@ -3,13 +3,51 @@
 import argparse
 import ipaddress
 import json
+import os
 from pathlib import Path
 import re
 import socket
+import subprocess
 import sys
 from urllib.parse import urlsplit
 
 UNSAFE_PORTS = {1719, 1720, 1723, 2049, 3659, 4045, 5060, 5061, 6000, 6566, 6665, 6666, 6667, 6668, 6669, 6697, 10080}
+
+
+def usable_ipv4(value):
+    try:
+        address = ipaddress.IPv4Address(value)
+        if not (address.is_loopback or address.is_unspecified or address.is_link_local
+                or address.is_multicast or address.is_reserved):
+            return str(address)
+    except ipaddress.AddressValueError:
+        pass
+    return None
+
+
+def select_host(interfaces, routes, ssh_connection=''):
+    """Use only addresses assigned to this host; SSH metadata is not a trust root."""
+    assigned = {address for interface in interfaces for info in interface.get('addr_info', [])
+                if info.get('family') == 'inet' and (address := usable_ipv4(info.get('local', '')))}
+    connection = ssh_connection.split()
+    if len(connection) == 4 and connection[2] in assigned:
+        return connection[2]
+    sources = {source for route in routes if (source := route.get('prefsrc')) in assigned}
+    if len(sources) == 1:
+        return sources.pop()
+    if len(assigned) == 1:
+        return assigned.pop()
+    raise ValueError('Cannot determine one server IPv4 address. Use --public-url http://SERVER_IP explicitly; no address prompt is used.')
+
+
+def detect_host():
+    # These netlink queries do not contact an external IP lookup or send network packets.
+    interfaces = json.loads(subprocess.check_output(['ip', '-j', '-4', 'address', 'show'], timeout=5))
+    try:
+        routes = json.loads(subprocess.check_output(['ip', '-j', '-4', 'route', 'get', '1.1.1.1'], stderr=subprocess.DEVNULL, timeout=5))
+    except subprocess.CalledProcessError:
+        routes = []
+    return select_host(interfaces, routes, os.environ.get('SSH_CONNECTION', ''))
 
 
 def port(value):
@@ -46,10 +84,12 @@ def resolve(origin, number, name):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=['resolve', 'load', 'default', 'port', 'free', 'site'])
+    parser.add_argument('action', choices=['resolve', 'load', 'default', 'port', 'free', 'site', 'detect'])
     parser.add_argument('values', nargs='*')
     args = parser.parse_args()
-    if args.action == 'port':
+    if args.action == 'detect':
+        print('http://' + detect_host())
+    elif args.action == 'port':
         port(args.values[0])
     elif args.action == 'free':
         number = port(args.values[0])
@@ -90,6 +130,6 @@ def main():
 if __name__ == '__main__':
     try:
         main()
-    except (ValueError, OSError, KeyError, TypeError) as error:
+    except (ValueError, OSError, KeyError, TypeError, subprocess.SubprocessError) as error:
         print('INVALID_NETWORK: ' + str(error), file=sys.stderr)
         raise SystemExit(2)
