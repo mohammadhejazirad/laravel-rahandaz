@@ -231,10 +231,10 @@ installer_decide_iranian_mirrors() {
     fi
     if [[ "$INSTALLER_GEO_STATUS" == "known" ]]; then
         installer_say "GEO iran source ${INSTALLER_GEO_SOURCE}"
-        prompt="سرور در ایران شناسایی شد. مخزن ایرانی اوبونتو تنظیم شود؟"
+        prompt="The server was detected in Iran. Configure an Iranian Ubuntu mirror?"
     else
         installer_say "GEO unknown"
-        prompt="کشور سرور تشخیص داده نشد. مخزن ایرانی اوبونتو تنظیم شود؟"
+        prompt="The server country could not be detected. Configure an Iranian Ubuntu mirror?"
     fi
     if installer_confirm "$prompt"; then
         PREFER_IRANIAN=1

@@ -73,7 +73,7 @@ command = ("(set -eu; rahandaz_install_dir=$(mktemp -d); "
            + '  %s\\n" "$rahandaz_install_dir/install.sh" | sha256sum --check --status; '
            + 'if [ "$(id -u)" -eq 0 ]; then bash "$rahandaz_install_dir/install.sh"; '
            + 'else sudo bash "$rahandaz_install_dir/install.sh"; fi)')
-guide = f"""# Rahandaz {version} — installation candidate
+guide = f"""# Rahandaz {version} - installation candidate
 
 This file is generated from a verified signed artifact; it does not certify VM installation.
 Draft releases cannot be downloaded anonymously. Prereleases are for disposable VMs only.

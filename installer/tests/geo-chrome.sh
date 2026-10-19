@@ -92,6 +92,28 @@ else
     bad "offline mirror choice stays a question"
 fi
 
+# Initial installation never invokes project-browser installation, even with a legacy environment.
+if (
+    installer_apt_install() { return 0; }
+    installer_chrome_step() { return 99; }
+    MODE=apply INSTALLER_OFFLINE=1 INSTALL_CHROME=yes stage_03_system_packages
+); then
+    ok "base package stage never invokes Chrome"
+else
+    bad "base package stage never invokes Chrome"
+fi
+for mode in --plan --apply --resume --repair --upgrade; do
+    set +e
+    bash "${INSTALLER_HOME}/bin/rahandaz-install" "$mode" --install-chrome yes >"${tmp}/legacy-chrome.log" 2>&1
+    result=$?
+    set -e
+    if [[ "$result" == 2 ]] && grep -q CHROME_PANEL_ONLY "${tmp}/legacy-chrome.log"; then
+        ok "legacy Chrome install is refused before mutation in ${mode}"
+    else
+        bad "legacy Chrome install is refused before mutation in ${mode}"
+    fi
+done
+
 if installer_chrome_pin_ok; then
     ok "chrome pin is well formed"
 else

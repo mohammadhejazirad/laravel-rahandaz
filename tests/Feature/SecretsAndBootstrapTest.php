@@ -145,6 +145,20 @@ class SecretsAndBootstrapTest extends TestCase
         $this->assertStringContainsString('master_key_mode: fail', $failed);
     }
 
+    public function test_doctor_rejects_group_read_on_an_unmanaged_master_key(): void
+    {
+        $path = (string) config('rahandaz.master_key_file');
+        chmod($path, 0640);
+        clearstatcache(true, $path);
+        try {
+            $this->assertSame(1, Artisan::call('rahandaz:doctor'));
+            $this->assertStringContainsString('master_key_mode: fail', Artisan::output());
+        } finally {
+            chmod($path, 0600);
+            clearstatcache(true, $path);
+        }
+    }
+
     private function forgetSecrets(): void
     {
         $this->app->forgetInstance(MasterKey::class);

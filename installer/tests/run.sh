@@ -119,6 +119,13 @@ INSTALLER_ERROR_CODE=""
 
 INSTALLER_STATE_DIR="${tmp}/state"
 installer_state_init
+installer_state_set error_code PREVIOUS_FAILURE
+installer_state_remove error_code
+if [[ -z "$(installer_state_get error_code)" && "$(stat -c %a "$INSTALLER_STATE_FILE")" == 600 ]]; then
+    ok "resolved state error is removed without weakening journal permissions"
+else
+    bad "resolved state error is removed without weakening journal permissions"
+fi
 if ! installer_state_set example password 2>"${tmp}/state.err"; then
     ok "state rejects a secret-like value"
 else
@@ -372,6 +379,11 @@ if [[ -f "$nginx_file" ]] && grep -q 'location \^~ /rahandaz/' "$nginx_file" && 
     ok "nginx site keeps the panel prefix and hidden files closed"
 else
     bad "nginx site keeps the panel prefix and hidden files closed"
+fi
+if grep -q 'server_name localhost 127.0.0.1;' "$nginx_file" && ! grep -q 'server_name _' "$nginx_file"; then
+    ok "loopback names route tunnel traffic without conflicting with the default site"
+else
+    bad "loopback names route tunnel traffic without conflicting with the default site"
 fi
 if [[ -f "${sysroot}/var/lib/rahandaz/account.contract" ]] && ! grep -q 'password=' "${sysroot}/var/lib/rahandaz/account.contract"; then
     ok "account contract does not store a password"

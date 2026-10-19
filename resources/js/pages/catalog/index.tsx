@@ -1,3 +1,4 @@
+import { ChromeInstallationCard, type ChromeInstallationState } from '@/components/catalog/chrome-installation-card';
 import { Head, usePage } from "@inertiajs/react";
 import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -20,15 +21,18 @@ interface PackageRow {
 export default function CatalogIndex({
     packages,
     install_available,
+    chrome,
 }: {
     packages: { data: PackageRow[]; meta: PageMeta };
     install_available: false;
+    chrome: ChromeInstallationState;
 }) {
     const labels = usePage<SharedProps>().props.enum_labels;
 
     return (
         <AppLayout title="نرم‌افزارها" description="نرم‌افزارها و نسخه‌های ثبت‌شده را بررسی کنید؛ وضعیت نصب هر مورد جداگانه مشخص می‌شود.">
             <Head title="نرم‌افزارها" />
+            <ChromeInstallationCard chrome={chrome} />
             {install_available ? null : (
                 <Alert tone="info">نصب از این فهرست انجام نمی‌شود. وضعیت نسخه تا آزمون واقعی «آزموده‌نشده» می‌ماند.</Alert>
             )}

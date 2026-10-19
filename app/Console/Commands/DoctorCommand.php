@@ -46,7 +46,13 @@ class DoctorCommand extends Command
         $masterKeyPath = (string) config('rahandaz.master_key_file');
         $masterKeyMode = is_file($masterKeyPath) ? fileperms($masterKeyPath) : false;
 
-        if ($masterKeyMode === false || ($masterKeyMode & 0077) !== 0) {
+        // Native installation grants only the dedicated service group read access.
+        $serviceGroup = function_exists('posix_getgrnam') ? posix_getgrnam('rahandaz-svc') : false;
+        $managedGroupRead = $masterKeyPath === '/etc/rahandaz/master.key'
+            && ! is_link($masterKeyPath) && $masterKeyMode !== false
+            && ($masterKeyMode & 07777) === 0640 && fileowner($masterKeyPath) === 0
+            && is_array($serviceGroup) && filegroup($masterKeyPath) === $serviceGroup['gid'];
+        if ($masterKeyMode === false || is_link($masterKeyPath) || (($masterKeyMode & 0077) !== 0 && ! $managedGroupRead)) {
             $this->line('master_key_mode: fail');
             $failed = true;
         } else {

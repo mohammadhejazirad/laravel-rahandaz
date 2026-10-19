@@ -62,6 +62,7 @@ installer_route_existing() {
     [[ -n "$installed" ]] || return 0
     cmp="$(installer_semver_compare "$INSTALLER_RELEASE_VERSION" "$installed")" || return 1
     if [[ "$cmp" == "0" ]]; then
+        installer_state_remove error_code || return 1
         installer_say "ALREADY_CURRENT ${installed}"
         installer_say "RESULT success"
         return 20

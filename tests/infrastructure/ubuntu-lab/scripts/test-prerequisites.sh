@@ -24,6 +24,7 @@ docker run --name "$name" --cpus=1 --memory=2g --pids-limit=512 \
         chmod 0600 /run/rahandaz-lab/marker
         export RAHANDAZ_OPS_LAB_TOKEN="$token"
         python3 installer/tests/prerequisites_test.py
+        RAHANDAZ_INSTALLER_REFUSE_LIVE=1 bash installer/tests/run.sh
         bash installer/bin/rahandaz-prerequisites --plan
         if [[ "$1" == --mirrors ]]; then
             INSTALLER_HOME=/opt/rahandaz/installer

@@ -92,7 +92,6 @@ stage_03_system_packages() {
         DEBIAN_FRONTEND=noninteractive apt-get update -o Acquire::Retries=3
     fi
     installer_apt_install sudo ufw ca-certificates curl gnupg ubuntu-keyring git unzip tar openssl python3 acl
-    installer_chrome_step
 }
 
 stage_04_runtime_installation() {
@@ -393,16 +392,21 @@ stage_10_database_migration() {
 }
 
 stage_11_nginx_php_fpm() {
-    local root site pool pool_dir
+    local root site pool pool_dir server_names
     root="$(installer_sysroot)"
     if [[ "$MODE" == "plan" ]]; then
         installer_say "PLAN a dedicated Nginx site and a private PHP 8.4 FPM pool. Distro PHP-FPM pools are not changed."
         return 0
     fi
     site="$(installer_root_path /etc/nginx/sites-available/rahandaz.conf)"
+    server_names="localhost 127.0.0.1"
+    case "$SERVER_NAME" in
+        _ | localhost | 127.0.0.1) ;;
+        *) server_names="$SERVER_NAME $server_names" ;;
+    esac
     installer_render_template "${INSTALLER_HOME}/templates/nginx/rahandaz.conf.tpl" "$site" \
         HTTP_PORT "${HTTP_PORT}" \
-        SERVER_NAME "${SERVER_NAME}" \
+        SERVER_NAME "$server_names" \
         PUBLIC_ROOT /var/lib/rahandaz/current/public \
         WELCOME_ROOT /var/lib/rahandaz/welcome \
         FPM_SOCK /run/rahandaz/php-fpm.sock \
@@ -536,6 +540,11 @@ stage_14_health_verification() {
     if [[ "$(installer_sysroot)" != "/" || "${INSTALLER_OFFLINE:-}" == "1" ]]; then
         return 2
     fi
+    # Resume must repair runtime access even when the systemd stage was already completed.
+    security_runtime_permissions || {
+        installer_error RUNTIME_PERMISSION_FAILED "Runtime storage or cache permissions could not be verified."
+        return 1
+    }
     installer_curl --fail --silent --show-error --max-time 15 --header "Host: localhost" "${base}/up" >/dev/null || {
         installer_error HEALTHCHECK_FAILED "Laravel /up did not succeed."
         return 1
@@ -545,7 +554,7 @@ stage_14_health_verification() {
         return 1
     }
     welcome="$(installer_root_path /var/lib/rahandaz/welcome/index.html)"
-    mkdir -p "$(dirname "$welcome")"
+    security_welcome_permissions || return 1
     if [[ ! -f "${INSTALLER_HOME}/templates/welcome/index.html" ]]; then
         installer_error HEALTHCHECK_FAILED "The welcome template is not in this installer bundle."
         return 1
@@ -554,8 +563,9 @@ stage_14_health_verification() {
     content="$(cat "${INSTALLER_HOME}/templates/welcome/index.html")"
     content="${content//\{\{PANEL_URL\}\}/${PUBLIC_URL}/rahandaz/login}"
     content="${content//\{\{HEALTH_MARKER\}\}/verified}"
-    content="${content//\{\{SETUP_STATUS_LABEL\}\}/نصب بررسی شد}"
     printf '%s\n' "$content" >"$welcome"
+    chown root:www-data "$welcome" || return 1
+    chmod 0640 "$welcome" || return 1
     installer_curl --fail --silent --show-error --max-time 15 --header "Host: localhost" "${base}/" | grep -q 'data-health-marker="verified"' || {
         rm -f "$welcome"
         installer_error HEALTHCHECK_FAILED "The welcome page did not serve the verified marker."
@@ -589,6 +599,7 @@ stage_15_installation_summary() {
     if [[ "$failed" -eq 0 && "$incomplete" -eq 0 && "$MODE" != "plan" ]]; then
         installer_say "RESULT success"
         INSTALLER_RESULT="success"
+        installer_state_remove error_code || return 1
     elif [[ "$MODE" == "plan" && "$failed" -eq 0 ]]; then
         installer_say "RESULT plan"
         INSTALLER_RESULT="plan"

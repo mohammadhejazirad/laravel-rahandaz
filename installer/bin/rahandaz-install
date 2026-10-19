@@ -25,8 +25,6 @@ source "${INSTALLER_HOME}/lib/runtime.sh"
 source "${INSTALLER_HOME}/lib/engine.sh"
 # shellcheck source=../lib/geo.sh
 source "${INSTALLER_HOME}/lib/geo.sh"
-# shellcheck source=../lib/chrome.sh
-source "${INSTALLER_HOME}/lib/chrome.sh"
 # shellcheck source=../lib/continue.sh
 source "${INSTALLER_HOME}/lib/continue.sh"
 
@@ -61,7 +59,7 @@ Running the same --apply command again continues finished stages.
 A newer verified release is prepared beside the current one and does not delete projects or databases.
 Install targets are Ubuntu 22.04 and 24.04 LTS. Ubuntu 26.04 stops before any change.
 --iranian-mirrors yes|no answers the mirror question. On Iran, apply asks before changing mirrors.
---install-chrome yes|no installs pinned Chrome for Testing. The default on a terminal is to ask.
+Chrome is optional project software managed from the panel, never installed here.
 EOF
 }
 
@@ -87,7 +85,11 @@ while [[ $# -gt 0 ]]; do
             ;;
         --install-chrome)
             case "${2:-}" in
-                yes | no) INSTALL_CHROME="$2" ;;
+                no) : ;;
+                yes)
+                    installer_error CHROME_PANEL_ONLY "Chrome is optional project software. Request installation from the panel catalog."
+                    exit 2
+                    ;;
                 *)
                     installer_error INVALID_INPUT "--install-chrome requires yes or no."
                     exit 2

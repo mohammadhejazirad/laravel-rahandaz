@@ -53,3 +53,8 @@ Primitiveهای Radix به‌صورت بسته‌های مستقل Avatar، Dial
 ## PWA — ۲۰۲۶-۱۰-۱۷
 
 پکیج تازه نصب نشد. Web App Manifest و Service Worker کوچک با Web API بومی، PwaProvider تایپ‌شده، Button/Modal مشترک و Lucide موجود استفاده شدند. Workbox/vite-plugin-pwa اضافه نشدند چون precache باندل‌ها یا cache صفحات خصوصی برای این پنل مطلوب نیست؛ فقط دو فایل عمومی آفلاین cache می‌شوند. تولید PNG رسمی با ImageMagick ابزار توسعه است، نه وابستگی runtime/build روی VPS. پذیرش نصب مرورگر و محدودیت دستگاه واقعی در PWA.md ثبت شده است.
+
+
+## ۲۰۲۶-۱۰-۱۹ — کارت Chrome پروژه
+
+بدون پکیج تازه؛ از Inertia، React و Card/Button/Form/StatusBadge مشترک استفاده می‌کند. Clipboard API برای کپی مسیر و focus/select برای کپی دستی است. Chrome یا Puppeteer به dependencyهای frontend یا installer پنل اضافه نشدند.

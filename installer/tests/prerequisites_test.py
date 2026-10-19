@@ -283,9 +283,22 @@ false
         self.assertEqual(result.returncode, 1)
         self.assertIn('failed_exit=1', (self.work / 'state/audit.log').read_text())
 
-    def test_entire_script_messages_are_ascii(self):
-        for path in [ROOT / 'installer/bin/rahandaz-prerequisites', ROOT / 'installer/lib/prerequisites.sh']:
-            path.read_text().encode('ascii')
+    def test_all_bash_sources_are_ascii(self):
+        # Scan project sources, including extensionless Bash entry points.
+        # Web translations belong in templates, never in shell sources.
+        excluded = {'.git', 'node_modules', 'vendor', 'storage', 'var',
+                    '__pycache__', '.venv', 'reports'}
+        for directory, subdirectories, files in os.walk(ROOT):
+            subdirectories[:] = sorted(set(subdirectories) - excluded)
+            for name in sorted(files):
+                path = Path(directory) / name
+                if path.is_symlink() or not path.is_file():
+                    continue
+                if path.suffix in ('.sh', '.bash') or (
+                    not path.suffix and b'bash' in path.read_bytes().split(b'\n', 1)[0]
+                ):
+                    with self.subTest(path=str(path.relative_to(ROOT))):
+                        path.read_text().encode('ascii')
 
 
 if __name__ == '__main__':

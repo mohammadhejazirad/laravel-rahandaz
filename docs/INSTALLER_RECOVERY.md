@@ -57,3 +57,12 @@ bash installer/bin/rahandaz-install --doctor
 ```
 
 این فرمان healthcheck زندهٔ HTTP نیست. موفقیت doctor یعنی stageهای ذخیره‌شده همگی `succeeded` هستند. تا آن وضعیت ثبت نشود، doctor نصب را تأیید نمی‌کند.
+
+
+## خطای storage، welcome یا health در نصب beta14
+
+اگر PHP-FPM در نوشتن `storage/logs` یا compiled views خطای Permission denied داد، فقط shared/storage را writable نکنید: بسته ممکن است storage واقعی داخل release داشته باشد. installer اصلاح‌شده مسیر واقعی را در محدودهٔ مجاز بررسی، دسترسی service را فقط روی runtime/cache تنظیم و symlink ناشناخته را رد می‌کند. `chmod -R 777` یا service-owned کردن کل برنامه راه بازیابی نیست. resume پیش از health این دسترسی‌ها را دوباره اصلاح می‌کند.
+
+welcome عمومی باید برای Nginx خواندنی باشد؛ پوشهٔ 0700 و فایل 0600 با موفقیت نصب سازگار نیست. helper جدید directory متعلق به root:www-data با 0750 و HTML با 0640 می‌سازد. private storage نباید برای رفع مشکل welcome عمومی شود. مسیر SSH tunnel باید با Host localhost و 127.0.0.1 به سایت پنل برسد و سایت پیش‌فرض میزبان بی‌اجازه حذف نشود.
+
+نمونهٔ اجراشده، backup خصوصی، verification بستهٔ اصلی و محدودیت‌ها در [گزارش بازیابی VPS](IRAN_VPS_INSTALL_RECOVERY_2026_10_19.md) است. patch سورس یا این runbook، artifact عمومی beta14 را عوض نمی‌کند؛ برای سرور دیگر از installer اصلاح‌شده و artifact با امضا/checksum معتبر استفاده شود.

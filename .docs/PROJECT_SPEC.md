@@ -248,6 +248,7 @@ rahandaz/
 - credential حساس web/queue/project با least privilege، group/ACL کنترل‌شده، socket credential helper و field encryption نگه‌داری می‌شود؛ تفاوت دسترسی processها در `SECURITY_MODEL.md` و تست OS اثبات شود.
 - فرم ورود username یا email، RateLimiter، secure session، MFA ترجیحاً TOTP/WebAuthn پس از ارزیابی، logout/revoke sessions، password reset فقط در مسیر امن و signup عمومی غیرفعال داشته باشد. Owner آخر قابل حذف/تنزل نیست؛ resource Policy در هر درخواست الزامی است.
 - کاربران/پروفایل شامل نام نمایشی، email، وضعیت، نقش، آخرین login، sessionهای فعال و فیلدهای شماره همراه/کد ملی اختیاری و حساس است؛ داده PII طبق retention/encryption محافظت شود و شناسه ملی مبنای مجوز نیست.
+- تمام اسکریپت‌های Bash پروژه، شامل فایل‌های `.sh`، `.bash` و ورودی‌های بدون پسوند، باید فقط متن انگلیسی/ASCII داشته باشند. وجود متن فارسی در پیام، prompt، خطا، warning، log، help، comment یا متن ثابت داخل Bash ممنوع است؛ این الزام در نصب، به‌روزرسانی، recovery، عملیات و آزمون‌ها برقرار است. متن فارسی رابط وب باید در template یا منابع ترجمه نگهداری شود، نه در Bash.
 - خروجی installer، Artisan commandها و خطاهای ترمینال برای اتوماسیون انگلیسی/ASCII-friendly باشند؛ UI فارسی و RTL است. Wizard فقط UID، group، وضعیت locked بودن account و سلامت مرز privilege را نمایش می‌دهد؛ هیچ «دریافت رمز حساب سیستمی» وجود ندارد.
 
 ## 6. مدل داده و invariantها
@@ -510,6 +511,12 @@ Wizard در desktop و mobile یک stepper عمودی با وضعیت‌های `
 هر خطای onboarding حداقل این داده‌های redacted را دارد: شماره مرحله، component، operation، زمان، error code پایدار، خلاصه فارسی، علت فنی، exit code/signal در صورت وجود، بخش امن stderr، آخرین checkpoint، retryability، rollback outcome، لینک log کامل و راه‌حل پیشنهادی. UI actionهای `Retry failed step`، `Edit selection`، `Download report` و در صورت امن بودن `Continue with errors` دارد؛ retry فقط step ناموفق و dependencyهای لازم را اجرا می‌کند و componentهای موفق idempotent دوباره تخریب نمی‌شوند. secret، password و private key تحت هیچ شرایطی در گزارش خطا قرار نمی‌گیرند.
 
 ## 9. کاتالوگ نرم‌افزار و سرویس‌ها
+
+Google Chrome/Chrome for Testing وابستگی پنل مدیریت نیست و نصب‌کنندهٔ اولیه، پیش‌نیازها، resume، repair و به‌روزرسانی پنل نباید آن را نصب کنند، دانلود کنند یا دربارهٔ نصب آن سؤال کنند. Chrome فقط نرم‌افزار اختیاری پروژه‌هاست و نصب یا مدیریت آن باید با درخواست صریح کاربر از GUI کاتالوگ پنل، از مسیر Operations Engine و پس از آماده‌شدن قرارداد و آزمون‌های لازم انجام شود. نیاز پروژه به `spatie/browsershot` یا `puppeteer` برای PDF/PNG مجوز نصب خودکار Chrome یا Node.js در نصب اولیهٔ پنل نیست.
+
+پس از نصب و تأیید واقعی، GUI باید مسیر executable مرورگر را با جهت LTR، فونت monospace و امکان کپی/انتخاب دستی نمایش دهد تا کاربر در کد یا `.env` خوانده‌شده توسط پروژه استفاده کند. مسیر پیشنهادی، Job queued یا خروجی ناموفق نباید به‌عنوان مسیر نصب‌شده نمایش داده شود. فایل پروژه یا `.env` بدون درخواست کاربر تغییر نمی‌کند.
+
+نسخهٔ مرورگر و مسیر executable باید با نیاز پروژه و نسخهٔ Browsershot/Puppeteer سازگار باشند؛ وجود مرورگر به‌تنهایی آمادگی تولید PDF/PNG را ثابت نمی‌کند. نصب و حذف نیازمند Workspace/ResourceGrant، validation، audit، dependency/impact preview و verification واقعی‌اند؛ تا آماده‌شدن executor، رابط باید محدودیت را صریح نمایش دهد و نصب موفق اعلام نکند. قرارداد تفصیلی و مغایرت فعلی در [راهنمای نصب](../docs/INSTALLATION.md#مرورگر-سمت-سرور-فقط-برای-پروژهها) ثبت است.
 
 هر PackageDefinition باید OS/architecture/versionهای پشتیبانی‌شده، source، signing key fingerprint، روش verification، role، dependencies، conflicts، ports، data/config paths، healthcheck، rollback capability و definition_version داشته باشد. نسخه ناموجود یا EOL با موفقیت ساختگی نصب نشود.
 

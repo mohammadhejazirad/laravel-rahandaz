@@ -4,7 +4,7 @@ set -Eeuo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 version="$(lab_version "${1:-}")"
 mode="${2:---fixtures}"
-case "$mode" in --fixtures|--live|--ssh-config) ;; *) lab_die 'Use --fixtures, --live or --ssh-config.' ;; esac
+case "$mode" in --fixtures|--live|--ssh-config|--runtime-permissions) ;; *) lab_die 'Use --fixtures, --live, --ssh-config or --runtime-permissions.' ;; esac
 repo="$(cd "$LAB_ROOT/../../.." && pwd)"
 stamp="$(date -u +%Y%m%dT%H%M%SZ)"
 report="$LAB_ROOT/reports/security-${version}-${stamp}"
@@ -20,6 +20,12 @@ docker run --name "$name" --cpus=1 --memory=2g --pids-limit=512 \
     python3 installer/tests/security_test.py
     bash installer/bin/rahandaz-security --plan
     bash installer/bin/rahandaz-firewall --plan
+    if [[ "$1" == --runtime-permissions ]]; then
+        apt-get update -o Acquire::Retries=3
+        apt-get install -y --no-install-recommends acl
+        RAHANDAZ_RUNTIME_PERMISSIONS_LAB=1 python3 tests/infrastructure/ubuntu-lab/scripts/inside/runtime-permissions-test.py
+        exit 0
+    fi
     if [[ "$1" == --live || "$1" == --ssh-config ]]; then
         INSTALLER_HOME=/opt/rahandaz/installer
         for lib in common state os gate render runtime engine prerequisites; do source "$INSTALLER_HOME/lib/$lib.sh"; done

@@ -2,7 +2,7 @@
 server {
     listen @@HTTP_PORT@@;
     listen [::]:@@HTTP_PORT@@;
-    server_name @@SERVER_NAME@@ localhost;
+    server_name @@SERVER_NAME@@;
     root @@PUBLIC_ROOT@@;
     index index.php;
     client_max_body_size @@CLIENT_MAX_BODY@@;

@@ -153,3 +153,34 @@ Release workflow به push روی main متصل شد؛ نسخه beta شامل ru
 ## 2026-10-17 — regression خروجی publication
 
 پس از رفع executable bit ورودی operations/helper و جداکردن خروجی Release از assets مخزن، harness روی Ubuntu 22.04، 24.04 و 26.04 دوباره اجرا شد: installer ۷۲/۰ و release ۳۰/۰ در هر سه نسخه. گزارش‌ها: `reports/release-22.04-20261017T153116Z/`، `reports/release-24.04-20261017T153116Z/` و `reports/release-26.04-20261017T153116Z/`. آزمون تازه رد پوشه خروجی موجود را می‌سنجد تا پوشه‌های برند وارد upload نشوند. actionlint و diff-check موفق؛ full PHP میزبان ۱۵۰/۳۶۰۵. نصب کامل VM، systemd/reboot و HTTP واقعی همچنان requires_vm است. CI شماره 39045153606 در build/bundle/sign موفق و در upload publication شکست داشت؛ اجرای اصلاح‌شده باید مستقل بررسی شود.
+
+
+## ۲۰۲۶-۱۰-۱۹ — الزام انگلیسی/ASCII در همهٔ منابع Bash
+
+پیام‌های تعاملی geo و Chrome انگلیسی شدند. متن فارسی وضعیت خوشامد از Bash به قالب HTML منتقل شد؛ خروجی وب همان متن قبلی است. عنوان تولیدشدهٔ INSTALL نیز از خط تیرهٔ ASCII استفاده می‌کند. آزمون `test_all_bash_sources_are_ascii` همهٔ منابع پروژه با پسوند `.sh`/`.bash` و ورودی‌های بدون پسوند دارای shebang Bash را بررسی می‌کند؛ وابستگی‌ها، خروجی‌های تولیدشده و گزارش‌ها خارج از این پیمایش هستند.
+
+میزبان توسعه: `bash installer/tests/run.sh` با ۷۷ passed/۰ failed، پیش‌نیازها با ۴۰ آزمون موفق و release با ۳۰ آزمون موفق اجرا شدند. lint، TypeScript، build و `git diff --check` موفق بودند. رفتار PHP یا صفحهٔ وب تغییر نکرد.
+
+روی هر یک از Ubuntuهای 22.04، 24.04 و 26.04، فرمان `bash tests/infrastructure/ubuntu-lab/scripts/test-prerequisites.sh <version> --fixtures` خروج ۰ داد: ۴۰ آزمون پیش‌نیاز، ۷۷ بررسی نصب‌کننده (شامل زیرمجموعهٔ geo/Chrome با ۱۲ بررسی و updater با ۲۱ بررسی) و plan موفق. شواهد هر نسخه در `tests/infrastructure/ubuntu-lab/reports/prerequisites-<version>-20261019T112634Z/` ذخیره شده‌اند. اجرای مجموعهٔ installer در این harness با `RAHANDAZ_INSTALLER_REFUSE_LIVE=1` انجام می‌شود.
+
+شکست اولیهٔ بررسی ASCII به خط تیرهٔ Unicode در `prepare-github.sh` مربوط بود و با ASCII جایگزین شد. اجرای اولیهٔ مجموعهٔ installer در کانتینر دارای marker به دلیل انتظار رد live apply شکست خورد؛ تنظیم صریح REFUSE_LIVE در harness، آزمون را بدون تغییر gate تولید یا اجرای نصب زنده تکرارپذیر کرد. اجرای نهایی هر سه نسخه موفق است.
+
+این آزمون‌ها fixture/container-lab هستند؛ APT زنده، systemd، SSH، reboot/recovery و نصب کامل در VM در این برش اجرا نشدند. گواهی Production یا VM اضافه نشده و حالت عملیات disabled باقی است.
+
+
+## ۲۰۲۶-۱۰-۱۹ — Chrome خارج از نصب اولیه، درخواست اختیاری GUI
+
+میزبان: installer ۷۷/۰، geo/Chrome زیرمجموعهٔ ۱۸/۰ (شش بررسی تازه: نبود فراخوانی در بسته‌های پایه با env قدیمی و رد CLI yes در پنج mode)، prerequisites چهل آزمون موفق. operations harness موفق؛ package.install برای google-chrome همچنان untested/fail-closed است و نصب میزبان از این برش فعال نمی‌شود.
+
+Ubuntuهای 22.04، 24.04 و 26.04 هرکدام با `test-prerequisites.sh <version> --fixtures` خروج ۰، prerequisites چهل آزمون، installer ۷۷/۰ و plan موفق داشتند. شواهد: `tests/infrastructure/ubuntu-lab/reports/prerequisites-<version>-20261019T113512Z/`. این fixtureها عدم نصب Chrome از مسیر installer را بررسی می‌کنند؛ دانلود یا نصب واقعی مرورگر انجام نشد.
+
+PHP کامل: ۱۹۱ آزمون و ۳۹۶۸ assertion موفق با PostgreSQL/Redis آزمایشی loopback. زیرمجموعهٔ catalog/pages/operations با ۱۷ آزمون و ۲۴۳ assertion موفق بود. Pint، lint، TypeScript و build موفق‌اند. UI با production build و props ساختگی در Chrome headless، حالت اولیه و مسیر تأییدشده، عرض‌های ۳۲۰/۳۹۰/۷۶۸/۱۴۴۰ و Light/Dark، بدون overflow و exception بررسی شد. handler کپی با Clipboard mock و انتخاب دستی واقعی هنگام خطا آزموده شد؛ نتیجهٔ نصب یا رندر Chrome سمت پروژه محسوب نمی‌شود.
+
+اجرای اول full PHPUnit با Redis پیش‌فرض 192.0.2.1 متوقف شد و نتیجهٔ موفق محسوب نشد؛ اجرای loopback موفق بود. دو تلاش اول smoke کپی به‌علت انتخاب اولین role=status (پیام عمومی layout) شکست داشتند؛ انتخاب پیام داخل کارت و بررسی دوباره موفق شد. آزمون‌های VM، systemd، SSH، reboot و نصب/رندر مرورگر برای کاربر پروژه در این برش not_run هستند. گیت موتور، helper محدود و certification نصب Chrome همچنان کار بازند.
+
+
+## ۲۰۲۶-۱۰-۱۹ — بازیابی نصب واقعی Ubuntu 24.04 روی VPS ایران
+
+برش واقعی beta14 با patch محدود از شکست healthcheck به success رسید. `/up`، login، welcome و build assets با HTTP ۲۰۰، ورود واقعی تا صفحهٔ تغییر گذرواژه، doctor دیتابیس/دو Redis/کلیدها و سرویس‌های systemd بررسی شدند. داده و کلید/credentials حفظ شدند. این اجرای resume واقعی 24.04 است؛ fresh VM سه نسخه، reboot و HTTPS نهایی را passed نمی‌کند.
+
+Matrix کانتینر: هر سه 22.04/24.04/26.04 در `security-<version>-20261019T115012Z` آزمون واقعی ACL/storage/shared/default inheritance/welcome/رد symlink را گذراندند؛ هر سه در `prerequisites-<version>-20261019T115200Z` چهل آزمون پیش‌نیاز، installer هفتادونه/صفر و plan موفق داشتند. میزبان: PHP کامل ۱۹۲/۳۹۷۰، installer ۷۹/۰، release سی، prerequisites چهل و security پنج آزمون موفق. تفصیل و شکست‌های واقعی میانی در [IRAN_VPS_INSTALL_RECOVERY_2026_10_19.md](IRAN_VPS_INSTALL_RECOVERY_2026_10_19.md) است. تست Docker گواهی systemd/VM نیست و 26.04 supported اعلام نشده است.

@@ -58,3 +58,12 @@ installer_stage_done() {
     local id="$1"
     [[ "$(installer_state_get "stage.${id}")" == "succeeded" ]]
 }
+
+installer_state_remove() {
+    local key="$1" tmp
+    [[ "$key" =~ ^[a-z0-9._-]+$ && -f "$INSTALLER_STATE_FILE" && ! -L "$INSTALLER_STATE_FILE" ]] || return 1
+    tmp="$(mktemp "${INSTALLER_STATE_FILE}.XXXXXX")" || return 1
+    awk -v k="$key" '$1 != k { print }' "$INSTALLER_STATE_FILE" >"$tmp" || { rm -f "$tmp"; return 1; }
+    chmod 0600 "$tmp" || return 1
+    mv "$tmp" "$INSTALLER_STATE_FILE"
+}

@@ -260,8 +260,8 @@ UNIT
 }
 
 security_runtime_permissions() {
-    # Code/configuration stays root-owned. Service writes only shared runtime data/logs.
-    local release
+    # Code/configuration stays root-owned. Only runtime storage and cache are writable.
+    local release storage cache tree
     release=$(readlink -f /var/lib/rahandaz/current) || return 1
     [[ "$release" == /var/lib/rahandaz/releases/* && -f "$release/artisan" ]] || return 1
     chown root:root /var/lib/rahandaz /var/lib/rahandaz/releases "$release" || return 1
@@ -271,11 +271,35 @@ security_runtime_permissions() {
     setfacl -m u:www-data:x "$release" || return 1
     setfacl -R -m u:www-data:rX "$release/public" || return 1
     install -d -o rahandaz-svc -g rahandaz-svc -m 0750 /var/lib/rahandaz/shared/storage /var/log/rahandaz || return 1
-    chown -R rahandaz-svc:rahandaz-svc /var/lib/rahandaz/shared/storage "$release/bootstrap/cache" || return 1
+    storage=$(readlink -f "$release/storage") || return 1
+    cache=$(readlink -f "$release/bootstrap/cache") || return 1
+    # Signed bundles may contain a real storage directory, not a shared symlink.
+    [[ "$storage" == "$release/storage" || "$storage" == /var/lib/rahandaz/shared/storage ]] || return 1
+    [[ "$cache" == "$release/bootstrap/cache" ]] || return 1
+    for tree in "$storage" "$cache"; do
+        [[ -d "$tree" && -z "$(find "$tree" -type l -print -quit)" ]] || return 1
+    done
+    mkdir -p "$storage/app/private" "$storage/app/public" "$storage/framework/cache/data" \
+        "$storage/framework/sessions" "$storage/framework/views" "$storage/logs" || return 1
+    for tree in "$storage" "$cache"; do
+        chown -R rahandaz-svc:rahandaz-svc "$tree" || return 1
+        setfacl -R -m u:rahandaz-svc:rwX "$tree" || return 1
+        # Root-run Artisan may create new files after service activation. Preserve service access.
+        find "$tree" -type d -exec setfacl -m d:u:rahandaz-svc:rwx {} + || return 1
+    done
     chgrp rahandaz-svc /etc/rahandaz || return 1
     chmod 0750 /etc/rahandaz || return 1
     local file
     for file in /etc/rahandaz/master.key /etc/rahandaz/canary.json; do
         [[ ! -f "$file" ]] || { chown root:rahandaz-svc "$file" && chmod 0640 "$file"; } || return 1
     done
+}
+
+# Public welcome content is separate from private application runtime data.
+security_welcome_permissions() {
+    local welcome=/var/lib/rahandaz/welcome
+    [[ ! -L "$welcome" ]] || return 1
+    install -d -o root -g www-data -m 0750 "$welcome" || return 1
+    [[ -z "$(find "$welcome" -type l -print -quit)" ]] || return 1
+    setfacl -m u:www-data:r-x,d:u:www-data:r-x "$welcome" || return 1
 }

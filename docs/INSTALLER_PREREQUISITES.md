@@ -17,7 +17,13 @@ The installer still recognizes Ubuntu Server **22.04 (jammy), 24.04 (noble), 26.
 as test targets; 26.04 remains in the test matrix.
 Other distributions, Ubuntu versions and architectures fail closed. A target is not a claim of VM
 certification. Production is native; unmarked containers are rejected for apply.
-All terminal prompts, errors and comments in the executable implementation are English/ASCII.
+All Bash sources in the project must contain English/ASCII text only, including `.sh`, `.bash`
+and extensionless Bash entry points. Persian text is forbidden in prompts, messages, errors,
+warnings, logs, help, comments and embedded literals during installation, updates, recovery,
+operations and tests. Persian web UI copy belongs in HTML templates or translation resources,
+never in Bash. This rule is enforced by `test_all_bash_sources_are_ascii` in
+`installer/tests/prerequisites_test.py`.
+For example: `The server was detected in Iran. Configure an Iranian Ubuntu mirror?`
 
 ## Local use
 
@@ -52,6 +58,22 @@ or verifies curl, gnupg, Python 3, ACL tools and iproute2 before repository key 
 installation. At least 1 GiB RAM and 5 GiB free on each relevant filesystem are required; the
 project's target profile remains 2 GiB RAM. Container `/proc` can show host memory; the lab has its
 own Docker memory limit and is not proof of VPS resource capacity.
+
+## Optional project browser policy
+
+Google Chrome / Chrome for Testing is not a control-plane dependency. Initial installation,
+prerequisite setup, resume, repair and panel updates must not prompt for, download or install it.
+A project using `spatie/browsershot` or `puppeteer` for PDF/PNG output may need a compatible
+headless browser and project runtime; this does not make Chrome, Node.js or npm panel prerequisites.
+The intended installation path is an explicit request from the panel software catalog GUI,
+through the Operations Engine with authorization, audit and real rendering verification.
+Existing project browsers must be preserved. The GUI operation is not certified or enabled by
+this documentation. The full installer no longer calls Chrome installation. Legacy `--install-chrome yes` fails
+before mutation with `CHROME_PANEL_ONLY`; `no` is a compatibility no-op. The catalog now records
+explicit, audited install requests, but the host executor remains disabled and actual GUI
+installation/render verification is not yet implemented or certified. A copyable executable
+path is exposed only after successful, trusted worker verification evidence. See the policy and
+acceptance criteria in [INSTALLATION.md](INSTALLATION.md#مرورگر-سمت-سرور-فقط-برای-پروژهها).
 
 ## Installed prerequisites
 

@@ -2,6 +2,28 @@
 
 این فایل گزارش واقعیت مخزن است. نقشه در `.docs/ROADMAP.md` و مشخصات در `.docs/PROJECT_SPEC.md` است.
 
+## ۲۰۲۶-۱۰-۱۹ — رفع توقف نصب روی VPS واقعی ایران
+
+با دسترسی مجاز مالک، beta14 روی Ubuntu 24.04.5 بررسی شد. خطای ۵۰۰ health/login از storage داخل release و دسترسی ناقص service بود؛ خطای دوم از welcome با حالت 0700 بود. اصلاح محدود runtime/default ACL، welcome، نام‌های loopback سایت Nginx، تشخیص امن mode کلید در doctor و پاک‌کردن error_code قدیمی انجام و روی سرور اعمال شد. همان artifact امضاشده با basename اصلی دوباره verify و resume شد؛ checkpoint نهایی و result success ثبت شدند. ورود واقعی به صفحهٔ تغییر گذرواژه رسید، بدون تغییر گذرواژه/کلید/.env یا داده‌ها. SSH و تنظیم شبکه دست‌نخورده و موتور disabled ماندند.
+
+PHP کامل ۱۹۲ آزمون/۳۹۷۰ assertion، installer ۷۹/۰، release سی، prerequisites چهل و security پنج آزمون موفق. Matrix ACL واقعی و fixture روی هر سه Ubuntu کانتینری موفق؛ VM فعلی فقط 24.04 است. HTTPS نهایی، reboot و گواهی fresh سه Ubuntu انجام نشدند؛ Release عمومی هنوز patch جدید را ندارد. شواهد، شکست‌های میانی، روش بازیابی و محدودیت‌ها در [گزارش VPS](IRAN_VPS_INSTALL_RECOVERY_2026_10_19.md) ثبت شدند.
+
+## ۲۰۲۶-۱۰-۱۹ — حذف Chrome از installer و کارت درخواست/مسیر در کاتالوگ
+
+فراخوانی Chrome از بسته‌های پایه و بارگذاری کتابخانهٔ Chrome در CLI حذف شدند؛ کد دانلود/نصب قدیمی حذف و با guard خطا جایگزین شد. `--install-chrome yes` در plan/apply/resume/repair/upgrade پیش از mutation با CHROME_PANEL_ONLY رد می‌شود؛ `no` برای سازگاری no-op است. متغیر قدیمی INSTALL_CHROME نیز Chrome را در مرحلهٔ بسته‌ها فعال نمی‌کند.
+
+کارت کاتالوگ و endpoint UUID برای درخواست صریح مالک/مدیر میزبان محلی اضافه شدند: قفل میزبان و dedup، Job/Outbox/Audit، جداسازی Workspace، وضعیت/خطا و retry پس از شکست. مسیر فقط از checkpoint موفق worker با نسخه و checksum مطابق plan و render_verified دریافت می‌شود؛ LTR/monospace، کپی و انتخاب دستی دارد. مسیر و فرمان از HTTP پذیرفته نمی‌شوند و `.env` پروژه تغییر نمی‌کند. صفحه و dependency جدیدی ایجاد نشدند.
+
+محدودیت صریح: نصب عملیاتی Chrome از GUI هنوز کامل نیست. ExecutionGate و OperationRunner بسته‌اند؛ helper نصب محدود و worker رندر مرورگر هنوز پیاده‌سازی/گواهی نشده‌اند. درخواست از GUI در حالت فعلی EXECUTION_DISABLED می‌گیرد؛ هیچ مسیر واقعی یا موفقیت نصب ادعا نشده است. checkpoint موفق در آزمون صرفاً fixture است. این برش جای بازکردن موتور یا گواهی Production نیست.
+
+اعتبارسنجی: PHP کامل ۱۹۱ آزمون/۳۹۶۸ assertion موفق با DB/Redis محلی آزمایشی؛ Pint، lint، TypeScript، build و operations harness موفق. Ubuntu 22.04/24.04/26.04 container-lab هرکدام پیش‌نیاز ۴۰، installer ۷۷/۰ (geo/Chrome زیرمجموعه ۱۸/۰) و plan موفق. Chrome headless واقعی با props ساختگی کارت، حالت اولیه/مسیر، دو پوسته × چهار عرض، نبود overflow/runtime exception و کپی موفق با Clipboard mock و fallback واقعی را گذراند؛ این آزمایش نصب مرورگر میزبان نیست. تلاش نخست full PHPUnit با نشانی پیش‌فرض غیرقابل‌دسترسی Redis متوقف و با loopback تکرار شد. Matrix و محدودیت در INSTALLER_TEST_MATRIX آمده است.
+
+## ۲۰۲۶-۱۰-۱۹ — تصمیم Chrome اختیاری پروژه، خارج از نصب پنل
+
+به درخواست مالک مستند شد: Chrome/Chrome for Testing وابستگی پنل نیست؛ نصب اولیه، پیش‌نیاز، resume، repair و update نباید دربارهٔ نصب آن سؤال کنند یا آن را دانلود/نصب کنند. نیاز پروژه به Browsershot/Puppeteer برای PDF/PNG از وابستگی پنل جداست. مسیر مطلوب، درخواست صریح از GUI کاتالوگ با Operations Engine، مجوز، audit و verification رندر است؛ Node.js پروژه نیز وابستگی نصب پنل نمی‌شود. قاعده در AGENTS، مشخصات، INSTALLATION و INSTALLER_PREREQUISITES ثبت شد.
+
+این برش فقط مستندسازی است. فراخوانی فعلی `installer_chrome_step` در مرحلهٔ بسته‌های پایه و گزینهٔ `--install-chrome` همچنان مغایرت باز هستند؛ نصب Chrome از GUI تأییدشده نیست و executor disabled می‌ماند. معیار پذیرش حذف prompt/دانلود/نصب در مسیرهای installer و آزمون جداگانهٔ GUI در INSTALLATION آمده است. آزمون اجرایی یا Matrix Ubuntu در این برش تکرار نشد و نتیجهٔ قبلی تغییر نمی‌کند.
+
 ## ۲۰۲۶-۱۰-۱۹ — پین PHP در نصب کامل
 
 پین مرحلهٔ `04-runtime-installation` فقط `php8.4-*` را از `packages.sury.org` مجاز می‌کرد. `php-common` همان مخزن اولویت `-1` می‌گرفت و APT نسخهٔ اوبونتو را انتخاب می‌کرد. روی Ubuntu 26 این نسخه `php8.4-common` را می‌شکند؛ روی ۲۲٫۰۴ و ۲۴٫۰۴ هم حل‌کننده با پین قدیمی شکست. شبیه‌سازی `apt-get -s` داخل ایمیج رسمی، بدون نصب بسته: پین قدیمی روی jammy و noble و resolute خروج ۱۰۰ داشت و پین جدید روی هر سه `php-common` نسخهٔ `2:101` همان مخزن را انتخاب کرد و خروج ۰ داد. استثنای `libgd3` فقط برای jammy مانده است. Ubuntu 26 همچنان پیش از mutation رد می‌شود. این شبیه‌سازی گواهی نصب VM نیست.
@@ -449,3 +471,10 @@ Matrix: هر سه Ubuntu 22.04/24.04/26.04 container-lab، installer ۷۲/۰ و 
 ## 2026-10-17 — نخستین prerelease عمومی موفق
 
 Actions شماره 39045447762 برای commit 36d7143 کاملاً موفق شد؛ [v1.0.0-beta.5.1](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.5.1) با هشت فایل نصب/امضا/checksum به‌صورت public prerelease منتشر شد. خواندن تنظیمات GitHub و secret metadata نیز موفق بود. نصب واقعی VM همچنان not_run است. دانلود anonymous از ایستگاه توسعه با TLS connection reset مواجه شد؛ بررسی دانلود عمومی، امضا/checksum و `--verify-only` به انتهای workflow اضافه شد تا روی runner اجرا شود. این تغییر host executor یا Production certification را فعال نمی‌کند.
+
+
+## 2026-10-19 — پیام‌های Bash فقط انگلیسی/ASCII
+
+پرسش‌های میرور ایران/کشور نامشخص و نصب Chrome انگلیسی شدند؛ متن فارسی خوشامد وب به HTML منتقل شد تا هیچ متن فارسی در منابع Bash نماند. الزام عمومی برای پیام، خطا، لاگ، help، prompt، comment و literalهای Bash در AGENTS، مشخصات و راهنماهای نصب ثبت شد. آزمون ASCII موجود به تمام منابع Bash پروژه گسترش یافت و harness اوبونتو مجموعهٔ installer را با live apply صریحاً بسته اجرا می‌کند.
+
+میزبان: installer ۷۷/۰، پیش‌نیاز ۴۰ و release ۳۰ آزمون موفق؛ lint، TypeScript و build موفق. Ubuntuهای 22.04/24.04/26.04 container-lab: هرکدام پیش‌نیاز ۴۰ آزمون، installer ۷۷/۰ و plan موفق. شکست‌های اولیه و شواهد نهایی در INSTALLER_TEST_MATRIX ثبت شدند. نصب کامل VM/Production اجرا نشد؛ اصلاحات در سورس‌اند و Release منتشرشده را تغییر نمی‌دهند.
