@@ -16,6 +16,7 @@ use App\Http\Controllers\MonitoringController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProjectArchiveController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectLaunchController;
 use App\Http\Controllers\PwaController;
 use App\Http\Controllers\ServerController;
 use App\Http\Controllers\SettingsController;
@@ -75,6 +76,9 @@ Route::prefix(trim((string) config('rahandaz.base_path'), '/'))->group(function 
                 Route::put('/git/connections/{connection}/repositories', [GitConnectionController::class, 'select'])->middleware('throttle:20,1')->name('git.select');
                 Route::delete('/git/connections/{connection}', [GitConnectionController::class, 'disconnect'])->middleware('throttle:5,1')->name('git.disconnect');
                 Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
+                Route::get('/projects/new', [ProjectLaunchController::class, 'create'])->name('projects.create');
+                Route::post('/projects/sources/{repository}/branches', [ProjectLaunchController::class, 'branches'])->middleware('throttle:20,1')->name('projects.branches');
+                Route::post('/projects', [ProjectLaunchController::class, 'store'])->middleware('throttle:10,1')->name('projects.store');
                 Route::get('/deployments', [DeploymentController::class, 'index'])->name('deployments.index');
                 Route::post('/deployments', [DeploymentController::class, 'store'])->middleware('throttle:10,1')->name('deployments.store');
                 Route::get('/deployments/{deployment}', [DeploymentController::class, 'show'])->name('deployments.show');

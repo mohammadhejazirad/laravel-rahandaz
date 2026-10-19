@@ -24,8 +24,9 @@ final class GitHubManifest
             'setup_on_update' => true,
             'public' => false,
             'request_oauth_on_install' => false,
-            // GitHub requires a URL even for a disabled webhook. No delivery is enabled.
-            'hook_attributes' => ['url' => url('/'), 'active' => false],
+            // Webhooks are omitted. GitHub rejects a hook URL that is not reachable on the public
+            // internet, including localhost, even when the hook is inactive. Account, repository
+            // and branch selection use the installation API and do not need a hook.
             'default_permissions' => ['contents' => 'read', 'metadata' => 'read'],
             'default_events' => [],
         ];

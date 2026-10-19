@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Domain\Access\ProjectAccess;
 use App\Http\CurrentWorkspace;
 use App\Http\PaginatorPayload;
+use App\Http\WorkspaceAccess;
 use App\Models\Environment;
 use App\Models\Project;
 use App\Models\ProjectSourceArchive;
@@ -43,7 +44,7 @@ class ProjectController extends Controller
                 ])->all(),
                 'meta' => PaginatorPayload::meta($projects),
             ],
-            'create_available' => false,
+            'create_available' => WorkspaceAccess::membership($request->user(), $workspace)->role->mayDecryptSecrets(),
             'filters' => ['q' => $query],
         ]);
     }

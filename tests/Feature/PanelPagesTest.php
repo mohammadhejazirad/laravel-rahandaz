@@ -62,7 +62,7 @@ class PanelPagesTest extends TestCase
 
         $this->actingAs($owner)->get(route('projects.index'))->assertOk()->assertInertia(fn (Assert $page) => $page
             ->component('projects/index')
-            ->where('create_available', false)
+            ->where('create_available', true)
             ->has('projects.data', 1)
             ->where('projects.data.0.uuid', $project->uuid)
             ->where('projects.data.0.name', $project->name)

@@ -26,10 +26,10 @@
 | `/mirrors/` | `GET /rahandaz/mirrors` | `pages/mirrors/index.tsx` | App | خواندنی. apply و rollback نیست |
 | `/mirrors/<software_kind>/` | — | — | — | آماده نیست |
 | `/services/<uuid>/` | — | — | — | آماده نیست |
-| `/projects/` و `/projects/new/` | `GET /rahandaz/projects` | `pages/projects/index.tsx` | App | فهرست واقعی. ساخت پروژه نیست |
+| `/projects/` و `/projects/new/` | `GET /rahandaz/projects` و `GET /rahandaz/projects/new` | `pages/projects/index.tsx` و `pages/projects/create.tsx` | App | فهرست واقعی. ساخت برای مالک/مدیر: حساب، مخزن، شاخه و ثبت درخواست استقرار. clone میزبان نیست |
 | `/projects/<uuid>/` | `GET /rahandaz/projects/{uuid}` | `pages/projects/show.tsx` | App | مرور پروژه/محیط، انتخاب environment، dropzone ZIP و تاریخچه آرشیو/عملیات. `Accept: application/json` همان قرارداد شناسه را JSON می‌دهد |
 | upload منبع ZIP | `POST /rahandaz/projects/{project}/environments/{environment}/source-archives` | `components/projects/archive-upload.tsx` | App | واقعی برای Owner/Admin/Operator؛ private store + inspect + deployment/job/outbox/audit. extraction/build آماده نیست |
-| ساخت پروژه، settings پروژه، صفحه مستقل environment | — | — | — | آماده نیست |
+| settings پروژه، صفحه مستقل environment | — | — | — | آماده نیست. ساخت اولیه در `/projects/new` است |
 | `/jobs/` و `/jobs/<uuid>/` | `GET /rahandaz/jobs` و `/{uuid}` | `pages/jobs/index.tsx` و `show.tsx` | App | وضعیت و لاگ ذخیره‌شده، صفحه‌بندی. لغو و polling نیست |
 | استقرارها | `GET/POST /rahandaz/deployments` | `pages/deployments/index.tsx` | App | فهرست/فیلتر و درخواست SHA ثابت با Job؛ executor نیست |
 | جزئیات استقرار | `GET /rahandaz/deployments/{uuid}` و `POST /{uuid}/{retry|cancel}` | `pages/deployments/show.tsx` | App | وضعیت DB، retry ثابت، لغو پیش از شروع، polling صفحه فعال؛ rollback بسته |

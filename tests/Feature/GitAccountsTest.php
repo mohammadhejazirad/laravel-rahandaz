@@ -60,7 +60,7 @@ class GitAccountsTest extends TestCase
             ->component('git/register')->where('manifest', function ($json) {
                 $manifest = json_decode($json, true);
                 $this->assertSame(['contents' => 'read', 'metadata' => 'read'], $manifest['default_permissions']);
-                $this->assertFalse($manifest['hook_attributes']['active']);
+                $this->assertArrayNotHasKey('hook_attributes', $manifest);
                 $this->assertSame(route('git.manifest.callback'), $manifest['redirect_url']);
                 $this->assertSame([route('git.callback', 'github')], $manifest['callback_urls']);
 
