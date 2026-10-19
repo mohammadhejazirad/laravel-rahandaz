@@ -1,8 +1,32 @@
 # گزارش رفع توقف نصب روی VPS ایران — ۲۰۲۶-۱۰-۱۹
 
-## وضعیت نهایی پس از انتشار و ارتقا
+## پورت عمومی پنل و ارتقای beta23 — نتیجهٔ نهایی
 
-این بخش وضعیت نهایی را جایگزین محدودیت «patchها هنوز در Release نیستند» در گزارش تاریخی پایین می‌کند. انتشار عمومی امضاشدهٔ [v1.0.0-beta.17.1](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.17.1)، از commit `8c3c10d31221d562e1258e69d04f468c3c656057` با [CI موفق](https://github.com/mohammadhejazirad/laravel-rahandaz/actions/runs/39249749025) ساخته شد. سرور واقعی در دو مرحلهٔ beta14 → beta16 → beta17 ارتقا یافت؛ نسخهٔ فعال نهایی beta17 و کانال beta است. تغییرات Chrome GUI و اصلاح‌های installer اکنون داخل بستهٔ امضاشده‌اند؛ اجرای میزبان همچنان disabled است.
+به درخواست صریح مالک، دسترسی مستقیم HTTP/IPv4 روی پورت 8080 فعال شد. نسخهٔ فعال سرور `1.0.0-beta.23.1` از commit `151934197e9979c2cd312cea030b25ec2597c949`، [انتشار عمومی امضاشده](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.23.1) و [CI موفق](https://github.com/mohammadhejazirad/laravel-rahandaz/actions/runs/39259091468) است. README با فرمان دقیق INSTALL.md همین بسته و هش bootstrap `69ea2949b55bdf4550c9ba9c3a366cf8f0c957c751cc7393c76cc60e3f5dd051` هماهنگ شد؛ manifest، SHA256SUMS و امضاها با کلید pin‌شده و verify-only تأیید شدند.
+
+ارتقای واقعی beta17→beta19→beta20→beta22→beta23 با قفل، backup خصوصی pg_dump و archive پیکربندی/runtime، حفظ نسخهٔ قبلی، health و doctor انجام شد. beta18 و beta21 روی این VPS فعال نشدند. migration و seed با نصب قبلی یکسان بودند و اجرا نشدند. backup مرحلهٔ نهایی در `/root/rahandaz-update-beta23/backup/` است؛ فهرست dump و archive بررسی شد، ولی restore کامل DB یا failure injection ارتقا اجرا نشد. APP_KEY، master.key، canary و credentials حفظ شدند؛ مقایسهٔ env با beta17 جز APP_URL یکسان است. APP_URL اکنون IP عمومی با پورت 8080 است.
+
+### خطاهای آشکارشده و اصلاح واقعی
+
+- نخستین Job در beta19 به‌علت NoNewPrivileges سرویس queue نتوانست sudo اجرا کند و failed باقی ماند؛ موفق معرفی نشد. فعال‌سازی اولیه8080 در بررسی root انجام شد. در beta20 مسیر sudo با سوکت محدود systemd جایگزین شد؛ policy دقیق قبلی حذف شد. NoNewPrivileges و ProtectSystem سرویس worker حفظ شدند.
+- آزمون نخست سرویس helper با ProtectSystem=strict، به‌علت نیاز nginx -t به `/run/nginx.pid` شکست خورد و تنظیم قبلی بازگشت. پس از تشخیص در sandbox واقعی، فقط همان فایل به ReadWritePaths اضافه شد. اصلاح نهایی داخل بستهٔ امضاشده beta22 است؛ drop-in موقت آزمایش از `/run/systemd/system/` حذف شد و enrollment از release نهایی refresh شد.
+- نصب اولیه رکورد LocalHost نداشت و setup کامل نشده بود. درخواست معتبر مالک اکنون هویت protected/pending_probe/untested میزبان همان workspace را ثبت می‌کند؛ این رفتار موفقیت probe/setup یا supported بودن Ubuntu را ادعا نمی‌کند. تنظیمات حساب و endpoint پورت پس از تغییر گذرواژهٔ اولیه پیش از setup نیز قابل دسترس‌اند؛ سایر gateها بسته‌اند.
+
+در beta23، مرورگر پیش از ارسال درخواست شناسهٔ تصادفی می‌سازد؛ بنابراین حتی اگر پاسخ POST در تغییر پورت از دست برود، نتیجهٔ همان درخواست با احراز هویت و scope مالک پیدا می‌شود. پاسخ ثبت درخواست 202 است و موفقیت میزبان نیست. این حالت، CORS پورت قبلی و جداسازی workspace در آزمون regression پوشش دارند.
+
+### آزمون نهایی سرور واقعی
+
+- روی بستهٔ نهایی beta23، Job واقعی از Outbox و queue به helper root سیستم‌دی رسید:8080→8081 و سپس8081→8080 با checkpoint `verified=true` موفق شدند؛ login از شبکهٔ بیرونی روی پورت جدید 200 بود. آخرین پورت 8080 است و8081 listener ندارد. ماشین reboot نشد؛ Nginx و PHP-FPM اختصاصی graceful reload شدند.
+- بین دو عملیات، درخواست5432 با PORT_IN_USE رد شد؛ checksum فایل‌های env، Nginx و state قبل/بعد یکسان ماند. رد این درخواست خطای مورد انتظار آزمون است؛ دیتابیس و listener آن تغییر نکردند.
+- retry مستقیم همان execution_id موفق از client محدود، health را تأیید و reload اضافی Nginx ایجاد نکرد. سوکت root:rahandaz-svc/0660 است؛ sudo برای id یا helper با argv اضافی مجاز نیست. هیچ sudoers تازه‌ای باقی نماند. اجرای عمومی Operations همچنان disabled است.
+- HTTP عمومی ریشه به `/rahandaz/login` هدایت می‌شود؛ `/up`، ورود واقعی CSRF/session، guard تغییر گذرواژه و هر ۶۶ فایل build بررسی شدند. `.env`، log و مسیرهای خصوصی403/404 دارند. گذرواژهٔ اولیهٔ مالک تغییر داده نشد؛ بنابراین فرم تنظیمات در نشست واقعی مرورگر پس از اقدام خود مالک قابل استفاده است، نه با دورزدن guard.
+- PHP-FPM، queue، scheduler timer، Nginx، دو Redis و helper socket فعال‌اند؛ doctor با service user موفق است. اتصال دوم SSH، سایت بازیابی127.0.0.1:80 و تونل قبلی محفوظ‌اند. صفحهٔ ورود عمومی در Chrome مالک باز و بررسی شد.
+
+PHP نهایی ۲۰۶ آزمون/۴۰۶۸ assertion؛ زیرمجموعه پورت ۱۱ آزمون/۹۳ assertion؛ Python ۱۲ آزمون موفق است. CI lint/typecheck/build و مجموعه‌های installer/operations/release را موفق اجرا کرد. Matrix اختصاصی سه Ubuntu کانتینری در OPERATIONS_TEST_MATRIX ثبت شده است. اجرای زندهٔ systemd/Nginx فقط روی VPS Ubuntu 24.04.5 انجام شد؛ این گواهی VMهای 22.04/26.04، reboot یا Production نیست. HTTP عمومی انتخاب صریح مالک است و رمزگذاری ندارد؛ TLS/دامنه هنوز پیکربندی نشده‌اند. updater CLI همچنان prepare-only است؛ این ارتقای کنترل‌شده جای تکمیل updater خودکار نیست.
+
+## گزارش پیشین ارتقای beta17
+
+این بخش گزارش مرحلهٔ پیشین است؛ وضعیت فعلی در بخش پورت پنل بالاتر آمده است. انتشار عمومی امضاشدهٔ [v1.0.0-beta.17.1](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.17.1)، از commit `8c3c10d31221d562e1258e69d04f468c3c656057` با [CI موفق](https://github.com/mohammadhejazirad/laravel-rahandaz/actions/runs/39249749025) ساخته شد. سرور واقعی در دو مرحلهٔ beta14 → beta16 → beta17 ارتقا یافت؛ نسخهٔ فعال نهایی beta17 و کانال beta است. تغییرات Chrome GUI و اصلاح‌های installer اکنون داخل بستهٔ امضاشده‌اند؛ اجرای میزبان همچنان disabled است.
 
 Backend بدون env override به‌اشتباه رکورد development را می‌خواند؛ در beta17 مسیر صریح تنظیم‌شده، سپس release.json نصب‌شده و در نبود آن development انتخاب می‌شود. رکورد نصب‌شدهٔ نامعتبر پنهان نمی‌شود. این رفتار با آزمون regression و خواندن واقعی رکورد از service user روی VPS بررسی شد.
 

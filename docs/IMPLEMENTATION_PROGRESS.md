@@ -4,7 +4,9 @@
 
 ## ۲۰۲۶-۱۰-۱۹ — قابلیت محدود پورت پنل
 
-به درخواست مالک، تنظیم owner-only پورت پنل، Job/Outbox/Audit و helper محدود با قرارداد v1، expected-port، قفل، health، rollback و journal recovery اضافه شدند. HTTP هیچ فرمان بلند اجرا نمی‌کند؛ worker عضویت را دوباره بررسی می‌کند و موفقیت بدون شاهد helper پذیرفته نمی‌شود. Operations عمومی disabled باقی می‌مانند؛ enrollment مستقل root و استثنای HTTP/IPv4 در ADR 0008 و PANEL_PORT ثبت شدند. PHP کامل ۲۰۴ آزمون/۴۰۳۷ assertion، lint، typecheck، build، installer ۷۹/۰ و release سی/۰ موفق‌اند. Matrix اختصاصی قرارداد و dispatch روی سه Ubuntu کانتینری موفق و در OPERATIONS_TEST_MATRIX ثبت شد. آزمون VPS و نسخهٔ انتشار پس از اجرا ثبت می‌شوند.
+به درخواست مالک، تنظیم owner-only «پورت پنل»، Job/Outbox/Audit و helper محدود با قرارداد v1، expected-port، قفل، health، rollback و journal recovery اضافه شدند. HTTP هیچ فرمان بلند اجرا نمی‌کند؛ worker عضویت را دوباره بررسی می‌کند و موفقیت بدون شاهد helper پذیرفته نمی‌شود. socket activation سیستم‌دی جای sudo ناسازگار با NoNewPrivileges را گرفت؛ حفاظت queue حفظ شده است. تنظیمات حساب و پورت پس از تغییر گذرواژهٔ اولیه، قبل از تکمیل setup هم قابل دسترس‌اند؛ ثبت identity میزبان pending_probe/untested است و موفقیت setup نیست. Operations عمومی disabled می‌مانند؛ enrollment مستقل root و استثنای HTTP/IPv4 در ADR 0008 و PANEL_PORT ثبت شدند.
+
+PHP کامل ۲۰۶ آزمون/۴۰۶۸ assertion، lint، typecheck، build، installer ۷۹/۰ و release سی/۰ موفق‌اند. Matrix اختصاصی ۱۲ قرارداد و dispatch روی سه Ubuntu کانتینری موفق است. رفت‌وبرگشت پورت و رد پورت اشغال‌شده روی VPS واقعی 24.04 نیز موفق شدند؛ جزئیات انتشار، ارتقا و آزمون در [گزارش VPS](IRAN_VPS_INSTALL_RECOVERY_2026_10_19.md) آمده‌اند. این نتیجه گواهی سه VM یا آمادگی Production نیست.
 
 ## ۲۰۲۶-۱۰-۱۹ — انتشار و ارتقای کنترل‌شدهٔ VPS
 

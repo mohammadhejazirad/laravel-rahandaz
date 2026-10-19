@@ -10,7 +10,7 @@ Production نیست؛ وضعیت واقعی آزمون‌ها در [INSTALLER_TE
 
 نتیجه تازه در V1_TEST_REPORT: installer harness دوباره ۶۹ passed/۰ failed (updater زیرمجموعه ۲۱/۰)؛ full PHP suite اجرا شده، اما fresh install/health/login در VM همچنان requires_vm است. وجود صفحات درخواست و آموزش‌ها نصب عمومی را معتبر نمی‌کند؛ V1_RELEASE_READINESS مرجع gate است.
 
-درخت `installer/` و prerelease عمومی امضاشده [v1.0.0-beta.17.1](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.17.1) موجودند. `scripts/install.sh` وجود ندارد. README فرمان نصب آزمایشی نسخه‌دار با هش literal bootstrap دارد؛ manifest، امضا و checksum فایل‌های عمومی بررسی شده‌اند. این فرمان گواهی نصب تازه یا reboot/recovery سه VM نیست. کلید عمومی pin‌شده در `installer/trust/rahandaz-release.pub` است و `curl | bash` استفاده نمی‌شود.
+درخت `installer/` و prerelease عمومی امضاشده [v1.0.0-beta.23.1](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.23.1) موجودند. `scripts/install.sh` وجود ندارد. README فرمان نصب آزمایشی نسخه‌دار با هش literal bootstrap دارد؛ manifest، امضا و checksum فایل‌های عمومی بررسی شده‌اند. این فرمان گواهی نصب تازه یا reboot/recovery سه VM نیست. کلید عمومی pin‌شده در `installer/trust/rahandaz-release.pub` است و `curl | bash` استفاده نمی‌شود.
 
 زیرساخت GitHub Releases و bootstrap نسخه‌دار اضافه شده است. `install.sh` فایل **تولیدشده برای بستهٔ امضاشده** است، نه raw روی main. `INSTALL.md` فرمان قابل‌کپی با هش واقعی دارد. workflow با هر push به main بسته candidate می‌سازد و پس از تنظیم signing و متغیر انتشار، prerelease امضاشده منتشر می‌کند؛ اجرای دستی Draft نیز باقی است و دانلود anonymous از Draft ممکن نیست. تنظیم و شرایط اضافه‌شدن فرمان عمومی به README در [RELEASE_MANAGEMENT.md](RELEASE_MANAGEMENT.md) آمده است. نصب‌کننده هنوز TLS پنل یا executor پیاده‌سازی‌نشده را آماده نمی‌کند؛ HTTP اولیه فقط از tunnel/شبکه trusted استفاده شود.
 
@@ -69,3 +69,7 @@ bash installer/bin/rahandaz-install --plan --state-dir /tmp/rahandaz-plan
 پس از دریافت شواهد معتبر، همان کارت مسیر را به‌صورت LTR/monospace و read-only همراه دکمهٔ «کپی مسیر» نشان می‌دهد؛ در صورت نبود Clipboard API، مسیر برای کپی دستی انتخاب می‌شود. کاربر مسیر را به تنظیم executable در کد پروژه (مانند `setChromePath` در Browsershot) یا متغیر `.env` که کد پروژه واقعاً می‌خواند می‌دهد. پنل خودکار فایل `.env` یا پروژه را تغییر نمی‌دهد و نام متغیر یکسانی برای همهٔ کتابخانه‌ها فرض نمی‌کند.
 
 پذیرش اصلاح پیاده‌سازی نیازمند آزمون نصب تازه، resume، repair و upgrade است که نبود prompt، دانلود، نصب و تغییر Chrome را ثابت کند؛ مسیر CLI قدیمی نیز نباید این قاعده را دور بزند. مسیر GUI جداگانه به قرارداد، آزمون عملیات، بررسی رندر واقعی و Matrix Ubuntu نیاز دارد. تا آن زمان executor همان `disabled` باقی می‌ماند و رابط نباید این قابلیت را آماده یا نصب موفق معرفی کند.
+
+## پورت پنل مدیریت
+
+نصب اولیه خودکار HTTP عمومی را باز نمی‌کند. برای دسترسی مستقیم IP و پورت با تصمیم صریح مالک، قابلیت محدود [پورت پنل](PANEL_PORT.md) از release امضاشده ثبت می‌شود. سپس مالک پس از تغییر گذرواژهٔ اولیه، حتی پیش از تکمیل setup میزبان، از «تنظیمات حساب ← پورت پنل» پورت را تغییر می‌دهد. Job واقعی، healthcheck، graceful reload، journal و recovery لازم‌اند؛ SSH، پروژه‌ها و اجرای عمومی disabled حفظ می‌شوند. HTTP رمزگذاری ندارد. نتیجهٔ VPS در [گزارش آزمون](IRAN_VPS_INSTALL_RECOVERY_2026_10_19.md) ثبت شده است.

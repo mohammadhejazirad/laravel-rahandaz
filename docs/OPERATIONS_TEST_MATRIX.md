@@ -2,9 +2,11 @@
 
 ## ۲۰۲۶-۱۰-۱۹ — قرارداد پورت پنل
 
-قرارداد Python (۱۰ آزمون شامل rollback، crash recovery، idempotency، مالکیت و ورودی نامعتبر)، syntax فایل‌های Bash تغییریافته و dispatch ورودی خراب روی هر سه کانتینر 22.04/24.04/26.04 موفق شدند؛ گزارش نهایی `panel-port-<version>-20261019T124915Z`، exit_code=0 است. اجرای اول harness عمومی به‌علت نبود PHP در image شکست خورد؛ آن شکست passed نیست. harness اختصاصی سپس فقط قرارداد و dispatcher همین قابلیت را سنجید؛ harness کامل عمومی روی میزبان دارای PHP موفق بود و در CI هم اجرا می‌شود. این نتیجه اجرای systemd/Nginx واقعی در سه VM نیست. آزمون VPS پس از انتشار جدا ثبت می‌شود.
+قرارداد Python شامل ۱۲ آزمون helper/transport (rollback، crash recovery، idempotency، مالکیت، ورودی نامعتبر، سوکت ثابت و unavailable)، syntax فایل‌های Bash تغییریافته و dispatch ورودی خراب روی هر سه کانتینر 22.04/24.04/26.04 موفق شدند. گزارش‌های آخر `panel-port-22.04-20261019T131045Z`، `panel-port-24.04-20261019T131046Z` و `panel-port-26.04-20261019T131046Z`، همگی exit_code=0 هستند. اجرای نخست harness عمومی به‌علت نبود PHP در image شکست خورد؛ آن شکست passed نیست. harness اختصاصی قرارداد و dispatcher همین قابلیت را می‌سنجد؛ harness کامل عمومی روی میزبان دارای PHP و CI موفق بود. این نتایج اجرای systemd/Nginx واقعی در سه VM نیستند.
 
-PHP کامل محلی ۲۰۴ آزمون / ۴۰۳۷ assertion، lint، TypeScript و build موفق‌اند؛ installer ۷۹/۰ و release tests سی/۰ موفق بودند. قابلیت live پورت opt-in مستقل است؛ بقیهٔ عملیات disabled مانده‌اند.
+PHP کامل محلی ۲۰۶ آزمون / ۴۰۶۸ assertion، زیرمجموعهٔ پورت ۱۱ آزمون / ۹۳ assertion و Python دوازده/صفر موفق‌اند. lint، TypeScript، build، installer ۷۹/۰ و release tests سی/۰ نیز موفق بودند. قابلیت live پورت opt-in مستقل است؛ بقیهٔ عملیات disabled مانده‌اند.
+
+روی VPS واقعی Ubuntu 24.04.5، systemd socket activation و worker با NoNewPrivileges فعال، رفت‌وبرگشت 8080→8081→8080، پاسخ عمومی login/up، رد پورت اشغال‌شدهٔ 5432 با PORT_IN_USE، idempotency بدون reload دوباره، حفظ env جز APP_URL، deny فرمان sudo دلخواه و مسیر بازیابی 80/SSH بررسی شدند. sandbox helper فقط مسیرهای ثبت‌شده و فایل `/run/nginx.pid` را برای بررسی Nginx writable می‌کند؛ worker سخت‌گیری قبلی را حفظ کرده است. گزارش نسخهٔ نهایی و محدودیت‌ها در [گزارش VPS](IRAN_VPS_INSTALL_RECOVERY_2026_10_19.md) است. VMهای 22.04/26.04، reboot و failure injection واقعی این قابلیت آزموده نشده‌اند؛ 26.04 همچنان experimental است.
 
 به‌روزرسانی کنترل‌پلین ۲۰۲۶-۱۰-۱۴ در V1_TEST_REPORT است: operations Bash harness دوباره خروج صفر و full PHP/Redis suite موفق داشت. ماتریس Ubuntu/VM زیر به supported تبدیل نمی‌شود؛ apply، Boot و Recovery واقعی آزموده نشده‌اند.
 
