@@ -95,10 +95,14 @@ def run(args, timeout=30, service=False):
 
 def authorize(data):
     trusted_release()
-    result = subprocess.run(['/usr/bin/php8.4',
+    try:
+        result = subprocess.run(['/usr/bin/php8.4',
                              str(RELEASE/'infrastructure/operations/software/authorize.php')],
                             input=json.dumps(data).encode(), env=ENV, cwd=RELEASE,
                             capture_output=True, timeout=10, **service_identity())
+    except (OSError, subprocess.SubprocessError):
+        # Do not expose subprocess stderr or input, which may contain private data.
+        raise Refused('AUTHORIZATION_CHECK_FAILED') from None
     try:
         proof = json.loads(result.stdout)
     except (ValueError, TypeError):

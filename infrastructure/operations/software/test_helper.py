@@ -112,6 +112,12 @@ class ContractTests(unittest.TestCase):
         self.assertFalse(helper.same_request(self.data(), self.data() | {'packages': ['htop']}))
         self.assertFalse(helper.alive({'pid': 0, 'boot_id': 'old-boot', 'pid_start': '1'}))
 
+    def test_authorization_process_failure_is_closed_and_distinct_from_invalid_input(self):
+        for error in (PermissionError('identity denied'), helper.subprocess.TimeoutExpired('php', 10)):
+            with self.subTest(error=type(error).__name__), patch.object(helper, 'trusted_release'), patch.object(helper, 'service_identity', return_value={}), patch.object(helper.subprocess, 'run', side_effect=error):
+                with self.assertRaisesRegex(helper.Refused, '^AUTHORIZATION_CHECK_FAILED$'):
+                    helper.authorize(self.data())
+
     def test_each_required_unit_is_checked_individually(self):
         for missing in ('nginx', 'rahandaz-php-fpm', 'rahandaz-queue', 'rahandaz-scheduler.timer', 'redis-rahandaz-queue', 'redis-rahandaz-cache'):
             calls = []

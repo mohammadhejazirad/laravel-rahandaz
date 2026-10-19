@@ -25,7 +25,8 @@ SERVICE = MARKER + '''[Unit]
 Description=Rahandaz restricted software installation
 [Service]
 Type=exec
-User=root
+# A system service defaults to root; helper.py also enforces effective UID 0.
+# Explicit User=root with NoNewPrivileges drops CAP_SETUID on the tested Ubuntu VM.
 ExecStart=/usr/bin/python3 -I /usr/local/lib/rahandaz/operations/software/helper.py
 StandardInput=socket
 StandardOutput=null
