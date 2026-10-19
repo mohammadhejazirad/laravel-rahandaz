@@ -11,9 +11,10 @@ export function SoftwareInstallationCard({ software }: { software: SoftwareState
     const base = usePage<SharedProps>().props.app.base_path;
     const form = useForm({ packages: [] as string[], idempotency_key: software.request_key });
     const [review, setReview] = useState(false);
+    const [submitted, setSubmitted] = useState<string | null>(null);
     const pending = isSoftwarePending(software.job);
     useSoftwarePolling(pending, ['software']);
-    useSoftwareCompletion(software.job);
+    useSoftwareCompletion(software.job, submitted);
     return <Card className="space-y-4">
         <h2 className="font-semibold">نصب نرم‌افزار روی سرور</h2>
         <SoftwareProgress job={software.job} />
@@ -24,7 +25,7 @@ export function SoftwareInstallationCard({ software }: { software: SoftwareState
             event.preventDefault();
             if (!review) { setReview(true); return; }
             form.transform(data => ({ ...data, idempotency_key: software.request_key }));
-            form.post(`${base}/catalog/software/install`, { preserveScroll: true, onSuccess: () => { setReview(false); form.setData('packages', []); } });
+            form.post(`${base}/catalog/software/install`, { preserveScroll: true, onSuccess: page => { setSubmitted((page.props.software as SoftwareState | undefined)?.job?.uuid ?? null); setReview(false); form.setData('packages', []); } });
         }}>
             {!review ? <SoftwarePicker categories={software.categories} catalog={software.catalog} selected={form.data.packages} onChange={keys => form.setData('packages', keys)} disabled={pending} /> : <div className="space-y-2 text-sm leading-7"><h3 className="font-semibold">بازبینی نصب</h3><p dir="ltr" className="break-words font-mono">{form.data.packages.map(key => software.catalog[key]?.name).join(', ')}</p><p className="text-muted">دریافت از مخزن معتبر سرور یا فایل نسخه‌دار با checksum ثابت و بررسی اجرای واقعی. بسته‌های موجود ارتقا یا حذف نمی‌شوند. نصب در پس‌زمینه انجام می‌شود؛ می‌توانید نتیجه را در همین صفحه پیگیری کنید.</p></div>}
             {form.errors.packages && <p role="alert" className="text-sm text-danger">{form.errors.packages}</p>}

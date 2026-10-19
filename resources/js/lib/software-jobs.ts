@@ -9,7 +9,10 @@ export function isSoftwarePending(job: SoftwareJob | null | undefined): boolean 
 export function useSoftwarePolling(pending: boolean, props: string[]) {
     useVisiblePoll(pending, props.join(','), 3000);
 }
-export function useSoftwareCompletion(job: SoftwareJob | null | undefined) {
+export function shouldNotifySoftware(job: SoftwareJob | null | undefined, observed: string | null, stored: string | null, submitted: string | null): boolean {
+    return !!job && !isSoftwarePending(job) && stored !== 'notified' && (observed === job.uuid || stored === 'pending' || submitted === job.uuid);
+}
+export function useSoftwareCompletion(job: SoftwareJob | null | undefined, submitted: string | null = null) {
     const active = useRef<string | null>(null);
     useEffect(() => {
         if (!job) return;
@@ -21,7 +24,7 @@ export function useSoftwareCompletion(job: SoftwareJob | null | undefined) {
             try { sessionStorage.setItem(key, 'pending'); } catch { /* Optional persistence. */ }
             return;
         }
-        if (stored === 'notified' || (active.current !== job.uuid && stored !== 'pending')) return;
+        if (!shouldNotifySoftware(job, active.current, stored, submitted)) return;
         active.current = null;
         try { sessionStorage.setItem(key, 'notified'); } catch { /* toastId also deduplicates active notifications. */ }
         const summary = job.summary;
@@ -29,5 +32,5 @@ export function useSoftwareCompletion(job: SoftwareJob | null | undefined) {
         const message = job.status === 'succeeded' ? `بررسی و نصب نرم‌افزارهای انتخابی پایان یافت. ${counts}` : `${job.message ?? 'عملیات نصب کامل نشد؛ گزارش هر بسته را بررسی کنید.'} ${counts}`;
         if (job.status === 'succeeded') notify.success(message, { toastId: key, autoClose: 9000 });
         else notify.error(message, { toastId: key, autoClose: 12000 });
-    }, [job]);
+    }, [job, submitted]);
 }

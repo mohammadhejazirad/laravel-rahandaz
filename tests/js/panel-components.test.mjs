@@ -15,6 +15,8 @@ after(async () => { await server.close(); rmSync(cacheDir, { recursive: true, fo
 const { TableFrame } = await server.ssrLoadModule('/resources/js/components/ui/table-frame.tsx');
 const { formatBytes } = await server.ssrLoadModule('/resources/js/lib/format.ts');
 
+const { shouldNotifySoftware } = await server.ssrLoadModule('/resources/js/lib/software-jobs.ts');
+
 test('responsive tables preserve column context, links and escaped data without duplicate rows', () => {
     const html = renderToStaticMarkup(React.createElement(TableFrame, { label: 'منابع' },
         React.createElement('thead', null, React.createElement('tr', null, React.createElement('th', null, 'نام'), React.createElement('th', null, 'وضعیت'))),
@@ -37,4 +39,17 @@ test('monitoring units distinguish unavailable data from a measured zero', () =>
     assert.match(formatBytes(0), /۰ B/);
     assert.match(formatBytes(1024), /۱ KiB/);
     assert.match(formatBytes(1024 ** 3), /۱ GiB/);
+});
+
+test('software completion handles a fast response, resumed work, failures and deduplication', () => {
+    const job = { uuid: 'job-one', status: 'succeeded', message: null, packages: [] };
+    assert.equal(shouldNotifySoftware(job, null, null, null), false, 'Historical success must not toast on first visit');
+    assert.equal(shouldNotifySoftware(job, null, null, 'job-one'), true, 'The request may finish before its first response');
+    assert.equal(shouldNotifySoftware(job, 'job-one', null, null), true);
+    assert.equal(shouldNotifySoftware(job, null, 'pending', null), true, 'Refresh preserves observed work');
+    assert.equal(shouldNotifySoftware(job, 'job-one', 'notified', 'job-one'), false);
+    assert.equal(shouldNotifySoftware({ ...job, status: 'running' }, 'job-one', 'pending', 'job-one'), false);
+    assert.equal(shouldNotifySoftware({ ...job, status: 'queued' }, 'job-one', null, 'job-one'), false);
+    assert.equal(shouldNotifySoftware({ ...job, status: 'failed' }, 'job-one', null, null), true);
+    assert.equal(shouldNotifySoftware(job, 'different-job', null, 'different-job'), false);
 });

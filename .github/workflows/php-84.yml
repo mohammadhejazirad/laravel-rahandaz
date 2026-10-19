@@ -78,6 +78,7 @@ jobs:
           npm run typecheck
           npm run build
           node --experimental-strip-types --test tests/js/datetime.test.ts
+          node --test tests/js/panel-components.test.mjs
       - name: Audit locked dependencies
         run: |
           composer audit --locked --no-interaction

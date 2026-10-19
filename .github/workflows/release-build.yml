@@ -100,6 +100,7 @@ jobs:
           cp .env.example .env
           php artisan test --compact
           node --experimental-strip-types --test tests/js/datetime.test.ts
+          node --test tests/js/panel-components.test.mjs
           bash installer/tests/run.sh
           python3 installer/tests/release_test.py
           python3 installer/tests/candidate_test.py

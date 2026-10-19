@@ -20,6 +20,7 @@ interface SetupProps {
 export default function Setup({ holding, workspace, facts, software, session }: SetupProps) {
     const base = usePage<SharedProps>().props.app.base_path;
     const [review, setReview] = useState(false);
+    const [submitted, setSubmitted] = useState<string | null>(null);
     const form = useForm({ display_name: session?.answers.display_name ?? workspace.name, packages: session?.answers.packages ?? [] as string[], idempotency_key: software.request_key });
     const pending = isSoftwarePending(session?.job);
     const complete = !!workspace.setup_completed_at;
@@ -30,7 +31,7 @@ export default function Setup({ holding, workspace, facts, software, session }: 
         return () => window.clearTimeout(timer);
     }, [holding, complete, pending, review, form, session, base]);
     useSoftwarePolling(pending, ['session', 'workspace', 'software']);
-    useSoftwareCompletion(session?.job);
+    useSoftwareCompletion(session?.job, submitted);
     return <AppLayout title="راه‌اندازی اولیه" description="سرور را بررسی کنید، نرم‌افزارهای مورد نیاز را انتخاب کنید و وارد پنل مدیریت شوید.">
         <Head title="راه‌اندازی اولیه" />
         <div className="mx-auto max-w-4xl space-y-5">
@@ -42,7 +43,7 @@ export default function Setup({ holding, workspace, facts, software, session }: 
                     {!software.available && <Alert tone="warning">سرویس نصب در دسترس نیست. سلامت سرویس‌های راه‌انداز باید بررسی شود؛ انتخاب‌های شما قابل ذخیره است.</Alert>}
                     <Form className="space-y-5" onSubmit={event => {
                         event.preventDefault();
-                        if (review) form.post(`${base}/setup/apply`, { preserveScroll: true, onSuccess: () => setReview(false) });
+                        if (review) form.post(`${base}/setup/apply`, { preserveScroll: true, onSuccess: page => { setSubmitted((page.props.session as SetupProps['session'])?.job?.uuid ?? null); setReview(false); } });
                         else { form.setData('idempotency_key', software.request_key); form.patch(`${base}/setup`, { preserveScroll: true, onSuccess: () => setReview(true) }); }
                     }}>
                         {!review ? <><Input label="نام نمایشی سرور" name="display_name" isRequired maxLength={100} value={form.data.display_name} error={form.errors.display_name} onChange={event => form.setData('display_name', event.target.value)} />
