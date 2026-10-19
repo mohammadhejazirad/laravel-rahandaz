@@ -78,9 +78,14 @@ def request(data):
     return data
 
 
-def run(args, timeout=30):
+def service_identity():
+    service = pwd.getpwnam('rahandaz-svc')
+    return {'user': service.pw_uid, 'group': service.pw_gid, 'extra_groups': []}
+
+
+def run(args, timeout=30, service=False):
     try:
-        result = subprocess.run(args, env=ENV, cwd=RELEASE, capture_output=True, timeout=timeout)
+        result = subprocess.run(args, env=ENV, cwd=RELEASE, capture_output=True, timeout=timeout, **(service_identity() if service else {}))
         if result.returncode:
             raise Refused('COMMAND_FAILED')
         return result.stdout.decode(errors='replace')
@@ -90,11 +95,15 @@ def run(args, timeout=30):
 
 def authorize(data):
     trusted_release()
-    result = subprocess.run(['/usr/sbin/runuser', '-u', 'rahandaz-svc', '--', '/usr/bin/php8.4',
+    result = subprocess.run(['/usr/bin/php8.4',
                              str(RELEASE/'infrastructure/operations/software/authorize.php')],
                             input=json.dumps(data).encode(), env=ENV, cwd=RELEASE,
-                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=10)
-    if result.returncode:
+                            capture_output=True, timeout=10, **service_identity())
+    try:
+        proof = json.loads(result.stdout)
+    except (ValueError, TypeError):
+        raise Refused('AUTHORIZATION_CHECK_FAILED') from None
+    if result.returncode or proof != {'schema_version': '1', 'authorized': True}:
         raise Refused('AUTHORIZATION_REVOKED')
 
 
@@ -126,7 +135,7 @@ def readiness():
         if run(['/usr/bin/systemctl', 'show', '--property=NoNewPrivileges', '--value', unit]).strip() != 'yes':
             raise Refused('SERVICE_ACCOUNT_UNSAFE')
     verify_services()
-    run(['/usr/sbin/runuser', '-u', 'rahandaz-svc', '--', '/usr/bin/php8.4', 'artisan', 'rahandaz:doctor'])
+    run(['/usr/bin/php8.4', 'artisan', 'rahandaz:doctor'], service=True)
     state = Path('/etc/rahandaz/panel-listener.json')
     port = json.loads(state.read_text())['port'] if state.is_file() else 80
     for route in ('/up', '/rahandaz/login'):

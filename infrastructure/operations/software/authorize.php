@@ -27,7 +27,9 @@ try {
     if ($job->type === 'setup.initialize') {
         $allowed = $allowed && $job->actor !== null && app(PanelListener::class)->owner($job->actor, $job->workspace);
     }
+    echo json_encode(['schema_version' => '1', 'authorized' => $allowed], JSON_THROW_ON_ERROR);
     exit($allowed ? 0 : 1);
 } catch (Throwable) {
+    echo '{"schema_version":"1","authorized":false}';
     exit(1);
 }

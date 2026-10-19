@@ -24,7 +24,7 @@ export default function Setup({ holding, workspace, facts, software, session }: 
     const pending = isSoftwarePending(session?.job);
     const complete = !!workspace.setup_completed_at;
     useEffect(() => {
-        if (holding || complete || pending || review || form.processing || !form.data.display_name.trim() || form.data.display_name.length > 100) return;
+        if (holding || complete || pending || review || session?.state === 'blocked' || form.processing || !form.data.display_name.trim() || form.data.display_name.length > 100) return;
         if (session?.state === 'in_progress' && session.answers.display_name === form.data.display_name && JSON.stringify(session.answers.packages.slice().sort()) === JSON.stringify(form.data.packages.slice().sort())) return;
         const timer = window.setTimeout(() => form.patch(`${base}/setup`, { preserveScroll: true, preserveState: true, only: ['session', 'software', 'errors'] }), 1000);
         return () => window.clearTimeout(timer);

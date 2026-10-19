@@ -94,6 +94,19 @@ class ContractTests(unittest.TestCase):
             self.assertFalse(helper.install('jq', self.data())['changed'])
             command.assert_not_called(); verify.assert_called_once_with('jq')
 
+    def test_authorization_drops_all_supplementary_groups_and_requires_json_proof(self):
+        with patch.object(helper, 'trusted_release'), patch.object(helper.pwd, 'getpwnam', return_value=SimpleNamespace(pw_uid=999, pw_gid=999)):
+            for proof, code in [(b'{"schema_version":"1","authorized":true}', 0), (b'', 0), (b'{"schema_version":"1","authorized":false}', 1)]:
+                with patch.object(helper.subprocess, 'run', return_value=SimpleNamespace(returncode=code, stdout=proof)) as process:
+                    if not code and proof:
+                        helper.authorize(self.data())
+                    else:
+                        with self.assertRaises(helper.Refused): helper.authorize(self.data())
+                    self.assertEqual(process.call_args.kwargs['user'], 999)
+                    self.assertEqual(process.call_args.kwargs['group'], 999)
+                    self.assertEqual(process.call_args.kwargs['extra_groups'], [])
+                    self.assertEqual(process.call_args.args[0][0], '/usr/bin/php8.4')
+
     def test_journal_request_identity_and_orphan_recovery(self):
         self.assertTrue(helper.same_request(self.data(), self.data() | {'action': 'status'}))
         self.assertFalse(helper.same_request(self.data(), self.data() | {'packages': ['htop']}))
