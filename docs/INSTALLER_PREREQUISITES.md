@@ -69,9 +69,9 @@ The intended installation path is an explicit request from the panel software ca
 through the Operations Engine with authorization, audit and real rendering verification.
 Existing project browsers must be preserved. The GUI operation is not certified or enabled by
 this documentation. The full installer no longer calls Chrome installation. Legacy `--install-chrome yes` fails
-before mutation with `CHROME_PANEL_ONLY`; `no` is a compatibility no-op. The catalog now records
-explicit, audited install requests, but the host executor remains disabled and actual GUI
-installation/render verification is not yet implemented or certified. A copyable executable
+before mutation with `CHROME_PANEL_ONLY`; `no` is a compatibility no-op. The earlier catalog request-only path does not implement installation/render verification;
+the Chrome button is now disabled rather than submitting a guaranteed-failure job.
+The separate narrow software capability installs only htop/jq/FFmpeg/Unzip; it does not enable Chrome or the general executor. A copyable executable
 path is exposed only after successful, trusted worker verification evidence. See the policy and
 acceptance criteria in [INSTALLATION.md](INSTALLATION.md#مرورگر-سمت-سرور-فقط-برای-پروژهها).
 
