@@ -25,6 +25,9 @@ def assemble(source: Path, version: str, output: Path) -> Path:
     required = (
         "artisan", "composer.json", "composer.lock", "vendor/autoload.php",
         "public/build/manifest.json", "installer/bin/rahandaz-install",
+        "infrastructure/operations/software/authorize.php", "infrastructure/operations/software/catalog.json",
+        "infrastructure/operations/software/client.py", "infrastructure/operations/software/helper.py",
+        "infrastructure/operations/software/provision.py",
     )
     for name in required:
         path = source / name
@@ -35,6 +38,7 @@ def assemble(source: Path, version: str, output: Path) -> Path:
         "app", "bootstrap", "config", "database", "installer", "public", "resources",
         "routes", "vendor", "artisan", "composer.json", "composer.lock", ".env.example",
         "README.md", "LICENSE", "SECURITY.md", "CHANGELOG.md", "infrastructure/operations/panel",
+        "infrastructure/operations/software",
     )
     paths = []
     for name in roots:

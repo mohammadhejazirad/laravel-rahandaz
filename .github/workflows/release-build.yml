@@ -195,14 +195,30 @@ jobs:
         run: |
           set -euo pipefail
           release_assets="$RUNNER_TEMP/rahandaz-release-assets"
-          options=(--verify-tag)
-          if [[ "$CANDIDATE_EVENT" == workflow_dispatch ]]; then
-            options+=(--draft)
-          else
+          if [[ "$CANDIDATE_EVENT" != workflow_dispatch ]]; then
             # Create the tag at the tested commit; an existing tag is a conflict, never reused.
             gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f "ref=refs/tags/$RELEASE_TAG" -f "sha=$RELEASE_COMMIT" >/dev/null
           fi
-          gh release create "$RELEASE_TAG" "$release_assets"/* --repo "$GITHUB_REPOSITORY" "${options[@]}" --prerelease --latest=false --title "Rahandaz $RELEASE_TAG — test candidate" --notes-file "$release_assets/INSTALL.md"
+          # Keep incomplete uploads private. Retry only this new draft's signed bytes.
+          gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --draft --prerelease --latest=false --title "Rahandaz $RELEASE_TAG — test candidate" --notes-file "$release_assets/INSTALL.md"
+          uploaded=false
+          for attempt in 1 2 3; do
+            test "$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)" = true
+            if gh release upload "$RELEASE_TAG" "$release_assets"/* --repo "$GITHUB_REPOSITORY" --clobber; then
+              uploaded=true
+              break
+            fi
+            sleep "$((attempt * 2))"
+          done
+          test "$uploaded" = true
+          private_assets=$(mktemp -d "$RUNNER_TEMP/rahandaz-draft.XXXXXX")
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --dir "$private_assets"
+          cmp installer/trust/rahandaz-release.pub "$private_assets/rahandaz-release.pub"
+          openssl dgst -sha256 -verify installer/trust/rahandaz-release.pub -signature "$private_assets/SHA256SUMS.sig" "$private_assets/SHA256SUMS"
+          (cd "$private_assets" && sha256sum --check SHA256SUMS)
+          if [[ "$CANDIDATE_EVENT" == push ]]; then
+            gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false
+          fi
       - name: Verify published public assets without authentication
         if: github.event_name == 'push' && !github.event.repository.private
         run: |

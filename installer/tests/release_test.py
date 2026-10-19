@@ -42,6 +42,9 @@ class ReleaseTest(unittest.TestCase):
             "public/build/manifest.json": "{}\n", ".env.example": "APP_KEY=\n",
             "installer/bin/rahandaz-install": '#!/usr/bin/env bash\nset -eu\nprintf "%s\\n" "$@" >"$RAHANDAZ_RELEASE_TEST_MARKER"\nexit "${RAHANDAZ_RELEASE_TEST_EXIT:-0}"\n',
         }
+        for name in ('authorize.php', 'catalog.json', 'client.py', 'helper.py', 'provision.py'):
+            relative = 'infrastructure/operations/software/' + name
+            files[relative] = (ROOT / relative).read_text()
         for name, content in files.items():
             path = self.application / name
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -259,7 +262,20 @@ stage_12_systemd_services
             names = archive.getnames()
             self.assertIn("rahandaz/vendor/autoload.php", names)
             self.assertIn("rahandaz/storage/framework/views", names)
+            for name in ('authorize.php', 'catalog.json', 'client.py', 'helper.py', 'provision.py'):
+                relative = 'infrastructure/operations/software/' + name
+                self.assertEqual(archive.extractfile('rahandaz/' + relative).read(), (ROOT / relative).read_bytes())
             self.assertTrue(all(m.isfile() or m.isdir() for m in archive.getmembers()))
+
+    def test_incomplete_software_runtime_is_rejected_before_signing(self):
+        for name in ('authorize.php', 'catalog.json', 'client.py', 'helper.py', 'provision.py'):
+            path = self.application / 'infrastructure/operations/software' / name
+            content = path.read_bytes()
+            path.unlink()
+            result = self.assemble(output='missing-' + name)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn('missing a regular infrastructure/operations/software/' + name, result.stderr)
+            path.write_bytes(content)
 
     def test_bundle_is_reproducible(self):
         first, second = self.assemble("first"), self.assemble("second")
