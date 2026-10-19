@@ -21,10 +21,10 @@
 برای نصب نسخهٔ آزمایشی روی **سرور Ubuntu تازه و آزمایشی**، با SSH وارد سرور شوید و همین فرمان را کپی و اجرا کنید:
 
 ```bash
-curl -fsSL https://github.com/mohammadhejazirad/laravel-rahandaz/releases/download/v1.0.0-beta.5.1/install.sh | sudo bash
+(set -eu; rahandaz_install_dir=$(mktemp -d); trap 'rm -rf -- "$rahandaz_install_dir"' EXIT; curl --proto '=https' --proto-redir '=https' --tlsv1.2 -fsSL --connect-timeout 15 --max-time 120 --retry 3 https://github.com/mohammadhejazirad/laravel-rahandaz/releases/download/v1.0.0-beta.14.1/install.sh -o "$rahandaz_install_dir/install.sh"; printf "7fd496625ee8606859520c34dfe0c0df124dc628f8d65eaea5b1ac45350e6d94  %s\n" "$rahandaz_install_dir/install.sh" | sha256sum --check --status; if [ "$(id -u)" -eq 0 ]; then bash "$rahandaz_install_dir/install.sh"; else sudo bash "$rahandaz_install_dir/install.sh"; fi)
 ```
 
-فرمان، نصب کامل پنل را آغاز می‌کند: بستهٔ آمادهٔ برنامه و رابط را دریافت می‌کند، امضا و checksum بسته را بررسی می‌کند و PHP 8.4 و افزونه‌ها، Nginx، PostgreSQL، Redisهای اختصاصی، worker و scheduler را نصب یا تأیید می‌کند. Docker، Node.js، npm و Composer برای اجرای پنل لازم نیستند. در شروع، نشانی پنل از شما پرسیده می‌شود؛ برای ورود اولیه با HTTP از SSH tunnel طبق [راهنمای KVM](docs/KVM_INSTALLATION_TEST.md) استفاده کنید. اطلاعات ورود اولیه در فایل خصوصی `/root/rahandaz-initial-credentials.txt` قرار می‌گیرد.
+فرمان ابتدا اسکریپت نسخهٔ مشخص را دانلود و SHA-256 ثابت آن را بررسی می‌کند؛ فقط پس از تطبیق هش، نصب کامل پنل را آغاز می‌کند: بستهٔ آمادهٔ برنامه و رابط را دریافت می‌کند، امضا و checksum بسته را بررسی می‌کند و PHP 8.4 و افزونه‌ها، Nginx، PostgreSQL، Redisهای اختصاصی، worker و scheduler را نصب یا تأیید می‌کند. Docker، Node.js، npm و Composer برای اجرای پنل لازم نیستند. در شروع، نشانی پنل از شما پرسیده می‌شود؛ برای ورود اولیه با HTTP از SSH tunnel طبق [راهنمای KVM](docs/KVM_INSTALLATION_TEST.md) استفاده کنید. اطلاعات ورود اولیه در فایل خصوصی `/root/rahandaz-initial-credentials.txt` قرار می‌گیرد.
 
 پیش‌نیاز شروع این فرمان: Ubuntu Server نسخهٔ 22.04 یا 24.04 با معماری x86_64، دسترسی sudo، اینترنت و ابزارهای `curl`، CA certificates، `openssl`، `python3` و ابزارهای پایهٔ Ubuntu. این ابزارهای bootstrap باید از قبل موجود باشند؛ بقیهٔ وابستگی‌های پنل را نصب‌کننده مدیریت می‌کند. Ubuntu 26.04 فعلاً آزمایشی و غیرپیشنهادی است.
 
@@ -32,11 +32,11 @@ curl -fsSL https://github.com/mohammadhejazirad/laravel-rahandaz/releases/downlo
 
 ### جزئیات نصب امضاشده از GitHub
 
-مسیر توزیع راه‌انداز **[GitHub Releases](https://github.com/mohammadhejazirad/laravel-rahandaz/releases)** است؛ به CDN یا Docker برای نصب پنل نیاز نیست. نسخه آزمایشی امضاشدهٔ [v1.0.0-beta.5.1](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.5.1) در ۲۰۲۶-۱۰-۱۷ منتشر شد. این prerelease برای آزمون VM است؛ نصب Production هنوز تأیید نشده است. برای فایل‌های نسخه‌های بعدی، صفحه Releases را بررسی کنید.
+مسیر توزیع راه‌انداز **[GitHub Releases](https://github.com/mohammadhejazirad/laravel-rahandaz/releases)** است؛ به CDN یا Docker برای نصب پنل نیاز نیست. آخرین نسخهٔ آزمایشی امضاشده در زمان بررسی ۲۰۲۶-۱۰-۱۹، [v1.0.0-beta.14.1](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.14.1) در ۲۰۲۶-۱۰-۱۹ منتشر شد. این prerelease برای آزمون VM است؛ نصب Production هنوز تأیید نشده است. برای فایل‌های نسخه‌های بعدی، صفحه Releases را بررسی کنید.
 
-فرمان کوتاه بالا به فایل یک Release مشخص اشاره می‌کند؛ از شاخهٔ متغیر `main` یا `latest` نصب نمی‌کند. اعتماد اولیهٔ این روش به HTTPS گیت‌هاب و اسکریپت همان نسخه است؛ خود اسکریپت، امضای manifest و SHA-256 بستهٔ برنامه را با کلید عمومی تعبیه‌شده بررسی می‌کند. امضا و checksum اسکریپت عمومی همین نسخه نیز در بازبینی ۲۰۲۶-۱۰-۱۸ با کلید اعتماد مخزن تأیید شدند؛ این بررسی گواهی نصب VM نیست.
+فرمان کوتاه بالا به فایل یک Release مشخص اشاره می‌کند؛ از شاخهٔ متغیر `main` یا `latest` نصب نمی‌کند. اعتماد اولیهٔ این روش به فرمان بازبینی‌شدهٔ README و HTTPS گیت‌هاب است؛ SHA-256 ثابت در فرمان، پیش از اجرای اسکریپت بررسی می‌شود. خود اسکریپت، امضای manifest و SHA-256 بستهٔ برنامه را با کلید عمومی تعبیه‌شده بررسی می‌کند. امضای `SHA256SUMS` با کلید اعتماد مخزن و تطبیق هش اسکریپت و راهنمای `INSTALL.md` همین نسخه در بازبینی ۲۰۲۶-۱۰-۱۹ تأیید شدند؛ این بررسی گواهی نصب VM نیست.
 
-برای بررسی هش اسکریپت **پیش از اجرا**، راهنمای `INSTALL.md` همان Release یک فرمان جایگزین با دانلود در فایل موقت، SHA-256 ثابت و سپس اجرا دارد. برای بررسی امن طرح نصب از checkout مخزن، بدون تغییر میزبان:
+فرمان بالا از [راهنمای `INSTALL.md` همین Release](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/download/v1.0.0-beta.14.1/INSTALL.md) گرفته شده است؛ روش بررسی دستی و گزینهٔ `--verify-only` نیز در آن راهنما آمده‌اند. برای بررسی امن طرح نصب از checkout مخزن، بدون تغییر میزبان:
 
 ```bash
 bash installer/bin/rahandaz-install --plan --state-dir /tmp/rahandaz-plan
@@ -235,9 +235,9 @@ Helper ممتاز در طرح، یک برنامه root-owned با اسکیمای
 <a id="install"></a>
 ## نصب
 
-نصب Production هنوز تأیید نشده است. برای آزمون VM، بسته و راهنمای `INSTALL.md` نسخهٔ [v1.0.0-beta.5.1](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.5.1) موجود است. فرمان رسمی دانلود در README فقط پس از پذیرش آزمون‌های نصب درج می‌شود؛ URL یا checksum حدسی استفاده نمی‌شود.
+نصب Production هنوز تأیید نشده است. برای آزمون VM، بسته و راهنمای `INSTALL.md` نسخهٔ [v1.0.0-beta.14.1](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.14.1) موجود است. فرمان نسخه‌دار و دارای بررسی هش در بخش [نصب سریع و وضعیت نسخه اول](#نصب-سریع-و-وضعیت-نسخه-اول) برای سرور تازه و آزمایشی درج شده است.
 
-فرمان عمومی نصب، پس از قبولی Gateها، از `INSTALL.md` تولیدشده برای همان Release به بالای این README منتقل خواهد شد. وجود کد bootstrap یا Draft Release به معنی نصب Production تأییدشده نیست.
+وجود Release امضاشده و تأیید فایل‌های عمومی به معنی نصب Production تأییدشده نیست؛ پذیرش Gateهای نصب و گواهی VM همچنان لازم است.
 
 کد نصب‌کننده در `installer/` است. پیش‌فرض آن طرح است و سرور را تغییر نمی‌دهد:
 
