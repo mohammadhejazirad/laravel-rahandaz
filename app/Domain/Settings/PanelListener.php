@@ -36,7 +36,7 @@ final class PanelListener
 
     public function validPort(int $port): bool
     {
-        return $port >= 1024 && $port <= 65535 && ! in_array($port, [2049, 3659, 4045, 5060, 5061, 6000, 6566, 6665, 6666, 6667, 6668, 6669, 6697, 10080], true);
+        return $port >= 1024 && $port <= 65535 && ! in_array($port, [1719, 1720, 1723, 2049, 3659, 4045, 5060, 5061, 6000, 6566, 6665, 6666, 6667, 6668, 6669, 6697, 10080], true);
     }
 
     public function origin(array $state, ?int $port = null): string

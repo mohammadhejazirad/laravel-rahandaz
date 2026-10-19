@@ -54,7 +54,7 @@ class ListenerTests(unittest.TestCase):
         self.assertEqual((x.journal/EXEC/'env').stat().st_mode & 0o777,0o600)
 
     def test_invalid_ports_and_input_injection_never_mutate(self):
-        for n in (-1,22,80,443,6000,6667,10080,65536,True,'8081; reboot'):
+        for n in (-1,22,80,443,1719,1720,1723,6000,6667,10080,65536,True,'8081; reboot'):
             with self.assertRaises(m.Refused): self.listener.apply(payload(port=n))
         with self.assertRaises(m.Refused): self.listener.apply(payload(command='reboot'))
         self.unchanged(); self.assertEqual(self.calls,[])

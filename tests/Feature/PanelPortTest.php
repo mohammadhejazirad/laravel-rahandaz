@@ -97,7 +97,7 @@ class PanelPortTest extends TestCase
     {
         $this->withoutMiddleware(ThrottleRequests::class);
         $this->owner();
-        foreach ([22, 443, 6000, 6667, 65536, '8081; reboot'] as $port) {
+        foreach ([22, 443, 1719, 1720, 1723, 6000, 6667, 65536, '8081; reboot'] as $port) {
             $this->post(route('settings.panel-port'), ['port' => $port, 'expected_port' => 8080])->assertSessionHasErrors('port');
         }
         $this->post(route('settings.panel-port'), ['port' => 8081, 'expected_port' => 9000])->assertSessionHasErrors('port');

@@ -16,7 +16,7 @@ import time
 import urllib.request
 
 MARKER = '# rahandaz-managed: panel-listener-v1\n'
-UNSAFE_PORTS = {2049, 3659, 4045, 5060, 5061, 6000, 6566, 6665, 6666, 6667, 6668, 6669, 6697, 10080}
+UNSAFE_PORTS = {1719, 1720, 1723, 2049, 3659, 4045, 5060, 5061, 6000, 6566, 6665, 6666, 6667, 6668, 6669, 6697, 10080}
 
 class Refused(Exception):
     pass
