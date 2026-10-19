@@ -23,7 +23,7 @@ final class PanelPortController extends Controller
     {
         $workspace = CurrentWorkspace::get($request);
         abort_unless($listener->owner($request->user(), $workspace), 403);
-        $input = $request->validate(['port' => ['required', 'integer', 'between:1024,65535'], 'expected_port' => ['required', 'integer', 'between:1,65535']]);
+        $input = $request->validate(['port' => ['required', 'integer', 'between:1024,65535'], 'expected_port' => ['required', 'integer', 'between:1,65535'], 'request_id' => ['nullable', 'uuid']]);
         if (! $listener->validPort((int) $input['port'])) {
             throw ValidationException::withMessages(['port' => 'این پورت برای مرورگر مجاز نیست؛ پورت دیگری انتخاب کنید.']);
         }
@@ -32,7 +32,7 @@ final class PanelPortController extends Controller
         if ($state['port'] !== (int) $input['expected_port'] || $state['port'] === (int) $input['port']) {
             throw ValidationException::withMessages(['port' => 'پورت فعلی تغییر کرده یا با پورت جدید یکسان است؛ صفحه را تازه کنید.']);
         }
-        DB::transaction(function () use ($workspace, $request, $input): void {
+        $job = DB::transaction(function () use ($workspace, $request, $input): OperationJob {
             DB::select('select pg_advisory_xact_lock(hashtextextended(?, 0))', ['panel.port.update']);
             if (OperationJob::query()->where('type', 'panel.port.update')->whereIn('status', ['queued', 'running', 'waiting_retry'])->exists()) {
                 throw ValidationException::withMessages(['port' => 'یک تغییر پورت در حال اجراست؛ تا پایان آن صبر کنید.']);
@@ -45,12 +45,18 @@ final class PanelPortController extends Controller
             );
             $job = app(RecordOperation::class)->record(new RecordOperationData(
                 workspaceId: $workspace->id, actorId: $request->user()->id, type: 'panel.port.update',
-                idempotencyKey: (string) Str::uuid7(),
+                idempotencyKey: $input['request_id'] ?? (string) Str::uuid7(),
                 plan: ['contract_version' => '1', 'port' => (int) $input['port'], 'expected_port' => (int) $input['expected_port']],
                 mutatesHost: true, resourceType: 'local_host', resourceId: $host->id,
             ));
             app(AuditRecorder::class)->record($workspace, $request->user(), 'panel.port.requested', 'local_host', $host->uuid, AuditResult::Success, ['port' => (int) $input['port'], 'host_executed' => false], $request->attributes->get('request_id'), $request->ip(), $job);
+
+            return $job;
         });
+
+        if ($request->expectsJson()) {
+            return response()->json(['uuid' => $job->uuid, 'status' => $job->status->value], 202);
+        }
 
         return back()->with('status', 'درخواست تغییر پورت ثبت شد؛ پس از بررسی سلامت، پنل در نشانی جدید باز می‌شود.');
     }
@@ -59,8 +65,9 @@ final class PanelPortController extends Controller
     {
         $workspace = CurrentWorkspace::get($request);
         abort_unless($listener->owner($request->user(), $workspace), 403);
-        $request->validate(['job' => ['required', 'uuid']]);
-        $job = OperationJob::query()->where('workspace_id', $workspace->id)->where('type', 'panel.port.update')->where('uuid', $request->query('job'))->firstOrFail();
+        $input = $request->validate(['job' => ['required_without:request_id', 'nullable', 'uuid'], 'request_id' => ['required_without:job', 'nullable', 'uuid']]);
+        $query = OperationJob::query()->where('workspace_id', $workspace->id)->where('type', 'panel.port.update');
+        $job = isset($input['job']) ? $query->where('uuid', $input['job'])->firstOrFail() : $query->where('actor_id', $request->user()->id)->where('idempotency_key', $input['request_id'])->firstOrFail();
         $response = response()->json(['status' => $job->status->value, 'error_code' => $job->error_code])->header('Cache-Control', 'no-store');
         $state = $listener->state();
         if ($state !== null && is_int($state['previous_port'] ?? null) && $request->header('Origin') === $listener->origin($state, $state['previous_port'])) {

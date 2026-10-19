@@ -13,6 +13,7 @@ use App\Models\OperationJob;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Facades\Process;
+use Illuminate\Support\Str;
 use Tests\Concerns\CreatesPanelAccount;
 use Tests\TestCase;
 
@@ -79,6 +80,25 @@ class PanelPortTest extends TestCase
         $this->assertSame((string) $host->id, (string) $job->resource_id);
         $this->getJson(route('settings.panel-port.status', ['job' => $job->uuid]))->assertOk();
         $this->get(route('dashboard'))->assertRedirect(route('setup.show'));
+        Process::assertNothingRan();
+    }
+
+    public function test_client_can_find_its_request_after_losing_the_post_response_during_port_switch(): void
+    {
+        $this->owner();
+        $requestId = (string) Str::uuid();
+        $this->postJson(route('settings.panel-port'), ['port' => 8081, 'expected_port' => 8080, 'request_id' => $requestId])->assertStatus(202)->assertJsonPath('status', 'queued');
+        $job = OperationJob::query()->where('idempotency_key', $requestId)->sole();
+        $this->getJson(route('settings.panel-port.status', ['request_id' => $requestId]))->assertOk()->assertJsonPath('status', 'queued');
+        $job->update(['status' => 'succeeded']);
+        $state = json_decode(file_get_contents($this->state), true);
+        $state['port'] = 8081;
+        $state['previous_port'] = 8080;
+        file_put_contents($this->state, json_encode($state));
+        $this->withHeader('Origin', 'http://192.0.2.1:8080')->getJson(route('settings.panel-port.status', ['request_id' => $requestId]))->assertOk()->assertJsonPath('status', 'succeeded')->assertHeader('Access-Control-Allow-Origin', 'http://192.0.2.1:8080');
+        [$other] = $this->panelAccount(setupComplete: true);
+        $this->flushSession();
+        $this->actingAs($other)->getJson(route('settings.panel-port.status', ['request_id' => $requestId]))->assertNotFound();
         Process::assertNothingRan();
     }
 

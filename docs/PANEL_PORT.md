@@ -33,3 +33,5 @@ bash tests/infrastructure/ubuntu-lab/scripts/test-panel-port.sh 26.04
 fixture سرویس‌ها جای systemd/Nginx واقعی یا VM certification نیست. نتیجهٔ اجرا در OPERATIONS_TEST_MATRIX و گزارش VPS ثبت می‌شود.
 
 در نصب تازه، نخستین درخواست معتبر مالک فقط هویت protected میزبان محلی workspace را با وضعیت `pending_probe` و سازگاری `untested` ثبت می‌کند؛ این ثبت، آزمون میزبان یا تکمیل setup نیست. صفحهٔ تنظیمات حساب و endpointهای محدود پورت پیش از تکمیل setup قابل استفاده‌اند؛ سایر صفحه‌های میزبان همچنان پشت setup باقی می‌مانند.
+
+مرورگر پیش از ارسال POST یک request_id تصادفی می‌سازد و نتیجه را با همان شناسه، احراز هویت مالک و محدودهٔ workspace روی هر دو origin بررسی می‌کند. پاسخ202 فقط ثبت Job است. گم‌شدن پاسخ هنگام بسته‌شدن پورت قدیمی مانع یافتن نتیجه نمی‌شود؛ redirect همچنان به succeeded واقعی وابسته است. UUID درخواست روی HTTP با getRandomValues ساخته می‌شود و به randomUUID نیازمند HTTPS متکی نیست.
