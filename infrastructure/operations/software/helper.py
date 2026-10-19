@@ -363,14 +363,23 @@ def download_archive_once(entry, output):
 
 
 def download_archive(entry, output):
-    for attempt in range(2):
-        try:
-            return download_archive_once(entry, output)
-        except Refused as error:
-            if str(error) not in ('DOWNLOAD_FAILED', 'DOWNLOAD_ACCESS_DENIED', 'DOWNLOAD_RATE_LIMITED') or attempt == 1 or any(not url.startswith('https://') for url in ([entry['url']] if 'url' in entry else [entry['base_url']])):
-                raise
-            output.unlink(missing_ok=True)
-            time.sleep(2)
+    if output.exists() or output.is_symlink():
+        raise Refused('UNSAFE_DESTINATION')
+    candidates = [entry]
+    if 'parts' not in entry:
+        candidates += [entry | {'url': url} for url in entry.get('fallback_urls', [])]
+    for index, candidate in enumerate(candidates):
+        for attempt in range(2):
+            try:
+                return download_archive_once(candidate, output)
+            except Refused as error:
+                if str(error) not in ('DOWNLOAD_FAILED', 'DOWNLOAD_ACCESS_DENIED', 'DOWNLOAD_RATE_LIMITED') or any(not url.startswith('https://') for url in ([candidate['url']] if 'url' in candidate else [candidate['base_url']])):
+                    raise
+                if attempt == 1 and index == len(candidates)-1:
+                    raise
+                output.unlink(missing_ok=True)
+                if attempt == 0:
+                    time.sleep(2)
 
 
 def safe_extract(archive, destination, entry):

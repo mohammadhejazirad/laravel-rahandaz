@@ -211,6 +211,22 @@ class ContractTests(unittest.TestCase):
             with self.assertRaisesRegex(helper.Refused, '^PACKAGE_SERVICE_FAILED$'):
                 helper.verify_optional_service('mysql')
 
+    def test_pinned_mirror_fallback_never_accepts_a_different_checksum(self):
+        with tempfile.TemporaryDirectory() as name:
+            entry = {'url': 'https://official.invalid/archive', 'fallback_urls': ['https://mirror.invalid/archive'], 'sha256': hashlib.sha256(b'official bytes').hexdigest()}
+            denied = helper.urllib.error.HTTPError(entry['url'], 403, 'Forbidden', {}, None)
+            with patch.object(helper.time, 'sleep'), patch.object(helper.urllib.request, 'build_opener') as opener:
+                opener.return_value.open.side_effect = [denied, denied, io.BytesIO(b'official bytes')]
+                target = Path(name)/'download'
+                helper.download_archive(entry, target)
+                self.assertEqual(target.read_bytes(), b'official bytes')
+                self.assertEqual([call.args[0] for call in opener.return_value.open.call_args_list], [entry['url'], entry['url'], entry['fallback_urls'][0]])
+        with tempfile.TemporaryDirectory() as name, patch.object(helper.urllib.request, 'build_opener') as opener:
+            opener.return_value.open.return_value = io.BytesIO(b'changed mirror bytes')
+            with self.assertRaisesRegex(helper.Refused, '^CHECKSUM_MISMATCH$'):
+                helper.download_archive(entry, Path(name)/'download')
+            self.assertEqual(opener.return_value.open.call_count, 1)
+
     @unittest.skipUnless(os.geteuid() == 0, 'Real root state ownership is tested in the Ubuntu lab.')
     def test_real_socket_peer_rejection_async_ack_idempotency_and_crash_reconcile(self):
         with tempfile.TemporaryDirectory() as name:

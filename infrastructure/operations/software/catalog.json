@@ -230,12 +230,18 @@
         "22.04": {
           "url": "https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-ubuntu2204-8.0.34.tgz",
           "sha256": "8eef2a821651ac20f732b6636731a51b407675674ced8d7f1f1578ebc7aced43",
-          "archive_root": "mongodb-linux-x86_64-ubuntu2204-8.0.34"
+          "archive_root": "mongodb-linux-x86_64-ubuntu2204-8.0.34",
+          "fallback_urls": [
+            "https://github.com/mohammadhejazirad/laravel-rahandaz/releases/download/v1.0.0-beta.37.1/mongodb-linux-x86_64-ubuntu2204-8.0.34.tgz"
+          ]
         },
         "24.04": {
           "url": "https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-ubuntu2404-8.0.34.tgz",
           "sha256": "3e55cdcf7013fbc805d29d8195230df4b23c7688733ee15ad58ac6bc2a416611",
-          "archive_root": "mongodb-linux-x86_64-ubuntu2404-8.0.34"
+          "archive_root": "mongodb-linux-x86_64-ubuntu2404-8.0.34",
+          "fallback_urls": [
+            "https://github.com/mohammadhejazirad/laravel-rahandaz/releases/download/v1.0.0-beta.37.1/mongodb-linux-x86_64-ubuntu2404-8.0.34.tgz"
+          ]
         }
       },
       "destination": "/opt/rahandaz/runtimes/mongodb/8.0.34",
