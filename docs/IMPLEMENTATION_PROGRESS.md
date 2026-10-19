@@ -6,7 +6,7 @@
 
 انتشار عمومی امضاشدهٔ beta16 از commit `7a2ec63` و CI موفق بررسی شد؛ SHA256SUMS، امضا، manifest و bootstrap با کلید pin‌شده تأیید شدند. ارتقای واقعی VPS Ubuntu 24.04 از beta14 به beta16 با قفل، توقف writerهای خود پنل، `pg_dump` با فرمت custom، اعتبارسنجی فهرست restore و archive پیکربندی/runtime انجام شد. migration و seed یکسان بودند و اجرا نشدند؛ کلیدها و credentials بدون تغییر ماندند. سلامت HTTP، doctor با service user و سرویس‌ها پس از فعال‌سازی موفق شد. تونل خصوصی SSH و صفحهٔ ورود در Chrome مالک باز شدند.
 
-بررسی پس از ارتقا نشان داد Backend بدون env override رکورد توسعه را می‌خواند؛ fallback به release.json نصب‌شده اصلاح و آزمون regression اضافه شد. CLI updater همچنان فقط prepare می‌کند و assets فعلی metadata مجزای امضاشده ندارند؛ این ارتقای مهندسی‌شده گواهی updater خودکار نیست. محدودیت و مسیر واقعی در SELF_UPDATE ثبت شدند. گزارش نهایی نسخه و Matrix پس از آزمون انتشار در سند VPS به‌روزرسانی می‌شود.
+بررسی پس از ارتقا نشان داد Backend بدون env override رکورد توسعه را می‌خواند؛ fallback به release.json نصب‌شده اصلاح و آزمون regression اضافه شد. CLI updater همچنان فقط prepare می‌کند و assets فعلی metadata مجزای امضاشده ندارند؛ این ارتقای مهندسی‌شده گواهی updater خودکار نیست. محدودیت و مسیر واقعی در SELF_UPDATE ثبت شدند. نسخهٔ نهایی beta17 روی VPS فعال و Backend/CLI هماهنگ شدند؛ اجرای مجدد ALREADY_CURRENT، ورود واقعی و هر ۶۷ فایل build موفق بودند. PHP محلی ۱۹۵ آزمون/۳۹۷۵ assertion و CI انتشار جدید موفق‌اند؛ Matrix کانتینری قبلی با فایل‌های Bash بدون تغییر مرجع است و گواهی VM تازه‌ای ادعا نمی‌شود. backup، محدودیت HTTPS/تغییر گذرواژهٔ مالک و نتایج کامل در [گزارش VPS](IRAN_VPS_INSTALL_RECOVERY_2026_10_19.md) ثبت شدند.
 
 ## ۲۰۲۶-۱۰-۱۹ — رفع توقف نصب روی VPS واقعی ایران
 

@@ -21,7 +21,7 @@
 برای نصب نسخهٔ آزمایشی روی **سرور Ubuntu تازه و آزمایشی**، با SSH وارد سرور شوید و همین فرمان را کپی و اجرا کنید:
 
 ```bash
-(set -eu; rahandaz_install_dir=$(mktemp -d); trap 'rm -rf -- "$rahandaz_install_dir"' EXIT; curl --proto '=https' --proto-redir '=https' --tlsv1.2 -fsSL --connect-timeout 15 --max-time 120 --retry 3 https://github.com/mohammadhejazirad/laravel-rahandaz/releases/download/v1.0.0-beta.14.1/install.sh -o "$rahandaz_install_dir/install.sh"; printf "7fd496625ee8606859520c34dfe0c0df124dc628f8d65eaea5b1ac45350e6d94  %s\n" "$rahandaz_install_dir/install.sh" | sha256sum --check --status; if [ "$(id -u)" -eq 0 ]; then bash "$rahandaz_install_dir/install.sh"; else sudo bash "$rahandaz_install_dir/install.sh"; fi)
+(set -eu; rahandaz_install_dir=$(mktemp -d); trap 'rm -rf -- "$rahandaz_install_dir"' EXIT; curl --proto '=https' --proto-redir '=https' --tlsv1.2 -fsSL --connect-timeout 15 --max-time 120 --retry 3 https://github.com/mohammadhejazirad/laravel-rahandaz/releases/download/v1.0.0-beta.17.1/install.sh -o "$rahandaz_install_dir/install.sh"; printf "06a837887b7004ac6e02150589c2557be8353fac510377e71814fd20b29c78d8  %s\n" "$rahandaz_install_dir/install.sh" | sha256sum --check --status; if [ "$(id -u)" -eq 0 ]; then bash "$rahandaz_install_dir/install.sh"; else sudo bash "$rahandaz_install_dir/install.sh"; fi)
 ```
 
 فرمان ابتدا اسکریپت نسخهٔ مشخص را دانلود و SHA-256 ثابت آن را بررسی می‌کند؛ فقط پس از تطبیق هش، نصب کامل پنل را آغاز می‌کند: بستهٔ آمادهٔ برنامه و رابط را دریافت می‌کند، امضا و checksum بسته را بررسی می‌کند و PHP 8.4 و افزونه‌ها، Nginx، PostgreSQL، Redisهای اختصاصی، worker و scheduler را نصب یا تأیید می‌کند. Docker، Node.js، npm و Composer برای اجرای پنل لازم نیستند. در شروع، نشانی پنل از شما پرسیده می‌شود؛ برای ورود اولیه با HTTP از SSH tunnel طبق [راهنمای KVM](docs/KVM_INSTALLATION_TEST.md) استفاده کنید. اطلاعات ورود اولیه در فایل خصوصی `/root/rahandaz-initial-credentials.txt` قرار می‌گیرد.
@@ -30,13 +30,25 @@
 
 **این نسخه beta است؛ نصب Production هنوز تأیید نشده است.** نصب کامل و reboot/recovery روی سه Ubuntu هنوز گواهی VM ندارند. نصب پنل نیز موتور عملیات میزبان را فعال نمی‌کند؛ حالت پیش‌فرض `disabled` باقی می‌ماند. وضعیت جاری در [گزارش تکمیل عملیاتی](docs/OPERATIONAL_TEST_REPORT.md) و [برنامه اجرایی](docs/OPERATIONAL_COMPLETION_PLAN.md) ثبت شده است.
 
+### بازکردن پنل مدیریت پس از نصب
+
+برای origin اولیهٔ `http://127.0.0.1`، روی **رایانهٔ خودتان** این تونل را اجرا کنید؛ `SERVER_IP` را با IP سرور جایگزین کنید و ترمینال را باز نگه دارید:
+
+```bash
+ssh -N -L 127.0.0.1:18080:127.0.0.1:80 root@SERVER_IP
+```
+
+سپس در مرورگر همان رایانه، `http://127.0.0.1:18080/rahandaz/login` را باز کنید. اطلاعات ورود در `/root/rahandaz-initial-credentials.txt` روی سرور است؛ در اولین ورود تغییر گذرواژه الزامی است. برای دسترسی عمومی، دامنه و HTTPS معتبر باید جداگانه پیکربندی شوند؛ origin لوپ‌بک به‌معنی ارائهٔ پنل روی IP عمومی نیست.
+
+فرمان نصب سریع برای نصب تازه است. updater فعلی فقط release را آماده می‌کند و فعال‌سازی خودکار ندارد؛ نتیجهٔ `incomplete` یا exit code ۱۰، ارتقای موفق نیست. محدودیت metadata امضاشده و تفاوت ارتقای کنترل‌شده با CLI در [راهنمای به‌روزرسانی](docs/SELF_UPDATE.md) آمده است.
+
 ### جزئیات نصب امضاشده از GitHub
 
-مسیر توزیع راه‌انداز **[GitHub Releases](https://github.com/mohammadhejazirad/laravel-rahandaz/releases)** است؛ به CDN یا Docker برای نصب پنل نیاز نیست. آخرین نسخهٔ آزمایشی امضاشده در زمان بررسی ۲۰۲۶-۱۰-۱۹، [v1.0.0-beta.14.1](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.14.1) در ۲۰۲۶-۱۰-۱۹ منتشر شد. این prerelease برای آزمون VM است؛ نصب Production هنوز تأیید نشده است. برای فایل‌های نسخه‌های بعدی، صفحه Releases را بررسی کنید.
+مسیر توزیع راه‌انداز **[GitHub Releases](https://github.com/mohammadhejazirad/laravel-rahandaz/releases)** است؛ به CDN یا Docker برای نصب پنل نیاز نیست. آخرین نسخهٔ آزمایشی امضاشده در زمان بررسی ۲۰۲۶-۱۰-۱۹، [v1.0.0-beta.17.1](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.17.1) در ۲۰۲۶-۱۰-۱۹ منتشر شد. این prerelease برای آزمون VM است؛ نصب Production هنوز تأیید نشده است. برای فایل‌های نسخه‌های بعدی، صفحه Releases را بررسی کنید.
 
 فرمان کوتاه بالا به فایل یک Release مشخص اشاره می‌کند؛ از شاخهٔ متغیر `main` یا `latest` نصب نمی‌کند. اعتماد اولیهٔ این روش به فرمان بازبینی‌شدهٔ README و HTTPS گیت‌هاب است؛ SHA-256 ثابت در فرمان، پیش از اجرای اسکریپت بررسی می‌شود. خود اسکریپت، امضای manifest و SHA-256 بستهٔ برنامه را با کلید عمومی تعبیه‌شده بررسی می‌کند. امضای `SHA256SUMS` با کلید اعتماد مخزن و تطبیق هش اسکریپت و راهنمای `INSTALL.md` همین نسخه در بازبینی ۲۰۲۶-۱۰-۱۹ تأیید شدند؛ این بررسی گواهی نصب VM نیست.
 
-فرمان بالا از [راهنمای `INSTALL.md` همین Release](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/download/v1.0.0-beta.14.1/INSTALL.md) گرفته شده است؛ روش بررسی دستی و گزینهٔ `--verify-only` نیز در آن راهنما آمده‌اند. برای بررسی امن طرح نصب از checkout مخزن، بدون تغییر میزبان:
+فرمان بالا از [راهنمای `INSTALL.md` همین Release](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/download/v1.0.0-beta.17.1/INSTALL.md) گرفته شده است؛ روش بررسی دستی و گزینهٔ `--verify-only` نیز در آن راهنما آمده‌اند. برای بررسی امن طرح نصب از checkout مخزن، بدون تغییر میزبان:
 
 ```bash
 bash installer/bin/rahandaz-install --plan --state-dir /tmp/rahandaz-plan
@@ -50,7 +62,7 @@ bash installer/bin/rahandaz-install --plan --state-dir /tmp/rahandaz-plan
 
 درخت `installer/` و prerelease عمومی امضاشده موجودند؛ نصب کامل Production هنوز تأیید نشده و مجوز پروژه [Apache-2.0](LICENSE) است. حالت پیش‌فرض `RAHANDAZ_EXECUTION_MODE=disabled` است. در این حالت پنل دستور میزبان اجرا نمی‌کند و هیچ عملیات یا deployment را موفق اعلام نمی‌کند. جدول وضعیت پایین، قابلیت آماده را از طرح محصول جدا می‌کند. جزئیات پیشرفت در [docs/IMPLEMENTATION_PROGRESS.md](docs/IMPLEMENTATION_PROGRESS.md) و مشخصات در [.docs/PROJECT_SPEC.md](.docs/PROJECT_SPEC.md) است.
 
-نشان‌های بالا فقط نسخه قفل‌شده Laravel و محدودیت PHP را می‌گویند. تصویر PostgreSQL به image توسعه `postgres:16-alpine` در `compose.dev.yml` اشاره دارد، نه به یک نسخه production آزموده‌شده روی Ubuntu. فایل مجوز Apache-2.0 موجود است؛ وجود Release عمومی و موفقیت CI باید از GitHub بررسی شود. فایل‌های workflow در `.github/workflows/` هستند و در این مخزن اجرا نشده‌اند، پس نشان سبز CI معنا ندارد.
+نشان‌های بالا فقط نسخه قفل‌شده Laravel و محدودیت PHP را می‌گویند. تصویر PostgreSQL به image توسعه `postgres:16-alpine` در `compose.dev.yml` اشاره دارد، نه به یک نسخه production آزموده‌شده روی Ubuntu. فایل مجوز Apache-2.0 موجود است؛ وجود Release عمومی و موفقیت CI باید از GitHub بررسی شود. اجرای [CI انتشار beta17](https://github.com/mohammadhejazirad/laravel-rahandaz/actions/runs/39249749025) روی commit `8c3c10d` موفق شده است؛ موفقیت CI جای گواهی نصب و reboot روی VMهای هدف نیست.
 
 ## فهرست
 
@@ -235,7 +247,7 @@ Helper ممتاز در طرح، یک برنامه root-owned با اسکیمای
 <a id="install"></a>
 ## نصب
 
-نصب Production هنوز تأیید نشده است. برای آزمون VM، بسته و راهنمای `INSTALL.md` نسخهٔ [v1.0.0-beta.14.1](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.14.1) موجود است. فرمان نسخه‌دار و دارای بررسی هش در بخش [نصب سریع و وضعیت نسخه اول](#نصب-سریع-و-وضعیت-نسخه-اول) برای سرور تازه و آزمایشی درج شده است.
+نصب Production هنوز تأیید نشده است. برای آزمون VM، بسته و راهنمای `INSTALL.md` نسخهٔ [v1.0.0-beta.17.1](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.17.1) موجود است. فرمان نسخه‌دار و دارای بررسی هش در بخش [نصب سریع و وضعیت نسخه اول](#نصب-سریع-و-وضعیت-نسخه-اول) برای سرور تازه و آزمایشی درج شده است.
 
 وجود Release امضاشده و تأیید فایل‌های عمومی به معنی نصب Production تأییدشده نیست؛ پذیرش Gateهای نصب و گواهی VM همچنان لازم است.
 

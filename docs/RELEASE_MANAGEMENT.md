@@ -51,7 +51,7 @@
 3. در Settings → Environments محیط `release-signing` را بسازید و deployment branches را فقط `main` قرار دهید. برای انتشار کاملاً خودکار required reviewer تعیین نکنید؛ اگر reviewer تنظیم شود، هر انتشار تا تأیید او منتظر می‌ماند. محافظت branch اصلی و review تغییرات workflow/signing tooling همچنان لازم است.
 4. متن PEM کلید خصوصی را به Environment secret با نام `RAHANDAZ_RELEASE_SIGNING_KEY` بدهید. build/test به این secret دسترسی ندارد. مرحله امضا public key مشتق از secret را با فایل pin‌شده مقایسه می‌کند و عدم تطابق شکست است.
 5. در Settings → Secrets and variables → Actions → Variables متغیر Repository با نام `RAHANDAZ_AUTOMATIC_PRERELEASES` و مقدار دقیق `true` بسازید. نبودن آن، ساخت خودکار را متوقف نمی‌کند ولی انتشار را غیرفعال نگه می‌دارد. این متغیر باید Repository-level باشد، نه صرفاً Environment-level؛ شرط job پیش از ورود به Environment ارزیابی می‌شود.
-6. workflow، public key و تغییرات پروژه را به `main` push کنید. همه pushها، حتی تغییر docs، build/test تازه دارند؛ branchهای دیگر و pull requestها وارد workflow امضای Release نمی‌شوند. هیچ tag دستی برای مسیر خودکار لازم نیست.
+6. workflow، public key و تغییرات پروژه را به `main` push کنید. همه pushهای معمول، حتی تغییر docs، build/test تازه دارند؛ commit صرفاً مستنداتی با دستور استاندارد `[skip ci]` از این رفتار مستثناست (مثلاً ثبت هش و نتیجهٔ آزمون Release منتشرشده بدون ایجاد candidate تکراری). branchهای دیگر و pull requestها وارد workflow امضای Release نمی‌شوند. هیچ tag دستی برای مسیر خودکار لازم نیست.
 
 ## رفتار هر push و اجرای دستی
 
