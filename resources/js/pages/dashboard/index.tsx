@@ -1,6 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Activity, ArrowUpLeft, CircleX, Clock3, FolderGit2, Server, type LucideIcon } from 'lucide-react';
 import { PersianDate } from '@/components/dates/persian-date';
+import { ServerLocationCard, type ServerLocation } from '@/components/servers/server-location-card';
 import { UpdateAvailableCard } from '@/components/updates/UpdateAvailableCard';
 import type { ReleaseStatus } from '@/components/updates/update-status';
 import { Button } from '@/components/ui/button';
@@ -19,9 +20,10 @@ interface DashboardPageProps {
     recent_projects: { uuid: string; name: string; slug: string; status: string; declared_type: string; environment_count: number }[];
     recent_jobs: { uuid: string; type: string; status: string; created_at: string | null }[];
     release: ReleaseStatus;
+    location: ServerLocation;
 }
 
-export default function Dashboard({ workspace, execution_mode, operations, inventory, recent_projects, recent_jobs, release }: DashboardPageProps) {
+export default function Dashboard({ workspace, execution_mode, operations, inventory, recent_projects, recent_jobs, release, location }: DashboardPageProps) {
     const { app, enum_labels: labels } = usePage<SharedProps>().props;
     const base = app.base_path;
     return <AppLayout title="داشبورد" description="پروژه‌ها، کارهای در جریان و قدم بعدی شما در یک نگاه.">
@@ -41,6 +43,7 @@ export default function Dashboard({ workspace, execution_mode, operations, inven
                     {!recent_projects.length ? <EmptyState title="پروژه‌هایتان را از اینجا مدیریت کنید" action={<Button asChild variant="secondary"><Link href={`${base}/tutorials/projects-environments`}>آشنایی با پروژه و محیط</Link></Button>}>پس از ثبت پروژه، منبع کد و محیط‌های آن در دسترس خواهند بود.</EmptyState> : <ul className="grid gap-3 sm:grid-cols-2">{recent_projects.map(project => <li key={project.uuid} className="rounded-xl border border-line p-4"><Link href={`${base}/projects/${project.uuid}`} className="inline-flex min-h-11 items-center break-words font-semibold hover:text-accent">{project.name}</Link><p dir="ltr" className="break-all font-mono text-xs text-muted">{project.slug}</p><div className="mt-4 flex flex-wrap items-center gap-2"><StatusBadge value={project.status} /><span className="text-xs text-muted">{labelOf(project.declared_type, labels)} · {project.environment_count.toLocaleString('fa-IR')} محیط</span></div></li>)}</ul>}
                 </Card>
                 <UpdateAvailableCard release={release} detailsHref={`${base}/settings/updates`} />
+                <ServerLocationCard location={location} />
                 <Card><h2 className="font-semibold">میزبان و مشاهده‌ها</h2><div className="mt-4 grid gap-3 sm:grid-cols-2"><Link href={`${base}/servers`} className="flex min-h-16 items-center gap-3 rounded-xl bg-surface-muted p-3"><Server className="size-5 text-accent" aria-hidden="true" /><span className="text-sm">{inventory.servers.toLocaleString('fa-IR')} میزبان ثبت‌شده</span></Link><Link href={`${base}/monitoring`} className="flex min-h-16 items-center gap-3 rounded-xl bg-surface-muted p-3"><Activity className="size-5 text-accent" aria-hidden="true" /><span className="text-sm">{inventory.metric_samples.toLocaleString('fa-IR')} نمونهٔ پایش</span></Link></div><p className="mt-3 text-xs leading-6 text-muted">زمان آخرین مشاهده و تازگی داده را در صفحهٔ میزبان یا پایش بررسی کنید.</p></Card>
             </div>
             <div className="space-y-5">

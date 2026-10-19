@@ -69,6 +69,14 @@ installer_detect_os() {
     return 0
 }
 
+installer_os_install_target() {
+    case "${INSTALLER_OS_VERSION}:${INSTALLER_OS_CODENAME}" in
+        22.04:jammy | 24.04:noble) return 0 ;;
+    esac
+    installer_error UBUNTU_NOT_RECOMMENDED "Ubuntu ${INSTALLER_OS_VERSION} is not an install target. Use 22.04 LTS or 24.04 LTS. Ubuntu 26.04 is not an LTS install target and Iranian mirrors are not recommended for it."
+    return 1
+}
+
 installer_php_baseline_available() {
     # Rahandaz itself uses PHP 8.4 from the pinned repository.
     # Ubuntu archive packages do not provide that series: jammy is 8.1, noble is 8.3, resolute is 8.5.

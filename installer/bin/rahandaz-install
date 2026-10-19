@@ -23,6 +23,12 @@ source "${INSTALLER_HOME}/lib/render.sh"
 source "${INSTALLER_HOME}/lib/runtime.sh"
 # shellcheck source=../lib/engine.sh
 source "${INSTALLER_HOME}/lib/engine.sh"
+# shellcheck source=../lib/geo.sh
+source "${INSTALLER_HOME}/lib/geo.sh"
+# shellcheck source=../lib/chrome.sh
+source "${INSTALLER_HOME}/lib/chrome.sh"
+# shellcheck source=../lib/continue.sh
+source "${INSTALLER_HOME}/lib/continue.sh"
 
 MODE="plan"
 PREFER_IRANIAN=0
@@ -46,12 +52,16 @@ Rahandaz installer $(cat "${INSTALLER_HOME}/VERSION")
 Usage:
   rahandaz-install --plan
   rahandaz-install --apply --artifact FILE --manifest FILE --signature FILE --public-key FILE
-  rahandaz-install --resume|--repair|--upgrade [same release arguments]
+  rahandaz-install --apply|--resume|--repair|--upgrade [same release arguments]
   rahandaz-install --doctor
 
 --plan is the default and does not change the server.
 --apply installs only after the manifest signature and checksum verify.
-Public GitHub bootstraps are generated per signed release; there is no curl|bash entry.
+Running the same --apply command again continues finished stages.
+A newer verified release is prepared beside the current one and does not delete projects or databases.
+Install targets are Ubuntu 22.04 and 24.04 LTS. Ubuntu 26.04 stops before any change.
+--iranian-mirrors yes|no answers the mirror question. On Iran, apply asks before changing mirrors.
+--install-chrome yes|no installs pinned Chrome for Testing. The default on a terminal is to ask.
 EOF
 }
 
@@ -63,7 +73,28 @@ while [[ $# -gt 0 ]]; do
         --repair) MODE="repair" ;;
         --upgrade) MODE="upgrade" ;;
         --doctor) MODE="doctor" ;;
-        --prefer-iranian-mirrors) PREFER_IRANIAN=1 ;;
+        --prefer-iranian-mirrors) PREFER_IRANIAN=1; IRANIAN_MIRRORS="yes" ;;
+        --iranian-mirrors)
+            case "${2:-}" in
+                yes | no) IRANIAN_MIRRORS="$2" ;;
+                *)
+                    installer_error INVALID_INPUT "--iranian-mirrors requires yes or no."
+                    exit 2
+                    ;;
+            esac
+            [[ "$IRANIAN_MIRRORS" == "yes" ]] && PREFER_IRANIAN=1
+            shift
+            ;;
+        --install-chrome)
+            case "${2:-}" in
+                yes | no) INSTALL_CHROME="$2" ;;
+                *)
+                    installer_error INVALID_INPUT "--install-chrome requires yes or no."
+                    exit 2
+                    ;;
+            esac
+            shift
+            ;;
         --approve-migrations) APPROVE_MIGRATIONS=1 ;;
         --artifact) INSTALLER_ARTIFACT="$2"; shift ;;
         --manifest) INSTALLER_MANIFEST="$2"; shift ;;
@@ -134,6 +165,8 @@ fi
 installer_detect_os || exit 1
 
 if [[ "$MODE" != "plan" ]]; then
+    installer_os_install_target || exit 1
+    installer_decide_iranian_mirrors || exit $?
     installer_mutation_allowed || exit 1
     if [[ -z "$INSTALLER_ARTIFACT" || -z "$INSTALLER_MANIFEST" || -z "$INSTALLER_SIGNATURE" ]]; then
         installer_error UNVERIFIED_ARTIFACT "Apply requires --artifact, --manifest, and --signature."
@@ -142,6 +175,16 @@ if [[ "$MODE" != "plan" ]]; then
     key="$(installer_public_key "$INSTALLER_PUBLIC_KEY")" || exit 1
     installer_verify_manifest "$INSTALLER_MANIFEST" "$INSTALLER_SIGNATURE" "$key" "$INSTALLER_ARTIFACT" || exit 1
     installer_say "Release ${INSTALLER_RELEASE_VERSION} verified."
+    set +e
+    installer_route_existing
+    route_status=$?
+    set -e
+    case "$route_status" in
+        0) ;;
+        10) exit 10 ;;
+        20) exit 0 ;;
+        *) exit "$route_status" ;;
+    esac
 fi
 
 run_stage() {
@@ -193,7 +236,7 @@ run_stage() {
         installer_state_set error_code STAGE_FAILED
     fi
     installer_say "[FAILED] ${id}"
-    installer_say "RECOVERY fix $(installer_state_get error_code) and run --resume. Completed stages are kept."
+    installer_say "RECOVERY fix $(installer_state_get error_code) and run the same install command again. Completed stages are kept."
     return 1
 }
 

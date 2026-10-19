@@ -2,6 +2,15 @@
 
 این فایل گزارش واقعیت مخزن است. نقشه در `.docs/ROADMAP.md` و مشخصات در `.docs/PROJECT_SPEC.md` است.
 
+## ۲۰۲۶-۱۰-۱۹ — ادامهٔ نصب، Ubuntu 26، موقعیت IP و Chrome
+
+اعمال نصب روی Ubuntu 26.04 پیش از mutation با `UBUNTU_NOT_RECOMMENDED` می‌ایستد. 22.04 و 24.04 هدف نصب مانده‌اند. همان `--apply` مرحلهٔ موفق را رد می‌کند و `CONTINUE` چاپ می‌کند. اگر نتیجهٔ قبلی success و نسخهٔ artifact جدیدتر باشد، نسخه فقط آماده می‌شود؛ symlink فعلی و دادهٔ پایگاه جابه‌جا نمی‌شوند. نسخهٔ برابر دوباره نصب نمی‌شود. فعال‌سازی به‌روزرسانی روی VM هنوز healthcheck نشده است.
+
+تشخیص کشور در `installer/lib/geo.sh` و `ServerLocationLookup` است: IP عمومی، سپس چابکان، ipwho.is و ip-api. ایران یا تشخیص ناموفق پرسش مخزن را می‌آورد. کارت موقعیت روی داشبورد و صفحهٔ سرور است و در آزمون‌ها شبکه را صدا نمی‌زند. Chrome for Testing با پین SHA-256 در کاتالوگ و نصب‌کننده است و از apt گوگل استفاده نمی‌کند. lifecycle آن untested است و روی VM نصب نشده است.
+
+`bash installer/tests/run.sh` روی همین میزبان ۷۷ مورد و ۰ شکست داشت، شامل geo/chrome و ادامهٔ نصب آفلاین. `ServerLocationLookupTest` با `DB_HOST=127.0.0.1` پنج آزمون و ۲۹ assertion را گذراند. Pint، `npm run lint`، `npx tsc --noEmit` و `npm run build` خروج صفر داشتند. API تشخیص در آزمون ساختگی بود. مرورگر برای کلیک روی کارت نبود. نصب Chrome، healthcheck به‌روزرسانی و Matrix زندهٔ Ubuntu 22.04/24.04 اجرا نشد. production-ready نیست.
+
+
 ## ۲۰۲۶-۱۰-۱۹ — اتصال چندحساب و شروع پروژه از مخزن
 
 ساخت GitHub App دیگر `hook_attributes` ندارد. GitHub همان نشانی را، حتی با webhook غیرفعال، اگر از اینترنت عمومی دیده نشود رد می‌کند و خطای localhost از همین فیلد بود. بازگشت OAuth و نشانی برنامه سر جایشان است. فهرست مخزن و شاخه از API حساب خوانده می‌شود.

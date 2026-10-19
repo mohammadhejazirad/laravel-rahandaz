@@ -40,6 +40,17 @@ docker run --name "$name" --cpus=1 --memory=2g --pids-limit=512 \
             echo "SIGNED_IRANIAN_APT_INDEXES_VERIFIED_FROM_LAB_NETWORK; RESTRICTED_IRAN_NETWORK_NOT_CERTIFIED"
         fi
         if [[ "$1" == --live ]]; then
+            . /etc/os-release
+            if [[ "${VERSION_ID}" == "26.04" ]]; then
+                set +e
+                bash installer/bin/rahandaz-prerequisites --apply --yes --iranian-mirrors no >/tmp/ubuntu26.log 2>&1
+                refused=$?
+                set -e
+                [[ "$refused" != 0 ]]
+                grep -q UBUNTU_NOT_RECOMMENDED /tmp/ubuntu26.log
+                echo "UBUNTU_26_APPLY_REFUSED_BEFORE_MUTATION"
+                exit 0
+            fi
             find /etc/apt/sources.list.d -type f -exec sha256sum {} + >/tmp/original-sources.sha256
             if [[ -f /etc/apt/sources.list ]]; then
                 sha256sum /etc/apt/sources.list >>/tmp/original-sources.sha256

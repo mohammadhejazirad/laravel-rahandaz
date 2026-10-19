@@ -18,9 +18,9 @@
 | خطا | رندر خطای اینرسی یا Blade مستقیم | `pages/errors/show.tsx` و `views/errors/show.blade.php` | مستقل | ۴۰۳، ۴۰۴، ۴۱۹، ۵۰۰، ۵۰۳؛ پاسخ مستقیم بدون JavaScript قابل استفاده است |
 | `/setup/` | `GET /rahandaz/setup` | `pages/setup/index.tsx` | App | فقط probe خواندنی برای مالک. stepper و نصب نیست |
 | `/setup/progress/` | — | — | — | آماده نیست |
-| `/dashboard/` | `GET /rahandaz/dashboard` | `pages/dashboard/index.tsx` | App | شمارش واقعی job، پروژه، سرور و نمونه متریک. نمودار نیست |
+| `/dashboard/` | `GET /rahandaz/dashboard` | `pages/dashboard/index.tsx` | App | شمارش واقعی job، پروژه، سرور و نمونه متریک، به‌علاوهٔ کارت موقعیت IP. نمودار نیست |
 | `/servers/` | `GET /rahandaz/servers` | `pages/servers/index.tsx` | App | فهرست `local_hosts` همان workspace |
-| `/servers/<uuid>/overview/` | `GET /rahandaz/servers/{uuid}` | `pages/servers/show.tsx` | App | فقط فیلد ذخیره‌شده. پایش وصل نیست |
+| `/servers/<uuid>/overview/` | `GET /rahandaz/servers/{uuid}` | `pages/servers/show.tsx` | App | فیلد ذخیره‌شده به‌علاوهٔ کارت موقعیت IP. پایش وصل نیست |
 | monitoring، network، settings، console، ssh-keys، services، logs، events، databases، php سرور | — | — | — | آماده نیست. کنسول آزاد ساخته نشده |
 | `/catalog/` | `GET /rahandaz/catalog` | `pages/catalog/index.tsx` | App | خواندنی. نصب نیست |
 | `/mirrors/` | `GET /rahandaz/mirrors` | `pages/mirrors/index.tsx` | App | خواندنی. apply و rollback نیست |

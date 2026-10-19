@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Domain\Access\OperationAccess;
 use App\Domain\Access\ProjectAccess;
 use App\Domain\Jobs\Enums\JobStatus;
+use App\Domain\Network\ServerLocationLookup;
 use App\Http\CurrentWorkspace;
 use App\Infrastructure\Updates\UpdateStatusService;
 use App\Models\LocalHost;
@@ -19,7 +20,7 @@ use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function __invoke(Request $request, UpdateStatusService $updates): Response
+    public function __invoke(Request $request, UpdateStatusService $updates, ServerLocationLookup $location): Response
     {
         $workspace = CurrentWorkspace::get($request);
 
@@ -62,6 +63,7 @@ class DashboardController extends Controller
                 'created_at' => $job->created_at?->utc()->toIso8601ZuluString(),
             ])->all(),
             'release' => $updates->snapshot(),
+            'location' => $location->forPanel(),
         ]);
     }
 }

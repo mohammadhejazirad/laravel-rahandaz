@@ -31,6 +31,12 @@ return [
 
     'default_timezone' => env('RAHANDAZ_DEFAULT_TIMEZONE', 'Asia/Tehran'),
 
+    'location' => [
+        'enabled' => filter_var(env('RAHANDAZ_LOCATION_LOOKUP', true), FILTER_VALIDATE_BOOL),
+        'cache_seconds' => (int) env('RAHANDAZ_LOCATION_CACHE_SECONDS', 21600),
+        'failure_cache_seconds' => (int) env('RAHANDAZ_LOCATION_FAILURE_CACHE_SECONDS', 600),
+    ],
+
     'project_archives' => [
         'disk' => 'project_archives',
         'max_upload_bytes' => (int) env('RAHANDAZ_ARCHIVE_MAX_UPLOAD_BYTES', 104857600),

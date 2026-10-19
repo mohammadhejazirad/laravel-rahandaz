@@ -25,6 +25,7 @@ class PackageCatalogSeeder extends Seeder
             ['key' => 'mysql', 'display_name' => 'MySQL', 'service_kind' => 'database', 'control_plane_candidate' => false],
             ['key' => 'mariadb', 'display_name' => 'MariaDB', 'service_kind' => 'database', 'control_plane_candidate' => false],
             ['key' => 'mongodb', 'display_name' => 'MongoDB', 'service_kind' => 'database', 'control_plane_candidate' => false],
+            ['key' => 'google-chrome', 'display_name' => 'Google Chrome', 'service_kind' => 'tool', 'control_plane_candidate' => false],
         ];
 
         foreach ($packages as $package) {
@@ -39,6 +40,26 @@ class PackageCatalogSeeder extends Seeder
                     'control_plane_candidate' => $package['control_plane_candidate'],
                 ],
             );
+
+            if ($package['key'] === 'google-chrome') {
+                foreach (['jammy', 'noble'] as $codename) {
+                    PackageVersion::query()->updateOrCreate(
+                        [
+                            'package_definition_id' => $definition->id,
+                            'version' => '158.0.8110.0',
+                            'os_codename' => $codename,
+                            'architecture' => 'amd64',
+                        ],
+                        [
+                            'source_kind' => 'upstream_tarball',
+                            'lifecycle' => 'untested',
+                            'checksum_sha256' => '5deb7136a8a6cebc148929ed550b38218fc5c963f46a57121da64cd8c1cd0849',
+                        ],
+                    );
+                }
+
+                continue;
+            }
 
             PackageVersion::query()->updateOrCreate(
                 [

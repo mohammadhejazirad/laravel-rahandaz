@@ -15,7 +15,9 @@
 
 ## ادامه
 
-`--resume` مرحلهٔ `succeeded` را با `[SKIP]` رد می‌کند. `--repair` فقط مرحله‌های علامت‌خورده را دوباره اجرا می‌کند: مخزن، Redis، تنظیم Laravel، Nginx/PHP-FPM، systemd و خلاصه. repair به نصب تازه یا حذف پایگاه تبدیل نمی‌شود.
+همان فرمان `--apply` اگر مرحله‌ای را `succeeded` دیده باشد آن را با `[SKIP]` رد می‌کند و پیام `CONTINUE` می‌دهد. `--resume` همان رفتار را دارد. `--repair` فقط مرحله‌های علامت‌خورده را دوباره اجرا می‌کند: مخزن، Redis، تنظیم Laravel، Nginx/PHP-FPM، systemd و خلاصه. repair به نصب تازه یا حذف پایگاه تبدیل نمی‌شود.
+
+اگر نصب قبلاً `success` شده باشد و artifact جدیدتر باشد، همان فرمان فقط نسخه را کنار نسخهٔ فعلی آماده می‌کند. symlink فعلی و دادهٔ PostgreSQL عوض نمی‌شوند و فعال‌سازی به healthcheck روی VM موکول است. نسخهٔ برابر دوباره نصب نمی‌شود.
 
 upgrade کلید اصلی و حساب مالک را بازنویسی نمی‌کند. migration در upgrade به `--approve-migrations` نیاز دارد.
 
@@ -25,7 +27,8 @@ upgrade کلید اصلی و حساب مالک را بازنویسی نمی‌ک
 
 | کد | بازیابی |
 | --- | --- |
-| `UNSUPPORTED_OS` | فقط Ubuntu 22.04 jammy، 24.04 noble و 26.04 resolute |
+| `UNSUPPORTED_OS` | شناسهٔ سیستم Ubuntu نیست یا os-release قابل اعتماد نیست |
+| `UBUNTU_NOT_RECOMMENDED` | نصب و به‌روزرسانی فقط Ubuntu 22.04 و 24.04 LTS را تغییر می‌دهند. 26.04 پیش از هر تغییری متوقف می‌شود |
 | `UNSUPPORTED_ARCHITECTURE` | فقط `amd64` / `x86_64` در این نسخه آزمون شده |
 | `PHP_BASELINE_UNAVAILABLE` | Ubuntu خارج از jammy و noble و resolute. برای این سه نسخه PHP 8.4 فقط از pin امضاشده Sury می‌آید. مخزن بی‌امضا یا `trusted=yes` اضافه نکنید |
 | `LOW_MEMORY` | کمتر از ۱ GiB. زیر ۲ GiB فقط هشدار است |

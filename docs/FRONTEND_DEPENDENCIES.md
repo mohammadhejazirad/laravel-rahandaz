@@ -26,6 +26,8 @@ Primitiveهای Radix به‌صورت بسته‌های مستقل Avatar، Dial
 
 در برش صفحات اصلی و آموزش‌ها پکیج تازه نصب نشد. Select بومی با label/error و Inertia useForm کافی بود؛ Markdown محدود با React text رندر می‌شود و HTML/parser package ندارد. Recharts تا collector/سری زمانی واقعی گواهی‌شده اضافه نشد. جست‌وجوی ۲۲ مقاله service مستقل نمی‌خواهد. Chrome CDP test از Node موجود استفاده می‌کند؛ Puppeteer/Playwright dependency اضافه نشده است. build جدید CSS `72.64kB / 12.88 gzip` و AppLayout `28.46 / 9.61 gzip` است؛ بزرگ‌ترین shared chunk `373.88 / 116.68 gzip` مانده. npm audit آنلاین صفر vulnerability گزارش کرد؛ این benchmark React نیست.
 
+کارت موقعیت سرور در ۲۰۲۶-۱۰-۱۹ پکیج تازه نمی‌خواهد. تشخیص IP در Laravel و اسکریپت نصب است.
+
 ## حساب‌های گیت — ۲۰۲۶-۱۰-۱۶
 
 هیچ پکیج تازه‌ای نصب نشد. صفحه‌های `git/index` و `git/show` از Inertia، Lucide، کامپوننت‌های مشترک و `useVisiblePoll` موجود استفاده می‌کنند. Secret فقط ورودی فرم است و در props یا تاریخچهٔ اتصال بازگردانده نمی‌شود. تاریخ با formatter جلالی موجود نمایش داده می‌شود.

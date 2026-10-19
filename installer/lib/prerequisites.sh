@@ -408,13 +408,16 @@ prereq_main() {
                     'Usage: sudo bash installer/bin/rahandaz-prerequisites [--apply]' \
                     '       bash installer/bin/rahandaz-prerequisites --plan' \
                     'Automation: --yes --iranian-mirrors yes|no [--approve-package-repair]' \
-                    'Targets: Ubuntu 22.04, 24.04, 26.04 amd64. VM certification is pending.' \
+                    'Targets: Ubuntu 22.04 and 24.04 LTS amd64. Ubuntu 26.04 is not an install target. VM certification is pending.' \
                     'Installs prerequisites only. No application installation or update is performed.'
                 return 0 ;;
             *) prereq_fail INVALID_INPUT 'Unknown option. Use --help.'; return 2 ;;
         esac
     done
     installer_detect_os
+    if [[ "$mode" != plan ]]; then
+        installer_os_install_target || return 1
+    fi
     prereq_resources
     if [[ "$mode" == plan ]]; then
         printf '\nPLAN ONLY: no prompts, downloads, package changes or service activation.\n'
@@ -432,13 +435,19 @@ prereq_main() {
     fi
     if [[ -z "$PREREQ_IRAN" ]]; then
         [[ "$PREREQ_YES" != 1 ]] || { prereq_fail INPUT_REQUIRED '--yes requires an explicit --iranian-mirrors yes or no.'; return 2; }
-        # Distinguish a valid no from EOF: both are non-zero in a confirmation helper.
-        local answer
-        while :; do
-            printf 'Is your server located in Iran and do you want Iranian Ubuntu mirrors? [y/n]: ' >&2
-            IFS= read -r answer || { prereq_fail INPUT_REQUIRED 'Mirror selection is required.'; return 1; }
-            case "$answer" in y|Y) PREREQ_IRAN=yes; break ;; n|N) PREREQ_IRAN=no; break ;; *) printf 'Please enter y or n.\n' >&2 ;; esac
-        done
+        installer_decide_iranian_mirrors || return $?
+        case "${INSTALLER_MIRROR_CHOICE:-ask}" in
+            yes) PREREQ_IRAN=yes ;;
+            no) PREREQ_IRAN=no ;;
+            *)
+                local answer
+                while :; do
+                    printf 'Is your server located in Iran and do you want Iranian Ubuntu mirrors? [y/n]: ' >&2
+                    IFS= read -r answer || { prereq_fail INPUT_REQUIRED 'Mirror selection is required.'; return 1; }
+                    case "$answer" in y|Y) PREREQ_IRAN=yes; break ;; n|N) PREREQ_IRAN=no; break ;; *) printf 'Please enter y or n.\n' >&2 ;; esac
+                done
+                ;;
+        esac
     fi
     printf '\nWill install/verify Nginx, PostgreSQL, Redis and PHP 8.4 with scoped signed APT sources.\n'
     printf 'Existing files are preserved. New services will be started only after validation.\n'

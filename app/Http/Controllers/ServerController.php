@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Domain\Network\ServerLocationLookup;
 use App\Http\CurrentWorkspace;
 use App\Http\PaginatorPayload;
 use App\Models\LocalHost;
@@ -38,7 +39,7 @@ class ServerController extends Controller
         ]);
     }
 
-    public function show(Request $request, LocalHost $localHost): Response
+    public function show(Request $request, LocalHost $localHost, ServerLocationLookup $location): Response
     {
         $workspace = CurrentWorkspace::get($request);
         abort_unless((string) $localHost->workspace_id === (string) $workspace->id, 404);
@@ -54,6 +55,7 @@ class ServerController extends Controller
                 'last_seen_at' => $localHost->last_seen_at?->utc()->toIso8601ZuluString(),
             ],
             'monitoring_available' => false,
+            'location' => $location->forPanel(),
         ]);
     }
 }

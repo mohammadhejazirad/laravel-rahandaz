@@ -1,3 +1,4 @@
+import { ServerLocationCard, type ServerLocation } from '@/components/servers/server-location-card';
 import { Button } from '@/components/ui/button';
 import { Head, Link, usePage } from "@inertiajs/react";
 import { PersianDate } from "@/components/dates/persian-date";
@@ -11,6 +12,7 @@ import type { SharedProps } from "@/types";
 export default function ServerShow({
     host,
     monitoring_available,
+    location,
 }: {
     host: {
         uuid: string;
@@ -22,6 +24,7 @@ export default function ServerShow({
         last_seen_at: string | null;
     };
     monitoring_available: false;
+    location: ServerLocation;
 }) {
     const base = usePage<SharedProps>().props.app.base_path;
 
@@ -70,6 +73,7 @@ export default function ServerShow({
                     </div>
                 </dl>
             </Card>
+            <ServerLocationCard location={location} />
             <Card><h2 className="font-semibold">مدیریت میزبان</h2><p className="mt-2 text-sm text-muted">بخش موردنیاز را باز کنید؛ هر بخش وضعیت و محدودیت‌های واقعی خود را نشان می‌دهد.</p><div className="mt-4 grid gap-3 sm:grid-cols-2"><Button asChild variant="secondary"><Link href={`${base}/monitoring`}>منابع و سلامت سرویس‌ها</Link></Button><Button asChild variant="secondary"><Link href={`${base}/catalog`}>نرم‌افزارها و موتورهای اجرا</Link></Button><Button asChild variant="secondary"><Link href={`${base}/databases`}>دیتابیس‌های پروژه</Link></Button><Button asChild variant="secondary"><Link href={`${base}/jobs`}>عملیات و لاگ‌های میزبان</Link></Button></div></Card>
         </AppLayout>
     );

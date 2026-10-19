@@ -92,6 +92,7 @@ stage_03_system_packages() {
         DEBIAN_FRONTEND=noninteractive apt-get update -o Acquire::Retries=3
     fi
     installer_apt_install sudo ufw ca-certificates curl gnupg ubuntu-keyring git unzip tar openssl python3 acl
+    installer_chrome_step
 }
 
 stage_04_runtime_installation() {

@@ -12,6 +12,7 @@ source "${INSTALLER_HOME}/lib/common.sh"
 source "${INSTALLER_HOME}/lib/os.sh"
 source "${INSTALLER_HOME}/lib/gate.sh"
 source "${INSTALLER_HOME}/lib/php-runtime.sh"
+source "${INSTALLER_HOME}/lib/geo.sh"
 source "${INSTALLER_HOME}/lib/prerequisites.sh"
 
 prereq_main "$@"

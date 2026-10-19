@@ -396,7 +396,7 @@ second_hash=""
 if [[ -f "$key_file" ]]; then
     second_hash="$(sha256sum "$key_file" | awk '{ print $1 }')"
 fi
-if [[ "$second_status" -eq 10 && "$second_hash" == "$key_hash" ]] && grep -q '\[SKIP\] 06-application-release' "${tmp}/apply.err"; then
+if [[ "$second_status" -eq 10 && "$second_hash" == "$key_hash" ]] && grep -q '\[SKIP\] 06-application-release' "${tmp}/apply.err" && grep -q '^CONTINUE ' "${tmp}/apply.err"; then
     ok "resume keeps the release and the master key"
 else
     bad "resume keeps the release and the master key"
@@ -441,6 +441,12 @@ if bash "${INSTALLER_HOME}/tests/update.sh"; then
     ok "self-update suite"
 else
     bad "self-update suite"
+fi
+
+if bash "${INSTALLER_HOME}/tests/geo-chrome.sh"; then
+    ok "geo and chrome suite"
+else
+    bad "geo and chrome suite"
 fi
 
 printf 'passed %s\nfailed %s\n' "$pass" "$fail"
