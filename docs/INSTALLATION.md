@@ -77,7 +77,7 @@ bash installer/bin/rahandaz-install --plan --state-dir /tmp/rahandaz-plan
 
 ### قرارداد انتخاب پورت در نصب تازه
 
-این بخش وضعیت کد جدید مخزن با تشخیص خودکار آدرس و بدون سؤال origin است؛ beta.23.1 و کد candidate قبلی beta.24.1 این اصلاح نهایی را ندارند. beta.24.1 در [GitHub](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.24.1) منتشر شده ولی شامل حذف سؤال origin نیست. تا تأیید انتشار، فرمان README همچنان نسخهٔ منتشرشدهٔ قبلی را نصب می‌کند.
+این بخش وضعیت کد جدید مخزن با تشخیص خودکار آدرس و بدون سؤال origin است؛ beta.23.1 و کد candidate قبلی beta.24.1 این اصلاح نهایی را ندارند. beta.24.1 در [GitHub](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.24.1) منتشر شده ولی شامل حذف سؤال origin نیست. ساخت نسخهٔ اصلاح‌شدهٔ beta.25.1 در [اجرای 39285657748](https://github.com/mohammadhejazirad/laravel-rahandaz/actions/runs/39285657748) شروع شده است؛ تا تأیید انتشار، فرمان README همچنان نسخهٔ منتشرشدهٔ قبلی را نصب می‌کند.
 
 - مقدار پورت 1024 تا 65535 و خارج از فهرست محدود مرورگر است؛ پورت اشغال، پورت دارای صفر ابتدایی و origin دارای پورت متناقض رد می‌شوند. هیچ سرویس اشغال‌کننده‌ای متوقف نمی‌شود.
 - `--http-port 9001` پرسش پورت را حذف می‌کند. نصب بدون TTY فقط به `--http-port` صریح نیاز دارد و IP همچنان خودکار تعیین می‌شود؛ `--plan` و `--verify-only` پرسش تعاملی ندارند. origin دارای پورت صریح، همان پورت را به‌عنوان پیش‌فرض سؤال نشان می‌دهد.
