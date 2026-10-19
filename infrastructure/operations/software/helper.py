@@ -553,7 +553,7 @@ def install_archive(package, data, progress):
         libs = ['libnss3', 'libnspr4', 'libatk1.0-0' if os_version() == '22.04' else 'libatk1.0-0t64',
                 'libatk-bridge2.0-0' if os_version() == '22.04' else 'libatk-bridge2.0-0t64',
                 'libcups2' if os_version() == '22.04' else 'libcups2t64', 'libdrm2', 'libxkbcommon0',
-                'libxcomposite1', 'libxdamage1', 'libxfixes3', 'libxrandr2', 'libgbm1',
+                'libxcomposite1', 'libxdamage1', 'libxfixes3', 'libxrandr2', 'libgbm1', 'libcairo2', 'libpango-1.0-0',
                 'libasound2' if os_version() == '22.04' else 'libasound2t64', 'fonts-liberation']
         for lib in libs:
             install(package, data, lambda phase: None, dependency=lib)
