@@ -18,19 +18,19 @@
 
 ## نصب سریع و وضعیت نسخه اول
 
-نسخهٔ امضاشدهٔ **v1.0.0-beta.34.1** منتشر و امضا، checksum، assets عمومی و `--verify-only` آن تأیید شده‌اند. IP سرور خودکار تشخیص داده می‌شود و فقط `Panel port [8080]:` پرسیده می‌شود؛ Enter یعنی 8080 و سؤال origin/IP/دامنه وجود ندارد. شواهد و محدودیت آزمون VM در [ماتریس نصب](docs/INSTALLER_TEST_MATRIX.md) ثبت شده‌اند.
+نسخهٔ امضاشدهٔ **v1.0.0-beta.39.1** منتشر و امضا، checksum، assets عمومی و `--verify-only` آن تأیید شده‌اند. IP سرور خودکار تشخیص داده می‌شود و فقط `Panel port [8080]:` پرسیده می‌شود؛ Enter یعنی 8080 و سؤال origin/IP/دامنه وجود ندارد. شواهد و محدودیت آزمون VM در [ماتریس نصب](docs/INSTALLER_TEST_MATRIX.md) ثبت شده‌اند.
 
 برای نصب نسخهٔ آزمایشی روی **سرور Ubuntu تازه و آزمایشی**، با SSH وارد سرور شوید و همین فرمان را کپی و اجرا کنید:
 
 ```bash
-(set -eu; rahandaz_install_dir=$(mktemp -d); trap 'rm -rf -- "$rahandaz_install_dir"' EXIT; curl --proto '=https' --proto-redir '=https' --tlsv1.2 -fsSL --connect-timeout 15 --max-time 120 --retry 3 https://github.com/mohammadhejazirad/laravel-rahandaz/releases/download/v1.0.0-beta.34.1/install.sh -o "$rahandaz_install_dir/install.sh"; printf "78521dda23d2698a1935f3ae8fccf51a627a6891804d341e26dfb3808660e98c  %s\n" "$rahandaz_install_dir/install.sh" | sha256sum --check --status; if [ "$(id -u)" -eq 0 ]; then bash "$rahandaz_install_dir/install.sh"; else sudo bash "$rahandaz_install_dir/install.sh"; fi)
+(set -eu; rahandaz_install_dir=$(mktemp -d); trap 'rm -rf -- "$rahandaz_install_dir"' EXIT; curl --proto '=https' --proto-redir '=https' --tlsv1.2 -fsSL --connect-timeout 15 --max-time 120 --retry 3 https://github.com/mohammadhejazirad/laravel-rahandaz/releases/download/v1.0.0-beta.39.1/install.sh -o "$rahandaz_install_dir/install.sh"; printf "12c80fe420bb39f657484d53abaa42105cf8a24cb5f390458c56b4b36703b180  %s\n" "$rahandaz_install_dir/install.sh" | sha256sum --check --status; if [ "$(id -u)" -eq 0 ]; then bash "$rahandaz_install_dir/install.sh"; else sudo bash "$rahandaz_install_dir/install.sh"; fi)
 ```
 
 فرمان ابتدا اسکریپت نسخهٔ مشخص را دانلود و SHA-256 ثابت آن را بررسی می‌کند؛ فقط پس از تطبیق هش، نصب کامل پنل را آغاز می‌کند: بستهٔ آمادهٔ برنامه و رابط را دریافت می‌کند، امضا و checksum بسته را بررسی می‌کند و PHP 8.4 و افزونه‌ها، Nginx، PostgreSQL، Redisهای اختصاصی، worker و scheduler را نصب یا تأیید می‌کند. Docker، Node.js، npm و Composer برای اجرای پنل لازم نیستند. پس از انتخاب پورت و پایان healthcheck، نشانی پنل با IP سرور و همان پورت نمایش داده می‌شود؛ برای نمونه `http://194.110.24.123:8080/rahandaz/login`. اطلاعات ورود اولیه در فایل خصوصی `/root/rahandaz-initial-credentials.txt` قرار می‌گیرد.
 
 پیش‌نیاز شروع این فرمان: Ubuntu Server نسخهٔ 22.04 یا 24.04 با معماری x86_64، دسترسی sudo، اینترنت و ابزارهای `curl`، CA certificates، `openssl`، `python3` و ابزارهای پایهٔ Ubuntu. این ابزارهای bootstrap باید از قبل موجود باشند؛ بقیهٔ وابستگی‌های پنل را نصب‌کننده مدیریت می‌کند. Ubuntu 26.04 فعلاً آزمایشی و غیرپیشنهادی است.
 
-پس از تغییر رمز اولیه، راه‌اندازی پنل با انتخاب ابزارهای اختیاری، پیش‌نمایش و بررسی واقعی سلامت تکمیل می‌شود. نصب htop، jq، FFmpeg و Unzip از بخش نرم‌افزارها در دسترس است؛ Chrome و runtime پروژه‌ها هنوز نصب GUI ندارند. [شواهد و محدودیت‌ها](docs/SOFTWARE_SETUP_TEST_REPORT_2026_10_19.md).
+پس از تغییر رمز اولیه، راه‌اندازی پنل با انتخاب ابزارهای اختیاری، پیش‌نمایش و بررسی واقعی سلامت تکمیل می‌شود. کاتالوگ شامل ۱۸ نرم‌افزار در هفت دسته است: وب‌سرور، زبان و runtime، دیتابیس، کش، ابزار کاربردی، آنتی‌ویروس و مدیریت پردازش. نصب گروهی Loading، نتیجهٔ مستقل هر بسته، تعداد نهایی، Toast واقعی و مسیر اجرایی قابل کپی دارد. Chrome فقط با انتخاب صریح نصب می‌شود؛ نصب باینری دیتابیس به معنی ساخت پایگاه پروژه نیست. [رفتار و محدودیت‌ها](docs/SOFTWARE_CATALOG.md) و [نتایج آزمون](docs/SOFTWARE_CATALOG_TEST_REPORT_2026_10_19.md).
 
 **این نسخه beta است؛ نصب Production هنوز تأیید نشده است.** نصب کامل و reboot/recovery روی سه Ubuntu هنوز گواهی VM ندارند. نصب پنل نیز موتور عملیات میزبان را فعال نمی‌کند؛ حالت پیش‌فرض `disabled` باقی می‌ماند. وضعیت جاری در [گزارش تکمیل عملیاتی](docs/OPERATIONAL_TEST_REPORT.md) و [برنامه اجرایی](docs/OPERATIONAL_COMPLETION_PLAN.md) ثبت شده است.
 
@@ -50,11 +50,11 @@ ssh -N -L 127.0.0.1:18080:127.0.0.1:80 root@SERVER_IP
 
 ### جزئیات نصب امضاشده از GitHub
 
-مسیر توزیع راه‌انداز **[GitHub Releases](https://github.com/mohammadhejazirad/laravel-rahandaz/releases)** است؛ به CDN یا Docker برای نصب پنل نیاز نیست. آخرین نسخهٔ آزمایشی امضاشده در زمان بررسی ۲۰۲۶-۱۰-۱۹، [v1.0.0-beta.34.1](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.34.1) در ۲۰۲۶-۱۰-۱۹ منتشر شد. این prerelease برای آزمون VM است؛ نصب Production هنوز تأیید نشده است. برای فایل‌های نسخه‌های بعدی، صفحه Releases را بررسی کنید.
+مسیر توزیع راه‌انداز **[GitHub Releases](https://github.com/mohammadhejazirad/laravel-rahandaz/releases)** است؛ به CDN یا Docker برای نصب پنل نیاز نیست. آخرین نسخهٔ آزمایشی امضاشده در زمان بررسی ۲۰۲۶-۱۰-۱۹، [v1.0.0-beta.39.1](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.39.1) در ۲۰۲۶-۱۰-۱۹ منتشر شد. این prerelease برای آزمون VM است؛ نصب Production هنوز تأیید نشده است. برای فایل‌های نسخه‌های بعدی، صفحه Releases را بررسی کنید.
 
 فرمان کوتاه بالا به فایل یک Release مشخص اشاره می‌کند؛ از شاخهٔ متغیر `main` یا `latest` نصب نمی‌کند. اعتماد اولیهٔ این روش به فرمان بازبینی‌شدهٔ README و HTTPS گیت‌هاب است؛ SHA-256 ثابت در فرمان، پیش از اجرای اسکریپت بررسی می‌شود. خود اسکریپت، امضای manifest و SHA-256 بستهٔ برنامه را با کلید عمومی تعبیه‌شده بررسی می‌کند. امضای `SHA256SUMS` با کلید اعتماد مخزن و تطبیق هش اسکریپت و راهنمای `INSTALL.md` همین نسخه در بازبینی ۲۰۲۶-۱۰-۱۹ تأیید شدند؛ این بررسی گواهی نصب VM نیست.
 
-فرمان بالا از [راهنمای `INSTALL.md` همین Release](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/download/v1.0.0-beta.34.1/INSTALL.md) گرفته شده است؛ روش بررسی دستی و گزینهٔ `--verify-only` نیز در آن راهنما آمده‌اند. برای بررسی امن طرح نصب از checkout مخزن، بدون تغییر میزبان:
+فرمان بالا از [راهنمای `INSTALL.md` همین Release](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/download/v1.0.0-beta.39.1/INSTALL.md) گرفته شده است؛ روش بررسی دستی و گزینهٔ `--verify-only` نیز در آن راهنما آمده‌اند. برای بررسی امن طرح نصب از checkout مخزن، بدون تغییر میزبان:
 
 ```bash
 bash installer/bin/rahandaz-install --plan --state-dir /tmp/rahandaz-plan
@@ -66,9 +66,9 @@ bash installer/bin/rahandaz-install --plan --state-dir /tmp/rahandaz-plan
 
 صفحات استقرار، دامنه، دیتابیس، پشتیبان‌گیری و پایش اکنون به Backend و PostgreSQL متصل‌اند؛ درخواست‌های عملیاتی Job/Outbox/Audit واقعی دارند، ولی executor میزبان هنوز بسته است. مرکز آموزش‌ها جست‌وجو و نشان‌گذاری واقعی دارد. [گیت‌های انتشار](docs/V1_RELEASE_READINESS.md) و [گزارش آزمون](docs/V1_TEST_REPORT.md) محدوده تأییدشده و مانع‌ها را مشخص می‌کنند. این مخزن هنوز Production-ready نیست.
 
-درخت `installer/` و prerelease عمومی امضاشده موجودند؛ نصب کامل Production هنوز تأیید نشده و مجوز پروژه [Apache-2.0](LICENSE) است. حالت پیش‌فرض `RAHANDAZ_EXECUTION_MODE=disabled` است. در این حالت عملیات عمومی میزبان اجرا نمی‌شوند. تغییر پورت پنل و راه‌اندازی/نصب چهار ابزار مشخص، helperهای مستقل و محدود دارند؛ نصب امضاشده آن‌ها را enroll می‌کند. این استثناها executor عمومی یا deployment را فعال نمی‌کنند. مرز نرم‌افزارها در [تصمیم قابلیت محدود](docs/decisions/2026-10-19-software-capability.md) آمده است. جدول وضعیت پایین، قابلیت آماده را از طرح محصول جدا می‌کند. جزئیات پیشرفت در [docs/IMPLEMENTATION_PROGRESS.md](docs/IMPLEMENTATION_PROGRESS.md) و مشخصات در [.docs/PROJECT_SPEC.md](.docs/PROJECT_SPEC.md) است.
+درخت `installer/` و prerelease عمومی امضاشده موجودند؛ نصب کامل Production هنوز تأیید نشده و مجوز پروژه [Apache-2.0](LICENSE) است. حالت پیش‌فرض `RAHANDAZ_EXECUTION_MODE=disabled` است. در این حالت عملیات عمومی میزبان اجرا نمی‌شوند. تغییر پورت پنل، راه‌اندازی اولیه و نصب کاتالوگ ثابت ۱۸ نرم‌افزار، helperهای مستقل و محدود دارند؛ نصب امضاشده آن‌ها را enroll می‌کند. این استثناها executor عمومی یا deployment را فعال نمی‌کنند. مرز نرم‌افزارها در [تصمیم قابلیت محدود](docs/decisions/2026-10-19-software-capability.md) آمده است. جدول وضعیت پایین، قابلیت آماده را از طرح محصول جدا می‌کند. جزئیات پیشرفت در [docs/IMPLEMENTATION_PROGRESS.md](docs/IMPLEMENTATION_PROGRESS.md) و مشخصات در [.docs/PROJECT_SPEC.md](.docs/PROJECT_SPEC.md) است.
 
-نشان‌های بالا فقط نسخه قفل‌شده Laravel و محدودیت PHP را می‌گویند. تصویر PostgreSQL به image توسعه `postgres:16-alpine` در `compose.dev.yml` اشاره دارد، نه به یک نسخه production آزموده‌شده روی Ubuntu. فایل مجوز Apache-2.0 موجود است؛ وجود Release عمومی و موفقیت CI باید از GitHub بررسی شود. اجرای [CI انتشار beta34](https://github.com/mohammadhejazirad/laravel-rahandaz/actions/runs/39296698171) روی commit `f8975b8` موفق شده است؛ موفقیت CI جای گواهی نصب و reboot روی VMهای هدف نیست.
+نشان‌های بالا فقط نسخه قفل‌شده Laravel و محدودیت PHP را می‌گویند. تصویر PostgreSQL به image توسعه `postgres:16-alpine` در `compose.dev.yml` اشاره دارد، نه به یک نسخه production آزموده‌شده روی Ubuntu. فایل مجوز Apache-2.0 موجود است؛ وجود Release عمومی و موفقیت CI باید از GitHub بررسی شود. اجرای [CI انتشار beta39](https://github.com/mohammadhejazirad/laravel-rahandaz/actions/runs/39317104537) روی commit `495efc8` موفق شده است؛ موفقیت CI جای گواهی نصب و reboot روی VMهای هدف نیست.
 
 ## فهرست
 
@@ -142,11 +142,11 @@ bash installer/bin/rahandaz-install --plan --state-dir /tmp/rahandaz-plan
 | --- | --- | --- |
 | فهرست و برگه سرور محلی از ردیف‌های ذخیره‌شده | آماده | CPU، دیسک و شبکه زنده را نشان نمی‌دهد |
 | راه‌اندازی اولیه | برش محدود آماده | ذخیره و ادامهٔ پاسخ، انتخاب ابزار اختیاری، بررسی واقعی سرویس‌ها و پایان؛ Wizard کامل هشت‌مرحله‌ای هنوز تکمیل نیست |
-| کاتالوگ نرم‌افزار | برش محدود آماده | نصب اختیاری htop/jq/FFmpeg/Unzip، نسخهٔ مشاهده‌شده و Job واقعی؛ Chrome و runtimeها هنوز نصب GUI ندارند |
+| کاتالوگ نرم‌افزار | برش محدود آماده | ۱۸ انتخاب در هفت دسته، نصب گروهی واقعی، Loading/Toast پایانی، گزارش بسته‌ها و مسیر نسخه‌دار؛ تداخل و محدودیت شبکه صریح‌اند |
 | میرورها | در حال ساخت | مشاهده؛ اعمال از GUI فعال نیست |
 | اطلاعات زنده Ubuntu، systemd، UFW، کلید SSH | در حال ساخت | اسکریپت facts هست و سازگاری را `untested` می‌گذارد. پنل آن را اجرا نمی‌کند. کنسول آزاد root نیست |
 | نصب PHP، Node، Python، Nginx و سرویس‌ها روی میزبان | برنامه‌ریزی‌شده | اجرا خاموش است |
-| صفحه پایش | در حال ساخت | نمونه و سلامت ذخیره‌شده، timestamp، stale و polling فقط در صفحه فعال؛ collector و نمودار زنده نیست |
+| صفحه پایش | منابع زنده آماده، سلامت سرویس مستقل | CPU/RAM/دیسک/شبکه واقعی حدود هر سه ثانیه، نمودار ۱۲۰ مشاهده، stale/offline و ثبت محدود نمونه در پایگاه |
 
 ### پروژه، Git و استقرار
 
@@ -254,7 +254,7 @@ Helper ممتاز در طرح، یک برنامه root-owned با اسکیمای
 <a id="install"></a>
 ## نصب
 
-نصب Production هنوز تأیید نشده است. برای آزمون VM، بسته و راهنمای `INSTALL.md` نسخهٔ [v1.0.0-beta.34.1](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.34.1) موجود است. فرمان نسخه‌دار و دارای بررسی هش در بخش [نصب سریع و وضعیت نسخه اول](#نصب-سریع-و-وضعیت-نسخه-اول) برای سرور تازه و آزمایشی درج شده است.
+نصب Production هنوز تأیید نشده است. برای آزمون VM، بسته و راهنمای `INSTALL.md` نسخهٔ [v1.0.0-beta.39.1](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.39.1) موجود است. فرمان نسخه‌دار و دارای بررسی هش در بخش [نصب سریع و وضعیت نسخه اول](#نصب-سریع-و-وضعیت-نسخه-اول) برای سرور تازه و آزمایشی درج شده است.
 
 وجود Release امضاشده و تأیید فایل‌های عمومی به معنی نصب Production تأییدشده نیست؛ پذیرش Gateهای نصب و گواهی VM همچنان لازم است.
 
@@ -283,7 +283,7 @@ bash installer/bin/rahandaz-install --plan --state-dir /tmp/rahandaz-plan
 2. از صفحه همان نسخه در GitHub Releases، فایل `INSTALL.md` را باز کنید و فرمان یک‌خطی تولیدشده را اجرا کنید. این فرمان اسکریپت نسخه ثابت را دانلود، SHA-256 آن را بررسی و سپس اجرا می‌کند؛ bootstrap امضای manifest و صحت کل بسته را بررسی می‌کند. تا انتشار واقعی و آزمون فرمان، URL/هش ساختگی در این README قرار نمی‌گیرد.
 3. نصب‌کننده وابستگی‌های کنترل‌پلین، PHP 8.4، Nginx، PostgreSQL، Redisهای اختصاصی، سرویس‌ها و پنل build‌شده را نصب/بررسی می‌کند؛ نصب در Production native است و به Docker نیاز ندارد. Mirror ایران با گزینه `--prefer-iranian-mirrors` قابل انتخاب است؛ این گزینه جای تضمین دسترسی GitHub یا مخزن PHP نیست.
 4. پس از healthcheck موفق، حساب اولیه پنل خودکار ساخته شده و مسیر ورود و فایل root-only اعتبار اعلام می‌شود. در اتصال SSH امن، اعتبار را با `sudo cat /root/rahandaz-initial-credentials.txt` ببینید، وارد پنل شوید و رمز اولیه را عوض کنید. رمزها وارد لاگ نصب نمی‌شوند و اجرای مجدد آنها را بازتولید نمی‌کند.
-5. پس از تغییر رمز، راه‌اندازی اولیه را باز کنید: نام سرور و ابزارهای اختیاری را انتخاب، خلاصه را بازبینی و درخواست را تأیید کنید. ورود به داشبورد فقط پس از سلامت واقعی سرویس‌های اصلی ممکن است. بعداً از «نرم‌افزارها» چهار ابزار در دسترس را نصب کنید. استقرار عمومی، runtimeها، Chrome و دیتابیس پروژه هنوز اجرای کامل ندارند؛ تغییر env این محدودیت را رفع نمی‌کند.
+5. پس از تغییر رمز، راه‌اندازی اولیه را باز کنید: نام سرور و ابزارهای اختیاری را انتخاب، خلاصه را بازبینی و درخواست را تأیید کنید. ورود به داشبورد فقط پس از سلامت واقعی سرویس‌های اصلی ممکن است. بعداً از «نرم‌افزارها» بسته‌های دسته‌بندی‌شده، runtime مستقل یا Chrome اختیاری را انتخاب کنید. نتیجهٔ هر بسته را در گزارش ببینید؛ وابستگی نیازمند ارتقا و دانلود مسدود ممکن است ناموفق شوند. استقرار عمومی و ساخت دیتابیس پروژه هنوز اجرای کامل ندارند؛ تغییر env این محدودیت را رفع نمی‌کند.
 
 اولین آزمایش شخصی را مطابق [راهنمای نصب روی KVM](docs/KVM_INSTALLATION_TEST.md) انجام دهید. مسیر دریافت بسته Actions و امضای آزمایشی قبل از راه‌اندازی انتشار عمومی نیز در همان سند آمده است. HTTP اولیه فقط از tunnel یا شبکه trusted استفاده شود؛ HTTPS پنل هنوز خودکار صادر نمی‌شود.
 
@@ -494,7 +494,7 @@ backup پایگاه به‌تنهایی credential رمزشده را برنمی�
 | `rahandaz:doctor` برای Redis یا پایگاه fail می‌دهد | Compose یا سرویس محلی را ببینید. پورت صف ۶۳۷۹ و cache در نمونه توسعه ۶۳۸۰ است |
 | `Refusing to overwrite an existing master key` | کلید قبلاً ساخته شده. فایل را پاک نکنید |
 | `vite: not found` یا `multiplex: not found` | `npm ci` را دوباره اجرا کنید تا `node_modules/.bin` ساخته شود |
-| worker job را موفق نمی‌کند | برای راه‌اندازی/چهار ابزار، سلامت helper، صف و گزارش عملیات را بررسی کنید؛ سایر عملیات عمومی با `RAHANDAZ_EXECUTION_MODE=disabled` اجرا نمی‌شوند |
+| worker job را موفق نمی‌کند | برای راه‌اندازی/کاتالوگ نرم‌افزار، سلامت helper، صف و گزارش عملیات را بررسی کنید؛ سایر عملیات عمومی با `RAHANDAZ_EXECUTION_MODE=disabled` اجرا نمی‌شوند |
 | ZIP پروژه آپلود نمی‌شود | وجود `ext-zip`/`fileinfo`، سقف‌های `RAHANDAZ_ARCHIVE_*` و محدودیت Nginx/PHP upload را بررسی کنید؛ ZIP خطرناک عمداً با خطای فرم رد می‌شود |
 | webhook یا SSL کار نمی‌کند | وب‌هوک HTTP/worker و اعمال ACME/Nginx هنوز کامل نیستند؛ ثبت درخواست دامنه به‌معنی فعال‌شدن سایت نیست |
 | ورود پنل ۴۰۴ است | مسیر `/rahandaz/login` است، نه `/login` و نه `/` |
