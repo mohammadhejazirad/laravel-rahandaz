@@ -82,6 +82,7 @@ class GitAccountsTest extends TestCase
         $this->get(route('git.index'))->assertOk()->assertDontSee('manifest-secret-fixture')->assertDontSee('unused-private-key-fixture');
         $this->get(route('git.manifest.callback', ['state' => $state, 'code' => 'fixture-code']))->assertSessionHas('error');
         Http::assertSentCount(1);
+        Http::assertSent(fn ($request): bool => str_ends_with($request->url(), '/app-manifests/fixture-code/conversions') && $request->body() === '{}');
         $this->assertDatabaseCount('git_provider_settings', 1);
         $this->assertDatabaseCount('git_connections', 0);
     }

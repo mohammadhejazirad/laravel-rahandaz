@@ -38,10 +38,12 @@ final class GitHubManifest
             $url = 'https://api.github.com/app-manifests/'.rawurlencode($code).'/conversions';
             $ip = app(PublicHttpsGuard::class)->pin($url);
             $address = str_contains($ip, ':') ? '['.$ip.']' : $ip;
+            // GitHub rejects a JSON array. Laravel's post() default is [], which the
+            // conversion endpoint answers with HTTP 422 before it accepts the code.
             $response = Http::acceptJson()->withOptions([
                 'allow_redirects' => false,
                 'curl' => [CURLOPT_RESOLVE => ["api.github.com:443:{$address}"]],
-            ])->connectTimeout(3)->timeout(10)->post($url);
+            ])->connectTimeout(3)->timeout(10)->withBody('{}', 'application/json')->send('POST', $url);
             $data = $response->json();
             if (! $response->successful() || ! is_array($data)
                 || ! is_string($data['client_id'] ?? null) || preg_match('/^[A-Za-z0-9_.-]{1,200}$/D', $data['client_id']) !== 1

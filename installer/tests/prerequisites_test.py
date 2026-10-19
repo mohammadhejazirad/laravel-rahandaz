@@ -21,7 +21,10 @@ source "$INSTALLER_HOME/lib/common.sh"
 source "$INSTALLER_HOME/lib/os.sh"
 source "$INSTALLER_HOME/lib/gate.sh"
 source "$INSTALLER_HOME/lib/php-runtime.sh"
+source "$INSTALLER_HOME/lib/geo.sh"
 source "$INSTALLER_HOME/lib/prerequisites.sh"
+# Fixture prompts stay deterministic. Live geo runs only on a real sysroot outside this harness.
+export INSTALLER_OFFLINE=1
 PREREQ_STATE="$TEST_WORK/state"
 PREREQ_APT_DIR="$TEST_WORK/apt"
 PREREQ_POLICY="$TEST_WORK/policy"

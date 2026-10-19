@@ -274,12 +274,12 @@ def account_checks() -> None:
         leaked = secret.read_text(encoding="utf-8", errors="replace").strip() in json.dumps(created)
     engine_case("accounts", "create_again", "account.create_rahandaz_user", payload(), check=lambda result: result.get("mutated") is False)
     try:
-        user = pwd.getpwnam("rahandaz")
+        user = pwd.getpwnam("rahandaz-svc")
     except KeyError:
-        note("accounts", "linux_account", "failed", "ACCOUNT_MISSING", "user rahandaz was not created")
+        note("accounts", "linux_account", "failed", "ACCOUNT_MISSING", "user rahandaz-svc was not created")
         return
-    groups = run_cmd(["id", "-nG", "rahandaz"]).stdout.split()
-    status_line = run_cmd(["passwd", "-S", "rahandaz"]).stdout.split()
+    groups = run_cmd(["id", "-nG", "rahandaz-svc"]).stdout.split()
+    status_line = run_cmd(["passwd", "-S", "rahandaz-svc"]).stdout.split()
     locked = len(status_line) > 1 and status_line[1] == "L"
     mode = oct(secret.stat().st_mode & 0o777) if secret.is_file() else "missing"
     home_ok = user.pw_dir == "/var/lib/rahandaz" and user.pw_shell.endswith("nologin")
