@@ -39,7 +39,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectHome=true
 ProtectSystem=strict
-ReadWritePaths=/etc/nginx/sites-available /etc/nginx/sites-enabled /etc/rahandaz /var/lib/rahandaz /var/log/nginx
+ReadWritePaths=/etc/nginx/sites-available /etc/nginx/sites-enabled /etc/rahandaz /var/lib/rahandaz /var/log/nginx /run/nginx.pid
 '''
 
 
