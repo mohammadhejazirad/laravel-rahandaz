@@ -29,6 +29,17 @@ INSTALLER_PHP_PACKAGES=(
     php8.4-redis
 )
 
+# php8.4-* does not match php-common. Ubuntu's copy is too old on 22.04/24.04 and
+# Breaks third-party php8.4-common on 26.04. jammy's libgd3 is below the GD requirement.
+# Every other package from this origin stays blocked.
+installer_php_allowed_packages() {
+    local allowed='php8.4-* php-common'
+    if [[ "${INSTALLER_OS_CODENAME:-}" == jammy ]]; then
+        allowed+=' libgd3'
+    fi
+    printf '%s\n' "$allowed"
+}
+
 installer_php_key_fingerprint() {
     local file="$1"
     [[ -f "$file" && ! -L "$file" ]] || return 1
@@ -105,7 +116,7 @@ Components: main
 Signed-By: /usr/share/keyrings/rahandaz-php-sury.gpg
 EOF
     cat >"$prefs" <<EOF
-Package: php8.4-*
+Package: $(installer_php_allowed_packages)
 Pin: origin ${INSTALLER_PHP_ORIGIN}
 Pin-Priority: 500
 

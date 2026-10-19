@@ -285,7 +285,8 @@ prereq_install_packages() {
 }
 
 prereq_php_source() {
-    local keyring="$PREREQ_APT_DIR/php.gpg" source="$PREREQ_APT_DIR/parts/php.sources" allowed='php8.4-* php-common'
+    local keyring="$PREREQ_APT_DIR/php.gpg" source="$PREREQ_APT_DIR/parts/php.sources" allowed
+    allowed="$(installer_php_allowed_packages)"
     installer_php_key_ok
     gpg --batch --yes --dearmor --output "$keyring" "$INSTALLER_HOME/trust/sury-php.asc"
     cat >"$source" <<EOF
@@ -296,10 +297,6 @@ Components: main
 Architectures: amd64
 Signed-By: ${keyring}
 EOF
-    # Live solver evidence: Ubuntu's php-common is too old (22/24), or breaks third-party
-    # php8.4-common (26); jammy's libgd3 is below PHP GD's required version.
-    # These named dependencies are the only non-php8.4 exceptions in this scoped source.
-    [[ "$INSTALLER_OS_CODENAME" != jammy ]] || allowed+=' libgd3'
     cat >"$PREREQ_APT_DIR/preferences" <<EOF
 Package: ${allowed}
 Pin: origin ${INSTALLER_PHP_ORIGIN}

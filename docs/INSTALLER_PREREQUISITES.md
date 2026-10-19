@@ -91,7 +91,7 @@ Ubuntu mirrors do not replace it. Failure to access/verify that repository stops
 The scoped PHP policy also permits `php-common`, required by PHP 8.4 on all three targets, and
 `libgd3` on jammy only, required by the GD extension. These named exceptions were identified by
 real APT solver failures; all other non-`php8.4-*` packages from that origin remain blocked. This
-scoped exception does not rewrite the older full installer's system-wide pin.
+same named exception is written by the full installer pin in `php-runtime.sh`.
 No PHP mirror, download CDN, DNS change, alternative CA or disabled TLS/signature verification is
 invented. Full restricted-network installation still requires the separately planned artifact/PHP
 mirror work.

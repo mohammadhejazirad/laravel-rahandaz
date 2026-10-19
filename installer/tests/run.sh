@@ -407,6 +407,7 @@ if [[ -f "$php_source" && -f "$php_prefs" ]] \
     && grep -q 'Signed-By: /usr/share/keyrings/rahandaz-php-sury.gpg' "$php_source" \
     && grep -q 'packages.sury.org' "$php_source" \
     && ! grep -q 'trusted=yes' "$php_source" \
+    && grep -q 'Package: php8.4-\* php-common' "$php_prefs" \
     && grep -q 'Pin-Priority: -1' "$php_prefs" \
     && [[ -f "${sysroot}/etc/rahandaz/php/php-fpm.conf" ]] \
     && [[ -f "${sysroot}/etc/rahandaz/php/pool.d/rahandaz.conf" ]] \
