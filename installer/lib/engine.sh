@@ -174,11 +174,11 @@ stage_06_application_release() {
         return 1
     }
     ln -sfn "$dest" "$(installer_root_path /var/lib/rahandaz/current)"
-    if [[ "$version" == *-* ]]; then
-        installer_write_release_record "$version" development
-    else
-        installer_write_release_record "$version" stable
-    fi
+    case "$version" in
+        *-alpha.* | *-beta.* | *-rc.*) installer_write_release_record "$version" beta ;;
+        *-*) installer_write_release_record "$version" development ;;
+        *) installer_write_release_record "$version" stable ;;
+    esac
     mkdir -p "$(installer_root_path /var/lib/rahandaz/shared/storage)"
     if [[ ! -e "$dest/storage" ]]; then
         ln -s "$(installer_root_path /var/lib/rahandaz/shared/storage)" "$dest/storage"
@@ -639,7 +639,7 @@ stage_15_installation_summary() {
     fi
     installer_say "LOG ${INSTALLER_LOG:-stderr}"
     installer_say "PANEL ${PUBLIC_URL}/rahandaz/login"
-    installer_say "NEXT create or use the owner, then open the panel. Doctor: rahandaz-install --doctor"
+    installer_say "NEXT create or use the owner, then open the panel. Doctor: rahandaz doctor"
     installer_say "CREDENTIALS /root/rahandaz-initial-credentials.txt is mode 0600 and is not printed again."
     installer_say 'SYSTEM_CREDENTIALS /root/rahandaz-system-credentials.txt (root only). Reveal locally: sudo bash /usr/local/lib/rahandaz/bin/rahandaz-security --show-credentials'
     installer_say 'FIREWALL review separately with /usr/local/lib/rahandaz/bin/rahandaz-firewall --plan; activation requires a second SSH session.'

@@ -18,15 +18,15 @@
 
 ## نصب سریع و وضعیت نسخه اول
 
-در کد اصلاح‌شده، IP سرور خودکار تشخیص داده می‌شود و فقط `Panel port [8080]:` پرسیده می‌شود؛ سؤال origin/IP/دامنه حذف شده است. فرمان منتشرشدهٔ beta.23.1 پایین هنوز این اصلاح را ندارد. جایگزینی فرمان به انتشار و تأیید فایل‌های نسخهٔ امضاشدهٔ شامل این تغییر وابسته است؛ وضعیت در [ماتریس نصب](docs/INSTALLER_TEST_MATRIX.md) ثبت می‌شود. انتشار قبلی beta.24.1 نیز هنوز سؤال origin دارد و شامل این اصلاح نهایی نیست. ساخت نسخهٔ اصلاح‌شدهٔ beta.25.1 از commit `3d30479` در [GitHub Actions](https://github.com/mohammadhejazirad/laravel-rahandaz/actions/runs/39285657748) پیگیری می‌شود.
+نسخهٔ امضاشدهٔ **v1.0.0-beta.25.1** منتشر و امضا، checksum، assets عمومی و `--verify-only` آن تأیید شده‌اند. IP سرور خودکار تشخیص داده می‌شود و فقط `Panel port [8080]:` پرسیده می‌شود؛ Enter یعنی 8080 و سؤال origin/IP/دامنه وجود ندارد. شواهد و محدودیت آزمون VM در [ماتریس نصب](docs/INSTALLER_TEST_MATRIX.md) ثبت شده‌اند.
 
 برای نصب نسخهٔ آزمایشی روی **سرور Ubuntu تازه و آزمایشی**، با SSH وارد سرور شوید و همین فرمان را کپی و اجرا کنید:
 
 ```bash
-(set -eu; rahandaz_install_dir=$(mktemp -d); trap 'rm -rf -- "$rahandaz_install_dir"' EXIT; curl --proto '=https' --proto-redir '=https' --tlsv1.2 -fsSL --connect-timeout 15 --max-time 120 --retry 3 https://github.com/mohammadhejazirad/laravel-rahandaz/releases/download/v1.0.0-beta.23.1/install.sh -o "$rahandaz_install_dir/install.sh"; printf "69ea2949b55bdf4550c9ba9c3a366cf8f0c957c751cc7393c76cc60e3f5dd051  %s\n" "$rahandaz_install_dir/install.sh" | sha256sum --check --status; if [ "$(id -u)" -eq 0 ]; then bash "$rahandaz_install_dir/install.sh"; else sudo bash "$rahandaz_install_dir/install.sh"; fi)
+(set -eu; rahandaz_install_dir=$(mktemp -d); trap 'rm -rf -- "$rahandaz_install_dir"' EXIT; curl --proto '=https' --proto-redir '=https' --tlsv1.2 -fsSL --connect-timeout 15 --max-time 120 --retry 3 https://github.com/mohammadhejazirad/laravel-rahandaz/releases/download/v1.0.0-beta.25.1/install.sh -o "$rahandaz_install_dir/install.sh"; printf "294a552c11235951a4e5282d8b1c9c7ea96a49a3442c6f783954b0af99fc0f22  %s\n" "$rahandaz_install_dir/install.sh" | sha256sum --check --status; if [ "$(id -u)" -eq 0 ]; then bash "$rahandaz_install_dir/install.sh"; else sudo bash "$rahandaz_install_dir/install.sh"; fi)
 ```
 
-فرمان ابتدا اسکریپت نسخهٔ مشخص را دانلود و SHA-256 ثابت آن را بررسی می‌کند؛ فقط پس از تطبیق هش، نصب کامل پنل را آغاز می‌کند: بستهٔ آمادهٔ برنامه و رابط را دریافت می‌کند، امضا و checksum بسته را بررسی می‌کند و PHP 8.4 و افزونه‌ها، Nginx، PostgreSQL، Redisهای اختصاصی، worker و scheduler را نصب یا تأیید می‌کند. Docker، Node.js، npm و Composer برای اجرای پنل لازم نیستند. در نسخهٔ منتشرشدهٔ beta.23.1 پایین، نشانی پنل پرسیده می‌شود؛ این سؤال در کد اصلاح‌شده حذف شده و فقط پورت پرسیده می‌شود. برای همین نسخهٔ قدیمی، برای ورود اولیه با HTTP از SSH tunnel طبق [راهنمای KVM](docs/KVM_INSTALLATION_TEST.md) استفاده کنید. اطلاعات ورود اولیه در فایل خصوصی `/root/rahandaz-initial-credentials.txt` قرار می‌گیرد.
+فرمان ابتدا اسکریپت نسخهٔ مشخص را دانلود و SHA-256 ثابت آن را بررسی می‌کند؛ فقط پس از تطبیق هش، نصب کامل پنل را آغاز می‌کند: بستهٔ آمادهٔ برنامه و رابط را دریافت می‌کند، امضا و checksum بسته را بررسی می‌کند و PHP 8.4 و افزونه‌ها، Nginx، PostgreSQL، Redisهای اختصاصی، worker و scheduler را نصب یا تأیید می‌کند. Docker، Node.js، npm و Composer برای اجرای پنل لازم نیستند. پس از انتخاب پورت و پایان healthcheck، نشانی پنل با IP سرور و همان پورت نمایش داده می‌شود؛ برای نمونه `http://194.110.24.123:8080/rahandaz/login`. اطلاعات ورود اولیه در فایل خصوصی `/root/rahandaz-initial-credentials.txt` قرار می‌گیرد.
 
 پیش‌نیاز شروع این فرمان: Ubuntu Server نسخهٔ 22.04 یا 24.04 با معماری x86_64، دسترسی sudo، اینترنت و ابزارهای `curl`، CA certificates، `openssl`، `python3` و ابزارهای پایهٔ Ubuntu. این ابزارهای bootstrap باید از قبل موجود باشند؛ بقیهٔ وابستگی‌های پنل را نصب‌کننده مدیریت می‌کند. Ubuntu 26.04 فعلاً آزمایشی و غیرپیشنهادی است.
 
@@ -34,13 +34,15 @@
 
 ### بازکردن پنل مدیریت پس از نصب
 
-برای origin اولیهٔ `http://127.0.0.1`، روی **رایانهٔ خودتان** این تونل را اجرا کنید؛ `SERVER_IP` را با IP سرور جایگزین کنید و ترمینال را باز نگه دارید:
+پس از نصب تازه، `http://SERVER_IP:8080` را در مرورگر باز کنید؛ اگر پورت دیگری انتخاب کردید همان را وارد کنید. ریشه به `/rahandaz/login` هدایت می‌شود. اطلاعات ورود در فایل خصوصی `/root/rahandaz-initial-credentials.txt` روی سرور است؛ در اولین ورود تغییر گذرواژه الزامی است. مالک بعداً از «تنظیمات حساب ← پورت پنل» پورت را تغییر می‌دهد؛ پس از بازخوانی سرویس وب و بررسی واقعی سلامت، مرورگر به نشانی جدید منتقل می‌شود. این کار سرور را reboot نمی‌کند.
+
+HTTP رمزگذاری ندارد؛ برای دسترسی با تونل یا بازیابی مستقل، روی **رایانهٔ خودتان** فرمان زیر را اجرا کنید و ترمینال را باز نگه دارید:
 
 ```bash
 ssh -N -L 127.0.0.1:18080:127.0.0.1:80 root@SERVER_IP
 ```
 
-سپس در مرورگر همان رایانه، `http://127.0.0.1:18080/rahandaz/login` را باز کنید. اطلاعات ورود در `/root/rahandaz-initial-credentials.txt` روی سرور است؛ در اولین ورود تغییر گذرواژه الزامی است. برای دسترسی عمومی رمزگذاری‌شده، دامنه و HTTPS معتبر باید جداگانه پیکربندی شوند؛ origin لوپ‌بک به‌معنی ارائهٔ پنل روی IP عمومی نیست. دسترسی مستقیم HTTP با IP و پورت دلخواه، فقط با انتخاب صریح مالک و ثبت قابلیت محدود [پورت پنل](docs/PANEL_PORT.md) توسط اپراتور ممکن است. پس از آن مالک در «تنظیمات حساب ← پورت پنل» پورت را تغییر می‌دهد؛ سرویس وب بازخوانی و پس از بررسی سلامت، مرورگر به پورت جدید منتقل می‌شود. این کار سرور را reboot نمی‌کند.
+سپس `http://127.0.0.1:18080/rahandaz/login` را باز کنید. سایت بازیابی نصب تازه روی loopback:80 باقی می‌ماند. دامنه و HTTPS معتبر جداگانه پیکربندی می‌شوند. نصب‌های قدیمی با origin محلی، خودکار به8080 منتقل نمی‌شوند؛ قرارداد enrollment و helper محدود در [پورت پنل](docs/PANEL_PORT.md) آمده است. نتیجهٔ اصلاح نصب تازهٔ beta23 روی VPS مالک در [گزارش واقعی سرور](docs/IRAN_VPS_INSTALL_RECOVERY_2026_10_19.md) ثبت است.
 
 فرمان نصب سریع برای نصب تازه است. updater فعلی فقط release را آماده می‌کند و فعال‌سازی خودکار ندارد؛ نتیجهٔ `incomplete` یا exit code ۱۰، ارتقای موفق نیست. محدودیت metadata امضاشده و تفاوت ارتقای کنترل‌شده با CLI در [راهنمای به‌روزرسانی](docs/SELF_UPDATE.md) آمده است.
 

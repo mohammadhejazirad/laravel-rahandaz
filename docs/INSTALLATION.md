@@ -77,7 +77,7 @@ bash installer/bin/rahandaz-install --plan --state-dir /tmp/rahandaz-plan
 
 ### قرارداد انتخاب پورت در نصب تازه
 
-این بخش وضعیت کد جدید مخزن با تشخیص خودکار آدرس و بدون سؤال origin است؛ beta.23.1 و کد candidate قبلی beta.24.1 این اصلاح نهایی را ندارند. beta.24.1 در [GitHub](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.24.1) منتشر شده ولی شامل حذف سؤال origin نیست. ساخت نسخهٔ اصلاح‌شدهٔ beta.25.1 در [اجرای 39285657748](https://github.com/mohammadhejazirad/laravel-rahandaz/actions/runs/39285657748) شروع شده است؛ تا تأیید انتشار، فرمان README همچنان نسخهٔ منتشرشدهٔ قبلی را نصب می‌کند.
+این بخش وضعیت کد جدید مخزن با تشخیص خودکار آدرس و بدون سؤال origin است؛ beta.23.1 و کد candidate قبلی beta.24.1 این اصلاح نهایی را ندارند. نسخهٔ اصلاح‌شدهٔ beta.25.1 در [GitHub](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.25.1) منتشر شده است؛ نتیجهٔ راستی‌آزمایی assets عمومی در INSTALLER_TEST_MATRIX ثبت می‌شود. نصب‌های قبلی با loopback خودکار به تنظیم جدید منتقل نمی‌شوند.
 
 - مقدار پورت 1024 تا 65535 و خارج از فهرست محدود مرورگر است؛ پورت اشغال، پورت دارای صفر ابتدایی و origin دارای پورت متناقض رد می‌شوند. هیچ سرویس اشغال‌کننده‌ای متوقف نمی‌شود.
 - `--http-port 9001` پرسش پورت را حذف می‌کند. نصب بدون TTY فقط به `--http-port` صریح نیاز دارد و IP همچنان خودکار تعیین می‌شود؛ `--plan` و `--verify-only` پرسش تعاملی ندارند. origin دارای پورت صریح، همان پورت را به‌عنوان پیش‌فرض سؤال نشان می‌دهد.
@@ -97,3 +97,8 @@ bash installer/bin/rahandaz-install --plan --state-dir /tmp/rahandaz-plan
 در مسیر معمول نصب، تنها سؤال تنظیم شبکه `Panel port [8080]:` است. آدرس سمت سرور در اتصال SSH در صورتی پذیرفته می‌شود که واقعاً روی یکی از interfaceهای همین میزبان باشد؛ در نبود آن، source مسیر خروجی IPv4 و سپس تنها آدرس معتبر میزبان استفاده می‌شود. پرس‌وجوی route فقط محلی است و بسته‌ای به مقصد نمی‌فرستد؛ API تشخیص IP اینترنتی برای این انتخاب استفاده نمی‌شود. loopback، link-local، multicast، unspecified و broadcast پذیرفته نمی‌شوند.
 
 در نبود آدرس معتبر یا ابهام، نصب با پیام انگلیسی متوقف می‌شود و سؤال origin دوباره ظاهر نمی‌شود. برای معماری NAT، proxy، دامنه یا tunnel، گزینهٔ پیشرفتهٔ `--public-url` همچنان صریح قابل استفاده است؛ آدرس بیرونی NAT الزاماً از interface محلی قابل تشخیص نیست. `--resume` از journal قبلی می‌خواند و با تغییر اتصال SSH یا مسیر شبکه آدرس نصب را عوض نمی‌کند. این تصمیم در AGENTS، PROJECT_SPEC و قواعد دائمی ویرایشگر ثبت شده است.
+
+
+### تشخیص نصب موفق داخلی با دسترسی عمومی ناموفق
+
+در نسخهٔ قدیمی beta23، خروجی `PANEL http://127.0.0.1/rahandaz/login` یعنی health داخلی روی loopback بررسی شده است؛ این خروجی listener عمومی8080 را تضمین نمی‌کند. اجرای دوبارهٔ installer جدید روی نصب کامل، جای تغییر پورت یا ارتقای فعال نیست. اپراتور باید نسخه و Nginx و helper را بررسی و طبق PANEL_PORT فقط از release تأییدشده enrollment کند؛ تغییر بعدی از Job/Outbox/helper محدود انجام می‌شود. به تغییر دستی APP_URL یا حذف سایت پیش‌فرض نیاز نیست. فرمان نصب‌شدهٔ بررسی پایه `sudo rahandaz doctor` است؛ بررسی سرویس‌های برنامه با `sudo -u rahandaz-svc /usr/bin/php8.4 /var/lib/rahandaz/current/artisan rahandaz:doctor` از دایرکتوری برنامه انجام شود. اطلاعات ورود فقط در `/root/rahandaz-initial-credentials.txt` است و اولین ورود تغییر رمز را می‌خواهد.

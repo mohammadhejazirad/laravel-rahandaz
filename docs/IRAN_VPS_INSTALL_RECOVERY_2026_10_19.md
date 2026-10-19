@@ -1,5 +1,23 @@
 # گزارش رفع توقف نصب روی VPS ایران — ۲۰۲۶-۱۰-۱۹
 
+## پس از بازسازی مالک و نصب تازهٔ beta23
+
+این بخش وضعیت VPS تازه را ثبت می‌کند؛ گزارش ارتقاهای پایین متعلق به نصب پیش از بازسازی است. مالک Ubuntu 24.04.2 را مجدداً نصب و فرمان README نسخهٔ beta.23.1 را اجرا کرد. هر ۱۴ مرحله و health داخلی موفق بود، اما `APP_URL=http://127.0.0.1`، نبود enrollment پورت، نبود listener روی8080 و server_name محلی باعث می‌شد IP عمومی روی80 پاسخ404 بدهد. بنابراین success نصب داخلی، دسترسی عمومی8080 را تأیید نکرده بود. خطای APT، migration یا سرویس مشاهده نشد.
+
+بررسی و اصلاح واقعی:
+
+- امضای manifest و SHA256SUMS بستهٔ beta23 با کلید pin‌شده تأیید و helper/client/provision و کلاس‌های حساس نصب‌شده با artifact امضاشده مقایسه شدند. پشتیبان خصوصی custom pg_dump و archive پیکربندی در `/root/rahandaz-postinstall-review-20261019/backup/` ایجاد و فهرست هر دو خوانده شد؛ restore کامل پایگاه انجام نشد.
+- enrollment محدود از همان release امضاشده با host واقعی و current-port80 اجرا شد. سپس به درخواست مجاز مالک، Job پورت8080 با RecordOperation و audit اپراتور ثبت شد؛ Outbox منتشر و queue واقعی اجرا کرد. Job `01a15503-f2ac-7202-9df1-76626c342659` با checkpoint `verified=true` و بدون error_code موفق است. general executor همچنان disabled است؛ تغییر رمز/دورزدن guard ورود انجام نشد.
+- `APP_URL` به `http://194.110.24.123:8080` تغییر کرد. سایر خطوط env، master key، canary و هر دو فایل credentials با پشتیبان اولیه یکسان‌اند. helper با release برابر، socket برابر root:rahandaz-svc/0660 و NoNewPrivileges سرویس‌های پنل حفظ شد؛ sudo برای دستور آزاد و آرگومان اضافه رد شد. کانال اشتباه development در رکورد همین نسخهٔ تأییدشده به beta اصلاح شد؛ نسخهٔ برنامه عوض نشد.
+- از شبکهٔ بیرونی، ریشه8080 با302 به login هدایت و `/up` و login با200 پاسخ دادند. ورود واقعی با CSRF/session به `auth/password` رسید؛ گذرواژهٔ اولیه حفظ شد. هر۶۶ فایل build با200 و مسیرهای خصوصی با403/404 بررسی شدند. تب موجود Chrome مالک از خطای اتصال به صفحهٔ ورود واقعی روی8080 رسید و ظاهری بررسی شد.
+- Nginx، PHP-FPM8.4، queue، scheduler timer، هر دو Redis اختصاصی و helper socket فعال‌اند؛ هیچ unit شکست‌خورده‌ای نبود. Doctor برنامه پایگاه، Redis، کلیدها، canary و mode disabled را تأیید کرد. retry همان execution_id سلامت را تأیید و reload اضافی ایجاد نکرد. SSH دوم و بازیابی روی127.0.0.1:80 برقرار ماندند؛ سایت قدیمی80 و سایت پیش‌فرض Ubuntu بازنویسی نشدند.
+
+دو ایراد غیرمسدودکنندهٔ کد نصب نیز اصلاح شدند: خلاصهٔ نصب اکنون `rahandaz doctor` را معرفی می‌کند که واقعاً نصب شده است؛ نسخه‌های alpha/beta/rc در کانال beta ثبت می‌شوند. این اصلاح‌های منبع هنوز روی کد برنامهٔ VPS patch نشده‌اند و به بستهٔ امضاشدهٔ بعدی می‌روند. فرادادهٔ git_commit/timestamp در نصب قدیمی همچنان خالی است و گواهی provenance کامل ادعا نمی‌شود.
+
+خطاهای بررسی نگهداری پنهان نشده‌اند: نخستین اسکریپت پیش از backup با خواندن سربرگ manifest متوقف شد؛ درخواست زودهنگام قبل از enrollment نیز rollback شد. query تشخیصی از نام ستون نادرست dispatched_at استفاده کرد و با published_at تصحیح شد. دو error موجود در لاگ برنامه مربوط به همین probeهای نگهداری‌اند، نه شکست درخواست واقعی پنل. آزمون‌های نهایی موفق شدند؛ این تلاش‌های اولیه passed محسوب نمی‌شوند.
+
+محدودیت: این شاهد نصب تازهٔ beta23 توسط مالک و اصلاح دسترسی روی Ubuntu24.04 است؛ نصب تمیز beta25 یا VM22.04/26.04، reboot، بازیابی کامل DB و داشبورد پس از تغییر رمز مالک در این برش آزموده نشدند. هشدار secure_cookie با HTTP فعلی باقی است؛ دامنه/TLS پیکربندی نشده و Chrome روی سرور نصب نیست. هیچ پروژهٔ کاربر، PHP پیش‌فرض، firewall یا تنظیم SSH تغییر نکرد.
+
 ## پورت عمومی پنل و ارتقای beta23 — نتیجهٔ نهایی
 
 به درخواست صریح مالک، دسترسی مستقیم HTTP/IPv4 روی پورت 8080 فعال شد. نسخهٔ فعال سرور `1.0.0-beta.23.1` از commit `151934197e9979c2cd312cea030b25ec2597c949`، [انتشار عمومی امضاشده](https://github.com/mohammadhejazirad/laravel-rahandaz/releases/tag/v1.0.0-beta.23.1) و [CI موفق](https://github.com/mohammadhejazirad/laravel-rahandaz/actions/runs/39259091468) است. README با فرمان دقیق INSTALL.md همین بسته و هش bootstrap `69ea2949b55bdf4550c9ba9c3a366cf8f0c957c751cc7393c76cc60e3f5dd051` هماهنگ شد؛ manifest، SHA256SUMS و امضاها با کلید pin‌شده و verify-only تأیید شدند.

@@ -3,6 +3,7 @@
 
 import hashlib
 import io
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -57,6 +58,45 @@ class ReleaseTest(unittest.TestCase):
     def assemble(self, output="packed", version=None):
         return self.command("bash", "installer/release/assemble.sh", "--from", self.application,
                             "--version", version or self.version, "--output", self.work / output)
+
+    def test_fresh_install_records_the_verified_candidate_channel(self):
+        for version, channel in [('1.0.0', 'stable'), ('1.0.0-beta.25.1', 'beta'),
+                                 ('1.0.0-rc.1', 'beta'), ('1.0.0-alpha.1', 'beta'),
+                                 ('1.0.0-dev', 'development')]:
+            with self.subTest(version=version):
+                result = self.assemble(output='packed-' + version, version=version)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                root = self.work / ('sysroot-' + version)
+                result = self.command('bash', '-c', '''set -euo pipefail
+INSTALLER_HOME="$1/installer"
+source "$INSTALLER_HOME/lib/common.sh"
+source "$INSTALLER_HOME/lib/gate.sh"
+source "$INSTALLER_HOME/lib/render.sh"
+source "$INSTALLER_HOME/lib/php-runtime.sh"
+source "$INSTALLER_HOME/lib/engine.sh"
+RAHANDAZ_INSTALLER_SYSROOT="$2"
+MODE=apply INSTALLER_RELEASE_VERSION="$3" INSTALLER_ARTIFACT="$4"
+stage_06_application_release
+''', 'fixture', ROOT, root, version, result.stdout.strip())
+                self.assertEqual(result.returncode, 0, result.stderr)
+                record = json.loads((root / 'var/lib/rahandaz/release.json').read_text())
+                self.assertEqual((record['version'], record['channel']), (version, channel))
+                self.assertEqual((root / 'var/lib/rahandaz/current').resolve().name, version)
+
+    def test_installation_summary_uses_the_installed_operator_command(self):
+        result = self.command('bash', '-c', '''set -euo pipefail
+INSTALLER_HOME="$1/installer"
+source "$INSTALLER_HOME/lib/common.sh"
+source "$INSTALLER_HOME/lib/engine.sh"
+installer_state_get() { [[ "$1" == selected_mirror ]] || printf succeeded; }
+installer_state_remove() { :; }
+installer_state_set() { :; }
+MODE=apply PUBLIC_URL=http://194.110.24.123:8080
+stage_15_installation_summary
+''', 'fixture', ROOT)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('Doctor: rahandaz doctor', result.stdout + result.stderr)
+        self.assertNotIn('rahandaz-install --doctor', result.stdout + result.stderr)
 
     def prepare(self, artifact=None):
         if artifact is None:
