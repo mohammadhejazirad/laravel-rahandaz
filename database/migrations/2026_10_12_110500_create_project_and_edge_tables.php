@@ -301,8 +301,8 @@ return new class extends Migration
             alter table projects add constraint projects_name_chk check (char_length(btrim(name)) between 1 and 120);
             alter table projects add constraint projects_slug_chk check (slug ~ '^[a-z0-9][a-z0-9-]{1,48}$');
             alter table projects add constraint projects_type_chk check (
-                declared_type in ('laravel', 'php', 'static', 'node', 'nuxt', 'next', 'python', 'django', 'flask', 'fastapi', 'express', 'vue', 'react', 'nest', 'adonis')
-                and (detected_type is null or detected_type in ('laravel', 'php', 'static', 'node', 'nuxt', 'next', 'python', 'django', 'flask', 'fastapi', 'express', 'vue', 'react', 'nest', 'adonis'))
+                declared_type in ('laravel', 'php', 'static', 'static-react', 'static-vue', 'node', 'nuxt', 'next', 'python', 'django', 'flask', 'fastapi', 'express', 'vue', 'react', 'nest', 'adonis', 'wordpress')
+                and (detected_type is null or detected_type in ('laravel', 'php', 'static', 'static-react', 'static-vue', 'node', 'nuxt', 'next', 'python', 'django', 'flask', 'fastapi', 'express', 'vue', 'react', 'nest', 'adonis', 'wordpress'))
             );
             alter table projects add constraint projects_branch_chk check (default_branch ~ '^[A-Za-z0-9._/-]{1,255}$' and position('..' in default_branch) = 0);
             alter table projects add constraint projects_policy_chk check (migration_policy in ('none', 'expand_only', 'maintenance') and release_retention between 1 and 20);

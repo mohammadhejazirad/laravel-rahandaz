@@ -45,6 +45,7 @@ export default function ProjectShow({ project, environments, source_archives, ar
         slug: string;
         status: string;
         declared_type: string;
+        detected_type: string | null;
         default_branch: string;
         created_at: string | null;
         workspace_uuid: string | null;
@@ -80,6 +81,7 @@ export default function ProjectShow({ project, environments, source_archives, ar
                 </div>
                 <dl className="mt-4 grid gap-3 sm:grid-cols-2">
                     <div><dt className="text-sm text-muted">نوع اعلام‌شده</dt><dd dir="auto">{labelOf(project.declared_type, labels)}</dd></div>
+                    {project.detected_type ? <div><dt className="text-sm text-muted">تشخیص اولیه</dt><dd dir="ltr" className="font-mono">{labelOf(project.detected_type, labels)}</dd></div> : null}
                     <div><dt className="text-sm text-muted">شاخه پیش‌فرض Git</dt><dd className="font-mono" dir="ltr">{project.default_branch}</dd></div>
                     <div><dt className="text-sm text-muted">ایجاد</dt><dd><PersianDate iso={project.created_at} /></dd></div>
                 </dl>

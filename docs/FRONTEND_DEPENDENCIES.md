@@ -68,3 +68,7 @@ Primitiveهای Radix به‌صورت بسته‌های مستقل Avatar، Dial
 هیچ dependency تازه اضافه نشد. فرم و پیش‌نمایش با React/Inertia و کامپوننت‌های مشترک موجود ساخته شد. polling هر پنج ثانیه فقط برای Job فعال و تب قابل مشاهده است؛ از ثبت صف، نصب موفق نتیجه گرفته نمی‌شود. کلید idempotency در Backend تولید می‌شود تا HTTP عمومی بدون وابستگی به `crypto.randomUUID` نیز کار کند.
 
 2026-10-19 categorized catalog/live monitoring: no dependency added. Existing React-Toastify handles verified completion; native SVG renders bounded real CPU samples, and shared visible/online polling handles refresh/backoff. Missing samples never produce fabricated chart points.
+
+## انتخاب نوع برنامه — ۲۰۲۶-۱۰-۱۹
+
+پکیج تازه نصب نشد. `FrameworkPicker` شبکهٔ تک‌انتخابی مربع‌هاست و از Form، radio بومی و آیکون محلی Simple Icons با `currentColor` استفاده می‌کند. نام‌ها انگلیسی و توضیح‌ها فارسی‌اند. مجوز CC0 در `public/icons/frameworks/README.md` است.

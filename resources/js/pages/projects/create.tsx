@@ -1,8 +1,9 @@
 import { Form } from '@/components/ui/form';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { GitProviderIcon } from '@/components/git/provider-icon';
 import type { GitAccount } from '@/components/git/types';
+import { FrameworkPicker } from '@/components/projects/framework-picker';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -19,7 +20,7 @@ interface BranchOption { name: string; head_sha: string; is_default: boolean }
 interface ChosenRepo { uuid: string; full_name: string; default_branch: string; suggested_name: string }
 
 export default function ProjectCreate({
-    accounts, hosts, connection, repositories, repository, branches, filters, types, execution_mode,
+    accounts, hosts, connection, repositories, repository, branches, filters, types, detection, execution_mode,
 }: {
     accounts: Pick<GitAccount, 'uuid' | 'provider' | 'account_label' | 'base_url' | 'repository_count'>[];
     hosts: HostOption[];
@@ -29,6 +30,7 @@ export default function ProjectCreate({
     branches: BranchOption[];
     filters: { repo_q: string };
     types: { value: string; label: string }[];
+    detection: { type: string | null; label: string | null } | null;
     execution_mode: string;
 }) {
     const base = usePage<SharedProps>().props.app.base_path;
@@ -40,9 +42,14 @@ export default function ProjectCreate({
         repository: repository?.uuid ?? '',
         branch,
         name: repository?.suggested_name ?? '',
-        declared_type: 'laravel',
+        declared_type: detection?.type ?? '',
         host: hosts.length === 1 ? hosts[0].uuid : '',
     });
+    useEffect(() => {
+        form.setData('declared_type', detection?.type ?? '');
+        // The hint belongs to the repository that was just selected.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [repository?.uuid]);
     const waiting = account !== null && account.repository_count === 0 && repositories.data.length === 0 && filters.repo_q === '';
     useVisiblePoll(waiting, 'accounts,repositories', 8000);
 
@@ -84,7 +91,8 @@ export default function ProjectCreate({
             <div className="mt-4 flex flex-wrap gap-2">{branches.map(item => <button key={item.name} type="button" aria-pressed={branch === item.name} className={cn('inline-flex min-h-11 items-center rounded-full border px-3 font-mono text-sm', branch === item.name ? 'border-accent bg-accent-soft' : 'border-line hover:border-accent')} dir="ltr" onClick={() => { setBranch(item.name); form.setData('branch', item.name); }}>{item.name}</button>)}</div>
             <Form className="mt-6 grid gap-4" onSubmit={event => { event.preventDefault(); form.transform(data => ({ ...data, branch })); form.post(`${base}/projects`); }}>
                 <Input name="name" label="نام پروژه" isRequired maxLength={120} value={form.data.name} onChange={event => form.setData('name', event.target.value)} error={form.errors.name} />
-                <Select name="declared_type" label="نوع برنامه" isRequired value={form.data.declared_type} onChange={event => form.setData('declared_type', event.target.value)} error={form.errors.declared_type}>{types.map(type => <option key={type.value} value={type.value}>{type.label}</option>)}</Select>
+                <FrameworkPicker name="declared_type" label="نوع برنامه" isRequired suggested={detection?.type ?? undefined} value={form.data.declared_type} allowed={types.map(type => type.value)} onChange={value => form.setData('declared_type', value)} error={form.errors.declared_type} />
+                {detection?.type ? <p className="text-sm leading-7 text-muted">از فایل‌های ریشهٔ شاخهٔ پیش‌فرض، <bdi dir="ltr" className="font-mono">{detection.label}</bdi> پیشنهاد شد. اگر درست نیست، نوع دیگری را انتخاب کنید. زیرپوشه‌ها در این تشخیص دیده نمی‌شوند.</p> : <p className="text-sm leading-7 text-muted">از فایل‌های ریشهٔ شاخهٔ پیش‌فرض نوعی تشخیص داده نشد. خودتان انتخاب کنید.</p>}
                 {hosts.length === 0 ? <Alert tone="warning">در این فضای کاری سروری ثبت نشده است. تا وجود یک سرور، پروژه ذخیره نمی‌شود.</Alert> : hosts.length === 1 ? <p className="text-sm text-muted">سرور: <span dir="ltr" className="font-mono">{hosts[0].name}</span></p> : <Select name="host" label="سرور" isRequired value={form.data.host} onChange={event => form.setData('host', event.target.value)} error={form.errors.host}><option value="">انتخاب سرور</option>{hosts.map(host => <option key={host.uuid} value={host.uuid}>{host.name}</option>)}</Select>}
                 <input type="hidden" name="repository" value={repository.uuid} />
                 <input type="hidden" name="branch" value={branch} />

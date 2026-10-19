@@ -13,6 +13,8 @@ enum ProjectType: string
     case Laravel = 'laravel';
     case Php = 'php';
     case StaticHtml = 'static';
+    case StaticReact = 'static-react';
+    case StaticVue = 'static-vue';
     case Node = 'node';
     case Nuxt = 'nuxt';
     case Next = 'next';
@@ -25,25 +27,29 @@ enum ProjectType: string
     case React = 'react';
     case Nest = 'nest';
     case Adonis = 'adonis';
+    case Wordpress = 'wordpress';
 
     public function label(): string
     {
         return match ($this) {
             self::Laravel => 'Laravel',
             self::Php => 'PHP',
-            self::StaticHtml => 'ایستا',
+            self::StaticHtml => 'HTML',
+            self::StaticReact => 'React',
+            self::StaticVue => 'Vue',
             self::Node => 'Node.js',
-            self::Nuxt => 'Nuxt',
+            self::Nuxt => 'Nuxt.js',
             self::Next => 'Next.js',
             self::Python => 'Python',
             self::Django => 'Django',
             self::Flask => 'Flask',
             self::Fastapi => 'FastAPI',
-            self::Express => 'Express',
-            self::Vue => 'Vue',
-            self::React => 'React',
-            self::Nest => 'Nest',
-            self::Adonis => 'Adonis',
+            self::Express => 'Express.js',
+            self::Vue => 'Vue.js',
+            self::React => 'React.js',
+            self::Nest => 'NestJS',
+            self::Adonis => 'AdonisJS',
+            self::Wordpress => 'WordPress',
         };
     }
 }

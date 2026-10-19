@@ -82,6 +82,7 @@ class ProjectController extends Controller
                 'slug' => $project->slug,
                 'status' => $project->status->value,
                 'declared_type' => $project->declared_type->value,
+                'detected_type' => $project->detected_type?->value,
                 'default_branch' => $project->default_branch,
                 'created_at' => $project->created_at?->utc()->toIso8601ZuluString(),
                 'workspace_uuid' => $project->workspace?->uuid,

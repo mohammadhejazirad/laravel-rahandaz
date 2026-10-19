@@ -347,6 +347,61 @@ final class GitConnector
         return $stored;
     }
 
+    /**
+     * Root names plus a few small manifests from the default branch.
+     * File bodies are not logged. Missing access returns an empty snapshot.
+     *
+     * @return array{names: list<string>, files: array<string, string>}
+     */
+    public function rootMarkers(RemoteRepository $repository, User $actor): array
+    {
+        $repository->loadMissing('gitConnection.credential', 'gitConnection.workspace');
+        $connection = $repository->gitConnection;
+        if (! $connection instanceof GitConnection || $connection->state === GitConnectionState::Revoked) {
+            throw new GitRejected('اتصال این مخزن قابل استفاده نیست.');
+        }
+        if ((string) $repository->workspace_id !== (string) $connection->workspace_id) {
+            throw new GitRejected('مخزن خارج از اتصال است.');
+        }
+
+        $branch = $repository->default_branch;
+        if (preg_match('/^[A-Za-z0-9._\/-]{1,255}$/', $branch) !== 1 || str_contains($branch, '..') || str_starts_with($branch, '-')) {
+            throw new GitRejected('شاخهٔ پیش‌فرض این مخزن مجاز نیست.');
+        }
+
+        $material = $this->oauth->accessToken($connection, $actor);
+        $headers = $this->connectionHeaders($connection, $material);
+        $listing = $this->markerResponse($this->markerUrl($connection, $repository, null), $headers, ['ref' => $branch, 'per_page' => 100]);
+        if ($listing === null || ! array_is_list($listing)) {
+            return ['names' => [], 'files' => []];
+        }
+
+        $names = [];
+        foreach (array_slice($listing, 0, 100) as $entry) {
+            if (! is_array($entry)) {
+                continue;
+            }
+            $name = (string) ($entry['name'] ?? '');
+            if (preg_match('/^[A-Za-z0-9._-]{1,80}$/', $name) === 1) {
+                $names[] = $name;
+            }
+        }
+        $names = array_values(array_unique($names));
+        $files = [];
+        foreach (['composer.json', 'package.json', 'requirements.txt', 'pyproject.toml', 'Pipfile'] as $name) {
+            if (! in_array($name, $names, true)) {
+                continue;
+            }
+            $payload = $this->markerResponse($this->markerUrl($connection, $repository, $name), $headers, ['ref' => $branch]);
+            $text = $this->markerText($payload);
+            if ($text !== null) {
+                $files[$name] = $text;
+            }
+        }
+
+        return ['names' => $names, 'files' => $files];
+    }
+
     public function disconnect(GitConnection $connection, User $actor, ?string $requestId, ?string $sourceIp): void
     {
         $connection->loadMissing('workspace');
@@ -601,6 +656,69 @@ final class GitConnector
         $row = DB::selectOne('select rahandaz_repository_clone_url(?) as ok', [$url]);
 
         return (bool) ($row->ok ?? false);
+    }
+
+    private function markerUrl(GitConnection $connection, RemoteRepository $repository, ?string $file): string
+    {
+        if ($connection->provider === GitProvider::Github) {
+            if (preg_match('/^[A-Za-z0-9_.-]+(\/[A-Za-z0-9_.-]+){1,5}$/', $repository->full_name) !== 1) {
+                throw new GitRejected('نام مخزن برای خواندن نشانه‌ها مجاز نیست.');
+            }
+            $path = implode('/', array_map(rawurlencode(...), explode('/', $repository->full_name)));
+
+            return 'https://api.github.com/repos/'.$path.'/contents'.($file === null ? '' : '/'.rawurlencode($file));
+        }
+
+        if (preg_match('/^[A-Za-z0-9_-]{1,64}$/', $repository->provider_repository_id) !== 1) {
+            throw new GitRejected('شناسه مخزن GitLab مجاز نیست.');
+        }
+        $base = rtrim($connection->base_url, '/').'/api/v4/projects/'.rawurlencode($repository->provider_repository_id).'/repository/';
+
+        return $file === null ? $base.'tree' : $base.'files/'.rawurlencode($file);
+    }
+
+    /**
+     * @param  array<string, string>  $headers
+     * @param  array<string, int|string>  $query
+     * @return array<int|string, mixed>|null
+     */
+    private function markerResponse(string $url, array $headers, array $query): ?array
+    {
+        try {
+            $response = $this->get($url, $this->guard->pin($url), $headers, $query);
+        } catch (UnsafeOutboundUrl $exception) {
+            throw new GitRejected($exception->getMessage());
+        }
+
+        if ($response->status() === 404) {
+            return null;
+        }
+
+        $this->assertOk($response);
+        $payload = $response->json();
+
+        return is_array($payload) ? $payload : null;
+    }
+
+    /**
+     * @param  array<int|string, mixed>|null  $payload
+     */
+    private function markerText(?array $payload): ?string
+    {
+        if ($payload === null || array_is_list($payload)) {
+            return null;
+        }
+        $size = (int) ($payload['size'] ?? 0);
+        $content = $payload['content'] ?? null;
+        if ($size > 131072 || ! is_string($content) || strlen($content) > 200000) {
+            return null;
+        }
+        $decoded = base64_decode(preg_replace('/\s+/', '', $content) ?? '', true);
+        if (! is_string($decoded) || strlen($decoded) > 131072 || str_contains($decoded, "\0") || ! mb_check_encoding($decoded, 'UTF-8')) {
+            return null;
+        }
+
+        return $decoded;
     }
 
     /**

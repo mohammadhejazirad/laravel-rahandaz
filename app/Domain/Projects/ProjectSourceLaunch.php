@@ -31,6 +31,7 @@ final class ProjectSourceLaunch
 {
     public function __construct(
         private readonly GitConnector $git,
+        private readonly ProjectTypeDetector $types,
         private readonly DeploymentWorkflow $deployments,
         private readonly AuditRecorder $audit,
     ) {}
@@ -117,6 +118,36 @@ final class ProjectSourceLaunch
         return $this->branchesOf($repository->fresh() ?? $repository);
     }
 
+    public function suggestType(RemoteRepository $repository, User $actor, ?string $requestId, ?string $sourceIp): ?ProjectType
+    {
+        $repository->loadMissing('gitConnection.workspace');
+        $connection = $repository->gitConnection;
+        try {
+            $snapshot = $this->git->rootMarkers($repository, $actor);
+            $type = $this->types->detect($snapshot['names'], $snapshot['files']);
+            $result = AuditResult::Success;
+        } catch (GitRejected) {
+            $type = null;
+            $result = AuditResult::Failure;
+        }
+
+        if ($connection instanceof GitConnection && $connection->workspace !== null) {
+            $this->audit->record(
+                $connection->workspace,
+                $actor,
+                'project.type_hint',
+                'remote_repository',
+                $repository->uuid,
+                $result,
+                ['detected_type' => $type?->value ?? 'unknown'],
+                $requestId,
+                $sourceIp,
+            );
+        }
+
+        return $type;
+    }
+
     /**
      * @return array{project: Project, deployment_uuid: string}
      */
@@ -128,6 +159,7 @@ final class ProjectSourceLaunch
         string $branch,
         string $name,
         ProjectType $type,
+        ?ProjectType $detected,
         ?string $requestId,
         ?string $sourceIp,
     ): array {
@@ -150,7 +182,7 @@ final class ProjectSourceLaunch
         }
 
         try {
-            return DB::transaction(function () use ($workspace, $actor, $host, $repository, $branch, $name, $type, $requestId, $sourceIp, $connection): array {
+            return DB::transaction(function () use ($workspace, $actor, $host, $repository, $branch, $name, $type, $detected, $requestId, $sourceIp, $connection): array {
                 $stored = RemoteBranch::query()
                     ->where('remote_repository_id', $repository->id)
                     ->where('name', $branch)
@@ -170,6 +202,7 @@ final class ProjectSourceLaunch
                     'name' => $name,
                     'slug' => $slug,
                     'declared_type' => $type,
+                    'detected_type' => $detected,
                     'remote_repository_id' => $repository->id,
                     'default_branch' => $branch,
                     'auto_deploy' => false,

@@ -58,6 +58,7 @@ class ProjectLaunchController extends Controller
             'branches' => $branches,
             'filters' => ['repo_q' => $search],
             'types' => array_map(fn (ProjectType $type): array => ['value' => $type->value, 'label' => $type->label()], ProjectType::cases()),
+            'detection' => $this->detection($request, $repository, $launch),
             'execution_mode' => (string) config('rahandaz.execution_mode'),
         ]);
     }
@@ -75,6 +76,11 @@ class ProjectLaunchController extends Controller
         } catch (Throwable) {
             return back()->with('error', 'فهرست شاخه‌ها دریافت نشد. اتصال حساب و دسترسی مخزن را بررسی کنید.');
         }
+
+        $request->session()->put('project_type_hint', [
+            'repository' => $repository->uuid,
+            'type' => $launch->suggestType($repository->fresh() ?? $repository, $request->user(), $request->attributes->get('request_id'), $request->ip())?->value,
+        ]);
 
         return redirect()->route('projects.create', [
             'connection' => $repository->gitConnection?->uuid,
@@ -108,6 +114,7 @@ class ProjectLaunchController extends Controller
                 $data['branch'],
                 $data['name'],
                 ProjectType::from($data['declared_type']),
+                $this->rememberedType($request, $repository),
                 $request->attributes->get('request_id'),
                 $request->ip(),
             );
@@ -141,5 +148,39 @@ class ProjectLaunchController extends Controller
         }
 
         return $connection->repositories()->where('uuid', $uuid)->where('disabled', false)->where('archived', false)->first();
+    }
+
+    /**
+     * @return array{type: string|null, label: string|null}|null
+     */
+    private function detection(Request $request, ?RemoteRepository $repository, ProjectSourceLaunch $launch): ?array
+    {
+        if ($repository === null) {
+            return null;
+        }
+
+        $hint = $request->session()->get('project_type_hint');
+        $matches = is_array($hint) && ($hint['repository'] ?? null) === $repository->uuid;
+        if (! $matches) {
+            $type = $launch->suggestType($repository, $request->user(), $request->attributes->get('request_id'), $request->ip());
+            $request->session()->put('project_type_hint', [
+                'repository' => $repository->uuid,
+                'type' => $type?->value,
+            ]);
+        } else {
+            $type = is_string($hint['type'] ?? null) ? ProjectType::tryFrom($hint['type']) : null;
+        }
+
+        return ['type' => $type?->value, 'label' => $type?->label()];
+    }
+
+    private function rememberedType(Request $request, RemoteRepository $repository): ?ProjectType
+    {
+        $hint = $request->session()->get('project_type_hint');
+        if (! is_array($hint) || ($hint['repository'] ?? null) !== $repository->uuid || ! is_string($hint['type'] ?? null)) {
+            return null;
+        }
+
+        return ProjectType::tryFrom($hint['type']);
     }
 }

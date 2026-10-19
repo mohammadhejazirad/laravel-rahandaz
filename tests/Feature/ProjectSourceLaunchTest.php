@@ -75,11 +75,16 @@ class ProjectSourceLaunchTest extends TestCase
             ->has('repositories.data', 1)
             ->where('repositories.data.0.full_name', 'acme/shop'));
 
-        Http::fake(['api.github.com/repos/acme/shop/branches*' => Http::response([[
-            'name' => 'main',
-            'protected' => false,
-            'commit' => ['sha' => $sha],
-        ]])]);
+        Http::fake([
+            'api.github.com/repos/acme/shop/branches*' => Http::response([[
+                'name' => 'main',
+                'protected' => false,
+                'commit' => ['sha' => $sha],
+            ]]),
+            'api.github.com/repos/acme/shop/contents*' => Http::response([
+                ['name' => 'README.md', 'type' => 'file', 'size' => 12],
+            ]),
+        ]);
         $this->post(route('projects.branches', $repository))->assertRedirect(route('projects.create', [
             'connection' => $github->uuid,
             'repository' => $repository->uuid,
@@ -96,6 +101,7 @@ class ProjectSourceLaunchTest extends TestCase
         ])->assertRedirect();
 
         $project = Project::query()->where('workspace_id', $workspace->id)->where('slug', 'shop')->firstOrFail();
+        $this->assertNull($project->detected_type);
         $this->assertSame($repository->id, $project->remote_repository_id);
         $this->assertSame('main', $project->default_branch);
         $this->assertSame('تولید', $project->environments()->value('name'));
@@ -104,6 +110,65 @@ class ProjectSourceLaunchTest extends TestCase
         $this->assertFalse(OperationJob::query()->findOrFail($deployment->operation_job_id)->plan['input']['host_executed']);
         $this->assertDatabaseHas('audit_events', ['action' => 'project.launch', 'result' => 'success']);
         $this->get(route('projects.index'))->assertInertia(fn (Assert $page) => $page->where('create_available', true)->where('projects.data.0.uuid', $project->uuid));
+    }
+
+    public function test_selecting_a_repository_suggests_a_type_without_overriding_the_operator(): void
+    {
+        [$owner, $workspace] = $this->panelAccount(setupComplete: true);
+        $host = LocalHost::factory()->create(['workspace_id' => $workspace->id]);
+        $connection = GitConnection::factory()->create(['workspace_id' => $workspace->id]);
+        $repository = RemoteRepository::factory()->create([
+            'workspace_id' => $workspace->id,
+            'git_connection_id' => $connection->id,
+            'full_name' => 'acme/shop',
+            'default_branch' => 'main',
+            'is_selected' => false,
+        ]);
+        $sha = str_repeat('cd', 20);
+        $composer = '{"require":{"laravel/framework":"^11.0"}}';
+        Http::fake(function ($request) use ($sha, $composer) {
+            $url = $request->url();
+            if (str_contains($url, '/branches')) {
+                return Http::response([['name' => 'main', 'protected' => false, 'commit' => ['sha' => $sha]]]);
+            }
+            if (str_contains($url, 'composer.json')) {
+                return Http::response([
+                    'name' => 'composer.json',
+                    'encoding' => 'base64',
+                    'size' => strlen($composer),
+                    'content' => base64_encode($composer),
+                ]);
+            }
+            if (str_contains($url, '/contents')) {
+                return Http::response([
+                    ['name' => 'artisan', 'type' => 'file', 'size' => 18],
+                    ['name' => 'composer.json', 'type' => 'file', 'size' => strlen($composer)],
+                ]);
+            }
+
+            return Http::response(['message' => 'missing'], 404);
+        });
+
+        $this->actingAs($owner)->post(route('projects.branches', $repository))->assertRedirect();
+        $this->get(route('projects.create', [
+            'connection' => $connection->uuid,
+            'repository' => $repository->uuid,
+        ]))->assertOk()->assertInertia(fn (Assert $page) => $page
+            ->where('detection.type', 'laravel')
+            ->where('detection.label', 'Laravel'));
+
+        $this->post(route('projects.store'), [
+            'repository' => $repository->uuid,
+            'branch' => 'main',
+            'name' => 'فروشگاه',
+            'declared_type' => 'next',
+            'host' => $host->uuid,
+        ])->assertRedirect();
+
+        $project = Project::query()->where('workspace_id', $workspace->id)->firstOrFail();
+        $this->assertSame('next', $project->declared_type->value);
+        $this->assertSame('laravel', $project->detected_type?->value);
+        $this->assertDatabaseHas('audit_events', ['action' => 'project.type_hint', 'result' => 'success']);
     }
 
     public function test_branch_fetch_failure_does_not_keep_a_new_repository_selection(): void
