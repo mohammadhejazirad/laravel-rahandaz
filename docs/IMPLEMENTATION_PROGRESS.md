@@ -2,6 +2,12 @@
 
 این فایل گزارش واقعیت مخزن است. نقشه در `.docs/ROADMAP.md` و مشخصات در `.docs/PROJECT_SPEC.md` است.
 
+## ۲۰۲۶-۱۰-۱۹ — انتشار و ارتقای کنترل‌شدهٔ VPS
+
+انتشار عمومی امضاشدهٔ beta16 از commit `7a2ec63` و CI موفق بررسی شد؛ SHA256SUMS، امضا، manifest و bootstrap با کلید pin‌شده تأیید شدند. ارتقای واقعی VPS Ubuntu 24.04 از beta14 به beta16 با قفل، توقف writerهای خود پنل، `pg_dump` با فرمت custom، اعتبارسنجی فهرست restore و archive پیکربندی/runtime انجام شد. migration و seed یکسان بودند و اجرا نشدند؛ کلیدها و credentials بدون تغییر ماندند. سلامت HTTP، doctor با service user و سرویس‌ها پس از فعال‌سازی موفق شد. تونل خصوصی SSH و صفحهٔ ورود در Chrome مالک باز شدند.
+
+بررسی پس از ارتقا نشان داد Backend بدون env override رکورد توسعه را می‌خواند؛ fallback به release.json نصب‌شده اصلاح و آزمون regression اضافه شد. CLI updater همچنان فقط prepare می‌کند و assets فعلی metadata مجزای امضاشده ندارند؛ این ارتقای مهندسی‌شده گواهی updater خودکار نیست. محدودیت و مسیر واقعی در SELF_UPDATE ثبت شدند. گزارش نهایی نسخه و Matrix پس از آزمون انتشار در سند VPS به‌روزرسانی می‌شود.
+
 ## ۲۰۲۶-۱۰-۱۹ — رفع توقف نصب روی VPS واقعی ایران
 
 با دسترسی مجاز مالک، beta14 روی Ubuntu 24.04.5 بررسی شد. خطای ۵۰۰ health/login از storage داخل release و دسترسی ناقص service بود؛ خطای دوم از welcome با حالت 0700 بود. اصلاح محدود runtime/default ACL، welcome، نام‌های loopback سایت Nginx، تشخیص امن mode کلید در doctor و پاک‌کردن error_code قدیمی انجام و روی سرور اعمال شد. همان artifact امضاشده با basename اصلی دوباره verify و resume شد؛ checkpoint نهایی و result success ثبت شدند. ورود واقعی به صفحهٔ تغییر گذرواژه رسید، بدون تغییر گذرواژه/کلید/.env یا داده‌ها. SSH و تنظیم شبکه دست‌نخورده و موتور disabled ماندند.

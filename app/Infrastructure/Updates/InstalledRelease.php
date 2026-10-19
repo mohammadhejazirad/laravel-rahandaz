@@ -10,11 +10,13 @@ final class InstalledRelease
 {
     public function __construct(private readonly string $path) {}
 
-    public static function fromConfig(): self
+    public static function fromConfig(string $installedPath = '/var/lib/rahandaz/release.json'): self
     {
         $configured = (string) config('rahandaz.release_file');
         if ($configured === '') {
-            $configured = base_path('installer/release/development.json');
+            $configured = is_file($installedPath) && ! is_link($installedPath)
+                ? $installedPath
+                : base_path('installer/release/development.json');
         }
 
         return new self($configured);

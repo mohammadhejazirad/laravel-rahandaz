@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit;
 
 use App\Infrastructure\Updates\GitHubReleaseClient;
+use App\Infrastructure\Updates\InstalledRelease;
 use App\Infrastructure\Updates\PhpRuntime;
 use App\Infrastructure\Updates\ProductVersion;
 use App\Infrastructure\Updates\UpdateNotificationService;
@@ -16,6 +17,48 @@ use Tests\TestCase;
 
 class UpdateSystemTest extends TestCase
 {
+    public function test_native_installation_reports_the_installed_release_without_an_env_override(): void
+    {
+        $path = tempnam(sys_get_temp_dir(), 'rahandaz-release-');
+        $record = json_decode((string) file_get_contents(base_path('installer/release/development.json')), true);
+        $record['version'] = '1.0.0-beta.16.1';
+        $record['channel'] = 'beta';
+        file_put_contents($path, json_encode($record));
+        config(['rahandaz.release_file' => '']);
+
+        try {
+            $installed = InstalledRelease::fromConfig($path)->toArray();
+            $this->assertSame('1.0.0-beta.16.1', $installed['version']);
+            $this->assertSame('beta', $installed['channel']);
+
+            config(['rahandaz.release_file' => base_path('installer/release/development.json')]);
+            $this->assertSame(ProductVersion::CHANNEL, InstalledRelease::fromConfig($path)->toArray()['channel']);
+        } finally {
+            unlink($path);
+        }
+    }
+
+    public function test_missing_native_record_uses_the_development_record(): void
+    {
+        config(['rahandaz.release_file' => '']);
+
+        $this->assertSame(ProductVersion::CHANNEL, InstalledRelease::fromConfig(__FILE__.'/missing')->toArray()['channel']);
+    }
+
+    public function test_invalid_installed_record_is_not_hidden_by_a_development_fallback(): void
+    {
+        $path = tempnam(sys_get_temp_dir(), 'rahandaz-release-');
+        file_put_contents($path, '{}');
+        config(['rahandaz.release_file' => '']);
+
+        try {
+            $this->expectException(\InvalidArgumentException::class);
+            InstalledRelease::fromConfig($path)->toArray();
+        } finally {
+            unlink($path);
+        }
+    }
+
     public function test_semantic_versions_compare_numerically(): void
     {
         $this->assertSame(1, SemanticVersion::compare('1.10.0', '1.9.0'));
