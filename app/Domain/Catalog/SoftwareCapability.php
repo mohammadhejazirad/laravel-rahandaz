@@ -62,7 +62,7 @@ class SoftwareCapability
             DB::select('select pg_advisory_xact_lock(hashtextextended(?, 0))', ['software.requests']);
             $active = OperationJob::query()->whereIn('type', ['software.install', 'setup.initialize'])
                 ->whereIn('status', ['queued', 'running', 'waiting_retry'])->lockForUpdate()->first();
-            if ($active !== null && ((string) $active->workspace_id !== (string) $workspace->id || $active->idempotency_key !== $key || $active->type !== $type)) {
+            if ($active !== null && ((string) $active->workspace_id !== (string) $workspace->id || (string) $active->actor_id !== (string) $actor->id || $active->idempotency_key !== $key || $active->type !== $type)) {
                 throw ValidationException::withMessages(['packages' => 'یک عملیات نصب در حال انجام است. پس از پایان آن دوباره تلاش کنید.']);
             }
             $job = app(RecordOperation::class)->record(new RecordOperationData(
