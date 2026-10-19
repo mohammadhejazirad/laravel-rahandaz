@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Domain\Access\OperationAccess;
 use App\Domain\Catalog\ChromeInstallation;
+use App\Domain\Catalog\SoftwareCapability;
 use App\Http\CurrentWorkspace;
 use App\Http\HostMutation;
 use App\Http\PaginatorPayload;
@@ -13,6 +14,7 @@ use App\Models\LocalHost;
 use App\Models\PackageDefinition;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -52,6 +54,13 @@ class CatalogController extends Controller
                 'meta' => PaginatorPayload::meta($packages),
             ],
             'install_available' => false,
+            'software' => [
+                'request_key' => (string) Str::uuid(),
+                'available' => $host !== null && app(SoftwareCapability::class)->available(),
+                'can_request' => app(OperationAccess::class)->managesWorkspace($request->user(), $workspace->id),
+                'catalog' => app(SoftwareCapability::class)->catalog(),
+                'job' => app(SoftwareCapability::class)->payload(app(SoftwareCapability::class)->latest($workspace)),
+            ],
             'chrome' => [
                 'host_uuid' => $host?->uuid,
                 'can_request' => $host !== null && app(OperationAccess::class)->managesWorkspace($request->user(), $workspace->id),
@@ -60,6 +69,17 @@ class CatalogController extends Controller
                 'executable_path' => $job === null ? null : $chrome->verifiedPath($job),
             ],
         ]);
+    }
+
+    public function installSoftware(Request $request, SoftwareCapability $software): RedirectResponse
+    {
+        $workspace = CurrentWorkspace::get($request);
+        abort_unless(app(OperationAccess::class)->managesWorkspace($request->user(), $workspace->id), 403);
+        $data = $request->validate(['packages' => ['required', 'array', 'min:1', 'max:4'], 'packages.*' => ['string', 'distinct'], 'idempotency_key' => ['required', 'uuid']]);
+        $host = LocalHost::query()->forWorkspace($workspace->id)->where('slug', 'local-host')->firstOrFail();
+        $software->request($workspace, $host, $request->user(), $data['packages'], $data['idempotency_key']);
+
+        return redirect()->route('catalog.index');
     }
 
     public function installChrome(Request $request, LocalHost $localHost, ChromeInstallation $chrome): RedirectResponse

@@ -8,7 +8,6 @@ import { QuickNavigation } from '@/components/navigation/quick-navigation';
 import { SectionNavigation } from '@/components/navigation/section-navigation';
 import { destinationForPath, visibleNavigation, type PanelGroup } from '@/lib/panel-navigation';
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Alert } from "@/components/ui/alert";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { Button } from "@/components/ui/button";
@@ -191,11 +190,6 @@ export function AppLayout({
                         <PwaControls />
                         <div className="page-content space-y-5">
                             <SectionNavigation path={path} base={base} canManage={canAudit} />
-                            {page.props.execution.mode === "disabled" ? (
-                                <Alert tone="warning">
-                                    اجرای میزبان غیرفعال است؛ درخواست‌ها قابل پیگیری‌اند و نصب یا استقرار تا اجرای واقعی تأیید نمی‌شود.
-                                </Alert>
-                            ) : null}
                             {children}
                         </div>
                     </main>

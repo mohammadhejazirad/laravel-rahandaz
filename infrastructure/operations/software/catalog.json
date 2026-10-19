@@ -1,0 +1,9 @@
+{
+  "schema_version": "1",
+  "packages": {
+    "htop": {"name": "htop", "description": "پایش تعاملی پردازش‌های سرور", "apt": "htop"},
+    "jq": {"name": "jq", "description": "پردازش داده‌های JSON در پروژه‌ها", "apt": "jq"},
+    "ffmpeg": {"name": "FFmpeg", "description": "پردازش و تبدیل صوت و تصویر", "apt": "ffmpeg"},
+    "unzip": {"name": "Unzip", "description": "استخراج فایل‌های ZIP", "apt": "unzip"}
+  }
+}

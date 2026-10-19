@@ -23,13 +23,13 @@ interface DashboardPageProps {
     location: ServerLocation;
 }
 
-export default function Dashboard({ workspace, execution_mode, operations, inventory, recent_projects, recent_jobs, release, location }: DashboardPageProps) {
+export default function Dashboard({ workspace, operations, inventory, recent_projects, recent_jobs, release, location }: DashboardPageProps) {
     const { app, enum_labels: labels } = usePage<SharedProps>().props;
     const base = app.base_path;
     return <AppLayout title="داشبورد" description="پروژه‌ها، کارهای در جریان و قدم بعدی شما در یک نگاه.">
         <Head title="داشبورد" />
         <Card className="border-accent/20 bg-accent-soft/30">
-            <div className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs text-muted">فضای کاری شما</p><h2 className="mt-1 text-xl font-bold">{workspace.name}</h2><p className="mt-2 text-sm text-muted">{execution_mode === 'disabled' ? 'پنل آمادهٔ مدیریت داده‌هاست؛ اجرای میزبان هنوز غیرفعال است.' : 'نتیجهٔ درخواست‌ها را در عملیات و لاگ‌ها دنبال کنید.'}</p></div><Button asChild variant="secondary"><Link href={`${base}/setup`}>بررسی راه‌اندازی</Link></Button></div>
+            <div className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs text-muted">فضای کاری شما</p><h2 className="mt-1 text-xl font-bold">{workspace.name}</h2><p className="mt-2 text-sm text-muted">نرم‌افزارهای در دسترس را از کاتالوگ نصب کنید و نتیجهٔ درخواست‌ها را در عملیات دنبال کنید.</p></div><Button asChild variant="secondary"><Link href={`${base}/setup`}>بررسی راه‌اندازی</Link></Button></div>
         </Card>
         <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
             <Metric icon={FolderGit2} label="پروژه‌ها" value={inventory.projects} href={`${base}/projects`} />

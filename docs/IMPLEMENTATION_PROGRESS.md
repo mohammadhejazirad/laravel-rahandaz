@@ -508,3 +508,7 @@ Actions شماره 39045447762 برای commit 36d7143 کاملاً موفق ش�
 پرسش‌های میرور ایران/کشور نامشخص و نصب Chrome انگلیسی شدند؛ متن فارسی خوشامد وب به HTML منتقل شد تا هیچ متن فارسی در منابع Bash نماند. الزام عمومی برای پیام، خطا، لاگ، help، prompt، comment و literalهای Bash در AGENTS، مشخصات و راهنماهای نصب ثبت شد. آزمون ASCII موجود به تمام منابع Bash پروژه گسترش یافت و harness اوبونتو مجموعهٔ installer را با live apply صریحاً بسته اجرا می‌کند.
 
 میزبان: installer ۷۷/۰، پیش‌نیاز ۴۰ و release ۳۰ آزمون موفق؛ lint، TypeScript و build موفق. Ubuntuهای 22.04/24.04/26.04 container-lab: هرکدام پیش‌نیاز ۴۰ آزمون، installer ۷۷/۰ و plan موفق. شکست‌های اولیه و شواهد نهایی در INSTALLER_TEST_MATRIX ثبت شدند. نصب کامل VM/Production اجرا نشد؛ اصلاحات در سورس‌اند و Release منتشرشده را تغییر نمی‌دهند.
+
+## ۲۰۲۶-۱۰-۱۹ — تکمیل مسیر محدود راه‌اندازی/نصب نرم‌افزار
+
+به انتخاب مالک، راه‌اندازی اولیه و نصب GUI ابزارهای htop/jq/FFmpeg/Unzip به مسیر محدود Operations Engine، Job/Outbox/Audit و helper ریشهٔ socket متصل شد. پایان فقط پس از بررسی واقعی control plane و ابزارها ثبت می‌شود؛ پاسخ‌ها، componentها و خطا قابل ادامه‌اند. نصب اولیه فقط helper را enroll می‌کند؛ Chrome و runtime اختیاری نصب نمی‌شوند. دروازهٔ عمومی همچنان disabled است. تصمیم و محدودیت‌های پیش‌نمایش/بازیابی در `docs/decisions/2026-10-19-software-capability.md` و نتایج واقعی در `docs/SOFTWARE_SETUP_TEST_REPORT_2026_10_19.md` است. این برش، استقرار عمومی، دیتابیس پروژه، Chrome یا Wizard هشت‌مرحله‌ای نهایی را کامل اعلام نمی‌کند.

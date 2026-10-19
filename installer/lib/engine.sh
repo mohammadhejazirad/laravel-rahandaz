@@ -467,6 +467,10 @@ stage_11_nginx_php_fpm() {
     return 0
 }
 
+installer_enroll_software() {
+    /usr/bin/python3 -I /var/lib/rahandaz/current/infrastructure/operations/software/provision.py --upgrade
+}
+
 stage_12_systemd_services() {
     local root release php_bin fpm_bin cli_dest lib_dest item
     root="$(installer_sysroot)"
@@ -514,6 +518,10 @@ EOF
         return 2
     fi
     installer_enroll_panel_listener || return 1
+    installer_enroll_software || {
+        installer_error STAGE_FAILED "The restricted software helper could not be enrolled."
+        return 1
+    }
     systemctl daemon-reload
     security_runtime_permissions || return 1
     systemctl enable --now redis-rahandaz-queue.service redis-rahandaz-cache.service rahandaz-php-fpm.service rahandaz-queue.service rahandaz-scheduler.timer || {

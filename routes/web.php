@@ -14,6 +14,7 @@ use App\Http\Controllers\JobController;
 use App\Http\Controllers\MirrorController;
 use App\Http\Controllers\MonitoringController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PanelPortController;
 use App\Http\Controllers\ProjectArchiveController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectLaunchController;
@@ -55,12 +56,15 @@ Route::prefix(trim((string) config('rahandaz.base_path'), '/'))->group(function 
             Route::get('/tutorials/{slug}', [TutorialController::class, 'show'])->where('slug', '[a-z0-9-]+')->name('tutorials.show');
             Route::put('/tutorials/{slug}/bookmark', [TutorialController::class, 'bookmark'])->where('slug', '[a-z0-9-]+')->middleware('throttle:60,1')->name('tutorials.bookmark');
             Route::get('/setup', [SetupController::class, 'show'])->name('setup.show');
+            Route::patch('/setup', [SetupController::class, 'save'])->middleware('throttle:30,1')->name('setup.save');
+            Route::post('/setup/apply', [SetupController::class, 'apply'])->middleware('throttle:5,1')->name('setup.apply');
 
             Route::middleware('setup.complete')->group(function () {
                 Route::get('/dashboard', DashboardController::class)->name('dashboard');
                 Route::get('/servers', [ServerController::class, 'index'])->name('servers.index');
                 Route::get('/servers/{localHost}', [ServerController::class, 'show'])->name('servers.show');
                 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
+                Route::post('/catalog/software/install', [CatalogController::class, 'installSoftware'])->middleware('throttle:5,1')->name('catalog.software.install');
                 Route::post('/catalog/chrome/{localHost}/install', [CatalogController::class, 'installChrome'])->middleware('throttle:5,1')->name('catalog.chrome.install');
                 Route::get('/mirrors', [MirrorController::class, 'index'])->name('mirrors.index');
                 Route::post('/git/github/register', [GitConnectionController::class, 'manifestStart'])->middleware('throttle:5,1')->name('git.manifest.start');
@@ -106,8 +110,8 @@ Route::prefix(trim((string) config('rahandaz.base_path'), '/'))->group(function 
                 Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
                 Route::post('/notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
                 Route::get('/audit', [AuditController::class, 'index'])->name('audit.index');
-                Route::post('/settings/panel-port', [\App\Http\Controllers\PanelPortController::class, 'update'])->middleware('throttle:3,1')->name('settings.panel-port');
-                Route::get('/settings/panel-port/status', [\App\Http\Controllers\PanelPortController::class, 'status'])->name('settings.panel-port.status');
+                Route::post('/settings/panel-port', [PanelPortController::class, 'update'])->middleware('throttle:3,1')->name('settings.panel-port');
+                Route::get('/settings/panel-port/status', [PanelPortController::class, 'status'])->name('settings.panel-port.status');
                 Route::get('/settings/profile', [SettingsController::class, 'profile'])->name('settings.profile');
                 Route::get('/settings/updates', [SystemUpdateController::class, 'show'])->name('settings.updates');
                 Route::post('/settings/updates/check', [SystemUpdateController::class, 'check'])

@@ -482,6 +482,12 @@ else
     fail "host php is required for the process adapter check"
 fi
 
+if python3 "$ROOT/software/test_helper.py"; then
+    pass "software capability contract"
+else
+    fail "software capability contract"
+fi
+
 if [[ "$failures" -gt 0 ]]; then
     printf '%s\n' "$failures test(s) failed" >&2
     exit 1

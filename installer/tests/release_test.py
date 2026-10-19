@@ -217,6 +217,7 @@ installer_root_path() { printf '%s%s' "$TEST_ROOT" "$1"; }
 installer_pid1_name() { printf systemd; }
 security_runtime_permissions() { :; }
 security_redis_units() { :; }
+installer_enroll_software() { printf '%s\n' 'software-helper-enrolled' >> "$TEST_ROOT/systemctl.log"; }
 systemctl() {
     printf '%s\n' "$*" >> "$TEST_ROOT/systemctl.log"
     if [[ "$*" == 'reload nginx' && "$FAIL_RELOAD" == 1 ]]; then return 1; fi
@@ -233,6 +234,7 @@ stage_12_systemd_services
             result = self.command("bash", "-c", script, "fixture", ROOT, root, fail)
             self.assertEqual(result.returncode, int(fail), result.stderr)
             calls = (root / "systemctl.log").read_text().splitlines()
+            self.assertIn("software-helper-enrolled", calls)
             self.assertEqual(calls[-2:], ["enable --now nginx", "reload nginx"])
 
     def test_exact_generated_command_downloads_verifies_and_runs_plan(self):

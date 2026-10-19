@@ -46,7 +46,7 @@ export function ChromeInstallationCard({ chrome }: { chrome: ChromeInstallationS
             {chrome.job && <StatusBadge value={chrome.job.status} />}
         </div>
         <p className="text-sm text-muted">اختیاری برای تولید PDF، PNG و تصویر صفحه با Browsershot یا Puppeteer است. در نصب اولیهٔ پنل نصب نمی‌شود. runtime و وابستگی‌های پروژه جداگانه تنظیم می‌شوند.</p>
-        {!chrome.execution_available && <p className="text-sm text-muted">اجرای نصب روی میزبان هنوز فعال نیست. دکمه فقط درخواست را ثبت می‌کند؛ تا تأیید واقعی نصب و رندر، مسیر اجرایی نمایش داده نمی‌شود.</p>}
+        {!chrome.execution_available && <p className="text-sm text-muted">نصب Chrome از پنل در این نسخه در دسترس نیست. پس از فراهم‌شدن نصب و بررسی رندر، مسیر اجرایی در همین بخش نمایش داده می‌شود.</p>}
         {chrome.executable_path ? <div className="space-y-2">
             <label htmlFor="chrome-executable" className="block text-sm font-medium">مسیر اجرایی تأییدشدهٔ Chrome</label>
             <div className="flex min-w-0 flex-col gap-2 sm:flex-row">
@@ -57,11 +57,11 @@ export function ChromeInstallationCard({ chrome }: { chrome: ChromeInstallationS
             <p role="status" className="text-sm">{copyStatus}</p>
         </div> : <Form onSubmit={event => {
             event.preventDefault();
-            if (!chrome.host_uuid || !chrome.can_request || submitting || pending) return;
+            if (!chrome.host_uuid || !chrome.can_request || !chrome.execution_available || submitting || pending) return;
             setSubmitting(true);
             router.post(`${base}/catalog/chrome/${chrome.host_uuid}/install`, {}, { preserveScroll: true, onFinish: () => setSubmitting(false) });
         }}>
-            <Button type="submit" disabled={!chrome.can_request || pending} loading={submitting}>{pending ? 'درخواست در حال بررسی است' : chrome.job?.status === 'failed' ? 'تلاش دوباره برای نصب Chrome' : 'درخواست نصب Chrome'}</Button>
+            <Button type="submit" disabled={!chrome.can_request || !chrome.execution_available || pending} loading={submitting}>{pending ? 'درخواست در حال بررسی است' : chrome.job?.status === 'failed' ? 'تلاش دوباره برای نصب Chrome' : 'درخواست نصب Chrome'}</Button>
             {!chrome.host_uuid && <p className="mt-2 text-sm text-muted">ابتدا میزبان محلی باید ثبت شود.</p>}
             {chrome.host_uuid && !chrome.can_request && <p className="mt-2 text-sm text-muted">نصب نرم‌افزار میزبان به دسترسی مالک یا مدیر نیاز دارد.</p>}
         </Form>}

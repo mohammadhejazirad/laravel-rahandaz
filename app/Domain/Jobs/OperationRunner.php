@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Jobs;
 
 use App\Domain\Access\OperationAccess;
+use App\Domain\Catalog\RunSoftware;
 use App\Domain\Jobs\Enums\JobStatus;
 use App\Domain\Jobs\Enums\StepStatus;
 use App\Domain\Projects\Enums\DeploymentStatus;
@@ -27,6 +28,12 @@ final class OperationRunner
     public function run(int|string $operationJobId): void
     {
         $operationJobId = (string) $operationJobId;
+
+        if (OperationJob::query()->whereKey($operationJobId)->whereIn('type', ['setup.initialize', 'software.install'])->exists()) {
+            app(RunSoftware::class)->run($operationJobId);
+
+            return;
+        }
 
         if (OperationJob::query()->whereKey($operationJobId)->where('type', 'panel.port.update')->exists()) {
             app(RunPanelPort::class)->run($operationJobId);

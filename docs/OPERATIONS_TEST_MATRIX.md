@@ -79,3 +79,7 @@ PHP کامل محلی ۲۰۶ آزمون / ۴۰۶۸ assertion، زیرمجموع�
 ## 2026-10-19 — initial installer panel-port enrollment
 
 Initial root enrollment is now part of the signed installer only for an explicitly selected IPv4/HTTP origin. The general executor stays disabled. Three Ubuntu container runs passed 17 network/enrollment contracts, 12 panel-helper contracts and real Nginx 8080→8081→8080 routing/reload smoke; the detailed report locations and PHP/systemd/VM limitations are in INSTALLER_TEST_MATRIX. Interrupted enrollment before state creation and during socket activation retries without overwriting state or foreign units. These use systemd fixtures; fresh VM/socket activation certification is still not_run. The agent did not erase the VPS. The owner rebuilt it, after which SSH identity verification and a fresh Ubuntu 24.04/bootstrap preflight succeeded. Application installation is pending the signed release; GitHub Actions has a reported service incident and the signing job is waiting for a runner.
+
+## Software capability v1 — 2026-10-19
+
+Ubuntu 22.04 and 24.04 disposable labs: fixed-tool APT installation/observation and second-run idempotency passed; 10 helper contracts/socket tests passed. Ubuntu 26.04: contract/socket tests passed, live capability intentionally refused. These are container checks, not VM support certification. Exact versions, incomplete fresh-install coverage and live verification status: `SOFTWARE_SETUP_TEST_REPORT_2026_10_19.md`. Default general host execution remains closed.
