@@ -1,4 +1,4 @@
-import * as DialogPrimitive from "@radix-ui/react-dialog";
+import * as DialogPrimitive from "@animate-ui/react/primitives/radix-ui/dialog";
 import { X } from "lucide-react";
 import type { ComponentProps } from "react";
 import { cn } from "@/lib/cn";
@@ -23,7 +23,7 @@ function ModalOverlay({
         <DialogPrimitive.Overlay
             data-slot="modal-overlay"
             className={cn(
-                "fixed inset-0 z-[65] bg-slate-950/60 backdrop-blur-sm data-[state=closed]:opacity-0 data-[state=open]:opacity-100 motion-safe:transition-opacity",
+                "fixed inset-0 z-[65] bg-slate-950/60 backdrop-blur-sm",
                 className,
             )}
             {...props}
@@ -46,7 +46,7 @@ function ModalContent({
                 data-slot="modal-content"
                 dir="rtl"
                 className={cn(
-                    "surface-shadow fixed left-1/2 top-1/2 z-[70] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-[1.75rem] border border-line bg-surface-raised p-5 text-ink outline-none data-[state=closed]:scale-95 data-[state=closed]:opacity-0 data-[state=open]:scale-100 data-[state=open]:opacity-100 motion-safe:transition-[opacity,transform] sm:p-6",
+                    "surface-shadow fixed inset-0 z-[70] m-auto h-fit max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg overflow-y-auto rounded-[1.75rem] border border-line bg-surface-raised p-5 text-ink outline-none sm:p-6",
                     className,
                 )}
                 {...props}

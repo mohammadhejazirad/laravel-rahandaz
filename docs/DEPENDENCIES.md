@@ -39,7 +39,10 @@
 | class-variance-authority | 0.7.1 | Apache-2.0 |
 | clsx | 2.1.1 | MIT |
 | tailwind-merge | 3.7.0 | MIT |
+| motion | 14.4.0 | MIT |
+| @animate-ui/react | 2.0.0 | MIT + Commons Clause |
+| radix-ui | 1.8.1 | MIT |
 
-فونت وزیرمتن متغیر در `resources/fonts/vazirmatn/` همراه `OFL.txt` است. آیکون عملیاتی فقط از Lucide می‌آید. نمایش جلالی از `Intl` با تقویم `persian` است و بسته تاریخ جدا نصب نشده است. shadcn/ui کتابخانه runtime جدا نیست؛ فایل‌های گزینشی آن داخل مخزن و روی Primitiveهای مستقل Radix بالا ساخته شده‌اند. تصمیم رد یا پذیرش Recharts، React Hook Form، Motion و date picker در `docs/FRONTEND_DEPENDENCIES.md` است.
+فونت وزیرمتن متغیر در `resources/fonts/vazirmatn/` همراه `OFL.txt` است. آیکون عملیاتی از Lucide می‌آید؛ سه آیکون ستون ورود از رجیستری Animate UI هستند و فقط با hover حرکت می‌کنند. نمایش جلالی از `Intl` با تقویم `persian` است و بسته تاریخ جدا نصب نشده است. shadcn/ui کتابخانه runtime جدا نیست. Dialog، Dropdown Menu و Tooltip روی primitiveهای Animate UI هستند که بستهٔ `radix-ui` را لازم دارند؛ Avatar، Separator و Slot همچنان بسته‌های مستقل Radix هستند. تصمیم Motion در `docs/FRONTEND_DEPENDENCIES.md` به‌روز شده است.
 
 Horizon، Pest، Ziggy، Wayfinder و SSR نصب نشده‌اند.

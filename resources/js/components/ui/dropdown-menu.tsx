@@ -1,4 +1,4 @@
-import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
+import * as DropdownMenuPrimitive from "@animate-ui/react/primitives/radix-ui/dropdown-menu";
 import { Check } from "lucide-react";
 import type { ComponentProps } from "react";
 import { cn } from "@/lib/cn";

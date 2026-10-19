@@ -1,4 +1,4 @@
-import * as SheetPrimitive from "@radix-ui/react-dialog";
+import * as SheetPrimitive from "@animate-ui/react/primitives/radix-ui/dialog";
 import { X } from "lucide-react";
 import type { ComponentProps } from "react";
 import { cn } from "@/lib/cn";
@@ -19,7 +19,7 @@ function SheetOverlay({
         <SheetPrimitive.Overlay
             data-slot="sheet-overlay"
             className={cn(
-                "fixed inset-0 z-50 bg-slate-950/55 backdrop-blur-sm data-[state=closed]:opacity-0 data-[state=open]:opacity-100 motion-safe:transition-opacity",
+                "fixed inset-0 z-50 bg-slate-950/55 backdrop-blur-sm",
                 className,
             )}
             {...props}
@@ -45,10 +45,8 @@ function SheetContent({
                 data-side={side}
                 dir="rtl"
                 className={cn(
-                    "fixed inset-y-0 z-50 flex w-[min(86vw,340px)] max-w-full flex-col border-line bg-surface text-ink shadow-2xl outline-none motion-safe:transition-transform",
-                    side === "right"
-                        ? "right-0 border-s data-[state=closed]:translate-x-full data-[state=open]:translate-x-0"
-                        : "left-0 border-e data-[state=closed]:-translate-x-full data-[state=open]:translate-x-0",
+                    "fixed inset-y-0 z-50 flex w-[min(86vw,340px)] max-w-full flex-col border-line bg-surface text-ink shadow-2xl outline-none",
+                    side === "right" ? "right-0 border-s" : "left-0 border-e",
                     className,
                 )}
                 {...props}

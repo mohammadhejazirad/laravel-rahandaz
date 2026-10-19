@@ -20,7 +20,7 @@ export default function Login() {
     }
 
     return (
-        <AuthLayout title="ورود">
+        <AuthLayout title="ورود" stars>
             <Head title="ورود" />
             <Form className="space-y-4" onSubmit={submit}>
                 <Input

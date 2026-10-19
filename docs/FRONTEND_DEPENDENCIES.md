@@ -16,9 +16,9 @@
 | date-fns-jalali | نصب نشد | `Intl` در Node 22 و مرورگر همین ماشین تقویم فارسی و timezone را دارد. آزمون مرز ۱۴۰۳ بدون بسته اضافه پاس شد. اگر بعداً ورودی شمسی لازم شد، این گزینه دوباره سنجیده می‌شود |
 | React Hook Form، Zod، resolver | نصب نشد | دو فرم فعلی ساده هستند و `useForm` اینرسی خطای ۴۲۲ لاراول را به فیلد می‌دهد. دو کتابخانه فرم موازی ممنوع است |
 | Uploader/dropzone package | نصب نشد | File API، drag/drop و progress خود Inertia نیاز واقعی را پوشش می‌دهند؛ امنیت upload در Laravel و `ArchiveInspector` است |
-| Motion | نصب نشد | باز و بسته شدن منو با CSS کافی است. `prefers-reduced-motion` در `app.css` است |
+| Motion 14.4.0 و `@animate-ui/react` 2.0.0 | نصب شد — ۲۰۲۶-۱۰-۲۰ | درخواست صریح برای انیمیشن primitiveها و پس‌زمینهٔ ورود. جزئیات در بخش پایین |
 
-Primitiveهای Radix به‌صورت بسته‌های مستقل Avatar، Dialog، Dropdown Menu، Separator، Slot و Tooltip نصب شده‌اند؛ بسته تجمیعی `radix-ui` نصب نیست. این انتخاب سطح وابستگی را به قابلیت‌های واقعاً مصرف‌شده محدود می‌کند. فایل‌های shadcn با tokenهای معنایی راه‌انداز تطبیق داده شده‌اند و default theme شادسی‌ان جایگزین هویت محصول نشده است.
+تا ۲۰۲۶-۱۰-۲۰ فقط بسته‌های مستقل Radix نصب بودند. از آن تاریخ Dialog، Dropdown Menu و Tooltip از primitiveهای Animate UI می‌آیند و به بستهٔ تجمیعی `radix-ui` نیاز دارند. Avatar، Separator و Slot مستقل مانده‌اند. فایل‌های shadcn با tokenهای معنایی راه‌انداز تطبیق داده شده‌اند و default theme شادسی‌ان جایگزین هویت محصول نشده است.
 
 صفحه به‌روزرسانی پکیج تازه نمی‌خواهد. اثر build در ۲۰۲۶-۱۰-۱۴، بدون Recharts و date picker: chunk مشترک اصلی `373.88 kB` خام و `116.68 kB` gzip، AppLayout برابر `27.19 kB` خام و `9.08 kB` gzip، chunk پوسته برابر `65.67 kB` خام و `23.10 kB` gzip، صفحه به‌روزرسانی `4.90 kB` خام و `1.84 kB` gzip، فونت `111.15 kB`، و CSS `72.18 kB` خام و `12.76 kB` gzip است. CSS پایه React-Toastify در خروجی CSS قرار دارد و entrypoint `react-toastify/unstyled` از تزریق دوباره style در runtime جلوگیری می‌کند. صفحات با `import.meta.glob` بدون `eager` جدا شده‌اند.
 
@@ -72,3 +72,11 @@ Primitiveهای Radix به‌صورت بسته‌های مستقل Avatar، Dial
 ## انتخاب نوع برنامه — ۲۰۲۶-۱۰-۱۹
 
 پکیج تازه نصب نشد. `FrameworkPicker` شبکهٔ تک‌انتخابی مربع‌هاست و از Form، radio بومی و آیکون محلی Simple Icons با `currentColor` استفاده می‌کند. نام‌ها انگلیسی و توضیح‌ها فارسی‌اند. مجوز CC0 در `public/icons/frameworks/README.md` است.
+
+## انیمیشن ورود — ۲۰۲۶-۱۰-۲۰
+
+`motion` 14.4.0، `@animate-ui/react` 2.0.0 و بستهٔ تجمیعی `radix-ui` 1.8.1 نصب شدند. Primitiveهای مستقل Avatar، Separator و Slot سر جایشان ماندند؛ Avatar در این نسخه از Animate UI انیمیشن ندارد. فرمان `npx @animate-ui/cli@latest animate all` فقط import چهار فایل را عوض کرد: Dropdown Menu، Modal، Sheet و Tooltip. کلاس‌های CSS که با transform خود Motion روی همان عنصر رقابت می‌کردند از Modal و Sheet برداشته شدند تا پنجره با `inset` و `margin: auto` وسط بماند و کشو با `data-side` از لبهٔ فیزیکی بلغزد.
+
+پس‌زمینهٔ Gravity Stars فقط با prop اختیاری `stars` روی صفحهٔ ورود است؛ صفحهٔ تغییر گذرواژه همان پوستهٔ قبلی را دارد. ستاره‌ها رنگ `currentColor` می‌گیرند، خارج از دید و در تب پنهان می‌ایستند، و با `prefers-reduced-motion` ثابت می‌مانند. سه آیکون ستون تیرهٔ ورود (Cog، Shield Check، Lock Keyhole) فقط با hover حرکت می‌کنند و حلقهٔ دائمی ندارند. آیکون `server-cog` در رجیستری این بسته نبود.
+
+مجوز `@animate-ui/react` برابر MIT به‌علاوهٔ Commons Clause است: استفاده داخل محصول مجاز است و فروش یا بازتوزیع خود کامپوننت‌ها به‌صورت مستقل مجاز نیست. فایل‌های کپی‌شده در `resources/js/components/animate-ui` زیر همان مجوز می‌مانند و مجوز Apache مخزن را عوض نمی‌کنند. `AnimateUIProvider` سراسری اضافه نشد.

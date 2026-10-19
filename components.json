@@ -12,6 +12,9 @@
     },
     "iconLibrary": "lucide",
     "rtl": true,
+    "registries": {
+        "@animate-ui": "https://animate-ui.com/r/{name}.json"
+    },
     "aliases": {
         "components": "@/components",
         "utils": "@/lib/cn",
