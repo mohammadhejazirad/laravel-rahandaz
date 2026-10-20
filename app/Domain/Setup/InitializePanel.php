@@ -44,7 +44,11 @@ final class InitializePanel
                 return $existing;
             }
             $session = $this->save($workspace, $actor, $name, $packages);
-            $host = LocalHost::query()->forWorkspace($workspace->id)->where('slug', 'local-host')->firstOrFail();
+            // Install creates the owner before any host row. Identity only; this is not a probe.
+            $host = LocalHost::query()->firstOrCreate(
+                ['workspace_id' => $workspace->id, 'slug' => 'local-host'],
+                ['display_name' => $session->answers['display_name']],
+            );
             $job = app(SoftwareCapability::class)->request($workspace, $host, $actor, $session->answers['packages'], $key, 'setup.initialize', ['setup_uuid' => $session->uuid]);
             $session->forceFill(['operation_job_id' => $job->id, 'current_step' => 8, 'plan_hash' => $job->request_hash])->save();
             $session->components()->delete();

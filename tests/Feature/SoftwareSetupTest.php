@@ -28,7 +28,7 @@ class SoftwareSetupTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->withoutMiddleware(ThrottleRequests::class);
+        $this->withoutMiddleware([\App\Http\Middleware\ThrottleByRoute::class, ThrottleRequests::class]);
         $this->partialMock(SoftwareCapability::class, fn ($mock) => $mock->shouldReceive('available')->andReturn(true));
         Process::fake();
     }
@@ -53,6 +53,19 @@ class SoftwareSetupTest extends TestCase
     {
         return ['schema_version' => '1', 'status' => 'succeeded', 'execution_id' => $job->uuid, 'operation' => $job->type, 'verified_at' => now()->timestamp, 'verified' => true, 'control_plane_verified' => true, 'os' => '24.04',
             'packages' => array_map(fn ($key) => ['package' => $key, 'version' => '1.2.3-1ubuntu1', 'verified' => true, 'changed' => true], $job->plan['input']['packages'])];
+    }
+
+    public function test_apply_creates_the_panel_host_when_install_has_not_registered_one(): void
+    {
+        [$user, $workspace] = $this->panelAccount();
+        $this->actingAs($user);
+        $this->assertSame(0, LocalHost::query()->count());
+        $job = $this->apply();
+        $host = LocalHost::query()->forWorkspace($workspace->id)->where('slug', 'local-host')->sole();
+        $this->assertSame((string) $host->id, (string) $job->resource_id);
+        $this->assertSame('My server', $host->display_name);
+        $this->assertSame('pending_probe', $host->state->value);
+        $this->assertTrue($host->protected);
     }
 
     public function test_answers_resume_and_http_only_queues_then_verified_health_unlocks_dashboard(): void

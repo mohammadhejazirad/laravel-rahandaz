@@ -115,7 +115,7 @@ class PanelPortTest extends TestCase
 
     public function test_invalid_reserved_browser_unsafe_and_stale_ports_are_rejected(): void
     {
-        $this->withoutMiddleware(ThrottleRequests::class);
+        $this->withoutMiddleware([\App\Http\Middleware\ThrottleByRoute::class, ThrottleRequests::class]);
         $this->owner();
         foreach ([22, 443, 1719, 1720, 1723, 6000, 6667, 65536, '8081; reboot'] as $port) {
             $this->post(route('settings.panel-port'), ['port' => $port, 'expected_port' => 8080])->assertSessionHasErrors('port');

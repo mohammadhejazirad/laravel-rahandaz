@@ -6,6 +6,7 @@ use App\Http\Middleware\EnsurePasswordIsCurrent;
 use App\Http\Middleware\EnsureSetupComplete;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\ThrottleByRoute;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -33,6 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'password.current' => EnsurePasswordIsCurrent::class,
             'setup.complete' => EnsureSetupComplete::class,
+            'throttle' => ThrottleByRoute::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
