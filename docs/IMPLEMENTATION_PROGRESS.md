@@ -2,9 +2,17 @@
 
 این فایل گزارش واقعیت مخزن است. نقشه در `.docs/ROADMAP.md` و مشخصات در `.docs/PROJECT_SPEC.md` است.
 
+## ۲۰۲۶-۱۰-۲۰ — نصب آزمایشی Ubuntu 22.04
+
+روی VPS خالی `194.110.24.123` (Ubuntu 22.04.5، حدود ۱٫۹GiB RAM، یک vCPU) بستهٔ آزمایشی امضاشدهٔ `1.0.0-lab.20261020` با آینهٔ Liara و پورت ۸۰۸۰ نصب شد. `RESULT success` و خروج صفر بعد از اصلاح health check ثبت شد. این بسته release عمومی GitHub نیست.
+
+در بیکاری، PSS سرویس‌ها حدود ۲۵MiB برای PostgreSQL، ۷MiB برای دو Redis، ۷MiB برای Nginx و ۱۹MiB برای master پنل بود؛ جمع حدود ۵۸MiB. `MemoryCurrent` اسلایس پنل ۳۳MiB و سقف `MemoryHigh` همان ۵۱۲MiB بود. یک درخواست login یک worker ساخت و پس از ۱۵ ثانیه فقط master ماند. `rahandaz-queue` و `php8.4-fpm` توزیع و Redis پورت ۶۳۷۹ خاموش بودند. زمان‌بند `OnCalendar=minutely` بود و واحد oneshot بین دقیقه‌ها inactive ماند. `shared_buffers=64MB` و `max_connections=40` و `jit=off` روی PostgreSQL ۱۴ اعمال شده بود. GD و Intl در `php8.4 -m` بودند. OPcache خط فرمان ۱۲۸ و `validate_timestamps=1` ماند؛ واحد پنل scan dir جدا با ۶۴ مگابایت دارد. `MemAvailable` بعد از نصب حدود ۱٫۵GiB بود. این یک نمونه است، گواهی سه Ubuntu یا production-ready نیست و ورود مرورگر انجام نشد.
+
+health check صفحهٔ خوشامد به خاطر `pipefail` و `grep -q` حتی با marker درست، curl را با کد ۲۳ شکست می‌داد و فایل خوشامد را پاک می‌کرد. خروجی curl حالا در فایل خوانده می‌شود. `bash installer/tests/run.sh` برابر ۸۲ passed و ۰ failed بود.
+
 ## ۲۰۲۶-۱۰-۲۰ — ردپای بیکار راه‌انداز
 
-زمان‌بند از تکرار هر پنج ثانیه به یک‌بار در دقیقه برگشت تا `schedule:run` تا آخر دقیقه مقیم نماند. worker صف تا `execution_mode=local` روشن نمی‌شود. pool پنل ondemand با سقف ۳ است، OPcache همان واحد ۶۴ مگابایت است، و slice پنل سقف ۵۱۲ مگابایت دارد. Redis صف سقف ۶۴ مگابایت گرفت. Redis توزیع و `php8.4-fpm` توزیع فقط وقتی نصب مال راه‌انداز است stop و disable می‌شوند و فایل پیکربندی‌شان عوض نمی‌شود. PostgreSQL تأییدنشده یک drop-in کوچک می‌گیرد. پایش هر ۱۵ ثانیه و گیت فقط پس از درخواست همگام‌سازی poll می‌شود. افزونه‌های PHP از جمله GD و Intl نصب می‌مانند. `bash installer/tests/run.sh` برابر ۸۱ passed و ۰ failed بود. lint، TypeScript و build خروج صفر داشتند. زمان‌بند با بوت برنامه `repeatable=no` است. PHPUnit پیش‌فرض به `192.0.2.1` وصل می‌شود و در این نشست اجرا نشد. اندازهٔ RAM روی VM گرفته نشده و production-ready نیست.
+زمان‌بند از تکرار هر پنج ثانیه به یک‌بار در دقیقه برگشت تا `schedule:run` تا آخر دقیقه مقیم نماند. worker صف تا `execution_mode=local` روشن نمی‌شود. pool پنل ondemand با سقف ۳ است، OPcache همان واحد ۶۴ مگابایت است، و slice پنل سقف ۵۱۲ مگابایت دارد. Redis صف سقف ۶۴ مگابایت گرفت. Redis توزیع و `php8.4-fpm` توزیع فقط وقتی نصب مال راه‌انداز است stop و disable می‌شوند و فایل پیکربندی‌شان عوض نمی‌شود. PostgreSQL تأییدنشده یک drop-in کوچک می‌گیرد. پایش هر ۱۵ ثانیه و گیت فقط پس از درخواست همگام‌سازی poll می‌شود. افزونه‌های PHP از جمله GD و Intl نصب می‌مانند. زمان‌بند با بوت برنامه `repeatable=no` است. PHPUnit پیش‌فرض به `192.0.2.1` وصل می‌شود و در این نشست اجرا نشد. اندازهٔ همین پروفایل روی یک VPS در بخش بالایی است.
 
 ## ۲۰۲۶-۱۰-۲۰ — انیمیشن صفحهٔ ورود
 

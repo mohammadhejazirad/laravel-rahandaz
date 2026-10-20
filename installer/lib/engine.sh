@@ -807,11 +807,21 @@ stage_14_health_verification() {
     printf '%s\n' "$content" >"$welcome"
     chown root:www-data "$welcome" || return 1
     chmod 0640 "$welcome" || return 1
-    installer_curl --fail --silent --show-error --max-time 15 --header "Host: localhost" "${recovery}/" | grep -q 'data-health-marker="verified"' || {
-        rm -f "$welcome"
+    # Write the body to a file. Piping into grep -q under pipefail makes curl
+    # exit 23 when grep closes the pipe after the first match.
+    local page
+    page="$(mktemp)"
+    if ! installer_curl --fail --silent --show-error --max-time 15 --header "Host: localhost" --output "$page" "${recovery}/"; then
+        rm -f "$page" "$welcome"
         installer_error HEALTHCHECK_FAILED "The welcome page did not serve the verified marker."
         return 1
-    }
+    fi
+    if ! grep -q 'data-health-marker="verified"' "$page"; then
+        rm -f "$page" "$welcome"
+        installer_error HEALTHCHECK_FAILED "The welcome page did not serve the verified marker."
+        return 1
+    fi
+    rm -f "$page"
     return 0
 }
 

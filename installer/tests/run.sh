@@ -440,6 +440,12 @@ if [[ -f "$php_source" && -f "$php_prefs" ]] \
 else
     bad "offline apply pins private PHP 8.4 and leaves distro pools untouched"
 fi
+health_fn="$(awk '/^stage_14_health_verification\(\)/,/^stage_15_installation_summary\(\)/' "${INSTALLER_HOME}/lib/engine.sh")"
+if grep -q -- '--output' <<<"$health_fn" && ! grep -q '| grep' <<<"$health_fn"; then
+    ok "welcome health check reads a file under pipefail"
+else
+    bad "welcome health check reads a file under pipefail"
+fi
 
 RAHANDAZ_INSTALLER_SYSROOT="${tmp}/sys"
 if installer_mutation_allowed; then
