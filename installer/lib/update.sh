@@ -268,6 +268,9 @@ installer_update_prepare() {
         installer_error ARTIFACT_INCOMPLETE "The release is missing artisan, composer.lock, or built assets."
         return 1
     }
+    if declare -F installer_prune_releases >/dev/null; then
+        installer_prune_releases "$dest" || return 1
+    fi
 }
 
 installer_update_save_attempt() {
@@ -438,6 +441,12 @@ installer_update_rollback() {
     fi
     current="$(installer_root_path /var/lib/rahandaz/current)"
     ln -sfn "$target" "$current"
+    if [[ -d /run/systemd/system ]] && systemctl is-active --quiet rahandaz-php-fpm.service; then
+        systemctl reload rahandaz-php-fpm.service || {
+            installer_error HEALTHCHECK_FAILED "Panel PHP-FPM did not reload the rolled-back release."
+            return 1
+        }
+    fi
     installer_say "application_rollback ${previous}"
     installer_say "HEALTH not_run"
     installer_update_history_add "$previous" rollback

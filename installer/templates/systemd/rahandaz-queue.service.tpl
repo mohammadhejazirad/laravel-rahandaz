@@ -4,11 +4,16 @@ After=network.target postgresql.service redis-rahandaz-queue.service redis-rahan
 
 [Service]
 Type=simple
+Slice=rahandaz.slice
 User=rahandaz-svc
 Group=rahandaz-svc
 WorkingDirectory=@@RELEASE@@
-ExecStart=@@PHP_BIN@@ artisan queue:work redis --sleep=3 --tries=3 --timeout=60 --max-time=3600
+# CLI OPcache stays off so an idle worker does not reserve a second cache.
+ExecStart=@@PHP_BIN@@ -d memory_limit=256M -d opcache.enable_cli=0 artisan queue:work redis --sleep=3 --tries=3 --timeout=60 --max-time=3600
 Restart=always
+Nice=10
+OOMScoreAdjust=250
+MemoryMax=320M
 RestartSec=5
 UMask=0077
 NoNewPrivileges=true

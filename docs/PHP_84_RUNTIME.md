@@ -12,7 +12,7 @@
 | سوکت | `/run/rahandaz/php-fpm.sock` |
 | واحد systemd | `rahandaz-php-fpm.service` با `Type=simple` |
 
-واحد `php8.4-fpm` توزیع فعال نمی‌شود. Nginx فقط به سوکت راه‌انداز وصل می‌شود. `update-alternatives` اجرا نمی‌شود.
+واحد `php8.4-fpm` توزیع برای پنل استفاده نمی‌شود. Nginx فقط به سوکت راه‌انداز وصل می‌شود. اگر اپراتور PHP-FPM موجود را با `--acknowledge-existing php8.4-fpm` نگه نداشته باشد، نصب‌کننده همان واحد توزیع را stop و disable می‌کند و pool `www` را ویرایش نمی‌کند. pool پنل `ondemand` با سقف ۳ پروسه است و در بیکاری پروسه‌ای نگه نمی‌دارد. OPcache پنل فقط از مسیر `PHP_INI_SCAN_DIR` همان واحد است و فایل سراسری PHP 8.4 پروژه‌های کاربر را عوض نمی‌کند. افزونه‌های `intl` و `gd` نصب می‌مانند. `update-alternatives` اجرا نمی‌شود. `validate_timestamps=0` است، پس پس از جابه‌جایی release باید `rahandaz-php-fpm` reload شود.
 
 ## مخزن
 

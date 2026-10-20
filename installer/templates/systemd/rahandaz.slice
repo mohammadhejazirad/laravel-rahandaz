@@ -1,0 +1,8 @@
+[Unit]
+Description=Rahandaz control-plane PHP processes
+
+[Slice]
+# A ceiling for panel PHP only. PostgreSQL, Redis, and Nginx stay outside this slice.
+MemoryHigh=512M
+MemoryMax=768M
+CPUWeight=20

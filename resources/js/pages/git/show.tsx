@@ -53,7 +53,13 @@ export default function GitShow({
     const [confirm, setConfirm] = useState(false);
     const [disconnecting, setDisconnecting] = useState(false);
     const [syncing, setSyncing] = useState(false);
-    useVisiblePoll(true, "events,connection", 5000);
+    const [watchUntil, setWatchUntil] = useState(0);
+    useVisiblePoll(watchUntil > Date.now(), "events,connection", 15000);
+    useEffect(() => {
+        if (watchUntil <= Date.now()) return;
+        const timer = window.setTimeout(() => setWatchUntil(0), watchUntil - Date.now());
+        return () => window.clearTimeout(timer);
+    }, [watchUntil]);
     const lastSync = useRef(connection.last_synced_at);
     useEffect(() => {
         if (lastSync.current !== connection.last_synced_at) {
@@ -105,6 +111,7 @@ export default function GitShow({
                             disabled={revoked}
                             onClick={() => {
                                 setSyncing(true);
+                                setWatchUntil(Date.now() + 180_000);
                                 router.post(
                                     `${url}/sync`,
                                     {},

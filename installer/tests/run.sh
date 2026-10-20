@@ -428,6 +428,12 @@ if [[ -f "$php_source" && -f "$php_prefs" ]] \
     && [[ -f "${sysroot}/etc/rahandaz/php/php-fpm.conf" ]] \
     && [[ -f "${sysroot}/etc/rahandaz/php/pool.d/rahandaz.conf" ]] \
     && [[ ! -e "${sysroot}/etc/php" ]] \
+    && grep -q 'pm = ondemand' "${sysroot}/etc/rahandaz/php/pool.d/rahandaz.conf" \
+    && grep -q 'pm.max_children = 3' "${sysroot}/etc/rahandaz/php/pool.d/rahandaz.conf" \
+    && grep -q 'opcache.memory_consumption=64' "${sysroot}/etc/rahandaz/php/ini/opcache.ini" \
+    && grep -q 'opcache.enable_cli=0' "${sysroot}/etc/systemd/system/rahandaz-queue.service" \
+    && grep -q 'Slice=rahandaz.slice' "${sysroot}/etc/systemd/system/rahandaz-php-fpm.service" \
+    && grep -q 'MemoryHigh=512M' "${sysroot}/etc/systemd/system/rahandaz.slice" \
     && grep -q '/usr/bin/php8.4' "${sysroot}/etc/systemd/system/rahandaz-queue.service" \
     && grep -q '/usr/sbin/php-fpm8.4' "${sysroot}/etc/systemd/system/rahandaz-php-fpm.service"; then
     ok "offline apply pins private PHP 8.4 and leaves distro pools untouched"

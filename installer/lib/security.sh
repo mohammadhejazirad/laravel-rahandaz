@@ -153,7 +153,8 @@ security_redis_config() {
     security_password_once "$secret" || return 1
     install -d -o redis -g redis -m 0750 "$data" || return 1
     # Passwords are SHA256 ACL verifiers, never plaintext in Redis config.
-    python3 - "$kind" "$port" "$secret" "$conf" "$data" <<'PY'
+    local output
+    output="$(python3 - "$kind" "$port" "$secret" "$conf" "$data" <<'PY'
 import hashlib, pathlib, sys, tempfile, os, grp
 kind, port, secret, target, data = sys.argv[1:]
 h = hashlib.sha256(pathlib.Path(secret).read_text().strip().encode()).hexdigest()
@@ -167,19 +168,30 @@ dir {data}
 user default off
 user rahandaz on #{h} ~* +@all
 '''
-text += 'appendonly yes\nappendfsync everysec\nmaxmemory-policy noeviction\n' if kind == 'queue' else 'appendonly no\nsave ""\nmaxmemory 128mb\nmaxmemory-policy allkeys-lru\n'
+text += 'appendonly yes\nappendfsync everysec\nmaxmemory 64mb\nmaxmemory-policy noeviction\n' if kind == 'queue' else 'appendonly no\nsave ""\nmaxmemory 128mb\nmaxmemory-policy allkeys-lru\n'
 p = pathlib.Path(target)
+legacy = text.replace('maxmemory 64mb\n', '') if kind == 'queue' else None
 # Do not rewrite a running instance's configuration on rerun or undo operator rotation.
+updated = not p.exists()
 if p.exists():
-    if p.read_text() != text:
+    current = p.read_text()
+    if current == text:
+        raise SystemExit(0)
+    if current != legacy:
         raise SystemExit('REDIS_CONFIG_DRIFT: explicit reconciliation required')
-else:
+    updated = True
+if updated:
     fd, tmp = tempfile.mkstemp(dir=p.parent)
     with os.fdopen(fd, 'w') as f:
         f.write(text); f.flush(); os.fsync(f.fileno())
     os.chown(tmp, 0, grp.getgrnam('redis').gr_gid); os.chmod(tmp, 0o640)
     os.replace(tmp, p)
+    print('UPDATED')
 PY
+)" || return 1
+    if [[ "$output" == UPDATED && -d /run/systemd/system ]] && systemctl is-active --quiet "redis-rahandaz-${kind}.service"; then
+        systemctl restart "redis-rahandaz-${kind}.service" || return 1
+    fi
 }
 
 security_datastore_health() {

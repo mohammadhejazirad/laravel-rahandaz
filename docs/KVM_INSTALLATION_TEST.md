@@ -81,10 +81,13 @@ sudo bash ~/installer/bootstrap/install.sh --artifact "$artifact" --manifest ~/s
 
 ```bash
 sudo cat /root/rahandaz-initial-credentials.txt
-sudo systemctl status nginx postgresql rahandaz-php-fpm.service rahandaz-queue.service redis-rahandaz-queue.service redis-rahandaz-cache.service rahandaz-scheduler.timer --no-pager
+sudo systemctl status nginx postgresql rahandaz-php-fpm.service redis-rahandaz-queue.service redis-rahandaz-cache.service rahandaz-scheduler.timer --no-pager
+systemctl is-active rahandaz-queue.service || true
 curl --fail http://127.0.0.1/up
 curl --fail --output /dev/null http://127.0.0.1/rahandaz/login
 ```
+
+`rahandaz-queue` در حالت `RAHANDAZ_EXECUTION_MODE=disabled` باید inactive باشد. روشن بودنش در این حالت ردپای بیکار اضافی است.
 
 اعتبار حساب پنل خودکار ساخته می‌شود؛ از مسیر tunnel وارد شوید و رمز اولیه را تغییر دهید. این حساب با کاربر Ubuntu یا PostgreSQL یکی نیست. فایل اعتبار و محتوای `/etc/rahandaz` را در issue، screenshot و گزارش ارسالی قرار ندهید. حساب انسانی Ubuntu `rahandaz` و حساب سرویس `rahandaz-svc` جدا هستند؛ رمزهای سیستم/پایگاه‌ها در فایل root-only جداگانه‌اند.
 

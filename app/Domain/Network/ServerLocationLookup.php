@@ -203,8 +203,8 @@ final class ServerLocationLookup
     {
         try {
             return Http::withOptions(['allow_redirects' => false])
-                ->connectTimeout(3)
-                ->timeout(8)
+                ->connectTimeout(2)
+                ->timeout(3)
                 ->acceptJson()
                 ->get($url);
         } catch (Throwable) {

@@ -2,8 +2,9 @@
 
 use Illuminate\Support\Facades\Schedule;
 
+// once per minute: schedule:run must exit. A sub-minute repeat keeps PHP resident for the whole minute.
 Schedule::command('rahandaz:outbox:dispatch')
-    ->everyFiveSeconds()
+    ->everyMinute()
     ->withoutOverlapping()
     ->onOneServer();
 

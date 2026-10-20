@@ -248,5 +248,6 @@ class PanelHttpTest extends TestCase
         $this->assertTrue($match->withoutOverlapping);
         $this->assertTrue($match->onOneServer);
         $this->assertSame('* * * * *', $match->expression);
+        $this->assertFalse($match->isRepeatable());
     }
 }

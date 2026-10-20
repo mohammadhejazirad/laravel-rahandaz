@@ -364,10 +364,22 @@ prereq_service() {
     systemctl is-active --quiet "$unit" || { prereq_fail SERVICE_UNHEALTHY "${unit} is not active."; return 1; }
 }
 
+prereq_redis_health() {
+    # The panel uses 6380 and 6381. Leave an operator-owned Redis on 6379 alone,
+    # and do not start the package default once the dedicated instances are up.
+    if systemctl is-active --quiet redis-rahandaz-queue.service && systemctl is-active --quiet redis-rahandaz-cache.service; then
+        printf '[SKIP] Dedicated Rahandaz Redis is active. Stock redis-server was not started.\n'
+        return 0
+    fi
+    prereq_service redis-server redis-server.service 6379 || return 1
+    [[ "$(redis-cli -h 127.0.0.1 -p 6379 ping)" == PONG ]] \
+        || { prereq_fail REDIS_UNHEALTHY 'Redis did not return PONG on loopback:6379. Existing authentication/configuration was preserved.'; return 1; }
+}
+
 prereq_health() {
     prereq_service nginx nginx.service 80
     prereq_service postgresql postgresql.service 5432
-    prereq_service redis-server redis-server.service 6379
+    prereq_redis_health || return 1
     # postgresql.service can be active (exited); verify actual clusters rather than its aggregate unit.
     local version cluster port status owner directory logfile found=0
     while read -r version cluster port status owner directory logfile; do
@@ -377,8 +389,6 @@ prereq_health() {
             || { prereq_fail POSTGRES_UNHEALTHY 'A PostgreSQL cluster is offline or not accepting connections. Existing cluster configuration was preserved.'; return 1; }
     done < <(pg_lsclusters --no-header)
     (( found == 1 )) || { prereq_fail POSTGRES_UNHEALTHY 'No PostgreSQL cluster exists. No existing data directory was initialized or replaced.'; return 1; }
-    [[ "$(redis-cli -h 127.0.0.1 -p 6379 ping)" == PONG ]] \
-        || { prereq_fail REDIS_UNHEALTHY 'Redis did not return PONG on loopback:6379. Existing authentication/configuration was preserved.'; return 1; }
     curl --noproxy '*' --fail --silent --show-error --max-time 10 http://127.0.0.1/ >/dev/null \
         || { prereq_fail NGINX_UNHEALTHY 'Nginx did not pass a local HTTP check. Existing sites were preserved; inspect their listen/address settings.'; return 1; }
 }

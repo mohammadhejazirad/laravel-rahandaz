@@ -1,0 +1,10 @@
+# rahandaz-managed: panel-logs-v1
+/var/log/rahandaz/*.log {
+    weekly
+    rotate 4
+    missingok
+    notifempty
+    compress
+    delaycompress
+    copytruncate
+}

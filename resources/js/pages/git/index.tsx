@@ -14,7 +14,6 @@ import type {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useVisiblePoll } from "@/hooks/use-visible-poll";
 import { AppLayout } from "@/layouts/app-layout";
 import type { SharedProps } from "@/types";
 
@@ -29,7 +28,6 @@ export default function GitIndex({ connections, providers, can_manage, events }:
     const [adding, setAdding] = useState(false);
     const [chosen, setChosen] = useState<GitProviderConfig['provider'] | null>(null);
     const config = providers.find(provider => provider.provider === chosen);
-    useVisiblePoll(true, "events,connections", 8000);
     return <AppLayout title="حساب‌های گیت" description="حساب خود را وصل کنید و مخزن‌هایی را که می‌خواهید در راه‌انداز استفاده کنید انتخاب کنید.">
         <Head title="حساب‌های گیت" />
         <Card>

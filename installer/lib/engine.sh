@@ -146,6 +146,51 @@ installer_tar_members_safe() {
     done < <(tar -tvzf "$archive" | awk '{ print substr($0, 1, 1) }')
 }
 
+installer_prune_releases() {
+    local root current extra pruned
+    root="$(installer_root_path /var/lib/rahandaz/releases)"
+    [[ -d "$root" && ! -L "$root" ]] || return 0
+    current="$(readlink -f "$(installer_root_path /var/lib/rahandaz/current)" 2>/dev/null || true)"
+    extra="${1:-}"
+    pruned="$(python3 - "$root" "$current" "$extra" <<'PY'
+import pathlib, shutil, sys
+root_text, current_text, extra_text = sys.argv[1:]
+root = pathlib.Path(root_text).resolve()
+keep = set()
+
+def remember(value):
+    if not value:
+        return
+    path = pathlib.Path(value)
+    if not path.is_absolute():
+        path = root / value
+    try:
+        resolved = path.resolve()
+    except OSError:
+        return
+    if resolved == root or root in resolved.parents:
+        keep.add(resolved)
+
+remember(current_text)
+remember(extra_text)
+dirs = [path.resolve() for path in root.iterdir() if path.is_dir() and not path.is_symlink()]
+dirs.sort(key=lambda path: path.stat().st_mtime, reverse=True)
+keep.update(dirs[:2])
+removed = 0
+for path in dirs:
+    if path in keep or path == root or root not in path.parents:
+        continue
+    shutil.rmtree(path)
+    removed += 1
+if removed:
+    print(removed)
+PY
+)" || return 1
+    if [[ -n "$pruned" ]]; then
+        installer_say "PRUNE ${pruned} old release directories. The current release and the previous one stay."
+    fi
+}
+
 stage_06_application_release() {
     local root dest version archive
     root="$(installer_sysroot)"
@@ -165,6 +210,7 @@ stage_06_application_release() {
     }
     dest="$(installer_root_path "/var/lib/rahandaz/releases/${version}")"
     if [[ -d "$dest" && -f "$(installer_root_path /var/lib/rahandaz/current/artisan)" ]]; then
+        installer_prune_releases || return 1
         return 0
     fi
     mkdir -p "$dest"
@@ -183,7 +229,67 @@ stage_06_application_release() {
     if [[ ! -e "$dest/storage" ]]; then
         ln -s "$(installer_root_path /var/lib/rahandaz/shared/storage)" "$dest/storage"
     fi
+    installer_prune_releases || return 1
     return 0
+}
+
+installer_postgres_small_profile() {
+    local count version cluster dropin tmp
+    if installer_acknowledged postgresql; then
+        installer_say "KEEP PostgreSQL memory settings. An existing installation was acknowledged."
+        return 0
+    fi
+    count="$(pg_lsclusters --no-header | awk 'NF { c++ } END { print c + 0 }')"
+    if [[ "$count" != 1 ]]; then
+        installer_say "KEEP PostgreSQL memory settings. Expected one cluster."
+        return 0
+    fi
+    version="$(pg_lsclusters --no-header | awk 'NF { print $1; exit }')"
+    cluster="$(pg_lsclusters --no-header | awk 'NF { print $2; exit }')"
+    [[ "$version" =~ ^[0-9]+$ && "$cluster" =~ ^[A-Za-z0-9._-]+$ ]] || {
+        installer_error POSTGRES_START_FAILED "PostgreSQL cluster identity could not be read."
+        return 1
+    }
+    dropin="/etc/postgresql/${version}/${cluster}/conf.d/rahandaz-small.conf"
+    if [[ ! -d "$(dirname "$dropin")" ]]; then
+        installer_say "KEEP PostgreSQL memory settings. conf.d is absent."
+        return 0
+    fi
+    if [[ -f "$dropin" && ! -L "$dropin" ]]; then
+        installer_say "KEEP PostgreSQL small profile."
+        return 0
+    fi
+    if [[ -e "$dropin" ]]; then
+        installer_error POSTGRES_START_FAILED "PostgreSQL profile path is a symlink."
+        return 1
+    fi
+    tmp="$(mktemp)"
+    cat >"$tmp" <<'EOF'
+# rahandaz-managed: postgres-small-v1
+shared_buffers = 64MB
+effective_cache_size = 256MB
+work_mem = 2MB
+maintenance_work_mem = 32MB
+max_connections = 40
+huge_pages = off
+jit = off
+EOF
+    install -m 0644 "$tmp" "$dropin"
+    rm -f "$tmp"
+    chgrp postgres "$dropin" 2>/dev/null || true
+    if [[ -d /run/systemd/system ]]; then
+        systemctl restart postgresql || {
+            installer_error POSTGRES_START_FAILED "PostgreSQL did not restart with the small profile."
+            return 1
+        }
+    else
+        pg_ctlcluster "$version" "$cluster" restart || {
+            installer_error POSTGRES_START_FAILED "PostgreSQL did not restart with the small profile."
+            return 1
+        }
+    fi
+    security_postgres_health || return 1
+    installer_say "APPLIED PostgreSQL small profile and restarted the cluster."
 }
 
 stage_07_postgresql_setup() {
@@ -243,6 +349,7 @@ PYHASH
         installer_state_set database_created yes
     fi
     security_postgres_health || return 1
+    installer_postgres_small_profile || return 1
     security_credentials
     return 0
 }
@@ -284,8 +391,9 @@ APP_ENV=production
 APP_KEY=
 APP_DEBUG=false
 APP_URL=${PUBLIC_URL}
-LOG_CHANNEL=stack
+LOG_CHANNEL=daily
 LOG_LEVEL=info
+LOG_DAILY_DAYS=7
 DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1
 DB_PORT=5432
@@ -317,6 +425,26 @@ REDIS_QUEUE_RETRY_AFTER=90
 EOF
         chmod 0600 "$envfile"
     fi
+    python3 - "$envfile" <<'PY' || return 1
+import pathlib, sys
+path = pathlib.Path(sys.argv[1])
+lines = path.read_text().splitlines()
+if any(line.startswith("LOG_DAILY_DAYS=") for line in lines):
+    raise SystemExit(0)
+out = []
+changed = False
+for line in lines:
+    if line == "LOG_CHANNEL=stack":
+        out.append("LOG_CHANNEL=daily")
+        changed = True
+    else:
+        out.append(line)
+if not changed:
+    raise SystemExit(0)
+out.append("LOG_DAILY_DAYS=7")
+path.write_text("\n".join(out) + "\n")
+path.chmod(0o600)
+PY
     if [[ -z "$(installer_env_get "$envfile" DB_PASSWORD)" && -s "$(installer_root_path /etc/rahandaz/database.password)" ]]; then
         python3 - "$envfile" "$(installer_root_path /etc/rahandaz/database.password)" <<'PY'
 import pathlib, sys
@@ -451,6 +579,9 @@ stage_11_nginx_php_fpm() {
     mkdir -p "$pool_dir" "$(installer_root_path /etc/nginx/sites-enabled)"
     cp "${INSTALLER_HOME}/templates/php-fpm/rahandaz-fpm.conf" "$(installer_root_path /etc/rahandaz/php/php-fpm.conf)"
     chmod 0644 "$(installer_root_path /etc/rahandaz/php/php-fpm.conf)"
+    mkdir -p "$(installer_root_path /etc/rahandaz/php/ini)"
+    cp "${INSTALLER_HOME}/templates/php/opcache.ini" "$(installer_root_path /etc/rahandaz/php/ini/opcache.ini)"
+    chmod 0644 "$(installer_root_path /etc/rahandaz/php/ini/opcache.ini)"
     installer_render_template "${INSTALLER_HOME}/templates/php-fpm/rahandaz.conf.tpl" "$pool" \
         FPM_SOCK /run/rahandaz/php-fpm.sock \
         UPLOAD_MAX 100M || return 1
@@ -471,14 +602,32 @@ installer_enroll_software() {
     /usr/bin/python3 -I /var/lib/rahandaz/current/infrastructure/operations/software/provision.py --upgrade
 }
 
+installer_quiesce_unused_defaults() {
+    # Config files of distribution Redis and PHP-FPM are not rewritten.
+    # An installation the operator acknowledged is left running.
+    if ! installer_acknowledged redis-server \
+        && systemctl is-active --quiet redis-rahandaz-queue.service \
+        && systemctl is-active --quiet redis-rahandaz-cache.service \
+        && systemctl list-unit-files --no-legend redis-server.service 2>/dev/null | grep -q '^redis-server.service'; then
+        systemctl disable --now redis-server.service || return 1
+        installer_say "STOPPED unused redis-server. Its configuration file was not modified."
+    fi
+    if ! installer_acknowledged php8.4-fpm \
+        && systemctl is-active --quiet rahandaz-php-fpm.service \
+        && systemctl list-unit-files --no-legend php8.4-fpm.service 2>/dev/null | grep -q '^php8.4-fpm.service'; then
+        systemctl disable --now php8.4-fpm.service || return 1
+        installer_say "STOPPED distro php8.4-fpm. The panel pool is rahandaz-php-fpm."
+    fi
+}
+
 stage_12_systemd_services() {
-    local root release php_bin fpm_bin cli_dest lib_dest item
+    local root release php_bin fpm_bin cli_dest lib_dest item logs mode
     root="$(installer_sysroot)"
     release="/var/lib/rahandaz/current"
     php_bin="${INSTALLER_PHP_BIN}"
     fpm_bin="${INSTALLER_PHP_FPM_BIN}"
     if [[ "$MODE" == "plan" ]]; then
-        installer_say "PLAN systemd units for rahandaz-php-fpm, the queue worker, the scheduler timer, and the Redis cache. ExecStart uses /usr/bin/php8.4. Cron is not installed."
+        installer_say "PLAN systemd units for rahandaz-php-fpm, the scheduler timer, and the Redis cache. The queue worker stays stopped while execution mode is disabled. ExecStart uses /usr/bin/php8.4. Cron is not installed."
         return 0
     fi
     mkdir -p "$(installer_root_path /etc/systemd/system)"
@@ -493,6 +642,21 @@ stage_12_systemd_services() {
         RELEASE "$release" PHP_BIN "$php_bin" DATA_ROOT /var/lib/rahandaz || return 1
     installer_render_template "${INSTALLER_HOME}/templates/systemd/rahandaz-scheduler.timer.tpl" \
         "$(installer_root_path /etc/systemd/system/rahandaz-scheduler.timer)" || return 1
+    cp "${INSTALLER_HOME}/templates/systemd/rahandaz.slice" \
+        "$(installer_root_path /etc/systemd/system/rahandaz.slice)"
+    chmod 0644 "$(installer_root_path /etc/systemd/system/rahandaz.slice)"
+    logs="$(installer_root_path /etc/logrotate.d/rahandaz)"
+    mkdir -p "$(dirname "$logs")"
+    if [[ -e "$logs" && ! -L "$logs" ]] && [[ "$(head -n 1 "$logs")" != '# rahandaz-managed: panel-logs-v1' ]]; then
+        installer_error FOREIGN_CONFIG "The logrotate snippet is not managed by Rahandaz."
+        return 1
+    fi
+    if [[ -L "$logs" ]]; then
+        installer_error FOREIGN_CONFIG "The logrotate snippet path is a symlink."
+        return 1
+    fi
+    cp "${INSTALLER_HOME}/templates/logrotate/rahandaz" "$logs"
+    chmod 0644 "$logs"
     if [[ "$(installer_sysroot)" == / && "${INSTALLER_OFFLINE:-}" != 1 ]]; then
         security_redis_units || return 1
     fi
@@ -524,8 +688,30 @@ EOF
     }
     systemctl daemon-reload
     security_runtime_permissions || return 1
-    systemctl enable --now redis-rahandaz-queue.service redis-rahandaz-cache.service rahandaz-php-fpm.service rahandaz-queue.service rahandaz-scheduler.timer || {
+    systemctl enable --now redis-rahandaz-queue.service redis-rahandaz-cache.service rahandaz-php-fpm.service rahandaz-scheduler.timer || {
         installer_error STAGE_FAILED "A Rahandaz unit did not become active."
+        return 1
+    }
+    # Restart so the slice, scan dir, and ondemand pool apply to an already running master.
+    systemctl restart rahandaz-php-fpm.service || {
+        installer_error STAGE_FAILED "The panel PHP-FPM pool did not restart."
+        return 1
+    }
+    mode="$(installer_env_get "$(installer_root_path /var/lib/rahandaz/current/.env)" RAHANDAZ_EXECUTION_MODE)"
+    if [[ "$mode" == local ]]; then
+        systemctl enable --now rahandaz-queue.service || {
+            installer_error STAGE_FAILED "The queue worker did not become active."
+            return 1
+        }
+    else
+        systemctl disable --now rahandaz-queue.service || {
+            installer_error STAGE_FAILED "The idle queue worker could not be stopped."
+            return 1
+        }
+        installer_say "QUEUE worker is installed and stopped while execution mode is disabled."
+    fi
+    installer_quiesce_unused_defaults || {
+        installer_error STAGE_FAILED "An unused distribution service could not be stopped."
         return 1
     }
     # APT may have started Nginx before the Rahandaz site existed.
