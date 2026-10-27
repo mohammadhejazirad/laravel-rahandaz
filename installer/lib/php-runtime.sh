@@ -129,6 +129,8 @@ EOF
         installer_error PHP84_KEY_UNVERIFIED "Refusing a PHP source that disables authentication."
         return 1
     fi
+    # command-not-found reads these as the calling user. A private umask must not hide them.
+    chmod 0644 "$source" "$prefs"
     return 0
 }
 

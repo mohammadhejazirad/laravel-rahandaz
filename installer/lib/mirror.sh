@@ -200,4 +200,6 @@ Suites: ${codename}-security
 Components: main restricted universe multiverse
 Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
 EOF
+    # The installer umask is private. APT lists must stay world-readable or command-not-found warns.
+    chmod 0644 "$dest"
 }

@@ -56,6 +56,17 @@ fi
 tmp="$(mktemp -d /tmp/rahandaz-installer-test.XXXXXX)"
 trap 'rm -rf "$tmp"' EXIT
 
+old_umask="$(umask)"
+umask 077
+apt_list="${tmp}/rahandaz-ubuntu.sources"
+installer_write_apt_sources ubuntu-archive noble "$apt_list"
+if [[ "$(stat -c %a "$apt_list")" == "644" ]] && grep -q 'archive.ubuntu.com' "$apt_list"; then
+    ok "apt source stays world-readable under a private umask"
+else
+    bad "apt source stays world-readable under a private umask"
+fi
+umask "$old_umask"
+
 os_noble="${tmp}/noble.os"
 cat >"$os_noble" <<'EOF'
 ID=ubuntu

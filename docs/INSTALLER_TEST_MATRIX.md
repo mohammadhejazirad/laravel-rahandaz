@@ -1,5 +1,9 @@
 # ماتریس آزمون نصب‌کننده
 
+## ۲۰۲۶-۱۰-۲۷ — فهرست APT خوانا برای کاربر عادی
+
+نصب‌کننده با `umask 077` اجرا می‌شود. `rahandaz-ubuntu.sources` و `rahandaz-php.sources` بعد از نوشتن `0644` می‌شوند تا `command-not-found` هنگام نبودن یک فرمان، هشدار Permission denied ندهد. محتوای این فایل‌ها فقط آدرس مخزن امضاشده است. آزمون در `installer/tests/run.sh` زیر umask خصوصی، حالت `644` را می‌سنجد. Node.js همچنان بستهٔ پنل نیست.
+
 ## ۲۰۲۶-۱۰-۱۹ — ارتقای واقعی تا beta17
 
 روی VPS Ubuntu 24.04.5، ارتقای کنترل‌شدهٔ beta14 → beta16 → beta17 با بستهٔ امضاشده، backup واقعی پایگاه و حفظ کلیدها انجام شد. Backend/CLI نسخهٔ beta17، health، login/CSRF، هر ۶۷ asset، سرویس‌ها و rerun همان نسخه با ALREADY_CURRENT موفق‌اند. migration/seed یکسان و اجرا نشدند. این آزمون CLI updater خودکار، fresh install، reboot یا restore کامل پایگاه نیست. روی 22.04 و 26.04 ارتقای VM در این برش اجرا نشد؛ Matrix کانتینرهای قبلی جای آن نیست. Bash در اصلاح beta17 تغییر نکرد. شواهد و خطای میانی مجوز CLI در [گزارش VPS](IRAN_VPS_INSTALL_RECOVERY_2026_10_19.md) ثبت شدند.
