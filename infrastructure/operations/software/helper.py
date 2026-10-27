@@ -73,7 +73,7 @@ def trusted_release():
 def request(data):
     if not isinstance(data, dict) or set(data) != {'schema_version', 'action', 'operation', 'execution_id', 'packages'}:
         raise Refused('INVALID_CONTRACT')
-    if data['schema_version'] != '1' or data['action'] not in ('start', 'status') or data['operation'] not in ('setup.initialize', 'software.install'):
+    if data['schema_version'] != '1' or data['action'] not in ('start', 'status') or data['operation'] not in ('setup.initialize', 'software.install', 'software.upgrade'):
         raise Refused('INVALID_CONTRACT')
     if not isinstance(data['execution_id'], str) or not re.fullmatch(UUID, data['execution_id']):
         raise Refused('INVALID_EXECUTION_ID')
@@ -83,6 +83,8 @@ def request(data):
     if data['operation'] == 'setup.initialize' and any(not catalog()[p].get('setup', False) for p in packages):
         raise Refused('PACKAGE_NOT_ALLOWED')
     if data['operation'] == 'software.install' and not packages:
+        raise Refused('PACKAGE_NOT_ALLOWED')
+    if data['operation'] == 'software.upgrade' and (len(packages) != 1 or not allows_upgrade(catalog()[packages[0]])):
         raise Refused('PACKAGE_NOT_ALLOWED')
     return data
 
@@ -221,6 +223,39 @@ def verify_tool(package):
     return output
 
 
+def allows_upgrade(entry):
+    return entry.get('kind') == 'apt' and entry.get('upgradeable', True) is not False
+
+
+def in_upgrade_scope(name, entry):
+    if name == entry.get('apt'):
+        return True
+    prefix = entry.get('upgrade_prefix')
+    if not isinstance(prefix, str) or re.fullmatch(r'[a-z0-9][a-z0-9+.:-]{0,40}', prefix) is None:
+        return False
+    return name == prefix or name.startswith(prefix + '-')
+
+
+def php_alternative():
+    # Read the current /usr/bin/php target. Package scripts may retarget it; we only restore a php binary.
+    link = Path('/etc/alternatives/php')
+    try:
+        if not link.is_symlink():
+            return None
+        target = os.readlink(link)
+    except OSError:
+        return None
+    return target if re.fullmatch(r'/usr/bin/php[0-9.]{1,8}', target) else None
+
+
+def restore_php_alternative(previous):
+    if previous is None or php_alternative() == previous:
+        return
+    if re.fullmatch(r'/usr/bin/php[0-9.]{1,8}', previous) is None:
+        raise Refused('UNSAFE_STATE')
+    run(['/usr/bin/update-alternatives', '--set', 'php', previous], 15)
+
+
 def apt_plan(preview):
     planned = {}
     for line in preview.splitlines():
@@ -231,6 +266,23 @@ def apt_plan(preview):
             if not match:
                 raise Refused('PACKAGE_VERSION_UNAVAILABLE')
             planned[match[1]] = match[2]
+    return planned
+
+
+def upgrade_plan(preview, entry):
+    # Point releases may move sibling packages of the same line. Removals and unrelated packages stay refused.
+    planned = {}
+    for line in preview.splitlines():
+        if line.startswith('Remv '):
+            raise Refused('PACKAGE_CONFLICT')
+        if not line.startswith('Inst '):
+            continue
+        match = re.match(r'Inst ([a-z0-9][a-z0-9+.:_-]*)(?: \[([A-Za-z0-9.+:~_-]{1,120})\])? \(([A-Za-z0-9.+:~_-]{1,120}) ', line)
+        if not match:
+            raise Refused('PACKAGE_VERSION_UNAVAILABLE')
+        if not in_upgrade_scope(match[1], entry):
+            raise Refused('PACKAGE_CONFLICT')
+        planned[match[1]] = match[3]
     return planned
 
 
@@ -310,13 +362,70 @@ def install(package, data, progress=lambda phase: None, dependency=None):
         raise Refused('PACKAGE_PLAN_CHANGED')
     # Hold the real dpkg lock through APT; never remove lock files or repair foreign transactions.
     progress('installation')
-    run(['/usr/bin/apt-get', '-y', *options, 'install', *pins], 180)
+    previous_php = php_alternative() if apt.startswith('php') else None
+    try:
+        run(['/usr/bin/apt-get', '-y', *options, 'install', *pins], 180)
+    finally:
+        if previous_php is not None:
+            restore_php_alternative(previous_php)
     progress('verification')
     version = installed(apt)
     if version != exact:
         raise Refused('PACKAGE_VERIFICATION_FAILED')
     if dependency is not None:
         return
+    verify_tool(package)
+    return {'package': package, 'version': version, 'verified': True, 'changed': True, 'executable_path': entry['executable_path']}
+
+
+def upgrade(package, data, progress=lambda phase: None):
+    entry = catalog()[package]
+    if not allows_upgrade(entry):
+        raise Refused('PACKAGE_NOT_ALLOWED')
+    apt = entry['apt']
+    current = installed(apt)
+    if not current:
+        raise Refused('PACKAGE_NOT_INSTALLED')
+    if shutil.disk_usage('/').free < 1024**3:
+        raise Refused('INSUFFICIENT_DISK')
+    progress('dependency_plan')
+    # Refresh indexes so the candidate is the repository's current package, not a stale local list.
+    run(['/usr/bin/apt-get', 'update'], 120)
+    options = ['--no-install-recommends', '--no-remove', '--only-upgrade', '-o', 'DPkg::Lock::Timeout=30',
+               '-o', 'Dpkg::Options::=--force-confold']
+    dependencies = upgrade_plan(run(['/usr/bin/apt-get', '--simulate', *options, 'install', apt]), entry)
+    if not dependencies:
+        progress('verification')
+        verify_tool(package)
+        version = installed(apt)
+        if version != current:
+            raise Refused('PACKAGE_VERIFICATION_FAILED')
+        return {'package': package, 'version': version, 'verified': True, 'changed': False, 'executable_path': entry['executable_path']}
+    for pinned in dependencies.values():
+        if not re.fullmatch(r'[A-Za-z0-9.+:~_-]{1,120}', pinned):
+            raise Refused('PACKAGE_VERSION_UNAVAILABLE')
+    plan = ROOT/data['execution_id']/'plan.json'
+    planned = json.loads(plan.read_text()) if plan.exists() else {}
+    planned[package] = dependencies
+    atomic(plan, planned)
+    pins = [name+'='+version for name, version in dependencies.items()]
+    progress('download')
+    run(['/usr/bin/apt-get', '-y', '--download-only', *options, 'install', *pins], 120)
+    authorize(data)
+    if upgrade_plan(run(['/usr/bin/apt-get', '--simulate', *options, 'install', *pins]), entry) != dependencies:
+        raise Refused('PACKAGE_PLAN_CHANGED')
+    progress('installation')
+    previous_php = php_alternative() if apt.startswith('php') else None
+    try:
+        run(['/usr/bin/apt-get', '-y', *options, 'install', *pins], 180)
+    finally:
+        if previous_php is not None:
+            restore_php_alternative(previous_php)
+    progress('verification')
+    version = installed(apt)
+    expected = dependencies.get(apt, current)
+    if version != expected:
+        raise Refused('PACKAGE_VERIFICATION_FAILED')
     verify_tool(package)
     return {'package': package, 'version': version, 'verified': True, 'changed': True, 'executable_path': entry['executable_path']}
 
@@ -719,7 +828,7 @@ def main():
                     def progress(phase):
                         item['phase'] = phase
                         event(package, phase)
-                    outcome = install(package, data, progress)
+                    outcome = upgrade(package, data, progress) if data['operation'] == 'software.upgrade' else install(package, data, progress)
                     item.update(outcome, status='succeeded', phase='verified', error_code=None)
                     event(package, 'verified')
                 except Refused as error:

@@ -20,6 +20,7 @@ export const panelNavigation: PanelGroup[] = [
     { label: 'میزبان و سرویس‌ها', destinations: [
         { path: 'servers', label: 'میزبان محلی', description: 'مشخصات میزبان همین نصب', icon: Server, guide: 'server-management' },
         { path: 'catalog', label: 'نرم‌افزارها', description: 'کاتالوگ موتورهای اجرا و سرویس‌ها', icon: Package, guide: 'php-runtimes' },
+        { path: 'catalog/installed', label: 'نصب‌شده‌ها', description: 'نسخهٔ نصب‌شده و به‌روزرسانی همان شاخه', icon: Package, guide: 'php-runtimes' },
         { path: 'domains', label: 'دامنه‌ها', description: 'دامنهٔ محیط‌ها و وضعیت گواهی', icon: Globe2, guide: 'domains-dns' },
         { path: 'databases', label: 'دیتابیس‌ها', description: 'دیتابیس و کاربر مستقل پروژه', icon: Database, guide: 'databases' },
         { path: 'monitoring', label: 'پایش', description: 'منابع میزبان و سلامت مشاهده‌شده', icon: Activity, guide: 'monitoring' },
@@ -41,7 +42,9 @@ export const panelNavigation: PanelGroup[] = [
 
 export function destinationForPath(path: string, base: string): PanelDestination | undefined {
     const relative = path.split('?')[0]?.replace(/\/$/, '');
-    return panelNavigation.flatMap(group => group.destinations).find(item => relative === `${base}/${item.path}` || relative?.startsWith(`${base}/${item.path}/`));
+    return panelNavigation.flatMap(group => group.destinations)
+        .filter(item => relative === `${base}/${item.path}` || relative?.startsWith(`${base}/${item.path}/`))
+        .sort((left, right) => right.path.length - left.path.length)[0];
 }
 
 export function visibleNavigation(canManage: boolean): PanelGroup[] {

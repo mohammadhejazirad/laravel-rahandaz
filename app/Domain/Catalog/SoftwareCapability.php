@@ -18,6 +18,8 @@ use Illuminate\Validation\ValidationException;
 
 class SoftwareCapability
 {
+    public const JOB_TYPES = ['setup.initialize', 'software.install', 'software.upgrade'];
+
     public function available(): bool
     {
         $path = (string) config('rahandaz.software_capability_file');
@@ -44,6 +46,43 @@ class SoftwareCapability
         return array_filter($this->catalog(), fn ($item) => $item['setup'] ?? false);
     }
 
+    public function browserCatalog(): array
+    {
+        $view = [];
+        foreach ($this->catalog() as $key => $entry) {
+            $view[$key] = [
+                'name' => $entry['name'],
+                'description' => $entry['description'],
+                'category' => $entry['category'] ?? 'utility',
+                'product' => $entry['product'] ?? null,
+                'product_name' => $entry['product_name'] ?? null,
+                'product_description' => $entry['product_description'] ?? null,
+                'version_label' => $entry['version_label'] ?? null,
+                'upgradeable' => $this->allowsUpgrade($entry),
+                'upgrade_note' => $this->upgradeNote($entry),
+            ];
+        }
+
+        return $view;
+    }
+
+    public function allowsUpgrade(array $entry): bool
+    {
+        return ($entry['kind'] ?? '') === 'apt' && ($entry['upgradeable'] ?? true) !== false;
+    }
+
+    public function upgradeNote(array $entry): ?string
+    {
+        if ($this->allowsUpgrade($entry)) {
+            return null;
+        }
+        if (in_array($entry['kind'] ?? '', ['archive', 'chrome'], true)) {
+            return 'نسخهٔ این مورد در کاتالوگ امضاشده ثابت است.';
+        }
+
+        return 'به‌روزرسانی این سرویس از پنل انجام نمی‌شود تا داده و سرویس اصلی حفظ شود.';
+    }
+
     public function validateSetup(array $packages): array
     {
         $packages = $this->validate($packages);
@@ -58,7 +97,7 @@ class SoftwareCapability
     {
         $results = [];
         // Only previously verified fixed paths; the panel never accepts paths from HTTP.
-        $jobs = OperationJob::query()->where('workspace_id', $workspace->id)->whereIn('type', ['software.install', 'setup.initialize'])
+        $jobs = OperationJob::query()->where('workspace_id', $workspace->id)->whereIn('type', self::JOB_TYPES)
             ->whereIn('status', ['succeeded', 'failed'])->with('steps')->latest('id')->limit(200)->get();
         foreach ($jobs as $job) {
             foreach ($job->steps->firstWhere('key', 'gate')?->checkpoint['packages'] ?? [] as $row) {
@@ -87,39 +126,56 @@ class SoftwareCapability
 
     public function request(Workspace $workspace, LocalHost $host, User $actor, array $packages, string $key, string $type = 'software.install', array $extra = []): OperationJob
     {
-        abort_unless(in_array($type, ['software.install', 'setup.initialize'], true), 422);
+        abort_unless(in_array($type, self::JOB_TYPES, true), 422);
         abort_unless((string) $host->workspace_id === (string) $workspace->id && $host->slug === 'local-host', 404);
         abort_unless(app(OperationAccess::class)->managesWorkspace($actor, $workspace->id), 403);
+        $field = $type === 'software.upgrade' ? 'package' : 'packages';
         if (! $this->available()) {
-            throw ValidationException::withMessages(['packages' => 'سرویس نصب در دسترس نیست. وضعیت سرویس‌های راه‌انداز را بررسی کنید.']);
+            throw ValidationException::withMessages([$field => 'سرویس نصب در دسترس نیست. وضعیت سرویس‌های راه‌انداز را بررسی کنید.']);
         }
-        $packages = $type === 'setup.initialize' ? $this->validateSetup($packages) : $this->validate($packages);
+        try {
+            $packages = $type === 'setup.initialize' ? $this->validateSetup($packages) : $this->validate($packages);
+        } catch (ValidationException $exception) {
+            if ($type !== 'software.upgrade') {
+                throw $exception;
+            }
+            throw ValidationException::withMessages(['package' => 'این نرم‌افزار از پنل به‌روزرسانی نمی‌شود.']);
+        }
         if ($type === 'software.install' && $packages === []) {
             throw ValidationException::withMessages(['packages' => 'حداقل یک نرم‌افزار انتخاب کنید.']);
         }
+        if ($type === 'software.upgrade' && (count($packages) !== 1 || ! $this->allowsUpgrade($this->catalog()[$packages[0]]))) {
+            throw ValidationException::withMessages(['package' => 'این نرم‌افزار از پنل به‌روزرسانی نمی‌شود.']);
+        }
 
-        return DB::transaction(function () use ($workspace, $host, $actor, $packages, $key, $type, $extra): OperationJob {
+        return DB::transaction(function () use ($workspace, $host, $actor, $packages, $key, $type, $extra, $field): OperationJob {
             DB::select('select pg_advisory_xact_lock(hashtextextended(?, 0))', ['software.requests']);
-            $active = OperationJob::query()->whereIn('type', ['software.install', 'setup.initialize'])
+            $active = OperationJob::query()->whereIn('type', self::JOB_TYPES)
                 ->whereNotIn('status', ['succeeded', 'failed', 'cancelled'])->lockForUpdate()->first();
             if ($active !== null && ((string) $active->workspace_id !== (string) $workspace->id || (string) $active->actor_id !== (string) $actor->id || $active->idempotency_key !== $key || $active->type !== $type)) {
-                throw ValidationException::withMessages(['packages' => 'یک عملیات نصب در حال انجام است. پس از پایان آن دوباره تلاش کنید.']);
+                throw ValidationException::withMessages([$field => 'یک عملیات نرم‌افزار در حال انجام است. پس از پایان آن دوباره تلاش کنید.']);
             }
             $job = app(RecordOperation::class)->record(new RecordOperationData(
                 workspaceId: $workspace->id, actorId: $actor->id, type: $type, idempotencyKey: $key,
                 plan: ['contract_version' => '1', 'packages' => $packages, ...$extra], mutatesHost: true,
                 resourceType: 'local_host', resourceId: $host->id,
             ));
-            app(AuditRecorder::class)->record($workspace, $actor, 'software.install.requested', 'operation_job', $job->uuid,
+            app(AuditRecorder::class)->record($workspace, $actor, $type === 'software.upgrade' ? 'software.upgrade.requested' : 'software.install.requested', 'operation_job', $job->uuid,
                 AuditResult::Success, ['packages' => $packages, 'host_executed' => false], operationJob: $job);
 
             return $job;
         });
     }
 
-    public function latest(Workspace $workspace): ?OperationJob
+    public function latest(Workspace $workspace, ?array $types = null): ?OperationJob
     {
-        return OperationJob::query()->where('workspace_id', $workspace->id)->whereIn('type', ['software.install', 'setup.initialize'])->latest('id')->first();
+        return OperationJob::query()->where('workspace_id', $workspace->id)->whereIn('type', $types ?? ['software.install', 'setup.initialize'])->latest('id')->first();
+    }
+
+    public function active(Workspace $workspace): ?OperationJob
+    {
+        return OperationJob::query()->where('workspace_id', $workspace->id)->whereIn('type', self::JOB_TYPES)
+            ->whereNotIn('status', ['succeeded', 'failed', 'cancelled'])->latest('id')->first();
     }
 
     public function payload(?OperationJob $job): ?array
@@ -142,7 +198,7 @@ class SoftwareCapability
             $summary[$status] = count(array_filter($packages, fn ($item) => $item['status'] === $status));
         }
 
-        return ['uuid' => $job->uuid, 'status' => $job->status->value, 'message' => $job->error_code === null ? null : $this->errorMessage($job->error_code),
+        return ['uuid' => $job->uuid, 'status' => $job->status->value, 'operation' => $job->type, 'message' => $job->error_code === null ? null : $this->errorMessage($job->error_code),
             'summary' => $summary, 'packages' => $packages];
     }
 
@@ -186,6 +242,7 @@ class SoftwareCapability
             'SANDBOX_UNAVAILABLE', 'SANDBOX_POLICY_CONFLICT' => 'sandbox مرورگر آماده نیست یا با تنظیم موجود AppArmor تداخل دارد. پشتیبانی user namespace و profile مرورگر را بررسی کنید؛ sandbox غیرفعال نمی‌شود.',
             'CPU_FEATURE_UNAVAILABLE' => 'پردازنده ویژگی AVX مورد نیاز MongoDB را ندارد. مشخصات CPU ماشین مجازی را از ارائه‌دهنده بررسی کنید.',
             'ARCHIVE_UNSAFE' => 'ساختار فایل نصب معتبر نیست. نصب بدون استخراج فایل ناامن متوقف شد.',
+            'PACKAGE_NOT_INSTALLED' => 'این نسخه هنوز نصب نشده است. ابتدا آن را از کاتالوگ نصب کنید.',
             'CORE_SERVICE_MISSING' => 'یکی از سرویس‌های اصلی پنل موجود نیست. ابتدا نصب اصلی پنل را بررسی کنید؛ جایگزینی runtime پنل از کاتالوگ انجام نمی‌شود.',
             'ARCHITECTURE_UNAVAILABLE' => 'این بسته برای معماری فعلی سرور در این نسخه ارائه نشده است.',
             'UNSAFE_DESTINATION', 'UNSAFE_CODE', 'UNSAFE_STATE' => 'مالکیت یا دسترسی مسیر نصب امن نیست، یا فایل خارجی در مقصد وجود دارد. مسیر باید توسط مدیر بررسی شود؛ بازنویسی انجام نشد.',

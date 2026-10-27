@@ -64,7 +64,9 @@ Route::prefix(trim((string) config('rahandaz.base_path'), '/'))->group(function 
                 Route::get('/servers', [ServerController::class, 'index'])->name('servers.index');
                 Route::get('/servers/{localHost}', [ServerController::class, 'show'])->name('servers.show');
                 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
+                Route::get('/catalog/installed', [CatalogController::class, 'installed'])->name('catalog.installed');
                 Route::post('/catalog/software/install', [CatalogController::class, 'installSoftware'])->middleware('throttle:5,1')->name('catalog.software.install');
+                Route::post('/catalog/software/upgrade', [CatalogController::class, 'upgradeSoftware'])->middleware('throttle:5,1')->name('catalog.software.upgrade');
                 Route::post('/catalog/chrome/{localHost}/install', [CatalogController::class, 'installChrome'])->middleware('throttle:5,1')->name('catalog.chrome.install');
                 Route::get('/mirrors', [MirrorController::class, 'index'])->name('mirrors.index');
                 Route::post('/git/github/register', [GitConnectionController::class, 'manifestStart'])->middleware('throttle:5,1')->name('git.manifest.start');

@@ -22,7 +22,8 @@
 | `/servers/` | `GET /rahandaz/servers` | `pages/servers/index.tsx` | App | فهرست `local_hosts` همان workspace |
 | `/servers/<uuid>/overview/` | `GET /rahandaz/servers/{uuid}` | `pages/servers/show.tsx` | App | فیلد ذخیره‌شده به‌علاوهٔ کارت موقعیت IP. پایش وصل نیست |
 | monitoring، network، settings، console، ssh-keys، services، logs، events، databases، php سرور | — | — | — | آماده نیست. کنسول آزاد ساخته نشده |
-| `/catalog/` | `GET /rahandaz/catalog` | `pages/catalog/index.tsx` | App | خواندنی. نصب نیست |
+| `/catalog/` | `GET /rahandaz/catalog` | `pages/catalog/index.tsx` | App | انتخاب دسته‌بندی، مدال نسخهٔ PHP و نصب پس‌زمینه |
+| نصب‌شده‌ها | `GET /rahandaz/catalog/installed` و `POST /rahandaz/catalog/software/upgrade` | `pages/catalog/installed.tsx` | App | فهرست تأییدشده و به‌روزرسانی یک کلید کاتالوگ؛ دکمه تا پایان job در حال اجرا می‌ماند |
 | `/mirrors/` | `GET /rahandaz/mirrors` | `pages/mirrors/index.tsx` | App | خواندنی. apply و rollback نیست |
 | `/mirrors/<software_kind>/` | — | — | — | آماده نیست |
 | `/services/<uuid>/` | — | — | — | آماده نیست |

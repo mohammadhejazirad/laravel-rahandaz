@@ -218,11 +218,38 @@ class SoftwareSetupTest extends TestCase
     {
         $this->account();
         $this->post(route('setup.apply'), ['display_name' => 'My server', 'packages' => ['google-chrome'], 'idempotency_key' => (string) Str::uuid()])->assertSessionHasErrors('packages');
+        $this->post(route('setup.apply'), ['display_name' => 'My server', 'packages' => ['php82'], 'idempotency_key' => (string) Str::uuid()])->assertSessionHasErrors('packages');
         $this->assertDatabaseCount('operation_jobs', 0);
         $capability = app(SoftwareCapability::class);
         foreach ($capability->catalog() as $entry) {
             $this->assertArrayHasKey($entry['category'], $capability->categories());
         }
         $this->assertCount(4, $capability->setupCatalog());
+    }
+
+    public function test_upgrade_queues_one_allowlisted_package_and_rejects_pinned_or_unknown_targets(): void
+    {
+        [$user] = $this->account(true);
+        $this->get(route('catalog.installed'))->assertOk()->assertInertia(fn (Assert $page) => $page->component('catalog/installed')->has('software.catalog.php.version_label'));
+        Membership::query()->where('user_id', $user->id)->update(['role' => MembershipRole::Viewer]);
+        $this->post(route('catalog.software.upgrade'), ['package' => 'php', 'idempotency_key' => (string) Str::uuid()])->assertForbidden();
+        Membership::query()->where('user_id', $user->id)->update(['role' => MembershipRole::Owner]);
+        foreach (['node', 'postgresql', 'bash'] as $package) {
+            $this->post(route('catalog.software.upgrade'), ['package' => $package, 'idempotency_key' => (string) Str::uuid()])->assertSessionHasErrors('package');
+        }
+        $this->post(route('catalog.software.upgrade'), ['package' => 'php', 'version' => '8.4.27', 'idempotency_key' => (string) Str::uuid()])->assertRedirect(route('catalog.installed'));
+        $job = OperationJob::query()->sole();
+        $this->assertSame('software.upgrade', $job->type);
+        $this->assertSame(['php'], $job->plan['input']['packages']);
+        $this->assertArrayNotHasKey('version', $job->plan['input']);
+        Process::assertNothingRan();
+        $evidence = $this->evidence($job);
+        $evidence['packages'][0]['version'] = '8.4.27-1';
+        $evidence['packages'][0]['executable_path'] = '/usr/bin/php8.4';
+        Process::fake(['*' => Process::result(output: json_encode($evidence))]);
+        app(OperationRunner::class)->run($job->id);
+        $this->assertSame('succeeded', $job->fresh()->status->value);
+        $this->assertSame('8.4.27-1', app(SoftwareCapability::class)->installed($job->workspace)[0]['version']);
+        Process::assertRan(fn ($process): bool => str_contains((string) $process->input(), '"operation":"software.upgrade"'));
     }
 }

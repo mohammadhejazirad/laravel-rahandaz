@@ -60,20 +60,69 @@
       "version_args": [
         "-v"
       ],
+      "upgrade_prefix": "nginx",
       "protected": true
+    },
+    "php82": {
+      "name": "PHP 8.2",
+      "description": "PHP 8.2 کنار نسخهٔ پنل؛ پیش‌فرض سیستم عوض نمی‌شود.",
+      "product": "php",
+      "product_name": "PHP",
+      "product_description": "نسخه را خودتان انتخاب می‌کنید. نسخه‌های ۸٫۲ تا ۸٫۵ کنار هم می‌مانند و PHP پیش‌فرض سیستم عوض نمی‌شود.",
+      "version_label": "8.2",
+      "category": "runtime",
+      "setup": false,
+      "kind": "apt",
+      "apt": "php8.2-fpm",
+      "executable_path": "/usr/bin/php8.2",
+      "version_args": ["--version"],
+      "upgrade_prefix": "php8.2"
+    },
+    "php83": {
+      "name": "PHP 8.3",
+      "description": "PHP 8.3 کنار نسخهٔ پنل؛ پیش‌فرض سیستم عوض نمی‌شود.",
+      "product": "php",
+      "product_name": "PHP",
+      "product_description": "نسخه را خودتان انتخاب می‌کنید. نسخه‌های ۸٫۲ تا ۸٫۵ کنار هم می‌مانند و PHP پیش‌فرض سیستم عوض نمی‌شود.",
+      "version_label": "8.3",
+      "category": "runtime",
+      "setup": false,
+      "kind": "apt",
+      "apt": "php8.3-fpm",
+      "executable_path": "/usr/bin/php8.3",
+      "version_args": ["--version"],
+      "upgrade_prefix": "php8.3"
     },
     "php": {
       "name": "PHP 8.4",
-      "description": "باینری مستقل PHP 8.4؛ نسخهٔ پیش‌فرض سیستم و pool پروژه‌ها تغییر نمی‌کند.",
+      "description": "باینری پنل PHP 8.4. اگر موجود باشد جایگزین نمی‌شود؛ به‌روزرسانی فقط همین شاخهٔ ۸٫۴ است.",
+      "product": "php",
+      "product_name": "PHP",
+      "product_description": "نسخه را خودتان انتخاب می‌کنید. نسخه‌های ۸٫۲ تا ۸٫۵ کنار هم می‌مانند و PHP پیش‌فرض سیستم عوض نمی‌شود.",
+      "version_label": "8.4",
       "category": "runtime",
       "setup": false,
       "kind": "apt",
       "apt": "php8.4-fpm",
       "executable_path": "/usr/bin/php8.4",
-      "version_args": [
-        "--version"
-      ],
+      "version_args": ["--version"],
+      "upgrade_prefix": "php8.4",
       "protected": true
+    },
+    "php85": {
+      "name": "PHP 8.5",
+      "description": "PHP 8.5 کنار نسخهٔ پنل؛ پیش‌فرض سیستم عوض نمی‌شود.",
+      "product": "php",
+      "product_name": "PHP",
+      "product_description": "نسخه را خودتان انتخاب می‌کنید. نسخه‌های ۸٫۲ تا ۸٫۵ کنار هم می‌مانند و PHP پیش‌فرض سیستم عوض نمی‌شود.",
+      "version_label": "8.5",
+      "category": "runtime",
+      "setup": false,
+      "kind": "apt",
+      "apt": "php8.5-fpm",
+      "executable_path": "/usr/bin/php8.5",
+      "version_args": ["--version"],
+      "upgrade_prefix": "php8.5"
     },
     "python": {
       "name": "Python 3",
@@ -98,6 +147,7 @@
       "version_args": [
         "--version"
       ],
+      "upgradeable": false,
       "protected": true
     },
     "mysql": {
@@ -116,7 +166,8 @@
         "mariadb-server-core"
       ],
       "port": 3306,
-      "service": "mysql"
+      "service": "mysql",
+      "upgradeable": false
     },
     "mariadb": {
       "name": "MariaDB",
@@ -134,7 +185,8 @@
         "mysql-server-8.0"
       ],
       "port": 3306,
-      "service": "mariadb"
+      "service": "mariadb",
+      "upgradeable": false
     },
     "redis": {
       "name": "Redis",
@@ -147,6 +199,7 @@
       "version_args": [
         "--version"
       ],
+      "upgrade_prefix": "redis",
       "protected": true
     },
     "memcached": {
@@ -173,7 +226,8 @@
       "executable_path": "/usr/bin/clamscan",
       "version_args": [
         "--version"
-      ]
+      ],
+      "upgrade_prefix": "clamav"
     },
     "clamav-freshclam": {
       "name": "FreshClam",
@@ -186,7 +240,8 @@
       "version_args": [
         "--version"
       ],
-      "service": "clamav-freshclam"
+      "service": "clamav-freshclam",
+      "upgrade_prefix": "clamav"
     },
     "supervisor": {
       "name": "Supervisor",
@@ -216,7 +271,8 @@
       "executable_path": "/opt/rahandaz/runtimes/node/24.22.0/bin/node",
       "version_args": [
         "--version"
-      ]
+      ],
+      "upgradeable": false
     },
     "mongodb": {
       "name": "MongoDB Community 8.0",
@@ -248,7 +304,8 @@
       "executable_path": "/opt/rahandaz/runtimes/mongodb/8.0.34/bin/mongod",
       "version_args": [
         "--version"
-      ]
+      ],
+      "upgradeable": false
     },
     "google-chrome": {
       "name": "Google Chrome for Testing",
@@ -266,7 +323,8 @@
       "executable_path": "/opt/rahandaz/browsers/chrome/158.0.8110.0/chrome-linux64/chrome",
       "version_args": [
         "--version"
-      ]
+      ],
+      "upgradeable": false
     }
   },
   "categories": {

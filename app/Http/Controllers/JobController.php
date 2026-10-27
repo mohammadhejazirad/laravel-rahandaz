@@ -53,7 +53,7 @@ class JobController extends Controller
 
         return Inertia::render('jobs/show', [
             'job' => $this->summary($job),
-            'software' => in_array($job->type, ['software.install', 'setup.initialize'], true) ? app(SoftwareCapability::class)->payload($job) : null,
+            'software' => in_array($job->type, SoftwareCapability::JOB_TYPES, true) ? app(SoftwareCapability::class)->payload($job) : null,
             'logs' => [
                 'data' => $logs->getCollection()->map(fn (OperationJobLog $log): array => [
                     'sequence' => $log->sequence,

@@ -6,6 +6,7 @@ namespace App\Domain\Jobs;
 
 use App\Domain\Access\OperationAccess;
 use App\Domain\Catalog\RunSoftware;
+use App\Domain\Catalog\SoftwareCapability;
 use App\Domain\Jobs\Enums\JobStatus;
 use App\Domain\Jobs\Enums\StepStatus;
 use App\Domain\Projects\Enums\DeploymentStatus;
@@ -29,7 +30,7 @@ final class OperationRunner
     {
         $operationJobId = (string) $operationJobId;
 
-        if (OperationJob::query()->whereKey($operationJobId)->whereIn('type', ['setup.initialize', 'software.install'])->exists()) {
+        if (OperationJob::query()->whereKey($operationJobId)->whereIn('type', SoftwareCapability::JOB_TYPES)->exists()) {
             app(RunSoftware::class)->run($operationJobId);
 
             return;

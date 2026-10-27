@@ -142,6 +142,66 @@ class ContractTests(unittest.TestCase):
                 with self.assertRaises(helper.Refused):
                     helper.request(self.data() | {'operation': 'setup.initialize', 'packages': [key]})
 
+    def test_upgrade_accepts_one_apt_line_and_refuses_archives_databases_and_batches(self):
+        self.assertEqual(helper.request(self.data() | {'operation': 'software.upgrade', 'packages': ['php']})['packages'], ['php'])
+        self.assertEqual(helper.request(self.data() | {'operation': 'software.upgrade', 'packages': ['jq']})['packages'], ['jq'])
+        for packages in (['node'], ['mongodb'], ['google-chrome'], ['postgresql'], ['mysql'], ['mariadb'], ['php', 'jq'], []):
+            with self.subTest(packages=packages), self.assertRaises(helper.Refused):
+                helper.request(self.data() | {'operation': 'software.upgrade', 'packages': packages})
+
+    def test_upgrade_plan_allows_same_line_and_refuses_removals_or_other_packages(self):
+        entry = helper.catalog()['php']
+        text = 'Inst php8.4-common [8.4.20-1] (8.4.27-1 Ubuntu [amd64])\nInst php8.4-fpm [8.4.20-1] (8.4.27-1 Ubuntu [amd64])'
+        self.assertEqual(helper.upgrade_plan(text, entry), {'php8.4-common': '8.4.27-1', 'php8.4-fpm': '8.4.27-1'})
+        for sample in ('Remv php8.3-fpm [8.3.1]', 'Inst libc6 [2.39] (2.40 Ubuntu [amd64])', 'Inst nginx [1.24] (1.26 Ubuntu [amd64])', 'Inst php8.4-fpm (bad;id Ubuntu)'):
+            with self.subTest(sample=sample), self.assertRaises(helper.Refused):
+                helper.upgrade_plan(sample, entry)
+        self.assertEqual(helper.upgrade_plan('0 upgraded, 0 newly installed, 0 to remove.', entry), {})
+
+    def test_upgrade_pins_the_same_line_and_restores_the_php_alternative(self):
+        with tempfile.TemporaryDirectory() as name:
+            data = self.data() | {'operation': 'software.upgrade', 'packages': ['php']}
+            (Path(name)/data['execution_id']).mkdir()
+            commands = []
+            preview = 'Inst php8.4-common [8.4.20-1] (8.4.27-1 Ubuntu [amd64])\nInst php8.4-fpm [8.4.20-1] (8.4.27-1 Ubuntu [amd64])'
+            def command(args, timeout=30):
+                commands.append(args)
+                return preview if '--simulate' in args else ''
+            with patch.object(helper, 'ROOT', Path(name)), patch.object(helper, 'installed', side_effect=['8.4.20-1', '8.4.27-1']), patch.object(helper, 'run', side_effect=command), patch.object(helper, 'authorize'), patch.object(helper, 'verify_tool'), patch.object(helper, 'php_alternative', side_effect=['/usr/bin/php8.4', '/usr/bin/php8.5', '/usr/bin/php8.4']):
+                result = helper.upgrade('php', data)
+            self.assertTrue(result['changed'])
+            self.assertEqual(result['version'], '8.4.27-1')
+            self.assertEqual(result['executable_path'], '/usr/bin/php8.4')
+            self.assertEqual(commands[0][:2], ['/usr/bin/apt-get', 'update'])
+            apply = commands[-2]
+            self.assertIn('--only-upgrade', apply)
+            self.assertIn('--no-remove', apply)
+            self.assertNotIn('--no-upgrade', apply)
+            self.assertIn('php8.4-fpm=8.4.27-1', apply)
+            self.assertIn('php8.4-common=8.4.27-1', apply)
+            self.assertEqual(commands[-1], ['/usr/bin/update-alternatives', '--set', 'php', '/usr/bin/php8.4'])
+
+    def test_upgrade_of_the_current_package_does_not_apply_apt_changes(self):
+        with tempfile.TemporaryDirectory() as name:
+            data = self.data() | {'operation': 'software.upgrade', 'packages': ['jq']}
+            commands = []
+            def command(args, timeout=30):
+                commands.append(args)
+                return ''
+            with patch.object(helper, 'ROOT', Path(name)), patch.object(helper, 'installed', return_value='1.7'), patch.object(helper, 'run', side_effect=command), patch.object(helper, 'verify_tool'):
+                self.assertFalse(helper.upgrade('jq', data)['changed'])
+            self.assertTrue(all('--only-upgrade' not in args or '--simulate' in args for args in commands))
+            self.assertFalse(any(args[0] == '/usr/bin/apt-get' and 'install' in args and '--simulate' not in args and '--download-only' not in args for args in commands))
+
+    def test_php_alternative_restore_refuses_a_non_php_target(self):
+        with patch.object(helper, 'run') as command:
+            with self.assertRaises(helper.Refused):
+                helper.restore_php_alternative('/tmp/php')
+            command.assert_not_called()
+            with patch.object(helper, 'php_alternative', return_value='/usr/bin/php8.4'):
+                helper.restore_php_alternative('/usr/bin/php8.4')
+            command.assert_not_called()
+
     def test_archive_traversal_links_devices_and_duplicate_members_are_rejected(self):
         for unsafe in ('../escape', 'root/../../escape', '/root/escape', 'root//escape'):
             with tempfile.TemporaryDirectory() as name:

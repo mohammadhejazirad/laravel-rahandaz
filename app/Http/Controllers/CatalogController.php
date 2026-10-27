@@ -12,6 +12,7 @@ use App\Http\HostMutation;
 use App\Http\PaginatorPayload;
 use App\Models\LocalHost;
 use App\Models\PackageDefinition;
+use App\Models\Workspace;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -54,15 +55,7 @@ class CatalogController extends Controller
                 'meta' => PaginatorPayload::meta($packages),
             ],
             'install_available' => false,
-            'software' => [
-                'request_key' => (string) Str::uuid(),
-                'available' => $host !== null && app(SoftwareCapability::class)->available(),
-                'can_request' => app(OperationAccess::class)->managesWorkspace($request->user(), $workspace->id),
-                'catalog' => app(SoftwareCapability::class)->catalog(),
-                'categories' => app(SoftwareCapability::class)->categories(),
-                'installed' => app(SoftwareCapability::class)->installed($workspace),
-                'job' => app(SoftwareCapability::class)->payload(app(SoftwareCapability::class)->latest($workspace)),
-            ],
+            'software' => $this->softwareState($request, $workspace, $host, ['software.install', 'setup.initialize']),
             'chrome' => [
                 'host_uuid' => $host?->uuid,
                 'can_request' => $host !== null && app(OperationAccess::class)->managesWorkspace($request->user(), $workspace->id),
@@ -70,6 +63,16 @@ class CatalogController extends Controller
                 'job' => $job === null ? null : ['uuid' => $job->uuid, 'status' => $job->status->value, 'error_code' => $job->error_code],
                 'executable_path' => $job === null ? null : $chrome->verifiedPath($job),
             ],
+        ]);
+    }
+
+    public function installed(Request $request): Response
+    {
+        $workspace = CurrentWorkspace::get($request);
+        $host = LocalHost::query()->forWorkspace($workspace->id)->where('slug', 'local-host')->first();
+
+        return Inertia::render('catalog/installed', [
+            'software' => $this->softwareState($request, $workspace, $host, ['software.upgrade']),
         ]);
     }
 
@@ -84,6 +87,18 @@ class CatalogController extends Controller
         return redirect()->route('catalog.index');
     }
 
+    public function upgradeSoftware(Request $request, SoftwareCapability $software): RedirectResponse
+    {
+        $workspace = CurrentWorkspace::get($request);
+        abort_unless(app(OperationAccess::class)->managesWorkspace($request->user(), $workspace->id), 403);
+        // The browser sends a catalog key only. Version strings, package names and URLs are not accepted.
+        $data = $request->validate(['package' => ['required', 'string'], 'idempotency_key' => ['required', 'uuid']]);
+        $host = LocalHost::query()->forWorkspace($workspace->id)->where('slug', 'local-host')->firstOrFail();
+        $software->request($workspace, $host, $request->user(), [$data['package']], $data['idempotency_key'], 'software.upgrade');
+
+        return redirect()->route('catalog.installed');
+    }
+
     public function installChrome(Request $request, LocalHost $localHost, ChromeInstallation $chrome): RedirectResponse
     {
         $workspace = CurrentWorkspace::get($request);
@@ -93,5 +108,21 @@ class CatalogController extends Controller
         $chrome->request($workspace, $localHost, $request->user(), $request->attributes->get('request_id'), $request->ip());
 
         return redirect()->route('catalog.index')->with('status', HostMutation::queuedMessage());
+    }
+
+    private function softwareState(Request $request, Workspace $workspace, ?LocalHost $host, array $jobTypes): array
+    {
+        $software = app(SoftwareCapability::class);
+
+        return [
+            'request_key' => (string) Str::uuid(),
+            'available' => $host !== null && $software->available(),
+            'can_request' => app(OperationAccess::class)->managesWorkspace($request->user(), $workspace->id),
+            'catalog' => $software->browserCatalog(),
+            'categories' => $software->categories(),
+            'installed' => $software->installed($workspace),
+            'job' => $software->payload($software->latest($workspace, $jobTypes)),
+            'active' => $software->payload($software->active($workspace)),
+        ];
     }
 }

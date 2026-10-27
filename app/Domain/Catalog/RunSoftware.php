@@ -54,7 +54,8 @@ final class RunSoftware
                     if ($job->status !== JobStatus::Running) {
                         $job->forceFill(['status' => JobStatus::Running, 'attempt' => $job->attempt + 1, 'started_at' => $job->started_at ?? now()])->save();
                         app(JobLifecycleRecorder::class)->record($job, 'started');
-                        app(JobLogger::class)->append($job, 'info', 'درخواست نصب '.count($input['packages']).' بسته: '.implode(', ', $input['packages']).'. موفقیت پس از بررسی هر بسته اعلام می‌شود.', 'gate');
+                        $verb = $job->type === 'software.upgrade' ? 'به‌روزرسانی' : 'نصب';
+                        app(JobLogger::class)->append($job, 'info', 'درخواست '.$verb.' '.count($input['packages']).' بسته: '.implode(', ', $input['packages']).'. موفقیت پس از بررسی هر بسته اعلام می‌شود.', 'gate');
                     }
                     $job->forceFill(['heartbeat_at' => now()])->save();
                     // Start is idempotent: a redelivered message reconciles the root journal.
@@ -118,7 +119,7 @@ final class RunSoftware
                     $status = in_array($package['status'], ['succeeded', 'failed', 'skipped'], true) ? $package['status'] : 'skipped';
                     $counts[$status]++;
                     $description = match ($status) {
-                        'succeeded' => ($package['changed'] ? 'نصب و بررسی شد؛ نسخه ' : 'از قبل نصب بود و بررسی شد؛ نسخه ').$package['version'],
+                        'succeeded' => $this->successLine($job->type, (bool) ($package['changed'] ?? false), (string) ($package['version'] ?? '')),
                         'failed' => 'ناموفق — '.$capability->errorMessage($package['error_code'] ?? $error ?? 'SOFTWARE_INSTALL_FAILED'),
                         default => 'اجرا نشد — '.$capability->errorMessage($package['error_code'] ?? $error ?? 'SOFTWARE_INSTALL_FAILED'),
                     };
@@ -126,12 +127,16 @@ final class RunSoftware
                 }
                 $summary = 'پایان بررسی '.$counts['total'].' بسته؛ موفق: '.$counts['succeeded'].'، ناموفق: '.$counts['failed'].'، اجرا‌نشده: '.$counts['skipped'].'.';
                 app(JobLogger::class)->append($job, $success ? 'info' : 'error', $summary.($error === null ? '' : ' '.$capability->errorMessage($error)), 'gate');
-                app(AuditRecorder::class)->record($job->workspace, $job->actor, $success ? 'software.install.verified' : 'software.install.failed', 'operation_job', $job->uuid, $success ? AuditResult::Success : AuditResult::Failure, ['packages' => $job->plan['input']['packages'] ?? [], 'verified' => $success, 'error_code' => $job->error_code, 'counts' => $counts], operationJob: $job);
+                $audit = $job->type === 'software.upgrade' ? 'software.upgrade' : 'software.install';
+                app(AuditRecorder::class)->record($job->workspace, $job->actor, $success ? $audit.'.verified' : $audit.'.failed', 'operation_job', $job->uuid, $success ? AuditResult::Success : AuditResult::Failure, ['packages' => $job->plan['input']['packages'] ?? [], 'verified' => $success, 'error_code' => $job->error_code, 'counts' => $counts], operationJob: $job);
                 if ($job->actor !== null && $job->actor->memberships()->where('workspace_id', $job->workspace_id)->exists()) {
                     PanelNotification::query()->firstOrCreate(['event_key' => 'operation:'.$job->uuid.':terminal'], [
                         'workspace_id' => $job->workspace_id, 'recipient_id' => $job->actor_id, 'operation_job_id' => $job->id,
                         'type' => 'software.'.($success ? 'succeeded' : 'failed'), 'level' => $success ? 'success' : 'danger',
-                        'title' => $success ? 'نصب و بررسی نرم‌افزار پایان یافت' : 'نصب نرم‌افزار کامل نشد', 'body' => $summary,
+                        'title' => $success
+                            ? ($job->type === 'software.upgrade' ? 'به‌روزرسانی و بررسی نرم‌افزار پایان یافت' : 'نصب و بررسی نرم‌افزار پایان یافت')
+                            : ($job->type === 'software.upgrade' ? 'به‌روزرسانی نرم‌افزار کامل نشد' : 'نصب نرم‌افزار کامل نشد'),
+                        'body' => $summary,
                         'action_path' => rtrim((string) config('rahandaz.base_path'), '/').'/jobs/'.$job->uuid,
                     ]);
                 }
@@ -139,6 +144,15 @@ final class RunSoftware
         } finally {
             DB::select('select pg_advisory_unlock(hashtextextended(?, 0))', ['software.worker']);
         }
+    }
+
+    private function successLine(string $type, bool $changed, string $version): string
+    {
+        if ($type === 'software.upgrade') {
+            return ($changed ? 'به‌روزرسانی و بررسی شد؛ نسخه ' : 'آخرین نسخهٔ در دسترس مخزن همین نسخه بود؛ نسخه ').$version;
+        }
+
+        return ($changed ? 'نصب و بررسی شد؛ نسخه ' : 'از قبل نصب بود و بررسی شد؛ نسخه ').$version;
     }
 
     private function verified(array $output, OperationJob $job, array $packages): bool
