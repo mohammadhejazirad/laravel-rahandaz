@@ -28,18 +28,21 @@ final class ChromeInstallation
             // Serialize clicks from different sessions and actors on this host.
             LocalHost::query()->whereKey($host->id)->lockForUpdate()->firstOrFail();
             $latest = $this->latest($workspace, $host);
-            if ($latest !== null && (! $latest->status->isTerminal() || $this->verifiedPath($latest) !== null)) {
+            if ($latest !== null && ! $latest->status->isTerminal()) {
                 return $latest;
             }
 
             $pin = parse_ini_file(base_path('installer/manifests/chrome-mirror.v1'), false, INI_SCANNER_RAW);
-            abort_unless(is_array($pin) && ($pin['schema'] ?? null) === '1', 503);
+            abort_unless(is_array($pin) && ($pin['schema'] ?? null) === '2', 503);
+            abort_unless(($pin['repo'] ?? null) === 'mohammadhejazirad/install-google-chrome-server', 503);
+            abort_unless(($pin['branch'] ?? null) === 'main' && ($pin['platform'] ?? null) === 'linux64', 503);
+            abort_unless(! isset($pin['version']) && ! isset($pin['sha256']) && ! isset($pin['commit']), 503);
             $job = app(RecordOperation::class)->record(new RecordOperationData(
                 workspaceId: $workspace->id,
                 actorId: $actor->id,
                 type: 'package.install',
                 idempotencyKey: 'chrome:'.$host->uuid.':'.($latest?->uuid ?? 'initial'),
-                plan: ['package' => 'google-chrome', 'operation' => 'package.install', 'contract_version' => '1', 'host_uuid' => $host->uuid, 'version' => $pin['version'], 'sha256' => $pin['sha256']],
+                plan: ['package' => 'google-chrome', 'operation' => 'package.install', 'contract_version' => '1', 'host_uuid' => $host->uuid, 'channel' => 'latest_stable', 'repo' => $pin['repo'], 'branch' => $pin['branch'], 'platform' => $pin['platform']],
                 mutatesHost: true,
                 resourceType: 'local_host',
                 resourceId: $host->id,
@@ -53,10 +56,28 @@ final class ChromeInstallation
 
     public function latest(Workspace $workspace, LocalHost $host): ?OperationJob
     {
+        return $this->jobs($workspace, $host)->first();
+    }
+
+    /** A newer request must not hide a browser that already passed render verification. */
+    public function verifiedInstallation(Workspace $workspace, LocalHost $host): ?string
+    {
+        foreach ($this->jobs($workspace, $host)->limit(20)->get() as $job) {
+            $path = $this->verifiedPath($job);
+            if ($path !== null) {
+                return $path;
+            }
+        }
+
+        return null;
+    }
+
+    private function jobs(Workspace $workspace, LocalHost $host)
+    {
         return OperationJob::query()->where('workspace_id', $workspace->id)
             ->where('resource_type', 'local_host')->where('resource_id', $host->id)
             ->where('type', 'package.install')->where('plan->input->package', 'google-chrome')
-            ->with('steps')->latest('id')->first();
+            ->with('steps')->latest('id');
     }
 
     /** Only a completed worker verification may expose an executable path. Never use the requested plan. */
@@ -71,10 +92,20 @@ final class ChromeInstallation
             || ($evidence['schema_version'] ?? null) !== '1'
             || ($evidence['package'] ?? null) !== 'google-chrome'
             || ($evidence['render_verified'] ?? null) !== true
-            || ($evidence['version'] ?? null) !== ($job->plan['input']['version'] ?? null)
-            || ($evidence['sha256'] ?? null) !== ($job->plan['input']['sha256'] ?? null)
             || preg_match('/^[a-f0-9]{64}$/D', (string) ($evidence['sha256'] ?? '')) !== 1
             || preg_match('/^[0-9]+(?:\.[0-9]+){3}$/D', (string) ($evidence['version'] ?? '')) !== 1) {
+            return null;
+        }
+        $plannedVersion = $job->plan['input']['version'] ?? null;
+        $plannedSha = $job->plan['input']['sha256'] ?? null;
+        if ($plannedVersion !== null || $plannedSha !== null) {
+            if ($plannedVersion !== $evidence['version'] || $plannedSha !== $evidence['sha256']) {
+                return null;
+            }
+        } elseif (($job->plan['input']['channel'] ?? null) !== 'latest_stable'
+            || ($job->plan['input']['repo'] ?? null) !== 'mohammadhejazirad/install-google-chrome-server'
+            || ($job->plan['input']['branch'] ?? null) !== 'main'
+            || ($job->plan['input']['platform'] ?? null) !== 'linux64') {
             return null;
         }
         $path = '/opt/rahandaz/browsers/chrome/'.$evidence['version'].'/chrome-linux64/chrome';

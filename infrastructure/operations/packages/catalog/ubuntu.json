@@ -8,7 +8,7 @@
     "26.04": {"codename": "resolute", "compatibility": "untested"}
   },
   "packages": {
-    "google-chrome": {"apt": null, "unit": null, "optional": true, "note": "Project browser only. Installer never installs it. Pinned helper installation and rendering verification require VM certification."},
+    "google-chrome": {"apt": null, "unit": null, "optional": true, "note": "Project browser only. Installer never installs it. The helper reads latest_stable from the pinned GitHub mirror at install time and checks that zip SHA-256. Rendering verification requires VM certification."},
     "nginx": {"apt": "nginx", "unit": "nginx", "reload": true},
     "postgresql": {"apt": "postgresql", "unit": "postgresql", "reload": true},
     "mysql": {"apt": "mysql-server", "unit": "mysql", "reload": false, "conflicts": ["mariadb"]},

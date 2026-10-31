@@ -76,7 +76,10 @@ class SoftwareCapability
         if ($this->allowsUpgrade($entry)) {
             return null;
         }
-        if (in_array($entry['kind'] ?? '', ['archive', 'chrome'], true)) {
+        if (($entry['kind'] ?? '') === 'chrome') {
+            return 'هنگام نصب، آخرین نسخهٔ پایدار از مخزن آینه خوانده می‌شود و checksum همان نسخه بررسی می‌شود.';
+        }
+        if (($entry['kind'] ?? '') === 'archive') {
             return 'نسخهٔ این مورد در کاتالوگ امضاشده ثابت است.';
         }
 

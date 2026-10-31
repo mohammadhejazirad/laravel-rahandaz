@@ -61,7 +61,7 @@ class CatalogController extends Controller
                 'can_request' => $host !== null && app(OperationAccess::class)->managesWorkspace($request->user(), $workspace->id),
                 'execution_available' => false,
                 'job' => $job === null ? null : ['uuid' => $job->uuid, 'status' => $job->status->value, 'error_code' => $job->error_code],
-                'executable_path' => $job === null ? null : $chrome->verifiedPath($job),
+                'executable_path' => $host === null ? null : $chrome->verifiedInstallation($workspace, $host),
             ],
         ]);
     }

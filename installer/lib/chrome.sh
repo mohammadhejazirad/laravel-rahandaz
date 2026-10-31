@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Chrome for Testing from the pinned GitHub mirror. The zip checksum is the trust check. Google's apt repository is not used.
+# Chrome for Testing mirror identity. The installer never downloads Chrome.
+# The panel helper reads latest_stable from this repository at install time.
 
 if [[ -n "${INSTALLER_LIB_CHROME:-}" ]]; then
     return 0
@@ -21,38 +22,42 @@ installer_chrome_pin_get() {
 }
 
 installer_chrome_pin_ok() {
-    local commit version sha parts
-    commit="$(installer_chrome_pin_get commit)" || return 1
-    version="$(installer_chrome_pin_get version)" || return 1
-    sha="$(installer_chrome_pin_get sha256)" || return 1
-    parts="$(installer_chrome_pin_get parts)" || return 1
-    [[ "$commit" =~ ^[0-9a-f]{40}$ ]] || return 1
-    [[ "$version" =~ ^[0-9]+(\.[0-9]+){3}$ ]] || return 1
-    [[ "$sha" =~ ^[0-9a-f]{64}$ ]] || return 1
-    [[ "$parts" =~ ^[1-9][0-9]*$ ]] || return 1
-    [[ "$(installer_chrome_pin_get platform)" == "linux64" ]] || return 1
-    [[ "$(installer_chrome_pin_get repo)" == "mohammadhejazirad/install-googleCrome-server" ]] || return 1
+    local schema repo branch platform
+    schema="$(installer_chrome_pin_get schema)" || return 1
+    repo="$(installer_chrome_pin_get repo)" || return 1
+    branch="$(installer_chrome_pin_get branch)" || return 1
+    platform="$(installer_chrome_pin_get platform)" || return 1
+    [[ "$schema" == "2" ]] || return 1
+    [[ "$repo" == "mohammadhejazirad/install-google-chrome-server" ]] || return 1
+    [[ "$branch" == "main" ]] || return 1
+    [[ "$platform" == "linux64" ]] || return 1
+    # Version, commit, and checksum move with the mirror manifest.
+    [[ -z "$(installer_chrome_pin_get version)" ]] || return 1
+    [[ -z "$(installer_chrome_pin_get commit)" ]] || return 1
+    [[ -z "$(installer_chrome_pin_get sha256)" ]] || return 1
+    [[ -z "$(installer_chrome_pin_get parts)" ]] || return 1
 }
 
 installer_chrome_manifest_ok() {
     local manifest="$1"
     installer_chrome_pin_ok || return 1
-    python3 - "$manifest" "$(installer_chrome_pin_get version)" "$(installer_chrome_pin_get sha256)" "$(installer_chrome_pin_get parts)" <<'PY'
+    python3 - "$manifest" <<'PY'
 import json, re, sys
-manifest, version, digest, parts = sys.argv[1:]
-data = json.load(open(manifest, encoding="utf-8"))
-if str(data.get("latest_stable")) != version:
+data = json.load(open(sys.argv[1], encoding="utf-8"))
+version = str(data.get("latest_stable") or "")
+if not re.fullmatch(r"[0-9]+(?:\.[0-9]+){3}", version):
     raise SystemExit(1)
 builds = [item for item in data.get("builds", []) if item.get("version") == version and item.get("platform") == "linux64"]
 if len(builds) != 1:
     raise SystemExit(1)
 build = builds[0]
-if str(build.get("sha256")) != digest or build.get("split") is not True:
+if not re.fullmatch(r"[0-9a-f]{64}", str(build.get("sha256") or "")) or build.get("split") is not True:
     raise SystemExit(1)
 names = build.get("parts")
-if not isinstance(names, list) or len(names) != int(parts):
+if not isinstance(names, list) or not names or len(names) > 20:
     raise SystemExit(1)
-if any(not re.fullmatch(r"chrome\.zip\.part-[0-9]{3}", str(name)) for name in names):
+expected = [f"chrome.zip.part-{index:03d}" for index in range(len(names))]
+if names != expected:
     raise SystemExit(1)
 PY
 }

@@ -27,6 +27,9 @@ import urllib.error
 ROOT = Path('/var/lib/rahandaz/software')
 RELEASE = Path('/var/lib/rahandaz/current')
 UUID = r'[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}'
+CHROME_MIRROR = 'mohammadhejazirad/install-google-chrome-server'
+CHROME_PREFIX = 'https://raw.githubusercontent.com/'+CHROME_MIRROR+'/main/'
+CHROME_VERSION = re.compile(r'^[0-9]+(?:\.[0-9]+){3}$')
 ENV = {'PATH': '/usr/sbin:/usr/bin:/sbin:/bin', 'LANG': 'C', 'LC_ALL': 'C',
        'DEBIAN_FRONTEND': 'noninteractive', 'HOME': '/root'}
 
@@ -210,8 +213,8 @@ def verify_optional_service(unit):
         raise Refused('PACKAGE_SERVICE_FAILED') from None
 
 
-def verify_tool(package):
-    entry = catalog()[package]
+def verify_tool(package, entry=None):
+    entry = catalog()[package] if entry is None else entry
     binary = trusted_binary(entry['executable_path'])
     output = run([binary, *entry['version_args']], 15, service=True).strip()
     if not output:
@@ -435,6 +438,67 @@ def os_version():
     return values.get('VERSION_ID', '').strip('"')
 
 
+def https_bytes(url, limit):
+    if not url.startswith(CHROME_PREFIX):
+        raise Refused('DOWNLOAD_FAILED')
+    class Guard(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl):
+            if not newurl.startswith(CHROME_PREFIX):
+                raise Refused('DOWNLOAD_FAILED')
+            return super().redirect_request(req, fp, code, msg, headers, newurl)
+    opener = urllib.request.build_opener(Guard())
+    try:
+        with opener.open(url, timeout=30) as source:
+            payload = source.read(limit+1)
+    except urllib.error.HTTPError as error:
+        raise Refused('DOWNLOAD_ACCESS_DENIED' if error.code in (401, 403) else 'DOWNLOAD_RATE_LIMITED' if error.code == 429 else 'DOWNLOAD_FAILED') from None
+    except (OSError, ValueError):
+        raise Refused('DOWNLOAD_FAILED') from None
+    if len(payload) > limit:
+        raise Refused('DOWNLOAD_FAILED')
+    return payload
+
+
+def resolve_chrome(entry):
+    # The catalog names the mirror. latest_stable and its zip hash come from that mirror at install time.
+    if entry.get('repo') != CHROME_MIRROR or entry.get('branch') != 'main' or entry.get('platform') != 'linux64' or entry.get('channel') != 'latest_stable':
+        raise Refused('PACKAGE_NOT_ALLOWED')
+    if entry.get('archive_root') != 'chrome-linux64' or entry.get('format') != 'zip':
+        raise Refused('PACKAGE_NOT_ALLOWED')
+    try:
+        manifest = json.loads(https_bytes(CHROME_PREFIX+'manifest.json', 65536))
+    except ValueError:
+        raise Refused('PACKAGE_VERSION_UNAVAILABLE') from None
+    if not isinstance(manifest, dict) or manifest.get('schema') != 1:
+        raise Refused('PACKAGE_VERSION_UNAVAILABLE')
+    version = manifest.get('latest_stable')
+    if not isinstance(version, str) or not CHROME_VERSION.fullmatch(version):
+        raise Refused('PACKAGE_VERSION_UNAVAILABLE')
+    builds = [item for item in manifest.get('builds', []) if isinstance(item, dict) and item.get('version') == version and item.get('platform') == 'linux64']
+    if len(builds) != 1:
+        raise Refused('PACKAGE_VERSION_UNAVAILABLE')
+    build = builds[0]
+    digest = build.get('sha256')
+    parts = build.get('parts')
+    if build.get('split') is not True or not isinstance(digest, str) or not re.fullmatch(r'[0-9a-f]{64}', digest):
+        raise Refused('CHECKSUM_MISMATCH')
+    if not isinstance(parts, list) or not 1 <= len(parts) <= 20:
+        raise Refused('ARCHIVE_UNSAFE')
+    expected = ['chrome.zip.part-'+str(index).zfill(3) for index in range(len(parts))]
+    if parts != expected:
+        raise Refused('ARCHIVE_UNSAFE')
+    # source_url points at Google storage and is not a download location.
+    root = '/opt/rahandaz/browsers/chrome/'+version+'/chrome-linux64'
+    resolved = dict(entry)
+    resolved['version'] = version
+    resolved['sha256'] = digest
+    resolved['parts'] = len(parts)
+    resolved['base_url'] = CHROME_PREFIX+'chrome/'+version+'/linux64/'
+    resolved['destination'] = root
+    resolved['executable_path'] = root+'/chrome'
+    return resolved
+
+
 def download_archive_once(entry, output):
     # URLs and hashes are exclusively from the root-owned signed catalog.
     urls = ([entry['base_url']+'chrome.zip.part-'+str(i).zfill(3) for i in range(entry['parts'])]
@@ -553,6 +617,26 @@ def safe_extract(archive, destination, entry):
             raise Refused('ARCHIVE_UNSAFE')
 
 
+def chrome_profile_text(binary):
+    if not re.fullmatch(r'/opt/rahandaz/browsers/chrome/[0-9]+(?:\.[0-9]+){3}/chrome-linux64/chrome', binary):
+        raise Refused('UNSAFE_DESTINATION')
+    return '# rahandaz-managed: chrome-sandbox-v1\nabi <abi/4.0>,\ninclude <tunables/global>\nprofile rahandaz-chrome '+binary+' flags=(unconfined) {\n  userns,\n}\n'
+
+
+def write_root_text(path, text):
+    fd, name = tempfile.mkstemp(dir=path.parent)
+    try:
+        with os.fdopen(fd, 'w') as output:
+            output.write(text)
+            output.flush()
+            os.fsync(output.fileno())
+        os.chmod(name, 0o644)
+        os.replace(name, path)
+    finally:
+        if os.path.exists(name):
+            os.unlink(name)
+
+
 def chrome_sandbox_policy(binary, data):
     restriction = Path('/proc/sys/kernel/apparmor_restrict_unprivileged_userns')
     if not restriction.exists() or restriction.read_text().strip() != '1':
@@ -560,14 +644,18 @@ def chrome_sandbox_policy(binary, data):
     if os_version() != '24.04' or not Path('/usr/sbin/apparmor_parser').is_file():
         raise Refused('SANDBOX_UNAVAILABLE')
     # Ubuntu restricts user namespaces for unprofiled applications. Grant only this
-    # immutable, pinned executable the same userns allowance as packaged browsers.
+    # Rahandaz-managed executable the same userns allowance as packaged browsers.
     profile = Path('/etc/apparmor.d/rahandaz-chrome')
-    text = '# rahandaz-managed: chrome-sandbox-v1\nabi <abi/4.0>,\ninclude <tunables/global>\nprofile rahandaz-chrome '+binary+' flags=(unconfined) {\n  userns,\n}\n'
+    text = chrome_profile_text(binary)
     trusted(profile.parent)
     if profile.exists() or profile.is_symlink():
         trusted(profile)
-        if profile.read_text() != text:
-            raise Refused('SANDBOX_POLICY_CONFLICT')
+        current = profile.read_text()
+        if current != text:
+            if not current.startswith('# rahandaz-managed: chrome-sandbox-v1\n'):
+                raise Refused('SANDBOX_POLICY_CONFLICT')
+            authorize(data)
+            write_root_text(profile, text)
     else:
         authorize(data)
         fd = os.open(profile, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o644)
@@ -652,6 +740,8 @@ def install_archive(package, data, progress):
     if platform.machine() != 'x86_64':
         raise Refused('ARCHITECTURE_UNAVAILABLE')
     entry = dict(catalog()[package])
+    if package == 'google-chrome':
+        entry = resolve_chrome(entry)
     if 'builds' in entry:
         build = entry['builds'].get(os_version())
         if build is None:
@@ -701,7 +791,7 @@ def install_archive(package, data, progress):
             os.rename(extracted, destination)
             changed = True
     progress('verification')
-    verify_tool(package)
+    verify_tool(package, entry)
     if package == 'google-chrome':
         chrome_sandbox_policy(entry['executable_path'], data)
         chrome_render(entry['executable_path'])

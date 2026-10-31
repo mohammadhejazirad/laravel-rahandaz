@@ -137,7 +137,14 @@ class ContractTests(unittest.TestCase):
     def test_setup_excludes_every_non_setup_package_and_catalog_has_categories(self):
         for key, entry in helper.catalog().items():
             self.assertIn('category', entry)
-            self.assertTrue(entry['executable_path'].startswith('/'))
+            if key == 'google-chrome':
+                self.assertEqual(entry['channel'], 'latest_stable')
+                self.assertEqual(entry['repo'], 'mohammadhejazirad/install-google-chrome-server')
+                self.assertNotIn('version', entry)
+                self.assertNotIn('executable_path', entry)
+                self.assertNotIn('sha256', entry)
+            else:
+                self.assertTrue(entry['executable_path'].startswith('/'))
             if not entry['setup']:
                 with self.assertRaises(helper.Refused):
                     helper.request(self.data() | {'operation': 'setup.initialize', 'packages': [key]})
@@ -236,6 +243,37 @@ class ContractTests(unittest.TestCase):
             self.assertEqual((destination/'root/bin').stat().st_mode & 0o7777, 0o755)
             self.assertEqual((destination/'root/bin/node').stat().st_mode & 0o7777, 0o755)
             self.assertEqual((destination/'root/bin/node-link').read_bytes(), b'bin')
+
+    def test_chrome_resolves_the_mirror_latest_and_ignores_the_upstream_url(self):
+        digest = 'c'*64
+        manifest = {'schema': 1, 'latest_stable': '156.0.8078.73', 'builds': [{
+            'version': '156.0.8078.73', 'platform': 'linux64', 'split': True, 'sha256': digest,
+            'source_url': 'https://storage.googleapis.com/chrome-for-testing-public/chrome.zip',
+            'parts': ['chrome.zip.part-000', 'chrome.zip.part-001', 'chrome.zip.part-002'],
+        }]}
+        with patch.object(helper, 'https_bytes', return_value=json.dumps(manifest).encode()) as fetch:
+            resolved = helper.resolve_chrome(helper.catalog()['google-chrome'])
+        self.assertEqual(fetch.call_args.args[0], 'https://raw.githubusercontent.com/mohammadhejazirad/install-google-chrome-server/main/manifest.json')
+        self.assertEqual(resolved['version'], '156.0.8078.73')
+        self.assertEqual(resolved['sha256'], digest)
+        self.assertEqual(resolved['parts'], 3)
+        self.assertEqual(resolved['base_url'], 'https://raw.githubusercontent.com/mohammadhejazirad/install-google-chrome-server/main/chrome/156.0.8078.73/linux64/')
+        self.assertEqual(resolved['executable_path'], '/opt/rahandaz/browsers/chrome/156.0.8078.73/chrome-linux64/chrome')
+        self.assertNotIn('storage.googleapis.com', resolved['base_url'])
+
+    def test_chrome_rejects_another_host_and_unsafe_manifest_parts(self):
+        with self.assertRaises(helper.Refused):
+            helper.https_bytes('https://storage.googleapis.com/chrome-for-testing-public/chrome.zip', 100)
+        manifest = {'schema': 1, 'latest_stable': '1.2.3.4', 'builds': [{
+            'version': '1.2.3.4', 'platform': 'linux64', 'split': True, 'sha256': 'a'*64,
+            'parts': ['chrome.zip.part-000', '../evil'],
+        }]}
+        with patch.object(helper, 'https_bytes', return_value=json.dumps(manifest).encode()), self.assertRaises(helper.Refused):
+            helper.resolve_chrome(helper.catalog()['google-chrome'])
+        moved = dict(manifest)
+        moved['latest_stable'] = '9.9.9.9'
+        with patch.object(helper, 'https_bytes', return_value=json.dumps(moved).encode()), self.assertRaises(helper.Refused):
+            helper.resolve_chrome(helper.catalog()['google-chrome'])
 
     def test_download_checks_combined_hash_and_refuses_non_https_without_network(self):
         with tempfile.TemporaryDirectory() as name:

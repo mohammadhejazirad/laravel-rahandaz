@@ -32,6 +32,10 @@ class ChromeInstallationTest extends TestCase
         $this->assertDatabaseHas('audit_events', ['action' => 'chrome.install_requested']);
         $job = OperationJob::query()->sole();
         $this->assertSame('google-chrome', $job->plan['input']['package']);
+        $this->assertSame('latest_stable', $job->plan['input']['channel']);
+        $this->assertSame('mohammadhejazirad/install-google-chrome-server', $job->plan['input']['repo']);
+        $this->assertArrayNotHasKey('version', $job->plan['input']);
+        $this->assertArrayNotHasKey('sha256', $job->plan['input']);
         $this->assertArrayNotHasKey('command', $job->plan['input']);
         app(OperationRunner::class)->run($job->id);
         $this->assertSame(JobStatus::Failed, $job->fresh()->status);
@@ -64,12 +68,15 @@ class ChromeInstallationTest extends TestCase
         $job->forceFill(['status' => JobStatus::Succeeded, 'finished_at' => now()])->save();
         $this->assertNull($service->verifiedPath($job->fresh()));
         // Stored worker evidence fixture; this is not an actual browser installation.
-        $path = '/opt/rahandaz/browsers/chrome/158.0.8110.0/chrome-linux64/chrome';
+        $path = '/opt/rahandaz/browsers/chrome/1.2.3.4/chrome-linux64/chrome';
         $step = $job->steps()->create(['key' => 'browser.verify', 'status' => StepStatus::Succeeded,
             'timeout_seconds' => 120, 'attempt' => 1, 'finished_at' => now(),
-            'checkpoint' => ['schema_version' => '1', 'package' => 'google-chrome', 'version' => '158.0.8110.0',
-                'sha256' => $job->plan['input']['sha256'], 'render_verified' => true, 'executable_path' => $path]]);
+            'checkpoint' => ['schema_version' => '1', 'package' => 'google-chrome', 'version' => '1.2.3.4',
+                'sha256' => hash('sha256', 'fixture'), 'render_verified' => true, 'executable_path' => $path]]);
         $this->actingAs($owner)->get(route('catalog.index'))->assertInertia(fn (Assert $p) => $p->where('chrome.executable_path', $path));
+        $this->post(route('catalog.chrome.install', $host))->assertRedirect();
+        $this->assertDatabaseCount('operation_jobs', 2);
+        $this->get(route('catalog.index'))->assertInertia(fn (Assert $p) => $p->where('chrome.executable_path', $path));
         $step->forceFill(['checkpoint' => [...$step->checkpoint, 'executable_path' => '/tmp/fake']])->save();
         $this->assertNull($service->verifiedPath($job->fresh()));
         $step->forceFill(['checkpoint' => [...$step->checkpoint, 'executable_path' => $path, 'render_verified' => false]])->save();

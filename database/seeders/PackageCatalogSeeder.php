@@ -42,18 +42,19 @@ class PackageCatalogSeeder extends Seeder
             );
 
             if ($package['key'] === 'google-chrome') {
+                PackageVersion::query()->where('package_definition_id', $definition->id)->where('version', '!=', 'latest')->delete();
                 foreach (['jammy', 'noble'] as $codename) {
                     PackageVersion::query()->updateOrCreate(
                         [
                             'package_definition_id' => $definition->id,
-                            'version' => '158.0.8110.0',
+                            'version' => 'latest',
                             'os_codename' => $codename,
                             'architecture' => 'amd64',
                         ],
                         [
                             'source_kind' => 'upstream_tarball',
                             'lifecycle' => 'untested',
-                            'checksum_sha256' => '5deb7136a8a6cebc148929ed550b38218fc5c963f46a57121da64cd8c1cd0849',
+                            'checksum_sha256' => null,
                         ],
                     );
                 }

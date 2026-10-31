@@ -119,13 +119,18 @@ if installer_chrome_pin_ok; then
 else
     bad "chrome pin is well formed"
 fi
+if ! grep -q '^version=' "$(installer_chrome_pin_file)"; then
+    ok "chrome pin does not freeze a version"
+else
+    bad "chrome pin does not freeze a version"
+fi
 python3 - "$tmp/manifest.json" <<'PY'
 import json, pathlib, sys
 path = pathlib.Path(sys.argv[1])
 path.write_text(json.dumps({
-    "latest_stable": "158.0.8110.0",
+    "latest_stable": "1.2.3.4",
     "builds": [{
-        "version": "158.0.8110.0",
+        "version": "1.2.3.4",
         "platform": "linux64",
         "sha256": "5deb7136a8a6cebc148929ed550b38218fc5c963f46a57121da64cd8c1cd0849",
         "split": True,
@@ -134,21 +139,34 @@ path.write_text(json.dumps({
 }), encoding="utf-8")
 PY
 if installer_chrome_manifest_ok "${tmp}/manifest.json"; then
-    ok "pinned chrome manifest is accepted"
+    ok "current chrome manifest is accepted"
 else
-    bad "pinned chrome manifest is accepted"
+    bad "current chrome manifest is accepted"
 fi
 python3 - "$tmp/manifest.json" <<'PY'
 import json, pathlib, sys
 path = pathlib.Path(sys.argv[1])
 data = json.loads(path.read_text(encoding="utf-8"))
-data["builds"][0]["sha256"] = "0" * 64
+data["builds"][0]["sha256"] = "not-a-checksum"
 path.write_text(json.dumps(data), encoding="utf-8")
 PY
 if ! installer_chrome_manifest_ok "${tmp}/manifest.json"; then
-    ok "changed chrome checksum is rejected"
+    ok "malformed chrome checksum is rejected"
 else
-    bad "changed chrome checksum is rejected"
+    bad "malformed chrome checksum is rejected"
+fi
+python3 - "$tmp/manifest.json" <<'PY'
+import json, pathlib, sys
+path = pathlib.Path(sys.argv[1])
+data = json.loads(path.read_text(encoding="utf-8"))
+data["builds"][0]["sha256"] = "5deb7136a8a6cebc148929ed550b38218fc5c963f46a57121da64cd8c1cd0849"
+data["latest_stable"] = "9.9.9.9"
+path.write_text(json.dumps(data), encoding="utf-8")
+PY
+if ! installer_chrome_manifest_ok "${tmp}/manifest.json"; then
+    ok "chrome manifest whose latest build is missing is rejected"
+else
+    bad "chrome manifest whose latest build is missing is rejected"
 fi
 if ! grep -R -n -E 'dl\.google\.com|curl -k|trusted=yes' "${INSTALLER_HOME}/lib/chrome.sh"; then
     ok "chrome installer does not use Google apt or insecure TLS"
