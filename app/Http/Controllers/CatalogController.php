@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Domain\Access\OperationAccess;
+use App\Domain\Catalog\CatalogVersionChoice;
 use App\Domain\Catalog\ChromeInstallation;
+use App\Domain\Catalog\DatabaseInstallGuard;
 use App\Domain\Catalog\SoftwareCapability;
 use App\Domain\Catalog\SoftwareInventory;
 use App\Http\CurrentWorkspace;
@@ -81,9 +83,30 @@ class CatalogController extends Controller
     {
         $workspace = CurrentWorkspace::get($request);
         abort_unless(app(OperationAccess::class)->managesWorkspace($request->user(), $workspace->id), 403);
-        $data = $request->validate(['packages' => ['required', 'array', 'min:1', 'max:32'], 'packages.*' => ['string', 'distinct'], 'idempotency_key' => ['required', 'uuid']]);
+        $data = $request->validate([
+            'packages' => ['required', 'array', 'min:1', 'max:32'],
+            'packages.*' => ['string', 'distinct'],
+            'package_versions' => ['nullable', 'array', 'max:32'],
+            'package_versions.*' => ['string', 'max:16'],
+            'listen_port' => ['nullable', 'integer'],
+            'idempotency_key' => ['required', 'uuid'],
+        ]);
         $host = LocalHost::query()->forWorkspace($workspace->id)->where('slug', 'local-host')->firstOrFail();
-        $software->request($workspace, $host, $request->user(), $data['packages'], $data['idempotency_key']);
+        $versions = app(CatalogVersionChoice::class)->assert($software->catalog(), $data['packages'], $data['package_versions'] ?? []);
+        $observed = app(SoftwareInventory::class)->observe($software->catalog(), $software->installed($workspace));
+        $installed = [];
+        foreach (['mysql', 'mariadb'] as $key) {
+            if (($observed['packages'][$key]['state'] ?? '') === 'installed') {
+                $installed[] = $key;
+            }
+        }
+        $engine = app(DatabaseInstallGuard::class)->secondEngine($data['packages'], $installed);
+        $port = app(DatabaseInstallGuard::class)->assertPort($engine, $data['listen_port'] ?? null);
+        $extra = array_filter([
+            'package_versions' => $versions,
+            'listen_port' => $port === null ? null : ['engine' => $engine, 'port' => $port],
+        ]);
+        $software->request($workspace, $host, $request->user(), $data['packages'], $data['idempotency_key'], 'software.install', $extra);
 
         return redirect()->route('catalog.index');
     }

@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\AssignRequestId;
 use App\Http\Middleware\EnsureAccountActive;
+use App\Http\Middleware\EnsurePanelSection;
 use App\Http\Middleware\EnsurePasswordIsCurrent;
 use App\Http\Middleware\EnsureSetupComplete;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -34,6 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'password.current' => EnsurePasswordIsCurrent::class,
             'setup.complete' => EnsureSetupComplete::class,
+            'panel.section' => EnsurePanelSection::class,
             'throttle' => ThrottleByRoute::class,
         ]);
     })

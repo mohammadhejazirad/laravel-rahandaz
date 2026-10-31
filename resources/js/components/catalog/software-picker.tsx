@@ -12,8 +12,8 @@ export { ExecutablePath } from './executable-path';
 export { SoftwareProgress } from './software-progress';
 
 const defaultCategories: Record<string, string> = { web: 'وب‌سرورها', runtime: 'زبان‌ها و runtimeها', database: 'دیتابیس‌ها', cache: 'کش', utility: 'ابزارهای کاربردی', antivirus: 'آنتی‌ویروس‌ها', security: 'ابزارهای امنیتی', process: 'مدیریت پردازش' };
-export function SoftwarePicker({ catalog, categories = defaultCategories, selected, onChange, disabled, inventory, installed = [], initialCategory }: {
-    catalog: SoftwareState['catalog']; categories?: Record<string, string>; selected: string[]; onChange: (keys: string[]) => void; disabled?: boolean;
+export function SoftwarePicker({ catalog, categories = defaultCategories, selected, onChange, onPick, disabled, inventory, installed = [], initialCategory }: {
+    catalog: SoftwareState['catalog']; categories?: Record<string, string>; selected: string[]; onChange: (keys: string[]) => void; onPick?: (key: string, versionId: string) => void; disabled?: boolean;
     inventory?: SoftwareState['inventory']; installed?: SoftwarePackageResult[]; initialCategory?: string;
 }) {
     const id = useId();
@@ -32,7 +32,7 @@ export function SoftwarePicker({ catalog, categories = defaultCategories, select
         </div>
         <div className="relative max-w-md"><Search aria-hidden="true" className="pointer-events-none absolute start-3 top-10 size-4 text-muted" /><Input label="جست‌وجوی نرم‌افزار" id={`${id}-search`} value={search} onChange={event => setSearch(event.target.value)} className="ps-10" onKeyDown={event => { if (event.key === 'Enter') event.preventDefault(); }} placeholder="نام نرم‌افزار یا کاربرد آن…" /></div>
         <div id={`${id}-panel`} role="tabpanel" aria-labelledby={`${id}-tab-${category}`} tabIndex={0} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {rows.map(row => <SoftwareVersionCard key={row.product} items={row.items} selected={selected} onChange={onChange} disabled={disabled} inventory={inventory} installed={installed} />)}
+            {rows.map(row => <SoftwareVersionCard key={row.product} items={row.items} selected={selected} onChange={onChange} onPick={onPick} disabled={disabled} inventory={inventory} installed={installed} />)}
             {rows.length === 0 && <p className="col-span-full rounded-xl border border-dashed border-line p-8 text-center text-sm text-muted">نرم‌افزاری با این جست‌وجو پیدا نشد.</p>}
         </div>
     </div>;

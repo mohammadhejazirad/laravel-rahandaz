@@ -19,7 +19,7 @@ class PackageCatalogSeeder extends Seeder
             ['key' => 'nginx', 'display_name' => 'Nginx', 'service_kind' => 'web', 'control_plane_candidate' => true],
             ['key' => 'php', 'display_name' => 'PHP', 'service_kind' => 'runtime', 'control_plane_candidate' => false],
             ['key' => 'node', 'display_name' => 'Node.js', 'service_kind' => 'runtime', 'control_plane_candidate' => false],
-            ['key' => 'python', 'display_name' => 'Python', 'service_kind' => 'runtime', 'control_plane_candidate' => false],
+            ['key' => 'python', 'display_name' => 'Python3', 'service_kind' => 'runtime', 'control_plane_candidate' => false],
             ['key' => 'postgresql', 'display_name' => 'PostgreSQL', 'service_kind' => 'database', 'control_plane_candidate' => true],
             ['key' => 'redis', 'display_name' => 'Redis', 'service_kind' => 'cache', 'control_plane_candidate' => true],
             ['key' => 'mysql', 'display_name' => 'MySQL', 'service_kind' => 'database', 'control_plane_candidate' => false],

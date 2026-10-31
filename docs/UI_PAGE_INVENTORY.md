@@ -21,7 +21,8 @@
 | `/dashboard/` | `GET /rahandaz/dashboard` | `pages/dashboard/index.tsx` | App | شمارش واقعی job، پروژه، سرور و نمونه متریک، به‌علاوهٔ کارت موقعیت IP. نمودار نیست |
 | `/servers/` | `GET /rahandaz/servers` | `pages/servers/index.tsx` | App | فهرست `local_hosts` همان workspace |
 | `/servers/<uuid>/overview/` | `GET /rahandaz/servers/{uuid}` و `POST /rahandaz/servers/{uuid}/services` | `pages/servers/show.tsx` | App | فیلد ذخیره‌شده، کارت موقعیت IP، و درخواست وضعیت/شروع/ریست سرویس‌های فهرست‌شده. توقف سرویس راه‌انداز رد می‌شود. اجرا روی میزبان نیست |
-| monitoring، network، settings، console، ssh-keys، services، logs، events، databases، php سرور | — | — | — | آماده نیست. کنسول آزاد ساخته نشده |
+| PHP سرور | `GET/PUT /rahandaz/servers/php` | `pages/servers/php.tsx` | App | فیلدهای پرکاربرد برای PHP کل سرور. نوشتن php.ini انجام نمی‌شود |
+| اعضا و فضای کاری | `GET /rahandaz/access` و ساخت فضای کاری/کاربر، نقش، بخش، گذرواژه و تعلیق | `pages/access/index.tsx` | App | مالک فضای کاری می‌سازد. مالک و مدیر نقش پایین‌تر را مدیریت می‌کنند. عضویت قدیمی بدون فهرست بخش، دسترسی قبلی را نگه می‌دارد |
 | `/catalog/` | `GET /rahandaz/catalog` | `pages/catalog/index.tsx` | App | انتخاب دسته‌بندی، مدال نسخهٔ PHP و نصب پس‌زمینه. Docker بستهٔ اختیاری runtime است |
 | مدیریت Docker | `GET /rahandaz/docker` و `/docker/apps` و `/docker/compose` و `POST /docker/stacks` | `pages/docker/*.tsx` | App | بعد از وجود باینری Docker در سایدبار. قالب آماده و Compose با env رمزشده. اجرا روی میزبان نیست |
 | نصب‌شده‌ها | `GET /rahandaz/catalog/installed` و `POST /rahandaz/catalog/software/upgrade` | `pages/catalog/installed.tsx` | App | فهرست تأییدشده و به‌روزرسانی یک کلید کاتالوگ؛ دکمه تا پایان job در حال اجرا می‌ماند |
@@ -29,10 +30,10 @@
 | `/mirrors/<software_kind>/` | — | — | — | آماده نیست |
 | `/services/<uuid>/` | — | — | — | آماده نیست |
 | `/projects/` و `/projects/new/` | `GET /rahandaz/projects` و `GET /rahandaz/projects/new` | `pages/projects/index.tsx` و `pages/projects/create.tsx` | App | فهرست واقعی. ساخت برای مالک/مدیر: حساب، مخزن، شاخه و ثبت درخواست استقرار. نوع برنامه با `FrameworkPicker` تک‌انتخابی انتخاب می‌شود و از فایل‌های ریشهٔ شاخهٔ پیش‌فرض پیشنهاد می‌گیرد. clone میزبان نیست |
-| `/projects/<uuid>/` | `GET /rahandaz/projects/{uuid}` | `pages/projects/show.tsx` | App | مرور پروژه/محیط، انتخاب environment، dropzone ZIP و تاریخچه آرشیو/عملیات. `Accept: application/json` همان قرارداد شناسه را JSON می‌دهد |
+| `/projects/<uuid>/` | `GET /rahandaz/projects/{uuid}` و `PUT /projects/{uuid}/laravel` | `pages/projects/show.tsx` | App | مرور پروژه/محیط، ZIP و برای پروژهٔ لاراول کارت‌های زمان‌بند، Horizon، Reverb، Octane، SSR و حالت تعمیر. اجرا روی اپلیکیشن نیست |
 | upload منبع ZIP | `POST /rahandaz/projects/{project}/environments/{environment}/source-archives` | `components/projects/archive-upload.tsx` | App | واقعی برای Owner/Admin/Operator؛ private store + inspect + deployment/job/outbox/audit. extraction/build آماده نیست |
 | settings پروژه، صفحه مستقل environment | — | — | — | آماده نیست. ساخت اولیه در `/projects/new` است |
-| `/jobs/` و `/jobs/<uuid>/` | `GET /rahandaz/jobs` و `/{uuid}` | `pages/jobs/index.tsx` و `show.tsx` | App | وضعیت و لاگ ذخیره‌شده، صفحه‌بندی. لغو و polling نیست |
+| `/jobs/` و `/jobs/<uuid>/` | `GET /rahandaz/jobs` و `/{uuid}` و `POST /{uuid}/cancel` | `pages/jobs/index.tsx` و `show.tsx` | App | وضعیت و لاگ ذخیره‌شده، صفحه‌بندی و polling تا پایان. لغوِ صف، عملیات را لغو می‌کند؛ لغوِ در حال اجرا فقط درخواست است و توقف فرایند را اثبات نمی‌کند |
 | استقرارها | `GET/POST /rahandaz/deployments` | `pages/deployments/index.tsx` | App | فهرست/فیلتر و درخواست SHA ثابت با Job؛ executor نیست |
 | جزئیات استقرار | `GET /rahandaz/deployments/{uuid}` و `POST /{uuid}/{retry|cancel}` | `pages/deployments/show.tsx` | App | وضعیت DB، retry ثابت، لغو پیش از شروع، polling صفحه فعال؛ rollback بسته |
 | دامنه‌ها | `GET/POST /rahandaz/domains` | `pages/domains/index.tsx` | App | درخواست دامنه/Nginx؛ اعمال میزبان نیست |
@@ -45,12 +46,13 @@
 | پایش | `GET /rahandaz/monitoring` | `pages/monitoring/index.tsx` | App | samples/services/alerts ذخیره‌شده؛ collector/alert engine نیست |
 | آموزش‌ها / جست‌وجو / دسته / نشان‌شده | `GET /rahandaz/tutorials?q=&category=&bookmarked=&page=` | `pages/tutorials/index.tsx` | App | content repository، pagination و query shareable |
 | جزئیات و نشان آموزش | `GET /rahandaz/tutorials/{slug}` و `PUT /{slug}/bookmark` | `pages/tutorials/show.tsx` | App | bookmark خصوصی PostgreSQL و متن بدون HTML خام |
-| `/users/` | — | — | — | آماده نیست |
+| `/users/` | `GET /rahandaz/access` و ساخت/نقش/گذرواژه/تعلیق | `pages/access/index.tsx` | App | فضای کاری، کاربر، نقش پایین‌تر، بخش‌های سایدبار، تعلیق و تعویض گذرواژه. انتقال مالکیت و MFA نیست |
 | `/audit/` | `GET /rahandaz/audit` | `pages/audit/index.tsx` | App | فقط مالک و مدیر. بدون metadata و بدون export |
 | `/notifications/` | `GET /rahandaz/notifications` | `pages/notifications/index.tsx` | App | فهرست گیرنده. خواندن تک‌مورد و همه واقعی است |
 | `/settings/profile/` | `GET /rahandaz/settings/profile` | `pages/settings/profile.tsx` | App | نمایش timezone، locale، پوسته و کارت پورت پنل با مجوز مالک، Job واقعی، health و انتقال origin. MFA نیست |
 | `/settings/updates/` | `GET /rahandaz/settings/updates` و `POST /rahandaz/settings/updates/check` | `pages/settings/updates.tsx` | App | وضعیت نسخه از backend. دکمه بررسی، کپی دستور CLI و تاریخچه. پنل فرمان را اجرا نمی‌کند. پکیج UI تازه ندارد |
-| members، system، route | — | — | — | آماده نیست |
+| `/settings/members/` | همان `/access` | `pages/access/index.tsx` | App | عضو، نقش و بخش. صفحهٔ جدا ندارد |
+| system، route | — | — | — | آماده نیست. نسخه و پورت در پروفایل و به‌روزرسانی است |
 
 مجوز: عضویت workspace برای صفحه‌های پنل. upload/deploy پروژه برای `owner`، `admin` و `operator` است و Viewer رد می‌شود. گزارش فعالیت فقط `owner` و `admin`. اعلان فقط `recipient` همان workspace. شناسه عددی و path آرشیو در props این صفحات نیست.
 

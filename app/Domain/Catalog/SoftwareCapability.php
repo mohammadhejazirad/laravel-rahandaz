@@ -58,6 +58,8 @@ class SoftwareCapability
                 'product_name' => $entry['product_name'] ?? null,
                 'product_description' => $entry['product_description'] ?? null,
                 'version_label' => $entry['version_label'] ?? null,
+                'version_rank' => $entry['version_rank'] ?? null,
+                'versions' => $entry['versions'] ?? null,
                 'version' => $entry['version'] ?? null,
                 'upgradeable' => $this->allowsUpgrade($entry),
                 'upgrade_note' => $this->upgradeNote($entry),

@@ -3,7 +3,8 @@ import { useSoftwareCompletion } from '@/lib/software-jobs';
 import { ReloadButton } from '@/components/ui/request-button';
 import { Button } from '@/components/ui/button';
 import { useVisiblePoll } from '@/hooks/use-visible-poll';
-import { Head, Link, usePage } from "@inertiajs/react";
+import { Head, Link, useForm, usePage } from "@inertiajs/react";
+import { Form } from "@/components/ui/form";
 import { PersianDate } from "@/components/dates/persian-date";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Card } from "@/components/ui/card";
@@ -38,10 +39,11 @@ export default function JobShow({
         finished_at: string | null;
     };
     logs: { data: LogRow[]; meta: PageMeta };
-    cancel_available: false;
+    cancel_available: boolean;
     software: SoftwareJob | null;
 }) {
     const base = usePage<SharedProps>().props.app.base_path;
+    const cancel = useForm({ job: '' });
 
     const active = !['failed', 'succeeded', 'cancelled'].includes(job.status);
     useVisiblePoll(active, 'job,logs,software', 5000);
@@ -93,7 +95,7 @@ export default function JobShow({
                     ) : null}
                 </dl>
                 {job.cancel_requested ? <p className="mt-3 text-sm text-warning">درخواست لغو ثبت شده است. این به‌معنی توقف اثبات‌شده فرایند نیست.</p> : null}
-                {cancel_available ? null : <p className="mt-3 text-sm text-muted">دکمه لغو اینجا نیست، چون نقطه امن لغو هنوز پیاده‌سازی نشده است.</p>}
+                {cancel_available ? <Form className="mt-4" onSubmit={event => { event.preventDefault(); cancel.post(`${base}/jobs/${job.uuid}/cancel`, { preserveScroll: true }); }}><Button type="submit" variant="secondary" loading={cancel.processing}>درخواست لغو</Button>{cancel.errors.job ? <p role="alert" className="mt-2 text-sm text-danger">{cancel.errors.job}</p> : null}</Form> : null}
             </Card>
             {software && <Card><SoftwareProgress job={software} /></Card>}
             {logs.data.length === 0 ? (

@@ -14,7 +14,9 @@ use App\Http\PaginatorPayload;
 use App\Http\WorkspaceAccess;
 use App\Models\Environment;
 use App\Models\Project;
+use App\Models\ProjectLaravelSetting;
 use App\Models\ProjectSourceArchive;
+use App\Models\Workspace;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -125,6 +127,7 @@ class ProjectController extends Controller
                 'execution_mode' => (string) config('rahandaz.execution_mode'),
             ],
             'deploy_available' => false,
+            'laravel' => $this->laravelPayload($request, $workspace, $project),
             'docker' => [
                 'can_request' => app(OperationAccess::class)->managesWorkspace($request->user(), $workspace->id) && ! str_starts_with($project->slug, 'rahandaz'),
                 'execution_available' => false,
@@ -135,6 +138,34 @@ class ProjectController extends Controller
                 ],
             ],
         ]);
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function laravelPayload(Request $request, Workspace $workspace, Project $project): ?array
+    {
+        if ($project->declared_type->value !== 'laravel' && $project->detected_type?->value !== 'laravel') {
+            return null;
+        }
+        $row = ProjectLaravelSetting::query()->where('project_id', $project->id)->first();
+
+        return [
+            'can_request' => app(OperationAccess::class)->managesWorkspace($request->user(), $workspace->id),
+            'schedule_enabled' => (bool) ($row->schedule_enabled ?? false),
+            'horizon_enabled' => (bool) ($row->horizon_enabled ?? false),
+            'reverb_enabled' => (bool) ($row->reverb_enabled ?? false),
+            'reverb_host' => $row->reverb_host ?? '127.0.0.1',
+            'reverb_port' => $row->reverb_port ?? 8080,
+            'octane_enabled' => (bool) ($row->octane_enabled ?? false),
+            'octane_server' => $row->octane_server ?? 'swoole',
+            'octane_host' => $row->octane_host ?? '127.0.0.1',
+            'octane_port' => $row->octane_port ?? 8000,
+            'octane_workers' => $row->octane_workers ?? 2,
+            'inertia_ssr_enabled' => (bool) ($row->inertia_ssr_enabled ?? false),
+            'inertia_ssr_path' => $row->inertia_ssr_path ?? 'bootstrap/ssr/ssr.js',
+            'maintenance_enabled' => (bool) ($row->maintenance_enabled ?? false),
+        ];
     }
 
     public function docker(Request $request, Project $project, DockerProjectControl $control): RedirectResponse

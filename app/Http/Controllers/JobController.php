@@ -6,11 +6,14 @@ namespace App\Http\Controllers;
 
 use App\Domain\Access\OperationAccess;
 use App\Domain\Catalog\SoftwareCapability;
+use App\Domain\Jobs\CancelDecision;
+use App\Domain\Jobs\CancelOperation;
 use App\Domain\Jobs\Enums\JobStatus;
 use App\Http\CurrentWorkspace;
 use App\Http\PaginatorPayload;
 use App\Models\OperationJob;
 use App\Models\OperationJobLog;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -64,8 +67,20 @@ class JobController extends Controller
                 ])->all(),
                 'meta' => PaginatorPayload::meta($logs),
             ],
-            'cancel_available' => false,
+            'cancel_available' => $this->cancelAvailable($job),
         ]);
+    }
+
+    public function cancel(Request $request, OperationJob $job): RedirectResponse
+    {
+        $this->authorize('view', $job);
+        $workspace = CurrentWorkspace::get($request);
+        abort_unless((string) $job->workspace_id === (string) $workspace->id, 404);
+        $mode = app(CancelOperation::class)->request($job, $request->user(), $request->ip());
+
+        return back()->with('status', $mode === 'finish'
+            ? 'عملیات هنوز شروع‌نشده لغو شد. فرمانی روی میزبان از این درخواست اجرا نشد.'
+            : 'درخواست لغو ثبت شد. توقف فرایندی که شاید شروع شده باشد هنوز اثبات نشده است.');
     }
 
     /**
@@ -83,5 +98,12 @@ class JobController extends Controller
             'created_at' => $job->created_at?->utc()->toIso8601ZuluString(),
             'finished_at' => $job->finished_at?->utc()->toIso8601ZuluString(),
         ];
+    }
+
+    private function cancelAvailable(OperationJob $job): bool
+    {
+        $mode = app(CancelDecision::class)->mode($job->status);
+
+        return $mode === 'finish' || ($mode === 'flag' && ! $job->cancel_requested);
     }
 }

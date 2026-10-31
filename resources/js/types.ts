@@ -37,6 +37,10 @@ export type SharedProps = PageProps & {
     notifications: {
         unread: number;
     };
+    access?: {
+        owner: boolean;
+        sections: string[] | null;
+    };
     docker?: {
         installed: boolean;
     };

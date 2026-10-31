@@ -53,6 +53,12 @@ final class OperationRunner
                 return;
             }
 
+            if ($job->cancel_requested) {
+                app(CancelOperation::class)->finishLocked($job);
+
+                return;
+            }
+
             $authorized = $this->access->mayExecute($job);
             $job->forceFill([
                 'status' => JobStatus::Running,

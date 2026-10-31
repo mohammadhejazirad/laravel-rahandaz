@@ -105,7 +105,7 @@ class PanelPagesTest extends TestCase
 
         $this->actingAs($owner)->get(route('jobs.show', $job))->assertOk()->assertInertia(fn (Assert $page) => $page
             ->component('jobs/show')
-            ->where('cancel_available', false)
+            ->where('cancel_available', true)
             ->where('job.uuid', $job->uuid));
 
         $this->actingAs($owner)->get(route('catalog.index'))->assertOk()->assertInertia(fn (Assert $page) => $page

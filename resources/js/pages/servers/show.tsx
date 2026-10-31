@@ -83,7 +83,7 @@ export default function ServerShow({
             </Card>
             <ServerLocationCard location={location} />
             <HostServices hostUuid={host.uuid} base={base} services={services} />
-            <Card><h2 className="font-semibold">مدیریت میزبان</h2><p className="mt-2 text-sm text-muted">بخش موردنیاز را باز کنید؛ هر بخش وضعیت و محدودیت‌های واقعی خود را نشان می‌دهد.</p><div className="mt-4 grid gap-3 sm:grid-cols-2"><Button asChild variant="secondary"><Link href={`${base}/monitoring`}>منابع و سلامت سرویس‌ها</Link></Button><Button asChild variant="secondary"><Link href={`${base}/catalog`}>نرم‌افزارها و موتورهای اجرا</Link></Button><Button asChild variant="secondary"><Link href={`${base}/databases`}>دیتابیس‌های پروژه</Link></Button><Button asChild variant="secondary"><Link href={`${base}/jobs`}>عملیات و لاگ‌های میزبان</Link></Button></div></Card>
+            <Card><h2 className="font-semibold">مدیریت میزبان</h2><p className="mt-2 text-sm text-muted">بخش موردنیاز را باز کنید؛ هر بخش وضعیت و محدودیت‌های واقعی خود را نشان می‌دهد.</p><div className="mt-4 grid gap-3 sm:grid-cols-2"><Button asChild variant="secondary"><Link href={`${base}/monitoring`}>منابع و سلامت سرویس‌ها</Link></Button><Button asChild variant="secondary"><Link href={`${base}/catalog`}>نرم‌افزارها و موتورهای اجرا</Link></Button><Button asChild variant="secondary"><Link href={`${base}/servers/php`}>تنظیم PHP سرور</Link></Button><Button asChild variant="secondary"><Link href={`${base}/databases`}>دیتابیس‌های پروژه</Link></Button><Button asChild variant="secondary"><Link href={`${base}/jobs`}>عملیات و لاگ‌های میزبان</Link></Button></div></Card>
         </AppLayout>
     );
 }

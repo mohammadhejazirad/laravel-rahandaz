@@ -64,8 +64,9 @@
       "protected": true
     },
     "php82": {
-      "name": "PHP 8.2",
+      "name": "PHP",
       "description": "PHP 8.2 کنار نسخهٔ پنل؛ پیش‌فرض سیستم عوض نمی‌شود.",
+      "version_rank": 82,
       "product": "php",
       "product_name": "PHP",
       "product_description": "نسخه را خودتان انتخاب می‌کنید. نسخه‌های ۸٫۲ تا ۸٫۵ کنار هم می‌مانند و PHP پیش‌فرض سیستم عوض نمی‌شود.",
@@ -79,8 +80,9 @@
       "upgrade_prefix": "php8.2"
     },
     "php83": {
-      "name": "PHP 8.3",
+      "name": "PHP",
       "description": "PHP 8.3 کنار نسخهٔ پنل؛ پیش‌فرض سیستم عوض نمی‌شود.",
+      "version_rank": 83,
       "product": "php",
       "product_name": "PHP",
       "product_description": "نسخه را خودتان انتخاب می‌کنید. نسخه‌های ۸٫۲ تا ۸٫۵ کنار هم می‌مانند و PHP پیش‌فرض سیستم عوض نمی‌شود.",
@@ -94,8 +96,9 @@
       "upgrade_prefix": "php8.3"
     },
     "php": {
-      "name": "PHP 8.4",
+      "name": "PHP",
       "description": "باینری پنل PHP 8.4. اگر موجود باشد جایگزین نمی‌شود؛ به‌روزرسانی فقط همین شاخهٔ ۸٫۴ است.",
+      "version_rank": 84,
       "product": "php",
       "product_name": "PHP",
       "product_description": "نسخه را خودتان انتخاب می‌کنید. نسخه‌های ۸٫۲ تا ۸٫۵ کنار هم می‌مانند و PHP پیش‌فرض سیستم عوض نمی‌شود.",
@@ -110,8 +113,9 @@
       "protected": true
     },
     "php85": {
-      "name": "PHP 8.5",
+      "name": "PHP",
       "description": "PHP 8.5 کنار نسخهٔ پنل؛ پیش‌فرض سیستم عوض نمی‌شود.",
+      "version_rank": 85,
       "product": "php",
       "product_name": "PHP",
       "product_description": "نسخه را خودتان انتخاب می‌کنید. نسخه‌های ۸٫۲ تا ۸٫۵ کنار هم می‌مانند و PHP پیش‌فرض سیستم عوض نمی‌شود.",
@@ -125,8 +129,11 @@
       "upgrade_prefix": "php8.5"
     },
     "python": {
-      "name": "Python 3",
+      "name": "Python3",
       "description": "مفسر سیستم و ابزار venv؛ محیط مجازی هر پروژه جدا ساخته می‌شود.",
+      "product": "python",
+      "product_name": "Python3",
+      "product_description": "مفسر سیستم و ابزار venv؛ محیط مجازی هر پروژه جدا ساخته می‌شود.",
       "category": "runtime",
       "setup": false,
       "kind": "apt",
@@ -139,6 +146,14 @@
     "postgresql": {
       "name": "PostgreSQL",
       "description": "موتور PostgreSQL موجود حفظ می‌شود؛ این انتخاب پایگاه یا کاربر پروژه نمی‌سازد.",
+      "product": "postgresql",
+      "product_name": "PostgreSQL",
+      "product_description": "نسخه را خودتان انتخاب می‌کنید. فقط نسخه‌ای که بستهٔ تأییدشده دارد قابل ثبت است و این درخواست major را پین نمی‌کند.",
+      "versions": [
+        {"id": "14", "label": "14", "rank": 14, "packaged": false},
+        {"id": "16", "label": "16", "rank": 16, "packaged": true},
+        {"id": "17", "label": "17", "rank": 17, "packaged": false}
+      ],
       "category": "database",
       "setup": false,
       "kind": "apt",
@@ -153,6 +168,14 @@
     "mysql": {
       "name": "MySQL",
       "description": "موتور MySQL؛ با MariaDB و پورت اشغال‌شده تداخل دارد.",
+      "product": "mysql",
+      "product_name": "MySQL",
+      "product_description": "نسخه را خودتان انتخاب می‌کنید. اگر MariaDB هم نصب شود، پورت دومی را خودتان تعیین می‌کنید.",
+      "versions": [
+        {"id": "8.0", "label": "8.0", "rank": 80, "packaged": true},
+        {"id": "8.4", "label": "8.4", "rank": 84, "packaged": false},
+        {"id": "9.0", "label": "9.0", "rank": 90, "packaged": false}
+      ],
       "category": "database",
       "setup": false,
       "kind": "apt",
@@ -172,6 +195,9 @@
     "mariadb": {
       "name": "MariaDB",
       "description": "موتور MariaDB؛ با MySQL و پورت اشغال‌شده تداخل دارد.",
+      "product": "mariadb",
+      "product_name": "MariaDB",
+      "product_description": "اگر MySQL هم باشد، هر دو روی پورت ۳۳۰۶ نصب نمی‌شوند و پورت دومی را خودتان می‌دهید.",
       "category": "database",
       "setup": false,
       "kind": "apt",
@@ -257,8 +283,13 @@
       "service": "supervisor"
     },
     "node": {
-      "name": "Node.js 24 LTS",
+      "name": "Node.js",
       "description": "runtime مستقل در مسیر نسخه‌دار؛ Node پیش‌فرض و پروژه‌های موجود تغییر نمی‌کنند.",
+      "product": "node",
+      "product_name": "Node.js",
+      "product_description": "نسخه را خودتان انتخاب می‌کنید. runtime در مسیر نسخه‌دار می‌ماند و Node پیش‌فرض سیستم عوض نمی‌شود.",
+      "version_label": "24 LTS",
+      "version_rank": 24,
       "category": "runtime",
       "setup": false,
       "kind": "archive",
@@ -275,8 +306,16 @@
       "upgradeable": false
     },
     "mongodb": {
-      "name": "MongoDB Community 8.0",
+      "name": "MongoDB",
       "description": "باینری مستقل MongoDB؛ پایگاه و سرویس عمومی ساخته نمی‌شود. آزمون موتور روی دادهٔ موقت اجرا می‌شود.",
+      "product": "mongodb",
+      "product_name": "MongoDB",
+      "product_description": "نسخه را خودتان انتخاب می‌کنید. فقط نسخهٔ دارای آرشیو checksum‌شده قابل ثبت است.",
+      "versions": [
+        {"id": "6.0", "label": "6.0", "rank": 60, "packaged": false},
+        {"id": "7.0", "label": "7.0", "rank": 70, "packaged": false},
+        {"id": "8.0", "label": "8.0", "rank": 80, "packaged": true}
+      ],
       "category": "database",
       "setup": false,
       "kind": "archive",

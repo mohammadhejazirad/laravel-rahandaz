@@ -4,6 +4,7 @@ import { Head, Link, usePage } from "@inertiajs/react";
 import { PersianDate } from "@/components/dates/persian-date";
 import { ArchiveUpload } from "@/components/projects/archive-upload";
 import { DockerProjectControls } from "@/components/projects/docker-project-controls";
+import { LaravelRuntimeCards, type LaravelRuntime } from "@/components/projects/laravel-runtime";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
@@ -39,7 +40,7 @@ interface SourceArchiveRow {
     } | null;
 }
 
-export default function ProjectShow({ project, environments, source_archives, archive_upload, deploy_available, docker }: {
+export default function ProjectShow({ project, environments, source_archives, archive_upload, deploy_available, laravel, docker }: {
     project: {
         uuid: string;
         name: string;
@@ -55,6 +56,7 @@ export default function ProjectShow({ project, environments, source_archives, ar
     source_archives: SourceArchiveRow[];
     archive_upload: { available: boolean; max_bytes: number; execution_mode: string };
     deploy_available: false;
+    laravel: LaravelRuntime | null;
     docker: {
         can_request: boolean;
         execution_available: false;
@@ -101,6 +103,7 @@ export default function ProjectShow({ project, environments, source_archives, ar
 
                 </> },
                 { id: 'docker', label: 'Docker', content: <DockerProjectControls base={base} projectUuid={project.uuid} docker={docker} /> },
+                ...(laravel ? [{ id: 'laravel', label: 'ابزار لاراول', content: <LaravelRuntimeCards laravel={laravel} action={`${base}/projects/${project.uuid}/laravel`} /> }] : []),
                 { id: 'environments', label: 'محیط‌ها', content: <>
             {environments.length === 0 ? (
                 <EmptyState title="محیطی ثبت نشده است">محیط‌های این پروژه پس از ثبت واقعی اینجا دیده می‌شوند.</EmptyState>

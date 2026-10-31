@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['workspace_id', 'user_id', 'role'])]
+#[Fillable(['workspace_id', 'user_id', 'role', 'sections'])]
 class Membership extends Model
 {
     /** @use HasFactory<MembershipFactory> */
@@ -25,6 +25,7 @@ class Membership extends Model
     {
         return [
             'role' => MembershipRole::class,
+            'sections' => 'array',
         ];
     }
 

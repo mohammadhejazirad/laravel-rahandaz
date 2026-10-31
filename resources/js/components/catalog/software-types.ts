@@ -10,6 +10,8 @@ export interface SoftwareJob {
 export interface CatalogItem {
     name: string; description: string; category?: string;
     product?: string | null; product_name?: string | null; product_description?: string | null; version_label?: string | null;
+    version_rank?: number | null;
+    versions?: { id: string; label: string; rank: number; packaged: boolean }[] | null;
     version?: string | null;
     upgradeable?: boolean; upgrade_note?: string | null;
 }

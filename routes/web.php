@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccessController;
 use App\Http\Controllers\AuditController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordController;
@@ -16,8 +17,10 @@ use App\Http\Controllers\MirrorController;
 use App\Http\Controllers\MonitoringController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PanelPortController;
+use App\Http\Controllers\PhpServerController;
 use App\Http\Controllers\ProjectArchiveController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectLaravelController;
 use App\Http\Controllers\ProjectLaunchController;
 use App\Http\Controllers\PwaController;
 use App\Http\Controllers\ServerController;
@@ -60,9 +63,11 @@ Route::prefix(trim((string) config('rahandaz.base_path'), '/'))->group(function 
             Route::patch('/setup', [SetupController::class, 'save'])->middleware('throttle:30,1')->name('setup.save');
             Route::post('/setup/apply', [SetupController::class, 'apply'])->middleware('throttle:5,1')->name('setup.apply');
 
-            Route::middleware('setup.complete')->group(function () {
+            Route::middleware(['setup.complete', 'panel.section'])->group(function () {
                 Route::get('/dashboard', DashboardController::class)->name('dashboard');
                 Route::get('/servers', [ServerController::class, 'index'])->name('servers.index');
+                Route::get('/servers/php', [PhpServerController::class, 'show'])->name('servers.php');
+                Route::put('/servers/php', [PhpServerController::class, 'update'])->middleware('throttle:10,1')->name('servers.php.update');
                 Route::get('/servers/{localHost}', [ServerController::class, 'show'])->name('servers.show');
                 Route::post('/servers/{localHost}/services', [ServerController::class, 'service'])->middleware('throttle:20,1')->name('servers.services');
                 Route::get('/docker', [DockerController::class, 'index'])->name('docker.index');
@@ -110,11 +115,21 @@ Route::prefix(trim((string) config('rahandaz.base_path'), '/'))->group(function 
                 Route::get('/monitoring', [MonitoringController::class, 'index'])->name('monitoring.index');
                 Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
                 Route::post('/projects/{project}/docker', [ProjectController::class, 'docker'])->middleware('throttle:20,1')->name('projects.docker');
+                Route::put('/projects/{project}/laravel', [ProjectLaravelController::class, 'update'])->middleware('throttle:20,1')->name('projects.laravel');
+                Route::get('/access', [AccessController::class, 'index'])->name('access.index');
+                Route::post('/access/workspaces', [AccessController::class, 'storeWorkspace'])->middleware('throttle:10,1')->name('access.workspaces.store');
+                Route::post('/access/workspaces/{workspace}/current', [AccessController::class, 'switchWorkspace'])->middleware('throttle:20,1')->name('access.switch');
+                Route::post('/access/users', [AccessController::class, 'storeUser'])->middleware('throttle:10,1')->name('access.users.store');
+                Route::put('/access/memberships/{membership}', [AccessController::class, 'updateSections'])->middleware('throttle:20,1')->name('access.sections');
+                Route::put('/access/memberships/{membership}/role', [AccessController::class, 'updateRole'])->middleware('throttle:20,1')->name('access.role');
+                Route::put('/access/memberships/{membership}/password', [AccessController::class, 'updatePassword'])->middleware('throttle:10,1')->name('access.password');
+                Route::put('/access/memberships/{membership}/status', [AccessController::class, 'updateStatus'])->middleware('throttle:10,1')->name('access.status');
                 Route::post('/projects/{project}/environments/{environment}/source-archives', [ProjectArchiveController::class, 'store'])
                     ->middleware('throttle:5,1')
                     ->name('projects.source-archives.store');
                 Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
                 Route::get('/jobs/{job}', [JobController::class, 'show'])->name('jobs.show');
+                Route::post('/jobs/{job}/cancel', [JobController::class, 'cancel'])->middleware('throttle:20,1')->name('jobs.cancel');
                 Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
                 Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
                 Route::post('/notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');

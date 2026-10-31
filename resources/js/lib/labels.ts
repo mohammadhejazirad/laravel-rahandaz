@@ -19,7 +19,8 @@ export function statusTone(
         value === "untested" ||
         value === "degraded" ||
         value === "waiting_retry" ||
-        value === "cancelling"
+        value === "cancelling" ||
+        value === "suspended"
     ) {
         return "warning";
     }

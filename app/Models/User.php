@@ -82,7 +82,14 @@ class User extends Authenticatable
 
     public function currentMembership(): ?Membership
     {
-        $this->loadMissing('memberships');
+        $this->loadMissing('memberships.workspace');
+        $wanted = request()->hasSession() ? request()->session()->get('current_workspace_uuid') : null;
+        if (is_string($wanted) && $wanted !== '') {
+            $match = $this->memberships->first(fn (Membership $membership): bool => $membership->workspace?->uuid === $wanted);
+            if ($match !== null) {
+                return $match;
+            }
+        }
 
         return $this->memberships->first();
     }

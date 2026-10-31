@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Domain\Access\PanelSections;
+use App\Domain\Accounts\Enums\MembershipRole;
 use App\Domain\Docker\DockerInstallation;
 use App\Models\PanelNotification;
 use App\Support\EnumLabelCatalog;
@@ -61,6 +63,12 @@ class HandleInertiaRequests extends Middleware
             ],
             'docker' => [
                 'installed' => $user !== null && app(DockerInstallation::class)->present(),
+            ],
+            'access' => [
+                'owner' => $membership?->role === MembershipRole::Owner,
+                'sections' => $membership === null || $membership->role === MembershipRole::Owner || $membership->sections === null
+                    ? null
+                    : array_values(array_intersect($membership->sections, array_keys(PanelSections::all()))),
             ],
             'notifications' => [
                 'unread' => $user === null || $membership === null ? 0 : PanelNotification::query()
