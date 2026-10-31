@@ -1,4 +1,5 @@
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { useLiveFilters } from '@/hooks/use-live-filters';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { FolderGit2 } from 'lucide-react';
 import { PersianDate } from '@/components/dates/persian-date';
 import { Alert } from '@/components/ui/alert';
@@ -18,10 +19,10 @@ interface ProjectRow { uuid: string; name: string; slug: string; status: string;
 export default function ProjectsIndex({ projects, create_available, filters }: { projects: { data: ProjectRow[]; meta: PageMeta }; create_available: boolean; filters: { q: string } }) {
     const { app, enum_labels: labels } = usePage<SharedProps>().props;
     const base = app.base_path;
-    const search = useForm({ q: filters.q });
+    const search = useLiveFilters(`${base}/projects`, { q: filters.q });
     return <AppLayout title="پروژه‌ها" description="پروژه را انتخاب کنید؛ منبع کد، محیط‌ها و تاریخچهٔ آن در یک صفحه در دسترس‌اند.">
         <Head title="پروژه‌ها" />
-        <Card><Form className="flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={event => { event.preventDefault(); search.get(`${base}/projects`, { preserveState: true }); }}><div className="flex-1"><Input name="q" label="پیداکردن پروژه" placeholder="نام پروژه یا شناسهٔ متنی" maxLength={120} value={search.data.q} onChange={event => search.setData('q', event.target.value)} error={search.errors.q} /></div><Button type="submit" variant="secondary" loading={search.processing}>جست‌وجو</Button>{filters.q ? <Button asChild variant="ghost"><Link href={`${base}/projects`}>نمایش همه</Link></Button> : null}</Form></Card>
+        <Card><Form className="flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={event => event.preventDefault()}><div className="flex-1"><Input name="q" label="پیداکردن پروژه" placeholder="نام پروژه یا شناسهٔ متنی" maxLength={120} value={search.data.q} onChange={event => search.setFilter('q', event.target.value)} error={search.errors.q} /></div>{search.data.q ? <Button variant="ghost" onClick={() => search.setFilter('q', '', true)}>نمایش همه</Button> : null}</Form></Card>
         <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-semibold">{projects.meta.total.toLocaleString('fa-IR')} پروژه</h2><div className="flex flex-wrap gap-2">{create_available ? <Button asChild><Link href={`${base}/projects/new`}>پروژه جدید</Link></Button> : null}<Button asChild variant="secondary"><Link href={`${base}/git`}>مدیریت حساب‌های گیت</Link></Button></div></div>
         {!create_available ? <Alert tone="neutral">ساخت پروژه از حساب گیت برای مالک و مدیر است. برای پروژه‌های موجود، دریافت فایل ZIP و پیگیری درخواست استقرار از جزئیات پروژه در دسترس است.</Alert> : null}
         {!projects.data.length ? <EmptyState title={filters.q ? 'پروژه‌ای با این نام پیدا نشد' : 'هنوز پروژه‌ای ثبت نشده است'} action={<Button asChild variant="secondary"><Link href={`${base}/${filters.q ? 'projects' : 'tutorials/projects-environments'}`}>{filters.q ? 'پاک‌کردن جست‌وجو' : 'راهنمای پروژه‌ها'}</Link></Button>}>{filters.q ? 'عبارت کوتاه‌تری جست‌وجو کنید.' : 'ابتدا راهنمای پروژه و محیط را ببینید؛ پروژه‌های ثبت‌شده اینجا نمایش داده می‌شوند.'}</EmptyState> : <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{projects.data.map(project => <li key={project.uuid} className="min-w-0"><Card className="flex h-full flex-col">

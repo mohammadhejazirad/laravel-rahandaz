@@ -69,7 +69,7 @@ final class ProjectSourceLaunch
             ->where('disabled', false)
             ->where('archived', false)
             ->when($search !== '', fn ($q) => $q->whereRaw('strpos(lower(full_name), lower(?)) > 0', [$search]))
-            ->orderBy('full_name');
+            ->recentFirst();
         $total = (clone $query)->count();
 
         return [

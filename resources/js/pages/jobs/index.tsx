@@ -1,8 +1,8 @@
-import { Button } from '@/components/ui/button';
+import { useLiveFilters } from '@/hooks/use-live-filters';
 import { Card } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
 import { Select } from '@/components/ui/select';
-import { Head, Link, useForm, usePage } from "@inertiajs/react";
+import { Head, Link, usePage } from "@inertiajs/react";
 import { PersianDate } from "@/components/dates/persian-date";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Pagination, type PageMeta } from "@/components/ui/pagination";
@@ -25,12 +25,12 @@ interface JobRow {
 export default function JobsIndex({ jobs, filters }: { jobs: { data: JobRow[]; meta: PageMeta }; filters: { status: string } }) {
     const base = usePage<SharedProps>().props.app.base_path;
 
-    const search = useForm({ status: filters.status });
+    const search = useLiveFilters(`${base}/jobs`, { status: filters.status });
 
     return (
         <AppLayout title="عملیات" description="وضعیت پایدار درخواست‌ها و Jobهای ثبت‌شده برای همین فضای کاری.">
             <Head title="عملیات" />
-            <Card><Form className="flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={event => { event.preventDefault(); search.get(`${base}/jobs`, { preserveState: true }); }}><Select label="وضعیت عملیات" name="status" value={search.data.status} onChange={event => search.setData('status', event.target.value)} error={search.errors.status}><option value="">همهٔ وضعیت‌ها</option><option value="queued">در صف</option><option value="running">در حال اجرا</option><option value="waiting_retry">منتظر تلاش دوباره</option><option value="interrupted">قطع‌شده</option><option value="cancelling">در حال لغو</option><option value="reconciling">در حال تطبیق</option><option value="failed">ناموفق</option><option value="succeeded">موفق</option><option value="cancelled">لغوشده</option></Select><Button type="submit" variant="secondary" loading={search.processing}>نمایش عملیات</Button></Form></Card>
+            <Card><Form className="flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={event => event.preventDefault()}><Select label="وضعیت عملیات" name="status" value={search.data.status} onChange={event => search.setFilter('status', event.target.value, true)} error={search.errors.status}><option value="">همهٔ وضعیت‌ها</option><option value="queued">در صف</option><option value="running">در حال اجرا</option><option value="waiting_retry">منتظر تلاش دوباره</option><option value="interrupted">قطع‌شده</option><option value="cancelling">در حال لغو</option><option value="reconciling">در حال تطبیق</option><option value="failed">ناموفق</option><option value="succeeded">موفق</option><option value="cancelled">لغوشده</option></Select></Form></Card>
             {jobs.data.length === 0 ? (
                 <EmptyState title="عملیاتی ثبت نشده است">عملیات‌های همین فضای کاری پس از ثبت واقعی اینجا فهرست می‌شوند.</EmptyState>
             ) : (

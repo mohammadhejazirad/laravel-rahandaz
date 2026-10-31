@@ -9,12 +9,13 @@ use App\Models\Concerns\BelongsToWorkspace;
 use App\Models\Concerns\HasPublicUuid;
 use Database\Factories\RemoteRepositoryFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['workspace_id', 'git_connection_id', 'provider_repository_id', 'full_name', 'namespace', 'clone_url', 'default_branch', 'visibility', 'archived', 'disabled', 'is_selected', 'last_seen_at', 'provider_metadata'])]
+#[Fillable(['workspace_id', 'git_connection_id', 'provider_repository_id', 'full_name', 'namespace', 'clone_url', 'default_branch', 'visibility', 'archived', 'disabled', 'is_selected', 'last_seen_at', 'provider_metadata', 'provider_activity_at'])]
 class RemoteRepository extends Model
 {
     /** @use HasFactory<RemoteRepositoryFactory> */
@@ -31,8 +32,15 @@ class RemoteRepository extends Model
             'disabled' => 'boolean',
             'is_selected' => 'boolean',
             'last_seen_at' => 'datetime',
+            'provider_activity_at' => 'datetime',
             'provider_metadata' => 'array',
         ];
+    }
+
+    public function scopeRecentFirst(Builder $query): void
+    {
+        // Missing provider dates sort last; local sync/permission updates never affect activity.
+        $query->orderByRaw('provider_activity_at desc nulls last')->orderByDesc('created_at')->orderByDesc('id');
     }
 
     public function gitConnection(): BelongsTo

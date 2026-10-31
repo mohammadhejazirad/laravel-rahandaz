@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useForm } from '@inertiajs/react';
 import { Card } from '@/components/ui/card';
@@ -15,10 +16,12 @@ export interface Repository {
 }
 export function RepositorySelection({
     repositories,
+    onDirtyChange,
     canManage,
     url,
 }: {
     repositories: Repository[];
+    onDirtyChange?: (dirty: boolean) => void;
     canManage: boolean;
     url: string;
 }) {
@@ -28,6 +31,7 @@ export function RepositorySelection({
             .filter((r) => r.is_selected)
             .map((r) => r.uuid),
     });
+    useEffect(() => { onDirtyChange?.(form.isDirty); }, [form.isDirty, onDirtyChange]);
     return (
         <Card>
             <h2 className="font-semibold">انتخاب مخزن‌های مجاز</h2>

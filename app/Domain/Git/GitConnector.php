@@ -257,6 +257,7 @@ final class GitConnector
                         'is_selected' => ! $row['archived'] && in_array($row['id'], $selected, true),
                         'last_seen_at' => now(),
                         'provider_metadata' => [],
+                        'provider_activity_at' => $row['provider_activity_at'],
                     ],
                 );
                 $stored++;
@@ -459,7 +460,7 @@ final class GitConnector
     }
 
     /**
-     * @return list<array{id: string, full_name: string, namespace: string, clone_url: string, default_branch: string, visibility: string, archived: bool}>
+     * @return list<array{id: string, full_name: string, namespace: string, clone_url: string, default_branch: string, visibility: string, archived: bool, provider_activity_at: ?string}>
      */
     private function repositories(GitConnection $connection, string $material, User $actor): array
     {
@@ -553,7 +554,7 @@ final class GitConnector
 
     /**
      * @param  array<int, mixed>  $payload
-     * @return list<array{id: string, full_name: string, namespace: string, clone_url: string, default_branch: string, visibility: string, archived: bool}>
+     * @return list<array{id: string, full_name: string, namespace: string, clone_url: string, default_branch: string, visibility: string, archived: bool, provider_activity_at: ?string}>
      */
     private function mapGithubRepositories(array $payload): array
     {
@@ -572,7 +573,7 @@ final class GitConnector
             $row = $this->repositoryRow($id, $fullName, $namespace, (string) ($repository['clone_url'] ?? ''), $branch, $visibility, (bool) ($repository['archived'] ?? false));
 
             if ($row !== null) {
-                $rows[] = $row;
+                $rows[] = [...$row, 'provider_activity_at' => RepositoryActivity::latest($repository)];
             }
         }
 
@@ -581,7 +582,7 @@ final class GitConnector
 
     /**
      * @param  array<int, mixed>  $payload
-     * @return list<array{id: string, full_name: string, namespace: string, clone_url: string, default_branch: string, visibility: string, archived: bool}>
+     * @return list<array{id: string, full_name: string, namespace: string, clone_url: string, default_branch: string, visibility: string, archived: bool, provider_activity_at: ?string}>
      */
     private function mapGitlabRepositories(array $payload): array
     {
@@ -612,7 +613,7 @@ final class GitConnector
             );
 
             if ($row !== null) {
-                $rows[] = $row;
+                $rows[] = [...$row, 'provider_activity_at' => RepositoryActivity::latest($repository)];
             }
         }
 

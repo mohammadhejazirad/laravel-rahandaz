@@ -345,7 +345,7 @@ final class GitConnectionController extends Controller
         $this->authorizeConnection($request, $connection, 'view');
         $filters = $request->validate(['search' => ['nullable', 'string', 'max:200']]);
         $search = trim($filters['search'] ?? '');
-        $repositories = $connection->repositories()->when($search !== '', fn ($q) => $q->whereRaw('strpos(lower(full_name), lower(?)) > 0', [$search]))->orderBy('full_name')->paginate(50, ['*'], 'repositories_page')->withQueryString();
+        $repositories = $connection->repositories()->when($search !== '', fn ($q) => $q->whereRaw('strpos(lower(full_name), lower(?)) > 0', [$search]))->recentFirst()->paginate(50, ['*'], 'repositories_page')->withQueryString();
 
         return Inertia::render('git/show', [
             'connection' => $this->summary($connection),

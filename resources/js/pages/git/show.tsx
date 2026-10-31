@@ -1,9 +1,10 @@
+import { useLiveFilters } from '@/hooks/use-live-filters';
 import { RepositorySelection, type Repository } from '@/components/git/repository-selection';
 import { ReloadButton } from '@/components/ui/request-button';
 import { Input } from '@/components/ui/input';
 import { GitConnectionSteps } from '@/components/git/connection-steps';
 import { Form } from '@/components/ui/form';
-import { Head, Link, router, useForm, usePage } from "@inertiajs/react";
+import { Head, Link, router, usePage } from "@inertiajs/react";
 import { useEffect, useRef, useState } from "react";
 import { GitProviderIcon } from '@/components/git/provider-icon';
 import { TestConnectionButton } from '@/components/git/test-connection-button';
@@ -60,7 +61,8 @@ export default function GitShow({
             router.reload({ only: ["repositories"] });
         }
     }, [connection.last_synced_at]);
-    const search = useForm({ search: filters.search });
+    const [selectionDirty, setSelectionDirty] = useState(false);
+    const search = useLiveFilters(url, { search: filters.search }, { enabled: !selectionDirty, only: ['repositories', 'filters'] });
     const revoked = connection.state === "revoked";
     return (
         <AppLayout
@@ -149,15 +151,16 @@ export default function GitShow({
                 پنل است.
             </Alert>
             <Card>
-                <Form className="flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={event => { event.preventDefault(); search.get(url, { preserveState: true, preserveScroll: true }); }}>
-                    <div className="min-w-0 flex-1"><Input label="جست‌وجوی مخزن" name="search" maxLength={200} dir="ltr" className="font-mono" placeholder="team / repository" value={search.data.search} onChange={event => search.setData('search', event.target.value)} error={search.errors.search} /></div>
-                    <Button type="submit" variant="secondary" loading={search.processing}>جست‌وجو</Button>
-                    {filters.search ? <Button asChild variant="secondary"><Link href={url}>پاک‌کردن جست‌وجو</Link></Button> : null}
+                <Form className="flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={event => event.preventDefault()}>
+                    <div className="min-w-0 flex-1"><Input label="جست‌وجوی مخزن" name="search" disabled={selectionDirty} maxLength={200} dir="ltr" className="font-mono" placeholder="team / repository" value={search.data.search} onChange={event => search.setFilter('search', event.target.value)} error={search.errors.search} /></div>
+
+                    {search.data.search ? <Button variant="secondary" disabled={selectionDirty} onClick={() => search.setFilter('search', '', true)}>پاک‌کردن جست‌وجو</Button> : null}
                 </Form>
-                <p className="mt-3 text-xs text-muted">پیش از جست‌وجو یا تغییر صفحه، انتخاب‌های فعلی را ذخیره کنید.</p>
+                <p className="mt-3 text-xs text-muted">{selectionDirty ? 'برای ادامهٔ جست‌وجو، ابتدا تغییرات دسترسی مخزن‌ها را ذخیره کنید.' : 'جست‌وجو خودکار است؛ مخزن‌ها بر اساس تازه‌ترین فعالیت سرویس نمایش داده می‌شوند.'}</p>
             </Card>
             <RepositorySelection
                 key={`${filters.search}-${repositories.meta.current_page}-${connection.last_synced_at}-${connection.state}`}
+                onDirtyChange={setSelectionDirty}
                 repositories={repositories.data}
                 canManage={can_manage && !revoked}
                 url={url}

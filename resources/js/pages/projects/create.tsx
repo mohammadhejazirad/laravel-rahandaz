@@ -1,3 +1,4 @@
+import { useLiveFilters } from '@/hooks/use-live-filters';
 import { ChoiceButton } from '@/components/ui/choice-button';
 import { RequestButton } from '@/components/ui/request-button';
 import { useRequestAction } from '@/hooks/use-request-action';
@@ -42,7 +43,7 @@ export default function ProjectCreate({
     const [loadingRepo, setLoadingRepo] = useState<string | null>(null);
     const [loadingAccount, setLoadingAccount] = useState<string | null>(null);
     const sourceAction = useRequestAction();
-    const search = useForm({ connection: connection ?? '', repo_q: filters.repo_q });
+    const search = useLiveFilters(`${base}/projects/new`, { connection: connection ?? '', repository: repository?.uuid ?? '', repo_q: filters.repo_q }, { only: ['repositories', 'filters'] });
     const form = useForm({
         repository: repository?.uuid ?? '',
         branch,
@@ -79,12 +80,12 @@ export default function ProjectCreate({
 
         {account ? <Card>
             <div className="flex flex-wrap items-center justify-between gap-3">
-                <div><h2 className="font-semibold">انتخاب مخزن</h2><p className="mt-2 text-sm leading-7 text-muted">مخزن‌های قابل‌دیدن این حساب. اگر فهرست خالی است، دریافت را بزنید و نتیجه را در تاریخچهٔ حساب ببینید.</p></div>
+                <div><h2 className="font-semibold">انتخاب مخزن</h2><p className="mt-2 text-sm leading-7 text-muted">مخزن‌های این حساب بر اساس تازه‌ترین تغییر یا ساخت در سرویس مرتب شده‌اند. اگر فهرست خالی است، دریافت را بزنید و نتیجه را در تاریخچهٔ حساب ببینید.</p></div>
                 <RequestButton variant="secondary" loading={account.sync_pending} loadingLabel="در حال دریافت و بررسی مخزن‌ها…" request={finish => router.post(`${base}/git/connections/${account.uuid}/sync`, {}, { onFinish: finish })}>دریافت مخزن‌ها</RequestButton>
             </div>
-            <Form className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={event => { event.preventDefault(); search.transform(data => ({ ...data, connection: connection ?? '' })); search.get(`${base}/projects/new`, { preserveState: true, preserveScroll: true }); }}>
-                <div className="min-w-0 flex-1"><Input name="repo_q" label="جست‌وجوی مخزن" dir="ltr" className="font-mono" maxLength={200} value={search.data.repo_q} onChange={event => search.setData('repo_q', event.target.value)} error={search.errors.repo_q} /></div>
-                <Button type="submit" variant="secondary" loading={search.processing}>جست‌وجو</Button>
+            <Form className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={event => event.preventDefault()}>
+                <div className="min-w-0 flex-1"><Input name="repo_q" label="جست‌وجوی مخزن" dir="ltr" className="font-mono" maxLength={200} value={search.data.repo_q} onChange={event => search.setFilter('repo_q', event.target.value)} error={search.errors.repo_q} /></div>
+
             </Form>
             {repositories.truncated ? <p className="mt-3 text-sm text-muted">بیش از ۲۰۰ مخزن با این جست‌وجو هست. عبارت را دقیق‌تر کنید.</p> : null}
             {repositories.data.length === 0 ? <p className="mt-4 text-sm text-muted">{waiting ? 'فهرست هنوز نرسیده است. دریافت را بزنید؛ این صفحه خودش تازه‌سازی می‌شود.' : 'مخزنی برای نمایش نیست.'}</p> : <div className="mt-4 flex flex-wrap gap-2">{repositories.data.map(item => <ChoiceButton key={item.uuid} selected={item.uuid === repository?.uuid} loading={sourceAction.pending && loadingRepo === item.uuid} loadingLabel="در حال دریافت شاخه‌ها…" disabled={sourceAction.pending} className={cn('inline-flex min-h-11 max-w-full items-center rounded-full border px-3 font-mono text-sm', item.uuid === repository?.uuid ? 'border-accent bg-accent-soft' : 'border-line hover:border-accent')} dir="ltr" onClick={() => sourceAction.run(finish => { setLoadingRepo(item.uuid); router.post(`${base}/projects/sources/${item.uuid}/branches`, {}, { preserveScroll: true, onFinish: () => { setLoadingRepo(null); finish(); } }); })}>{item.full_name}</ChoiceButton>)}</div>}
