@@ -101,4 +101,16 @@ if [[ "$failures" -ne 0 ]]; then
     printf 'failed %s\n' "$failures" >&2
     exit 1
 fi
+cat >"$tmp/stack.json" <<EOF
+{"execution_id":"$EXECUTION_ID","project_slug":"app-one","approval":true}
+EOF
+stack="$(run_op docker.stack.apply "$tmp/stack.json")"
+assert_eq "stack preview" "preview" "$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["status"])' "$stack")"
+set +e
+applied="$(RAHANDAZ_OPS_APPLY=1 run_op docker.stack.apply "$tmp/stack.json" 2>"$tmp/stack.err")"
+applied_rc=$?
+set -e
+assert_eq "stack apply exit" "1" "$applied_rc"
+assert_eq "stack apply code" "ENV_BRIDGE_REQUIRED" "$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["error_code"])' "$applied")"
+
 printf 'docker contract passed\n'

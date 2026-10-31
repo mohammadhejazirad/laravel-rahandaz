@@ -2,6 +2,10 @@
 
 این فایل گزارش واقعیت مخزن است. نقشه در `.docs/ROADMAP.md` و مشخصات در `.docs/PROJECT_SPEC.md` است.
 
+## ۲۰۲۶-۱۰-۳۱ — Docker در کاتالوگ و قالب‌های آماده
+
+Docker یک بستهٔ اختیاری کاتالوگ است (`docker.io` و `docker-compose-v2`) و نصب اولیهٔ پنل آن را نصب نمی‌کند. منوی «مدیریت Docker» فقط وقتی `/usr/bin/docker` موجود باشد در سایدبار می‌آید و سه بخش دارد: نما، برنامه‌های آماده، Compose و env. قالب‌ها RabbitMQ، Metabase، n8n، Rocket.Chat، Ollama، Open WebUI، GitLab CE، Chroma، Strapi و Qdrant هستند. مقدار env رمز می‌شود و در props برنمی‌گردد. اجرای استک روی میزبان هنوز به پل بازکردن env وصل نیست.
+
 ## ۲۰۲۶-۱۰-۳۱ — درخواست مدیریت سرویس و Docker پروژه
 
 صفحهٔ میزبان برای Nginx، Docker، PHP-FPM، MySQL، MariaDB، PostgreSQL و Redis دکمهٔ وضعیت، شروع و ریست دارد. توقف Nginx، PHP-FPM، PostgreSQL و Redis راه‌انداز همچنان رد می‌شود. Node.js واحد systemd سراسری نیست. صفحهٔ پروژه سه حالت Docker را می‌پذیرد: فقط Compose، فقط Dockerfile، یا هر دو. درخواست از موتور عملیات رد می‌شود و تا باز بودن executor روی میزبان اجرا نمی‌شود. قرارداد Bash در حالت plan آزموده شد؛ VM و Docker زنده آزموده نشد.

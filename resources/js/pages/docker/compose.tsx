@@ -2,6 +2,7 @@ import { Head, useForm, usePage } from '@inertiajs/react';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Form } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { AppLayout } from '@/layouts/app-layout';
 import type { SharedProps } from '@/types';
@@ -28,19 +29,22 @@ export default function DockerCompose({ installed, can_request }: { installed: b
             <Head title="Compose و env" />
             {!installed ? <Alert tone="warning">تا نصب Docker از کاتالوگ، این درخواست روی میزبان اجرا نمی‌شود.</Alert> : <Alert tone="info">رمز را داخل yml ننویسید. مقدار env رمزنگاری می‌شود و در صفحه باقی نمی‌ماند.</Alert>}
             <Card>
-                <div className="grid gap-3">
+                <Form className="grid gap-3" onSubmit={event => { event.preventDefault(); submit(); }}>
                     <Input name="slug" label="نام استک" dir="ltr" className="font-mono" isRequired value={form.data.slug} onChange={event => form.setData('slug', event.target.value)} error={form.errors.slug} />
                     <label className="block text-sm">
-                        <span className="mb-1.5 block font-medium text-ink">متن Compose</span>
-                        <textarea name="compose" dir="ltr" value={form.data.compose} onChange={event => form.setData('compose', event.target.value)} className="min-h-56 w-full rounded-xl border border-line bg-surface p-3 font-mono text-sm text-ink" />
+                        <span className="mb-1.5 block font-medium text-ink">متن Compose<span className="ms-1 text-danger" aria-hidden="true">*</span></span>
+                        <textarea name="compose" dir="ltr" aria-required="true" value={form.data.compose} onChange={event => form.setData('compose', event.target.value)} className="min-h-56 w-full rounded-xl border border-line bg-surface p-3 font-mono text-sm text-ink" />
                     </label>
                     {form.errors.compose ? <p role="alert" className="text-sm text-danger">{form.errors.compose}</p> : null}
-                    {keys.length > 0 ? keys.map(name => (
-                        <Input key={name} name={`env-${name}`} label={name} dir="ltr" className="font-mono" type="password" autoComplete="off" isRequired value={form.data.env[name] ?? ''} onChange={event => form.setData('env', { ...form.data.env, [name]: event.target.value })} />
-                    )) : <p className="text-sm text-muted">متغیر {'${NAME}'} در متن دیده نشد. اگر برنامه رمز ندارد، همین کافی است.</p>}
+                    {keys.length > 0 ? keys.map(name => {
+                        const secret = /PASS|SECRET|TOKEN|KEY/.test(name);
+                        return (
+                            <Input key={name} name={`env-${name}`} label={name} dir="ltr" className="font-mono" type={secret ? 'password' : 'text'} autoComplete="off" isRequired value={form.data.env[name] ?? ''} onChange={event => form.setData('env', { ...form.data.env, [name]: event.target.value })} />
+                        );
+                    }) : <p className="text-sm text-muted">متغیر {'${NAME}'} در متن دیده نشد. اگر برنامه رمز ندارد، همین کافی است.</p>}
                     {form.errors.env ? <p role="alert" className="text-sm text-danger">{form.errors.env}</p> : null}
-                    <Button type="button" loading={form.processing} disabled={!can_request || form.processing} onClick={submit}>ثبت درخواست</Button>
-                </div>
+                    <Button type="submit" loading={form.processing} disabled={!can_request || form.processing}>ثبت درخواست</Button>
+                </Form>
             </Card>
         </AppLayout>
     );

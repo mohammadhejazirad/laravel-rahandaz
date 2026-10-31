@@ -22,7 +22,8 @@
 | `/servers/` | `GET /rahandaz/servers` | `pages/servers/index.tsx` | App | فهرست `local_hosts` همان workspace |
 | `/servers/<uuid>/overview/` | `GET /rahandaz/servers/{uuid}` و `POST /rahandaz/servers/{uuid}/services` | `pages/servers/show.tsx` | App | فیلد ذخیره‌شده، کارت موقعیت IP، و درخواست وضعیت/شروع/ریست سرویس‌های فهرست‌شده. توقف سرویس راه‌انداز رد می‌شود. اجرا روی میزبان نیست |
 | monitoring، network، settings، console، ssh-keys، services، logs، events، databases، php سرور | — | — | — | آماده نیست. کنسول آزاد ساخته نشده |
-| `/catalog/` | `GET /rahandaz/catalog` | `pages/catalog/index.tsx` | App | انتخاب دسته‌بندی، مدال نسخهٔ PHP و نصب پس‌زمینه |
+| `/catalog/` | `GET /rahandaz/catalog` | `pages/catalog/index.tsx` | App | انتخاب دسته‌بندی، مدال نسخهٔ PHP و نصب پس‌زمینه. Docker بستهٔ اختیاری runtime است |
+| مدیریت Docker | `GET /rahandaz/docker` و `/docker/apps` و `/docker/compose` و `POST /docker/stacks` | `pages/docker/*.tsx` | App | بعد از وجود باینری Docker در سایدبار. قالب آماده و Compose با env رمزشده. اجرا روی میزبان نیست |
 | نصب‌شده‌ها | `GET /rahandaz/catalog/installed` و `POST /rahandaz/catalog/software/upgrade` | `pages/catalog/installed.tsx` | App | فهرست تأییدشده و به‌روزرسانی یک کلید کاتالوگ؛ دکمه تا پایان job در حال اجرا می‌ماند |
 | `/mirrors/` | `GET /rahandaz/mirrors` | `pages/mirrors/index.tsx` | App | خواندنی. apply و rollback نیست |
 | `/mirrors/<software_kind>/` | — | — | — | آماده نیست |
