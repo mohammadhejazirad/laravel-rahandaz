@@ -1,4 +1,4 @@
-import { Activity, ArchiveRestore, Bell, BookOpen, Database, FolderGit2, Globe2, LayoutDashboard, ListChecks, Package, RefreshCw, Rocket, ScrollText, Server, Settings, Shield, type LucideIcon } from 'lucide-react';
+import { Activity, ArchiveRestore, Bell, BookOpen, Box, Container, Database, FileCode2, FolderGit2, Globe2, LayoutDashboard, ListChecks, Package, RefreshCw, Rocket, ScrollText, Server, Settings, Shield, type LucideIcon } from 'lucide-react';
 
 export interface PanelDestination {
     path: string;
@@ -7,6 +7,7 @@ export interface PanelDestination {
     icon: LucideIcon;
     guide: string;
     managersOnly?: boolean;
+    requiresDocker?: boolean;
 }
 export interface PanelGroup { label: string; destinations: PanelDestination[] }
 
@@ -38,6 +39,11 @@ export const panelNavigation: PanelGroup[] = [
         { path: 'settings/profile', label: 'حساب کاربری', description: 'پوسته، منطقهٔ زمانی و گذرواژه', icon: Settings, guide: 'account-security' },
         { path: 'tutorials', label: 'راهنما و آموزش', description: 'آموزش گام‌به‌گام و رفع مشکل', icon: BookOpen, guide: 'getting-started' },
     ] },
+    { label: 'مدیریت Docker', destinations: [
+        { path: 'docker', label: 'نمای Docker', description: 'ورود به مدیریت کانتینرها بعد از نصب', icon: Container, guide: 'php-runtimes', requiresDocker: true },
+        { path: 'docker/apps', label: 'برنامه‌های آماده', description: 'قالب‌هایی مثل RabbitMQ، n8n و Metabase', icon: Box, guide: 'php-runtimes', requiresDocker: true },
+        { path: 'docker/compose', label: 'Compose و env', description: 'فایل Compose خودتان و متغیرهای env', icon: FileCode2, guide: 'php-runtimes', requiresDocker: true },
+    ] },
 ];
 
 export function destinationForPath(path: string, base: string): PanelDestination | undefined {
@@ -47,6 +53,9 @@ export function destinationForPath(path: string, base: string): PanelDestination
         .sort((left, right) => right.path.length - left.path.length)[0];
 }
 
-export function visibleNavigation(canManage: boolean): PanelGroup[] {
-    return panelNavigation.map(group => ({ ...group, destinations: group.destinations.filter(item => !item.managersOnly || canManage) }));
+export function visibleNavigation(canManage: boolean, dockerInstalled = false): PanelGroup[] {
+    return panelNavigation.map(group => ({
+        ...group,
+        destinations: group.destinations.filter(item => (!item.managersOnly || canManage) && (!item.requiresDocker || dockerInstalled)),
+    })).filter(group => group.destinations.length > 0);
 }

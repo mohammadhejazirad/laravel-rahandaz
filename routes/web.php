@@ -8,6 +8,7 @@ use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DatabaseController;
 use App\Http\Controllers\DeploymentController;
+use App\Http\Controllers\DockerController;
 use App\Http\Controllers\DomainController;
 use App\Http\Controllers\GitConnectionController;
 use App\Http\Controllers\JobController;
@@ -64,6 +65,10 @@ Route::prefix(trim((string) config('rahandaz.base_path'), '/'))->group(function 
                 Route::get('/servers', [ServerController::class, 'index'])->name('servers.index');
                 Route::get('/servers/{localHost}', [ServerController::class, 'show'])->name('servers.show');
                 Route::post('/servers/{localHost}/services', [ServerController::class, 'service'])->middleware('throttle:20,1')->name('servers.services');
+                Route::get('/docker', [DockerController::class, 'index'])->name('docker.index');
+                Route::get('/docker/apps', [DockerController::class, 'apps'])->name('docker.apps');
+                Route::get('/docker/compose', [DockerController::class, 'compose'])->name('docker.compose');
+                Route::post('/docker/stacks', [DockerController::class, 'store'])->middleware('throttle:10,1')->name('docker.stacks.store');
                 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
                 Route::get('/catalog/installed', [CatalogController::class, 'installed'])->name('catalog.installed');
                 Route::post('/catalog/software/install', [CatalogController::class, 'installSoftware'])->middleware('throttle:5,1')->name('catalog.software.install');

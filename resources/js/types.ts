@@ -37,6 +37,9 @@ export type SharedProps = PageProps & {
     notifications: {
         unread: number;
     };
+    docker?: {
+        installed: boolean;
+    };
     enum_labels: Record<string, string>;
 };
 

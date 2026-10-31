@@ -64,7 +64,7 @@ export function AppLayout({
     const role = user?.role;
     const canAudit = role === "owner" || role === "admin";
     const unread = page.props.notifications.unread;
-    const groups = visibleNavigation(canAudit);
+    const groups = visibleNavigation(canAudit, page.props.docker?.installed === true);
     const destination = destinationForPath(path, base);
 
     useEffect(() => {
@@ -189,7 +189,7 @@ export function AppLayout({
                         </header>
                         <PwaControls />
                         <div className="page-content space-y-5">
-                            <SectionNavigation path={path} base={base} canManage={canAudit} />
+                            <SectionNavigation path={path} base={base} canManage={canAudit} dockerInstalled={page.props.docker?.installed === true} />
                             {children}
                         </div>
                     </main>

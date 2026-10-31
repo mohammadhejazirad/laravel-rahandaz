@@ -1,5 +1,5 @@
 import {
-    Activity, AppWindow, Archive, Braces, CodeXml, Database, DatabaseBackup,
+    Activity, AppWindow, Archive, Braces, CodeXml, Container, Database, DatabaseBackup,
     DatabaseZap, FileCode2, Film, Globe, Grid2X2, Hexagon, Layers,
     Leaf, MemoryStick, Network, Package, Shield, ShieldCheck, ShieldPlus,
     Workflow, Wrench, Zap, type LucideIcon,
@@ -37,6 +37,7 @@ const softwareIcons: Record<string, LucideIcon> = {
     'clamav-freshclam': ShieldPlus,
     supervisor: Workflow,
     node: Hexagon,
+    docker: Container,
     mongodb: Leaf,
     'google-chrome': AppWindow,
 };

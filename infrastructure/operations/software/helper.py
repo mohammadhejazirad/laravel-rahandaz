@@ -326,6 +326,7 @@ def install(package, data, progress=lambda phase: None, dependency=None):
         if dependency is not None:
             return
         verify_tool(package)
+        install_companions(package, entry, data)
         return {'package': package, 'version': version, 'verified': True, 'changed': False, 'executable_path': entry['executable_path']}
     if entry.get('protected'):
         raise Refused('CORE_SERVICE_MISSING')
@@ -378,7 +379,15 @@ def install(package, data, progress=lambda phase: None, dependency=None):
     if dependency is not None:
         return
     verify_tool(package)
+    install_companions(package, entry, data)
     return {'package': package, 'version': version, 'verified': True, 'changed': True, 'executable_path': entry['executable_path']}
+
+
+def install_companions(package, entry, data):
+    for extra in entry.get('companions') or []:
+        if not isinstance(extra, str) or re.fullmatch(r'[a-z0-9][a-z0-9+.-]{0,62}', extra) is None:
+            raise Refused('PACKAGE_NOT_ALLOWED')
+        install(package, data, lambda phase: None, dependency=extra)
 
 
 def upgrade(package, data, progress=lambda phase: None):

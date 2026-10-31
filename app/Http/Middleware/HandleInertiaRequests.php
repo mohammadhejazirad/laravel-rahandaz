@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Domain\Docker\DockerInstallation;
 use App\Models\PanelNotification;
 use App\Support\EnumLabelCatalog;
 use Illuminate\Http\Request;
@@ -57,6 +58,9 @@ class HandleInertiaRequests extends Middleware
             'app' => [
                 'name' => 'راه‌انداز',
                 'base_path' => (string) config('rahandaz.base_path'),
+            ],
+            'docker' => [
+                'installed' => $user !== null && app(DockerInstallation::class)->present(),
             ],
             'notifications' => [
                 'unread' => $user === null || $membership === null ? 0 : PanelNotification::query()

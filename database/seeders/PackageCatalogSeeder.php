@@ -25,6 +25,7 @@ class PackageCatalogSeeder extends Seeder
             ['key' => 'mysql', 'display_name' => 'MySQL', 'service_kind' => 'database', 'control_plane_candidate' => false],
             ['key' => 'mariadb', 'display_name' => 'MariaDB', 'service_kind' => 'database', 'control_plane_candidate' => false],
             ['key' => 'mongodb', 'display_name' => 'MongoDB', 'service_kind' => 'database', 'control_plane_candidate' => false],
+            ['key' => 'docker', 'display_name' => 'Docker', 'service_kind' => 'runtime', 'control_plane_candidate' => false],
             ['key' => 'google-chrome', 'display_name' => 'Google Chrome', 'service_kind' => 'tool', 'control_plane_candidate' => false],
         ];
 

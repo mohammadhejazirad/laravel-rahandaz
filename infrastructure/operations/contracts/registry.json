@@ -310,6 +310,17 @@
       "entry": "ops_docker_action down"
     },
     {
+      "name": "docker.stack.apply",
+      "version": "1",
+      "privilege": "project",
+      "timeout_seconds": 180,
+      "lock": "docker-project",
+      "idempotency": "explicit",
+      "mutating": true,
+      "script": "docker/stack-apply.sh",
+      "entry": "ops_docker_stack"
+    },
+    {
       "name": "docker.image.build",
       "version": "1",
       "privilege": "project",

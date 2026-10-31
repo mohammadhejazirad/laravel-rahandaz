@@ -307,6 +307,18 @@
       ],
       "upgradeable": false
     },
+    "docker": {
+      "name": "Docker",
+      "description": "موتور کانتینر و Compose برای پروژه‌ها. نصب اولیهٔ پنل آن را نصب نمی‌کند؛ بعد از نصب، مدیریت Docker در منو دیده می‌شود.",
+      "category": "runtime",
+      "setup": false,
+      "kind": "apt",
+      "apt": "docker.io",
+      "companions": ["docker-compose-v2"],
+      "executable_path": "/usr/bin/docker",
+      "version_args": ["--version"],
+      "upgradeable": false
+    },
     "google-chrome": {
       "name": "Google Chrome for Testing",
       "description": "اختیاری برای Browsershot/Puppeteer؛ بررسی واقعی PNG/PDF با sandbox و نمایش مسیر قابل کپی.",

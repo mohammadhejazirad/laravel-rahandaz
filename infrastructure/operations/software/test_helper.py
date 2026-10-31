@@ -137,6 +137,11 @@ class ContractTests(unittest.TestCase):
     def test_setup_excludes_every_non_setup_package_and_catalog_has_categories(self):
         for key, entry in helper.catalog().items():
             self.assertIn('category', entry)
+            if key == 'docker':
+                self.assertFalse(entry['setup'])
+                self.assertEqual(entry['apt'], 'docker.io')
+                self.assertEqual(entry['companions'], ['docker-compose-v2'])
+                self.assertFalse(entry['upgradeable'])
             if key == 'google-chrome':
                 self.assertEqual(entry['channel'], 'latest_stable')
                 self.assertEqual(entry['repo'], 'mohammadhejazirad/install-google-chrome-server')
@@ -152,7 +157,7 @@ class ContractTests(unittest.TestCase):
     def test_upgrade_accepts_one_apt_line_and_refuses_archives_databases_and_batches(self):
         self.assertEqual(helper.request(self.data() | {'operation': 'software.upgrade', 'packages': ['php']})['packages'], ['php'])
         self.assertEqual(helper.request(self.data() | {'operation': 'software.upgrade', 'packages': ['jq']})['packages'], ['jq'])
-        for packages in (['node'], ['mongodb'], ['google-chrome'], ['postgresql'], ['mysql'], ['mariadb'], ['php', 'jq'], []):
+        for packages in (['node'], ['mongodb'], ['google-chrome'], ['docker'], ['postgresql'], ['mysql'], ['mariadb'], ['php', 'jq'], []):
             with self.subTest(packages=packages), self.assertRaises(helper.Refused):
                 helper.request(self.data() | {'operation': 'software.upgrade', 'packages': packages})
 
