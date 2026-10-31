@@ -92,3 +92,9 @@
 ## Categorized software and live resources — 2026-10-19
 
 Existing `/catalog`: shared categorized picker, execution-long loading, verified terminal Toast, per-package phases/outcomes/counts, job-log link and copyable verified versioned executable paths. Existing `/setup` keeps only its four optional tools and the same real progress component. Existing `/monitoring`: responsive resource cards, actual CPU history and timestamps, bounded three-second visible/online polling, stale/offline handling. Existing `/jobs/{uuid}` renders Persian log messages with automatic text direction. No new page or UI dependency. Browser/VM verification is recorded separately from compilation and automated contract tests.
+
+## ۲۰۲۶-۱۰-۳۱ — کاتالوگ و مدیریت دیتابیس
+
+صفحات موجود `catalog/index` و `catalog/installed` وضعیت فعلی بسته‌های میزبان را هنگام ورود می‌خوانند. کاتالوگ تب دسته‌بندی با کلیدهای جهت، جست‌وجو، کارت وضعیت/نسخه، مدال رادیویی و details ورود نسخه دارد. ورود دستی فقط به کلید موجود کاتالوگ نگاشت می‌شود؛ قرارداد نصب نسخه یا URL دلخواه باز نشده است. انتخاب چند نسخه با افزودن پیاپی، فهرست قابل حذف و بازبینی نصب گروهی انجام می‌شود. خطای مشاهده با «نصب نشده» یکسان نیست؛ شناسایی بسته به معنی سلامت سرویس نیست. وضعیت و Toast همچنان تابع job واقعی است.
+
+صفحهٔ `databases/index` از PageSections مشترک برای دیتابیس‌های پروژه، موتورها/نسخه‌ها و فرم ساخت استفاده می‌کند؛ کاتالوگ با تب دیتابیس از آن در دسترس است. نمونهٔ ثبت‌شده با بستهٔ نصب‌شده یکسان معرفی نمی‌شود. صفحه یا وابستگی جدید اضافه نشده است. بررسی دیداری مرورگر به‌دلیل نبود browser host در این جلسه انجام نشد.

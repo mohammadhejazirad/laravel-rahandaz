@@ -1,5 +1,8 @@
 import { Link, usePage } from '@inertiajs/react';
-import { useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
+import { Check, Layers, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/cn';
 import { isSoftwarePending } from '@/lib/software-jobs';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -19,82 +22,91 @@ export interface SoftwareJob {
 export interface CatalogItem {
     name: string; description: string; category?: string;
     product?: string | null; product_name?: string | null; product_description?: string | null; version_label?: string | null;
+    version?: string | null;
     upgradeable?: boolean; upgrade_note?: string | null;
 }
 export interface SoftwareState {
     available: boolean; can_request?: boolean;
     catalog: Record<string, CatalogItem>;
     categories?: Record<string, string>;
+    inventory?: { checked_at: string; packages: Record<string, { state: 'installed' | 'not_installed' | 'unknown'; version: string | null }> } | null;
     installed?: SoftwarePackageResult[];
     job?: SoftwareJob | null; active?: SoftwareJob | null; request_key: string;
 }
 const defaultCategories: Record<string, string> = { web: 'وب‌سرورها', runtime: 'زبان‌ها و runtimeها', database: 'دیتابیس‌ها', cache: 'کش', utility: 'ابزارهای کاربردی', antivirus: 'آنتی‌ویروس‌ها', security: 'ابزارهای امنیتی', process: 'مدیریت پردازش' };
-export function SoftwarePicker({ catalog, categories = defaultCategories, selected, onChange, disabled }: {
+export function SoftwarePicker({ catalog, categories = defaultCategories, selected, onChange, disabled, inventory, installed = [], initialCategory }: {
     catalog: SoftwareState['catalog']; categories?: Record<string, string>; selected: string[]; onChange: (keys: string[]) => void; disabled?: boolean;
+    inventory?: SoftwareState['inventory']; installed?: SoftwarePackageResult[]; initialCategory?: string;
 }) {
-    const groups = Object.entries(categories).map(([key, label]) => ({ key, label, items: rowsFor(Object.entries(catalog).filter(([, item]) => (item.category ?? 'utility') === key)) })).filter(group => group.items.length > 0);
-    return <div className="space-y-5">{groups.map(group => <fieldset key={group.key} disabled={disabled} className="grid gap-3 sm:grid-cols-2">
-        <legend className="mb-3 text-sm font-semibold">{group.label}</legend>
-        {group.items.map(row => row.kind === 'single'
-            ? <PackageCheckbox key={row.key} itemKey={row.key} item={row.item} selected={selected} onChange={onChange} />
-            : <VersionChoice key={row.product} items={row.items} selected={selected} onChange={onChange} disabled={disabled} />)}
-    </fieldset>)}</div>;
-}
-function rowsFor(items: [string, CatalogItem][]): Array<{ kind: 'single'; key: string; item: CatalogItem } | { kind: 'product'; product: string; items: [string, CatalogItem][] }> {
-    const seen = new Set<string>();
-    const rows: Array<{ kind: 'single'; key: string; item: CatalogItem } | { kind: 'product'; product: string; items: [string, CatalogItem][] }> = [];
-    for (const [key, item] of items) {
-        if (!item.product) {
-            rows.push({ kind: 'single', key, item });
-            continue;
-        }
-        if (seen.has(item.product)) continue;
-        seen.add(item.product);
-        const group = items.filter(([, candidate]) => candidate.product === item.product);
-        if (group.length < 2) rows.push({ kind: 'single', key: group[0][0], item: group[0][1] });
-        else rows.push({ kind: 'product', product: item.product, items: group });
-    }
-    return rows;
-}
-function PackageCheckbox({ itemKey, item, selected, onChange }: { itemKey: string; item: CatalogItem; selected: string[]; onChange: (keys: string[]) => void }) {
-    return <label className="flex min-w-0 cursor-pointer items-start gap-3 rounded-xl border border-line p-4 focus-within:ring-2 focus-within:ring-accent">
-        <input name={`package-${itemKey}`} type="checkbox" checked={selected.includes(itemKey)} onChange={event => onChange(event.target.checked ? [...selected, itemKey] : selected.filter(value => value !== itemKey))} className="mt-1 size-5 shrink-0 accent-accent" />
-        <span className="min-w-0"><span dir="ltr" className="block font-mono text-sm font-semibold">{item.name}</span><span className="mt-1 block text-sm leading-6 text-muted">{item.description}</span></span>
-    </label>;
-}
-function VersionChoice({ items, selected, onChange, disabled }: { items: [string, CatalogItem][]; selected: string[]; onChange: (keys: string[]) => void; disabled?: boolean }) {
-    const [open, setOpen] = useState(false);
-    const [draft, setDraft] = useState<string[]>([]);
-    const first = items[0][1];
-    const chosen = items.filter(([key]) => selected.includes(key));
-    const keys = items.map(([key]) => key);
-    return <div className="flex min-w-0 flex-col gap-3 rounded-xl border border-line p-4">
-        <div className="min-w-0">
-            <span dir="ltr" className="block font-mono text-sm font-semibold">{first.product_name ?? first.name}</span>
-            <span className="mt-1 block text-sm leading-6 text-muted">{first.product_description ?? first.description}</span>
-            {chosen.length > 0 && <span dir="ltr" className="mt-2 block break-words font-mono text-xs">{chosen.map(([, item]) => item.version_label ?? item.name).join(', ')}</span>}
+    const id = useId();
+    const [category, setCategory] = useState(initialCategory && initialCategory in categories ? initialCategory : 'all');
+    const [search, setSearch] = useState('');
+    const groups = Object.entries(categories).filter(([key]) => Object.values(catalog).some(item => (item.category ?? 'utility') === key));
+    const rows = rowsFor(Object.entries(catalog).filter(([, item]) => (category === 'all' || (item.category ?? 'utility') === category) && `${item.name} ${item.product_name ?? ''} ${item.description}`.toLowerCase().includes(search.trim().toLowerCase())));
+    const tabs = [['all', 'همهٔ نرم‌افزارها'], ...groups];
+    return <div className="space-y-5">
+        <div className="flex flex-wrap gap-2 rounded-2xl bg-surface-muted p-2" role="tablist" aria-label="دسته‌بندی نرم‌افزارها">
+            {tabs.map(([key, label], index) => <button key={key} id={`${id}-tab-${key}`} type="button" role="tab" aria-selected={category === key} aria-controls={`${id}-panel`} tabIndex={category === key ? 0 : -1} onClick={() => setCategory(key)} onKeyDown={event => {
+                const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : event.key === 'ArrowLeft' ? (index + 1) % tabs.length : event.key === 'ArrowRight' ? (index - 1 + tabs.length) % tabs.length : null;
+                if (next === null) return;
+                event.preventDefault(); setCategory(tabs[next][0]); document.getElementById(`${id}-tab-${tabs[next][0]}`)?.focus();
+            }} className={cn('min-h-11 rounded-xl px-3 py-2 text-sm font-medium transition-colors', category === key ? 'bg-surface text-accent shadow-sm' : 'text-muted hover:bg-surface/60 hover:text-ink')}>{label}</button>)}
         </div>
-        <Button type="button" variant="secondary" disabled={disabled} onClick={() => { setDraft(keys.filter(key => selected.includes(key))); setOpen(true); }}>انتخاب نسخه</Button>
-        <Modal open={open} onOpenChange={setOpen}>
-            <ModalContent>
-                <ModalHeader>
-                    <ModalTitle>انتخاب نسخهٔ <bdi dir="ltr">{first.product_name ?? first.name}</bdi></ModalTitle>
-                    <ModalDescription>یک یا چند نسخه را از فهرست ثابت انتخاب کنید. نام بسته یا نشانی دلخواه پذیرفته نمی‌شود.</ModalDescription>
-                </ModalHeader>
-                <fieldset className="mt-4 space-y-2">
-                    <legend className="sr-only">نسخه‌های قابل نصب</legend>
-                    {items.map(([key, item]) => <label key={key} className="flex min-w-0 cursor-pointer items-start gap-3 rounded-xl border border-line p-3">
-                        <input name={`version-${key}`} type="checkbox" checked={draft.includes(key)} onChange={event => setDraft(current => event.target.checked ? [...current, key] : current.filter(value => value !== key))} className="mt-1 size-5 shrink-0 accent-accent" />
-                        <span className="min-w-0"><bdi dir="ltr" className="font-mono text-sm font-semibold">{item.version_label ?? item.name}</bdi><span className="mt-1 block text-sm leading-6 text-muted">{item.description}</span></span>
-                    </label>)}
-                </fieldset>
-                <ModalFooter>
-                    <Button type="button" variant="secondary" onClick={() => setOpen(false)}>انصراف</Button>
-                    <Button type="button" onClick={() => { onChange([...selected.filter(key => !keys.includes(key)), ...draft]); setOpen(false); }}>تأیید انتخاب</Button>
-                </ModalFooter>
-            </ModalContent>
-        </Modal>
+        <div className="relative max-w-md"><Search aria-hidden="true" className="pointer-events-none absolute start-3 top-10 size-4 text-muted" /><Input label="جست‌وجوی نرم‌افزار" id={`${id}-search`} value={search} onChange={event => setSearch(event.target.value)} className="ps-10" onKeyDown={event => { if (event.key === 'Enter') event.preventDefault(); }} placeholder="نام نرم‌افزار یا کاربرد آن…" /></div>
+        <div id={`${id}-panel`} role="tabpanel" aria-labelledby={`${id}-tab-${category}`} tabIndex={0} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {rows.map(row => <PackageChoice key={row.product} items={row.items} selected={selected} onChange={onChange} disabled={disabled} inventory={inventory} installed={installed} />)}
+            {rows.length === 0 && <p className="col-span-full rounded-xl border border-dashed border-line p-8 text-center text-sm text-muted">نرم‌افزاری با این جست‌وجو پیدا نشد.</p>}
+        </div>
     </div>;
+}
+function rowsFor(items: [string, CatalogItem][]) {
+    const rows = new Map<string, [string, CatalogItem][]>();
+    for (const [key, item] of items) {
+        const product = item.product ?? key;
+        rows.set(product, [...(rows.get(product) ?? []), [key, item]]);
+    }
+    return Array.from(rows, ([product, items]) => ({ product, items }));
+}
+function PackageChoice({ items, selected, onChange, disabled, inventory, installed }: {
+    items: [string, CatalogItem][]; selected: string[]; onChange: (keys: string[]) => void; disabled?: boolean;
+    inventory?: SoftwareState['inventory']; installed: SoftwarePackageResult[];
+}) {
+    const id = useId();
+    const [open, setOpen] = useState(false);
+    const [draft, setDraft] = useState('');
+    const [custom, setCustom] = useState('');
+    const [error, setError] = useState('');
+    const first = items[0][1];
+    const keys = items.map(([key]) => key);
+    const chosen = items.filter(([key]) => selected.includes(key));
+    const label = (item: CatalogItem) => item.version_label ?? item.version ?? 'نسخهٔ مخزن سیستم';
+    const observations = items.map(([key, item]) => ({ key, item, current: inventory?.packages[key], previous: installed.find(row => row.package === key && row.verified) }));
+    const present = observations.filter(row => row.current?.state === 'installed');
+    const allAbsent = observations.every(row => row.current?.state === 'not_installed');
+    function confirm() {
+        const match = draft === 'custom' ? items.find(([, item]) => (item.version_label === custom.trim() || item.version === custom.trim()))?.[0] : draft;
+        if (!match || !keys.includes(match)) { setError('این نسخه در کاتالوگ معتبر موجود نیست. یکی از نسخه‌های قابل نصب را انتخاب کنید.'); return; }
+        onChange(selected.includes(match) ? selected : [...selected, match]); setOpen(false);
+    }
+    return <article className={cn('flex min-w-0 flex-col gap-4 rounded-2xl border bg-surface p-5', chosen.length ? 'border-accent ring-1 ring-accent/20' : 'border-line')}>
+        <div className="flex items-start justify-between gap-3"><span className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent"><Layers className="size-5" aria-hidden="true" /></span>{chosen.length > 0 && <span className="inline-flex items-center gap-1 rounded-full bg-accent-soft px-2 py-1 text-xs text-accent"><Check className="size-3" aria-hidden="true" />انتخاب‌شده</span>}</div>
+        <div><h3 dir="ltr" className="break-words font-mono font-semibold">{first.product_name ?? first.name}</h3><p className="mt-2 text-sm leading-7 text-muted">{first.product_description ?? first.description}</p></div>
+        <div className="space-y-1 rounded-xl bg-surface-muted p-3 text-xs leading-6">
+            {present.length ? present.map(row => <p key={row.key} className="text-success">نصب است · نسخهٔ بسته <bdi dir="ltr" className="break-all font-mono">{row.current?.version}</bdi></p>) : <p className="text-muted">{allAbsent ? 'نصب نشده است' : 'وضعیت نصب قابل تأیید نیست'}</p>}
+            {present.length === 0 && observations.some(row => row.previous) && <p className="text-muted">سابقهٔ نصب وجود دارد؛ وضعیت فعلی نیاز به بررسی دارد.</p>}
+        </div>
+        {chosen.length > 0 && <ul className="space-y-2" aria-label="نسخه‌های انتخاب‌شده">{chosen.map(([key, item]) => <li key={key} className="flex min-w-0 items-center justify-between gap-2 text-sm"><bdi dir="ltr" className="break-all font-mono">{label(item)}</bdi><Button type="button" variant="ghost" disabled={disabled} aria-label={`حذف ${item.name} از فهرست نصب`} onClick={() => onChange(selected.filter(value => value !== key))}>حذف</Button></li>)}</ul>}
+        <Button type="button" variant={chosen.length ? 'secondary' : 'primary'} className="mt-auto w-full" disabled={disabled} onClick={() => { setDraft(items.find(([key]) => inventory?.packages[key]?.state !== 'installed')?.[0] ?? keys[0]); setCustom(''); setError(''); setOpen(true); }}>انتخاب نسخه و افزودن</Button>
+        <Modal open={open} onOpenChange={setOpen}><ModalContent>
+            <ModalHeader><ModalTitle>نصب <bdi dir="ltr">{first.product_name ?? first.name}</bdi></ModalTitle><ModalDescription>نسخه را انتخاب و به فهرست اضافه کنید. برای افزودن نسخهٔ دیگر دوباره این پنجره را باز کنید؛ نصب همهٔ انتخاب‌ها با دکمهٔ نهایی آغاز می‌شود.</ModalDescription></ModalHeader>
+            <fieldset disabled={disabled} className="mt-5"><legend className="mb-3 text-sm font-semibold">نسخه‌های قابل نصب</legend><div className="grid grid-cols-2 gap-3">
+                {items.map(([key, item]) => <label key={key} className={cn('flex min-w-0 cursor-pointer items-start gap-2 rounded-xl border p-3 focus-within:ring-2 focus-within:ring-accent', draft === key ? 'border-accent bg-accent-soft' : 'border-line')}><input type="radio" name={`${id}-version`} value={key} checked={draft === key} onChange={() => { setDraft(key); setError(''); }} className="mt-1 size-4 shrink-0 accent-accent" /><span className="min-w-0 text-sm"><bdi dir="ltr" className="break-words font-mono">{label(item)}</bdi>{inventory?.packages[key]?.state === 'installed' && <span className="mt-1 block text-xs text-success">نصب است · نسخهٔ بسته <bdi dir="ltr" className="break-all font-mono">{inventory.packages[key].version}</bdi></span>}</span></label>)}
+            </div></fieldset>
+            <details className="mt-4 rounded-xl border border-line p-3"><summary className="text-sm font-medium">ورود نسخهٔ دلخواه</summary><div className="mt-3 space-y-3"><label className="flex items-center gap-2 text-sm"><input type="radio" name={`${id}-version`} checked={draft === 'custom'} onChange={() => setDraft('custom')} className="size-4 accent-accent" />استفاده از نسخهٔ واردشده</label><Input id={`${id}-custom`} label="نسخهٔ کامل" dir="ltr" className="font-mono" value={custom} onChange={event => { setCustom(event.target.value); setDraft('custom'); setError(''); }} help="فقط نسخه‌های موجود در کاتالوگ معتبر قابل نصب‌اند؛ نسخه یا نشانی دانلود خارج از کاتالوگ پذیرفته نمی‌شود." /></div></details>
+            {error && <p role="alert" className="mt-3 text-sm text-danger">{error}</p>}
+            <ModalFooter><Button type="button" variant="secondary" onClick={() => setOpen(false)}>انصراف</Button><Button type="button" disabled={disabled} onClick={confirm}>تأیید و افزودن به فهرست</Button></ModalFooter>
+        </ModalContent></Modal>
+    </article>;
 }
 export function ExecutablePath({ path, name }: { path: string; name: string }) {
     const input = useRef<HTMLInputElement>(null);

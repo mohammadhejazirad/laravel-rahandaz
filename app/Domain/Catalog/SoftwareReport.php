@@ -38,8 +38,9 @@ final class SoftwareReport
             $clean['status'] = $status;
             // Executable paths come only from a fixed catalog path with a pinned version.
             $entry = app(SoftwareCapability::class)->catalog()[$row['package']];
-            if (isset($entry['executable_path']) && ($row['executable_path'] ?? null) === $entry['executable_path'] && $row['verified']) {
-                $clean['executable_path'] = $entry['executable_path'];
+            $path = app(SoftwareCapability::class)->verifiedExecutablePath($entry, $row);
+            if ($path !== null) {
+                $clean['executable_path'] = $path;
             }
             $rows[] = $clean;
         }

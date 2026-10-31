@@ -58,6 +58,7 @@ class SoftwareCapability
                 'product_name' => $entry['product_name'] ?? null,
                 'product_description' => $entry['product_description'] ?? null,
                 'version_label' => $entry['version_label'] ?? null,
+                'version' => $entry['version'] ?? null,
                 'upgradeable' => $this->allowsUpgrade($entry),
                 'upgrade_note' => $this->upgradeNote($entry),
             ];
@@ -99,21 +100,33 @@ class SoftwareCapability
     public function installed(Workspace $workspace): array
     {
         $results = [];
+        $catalog = $this->catalog();
         // Only previously verified fixed paths; the panel never accepts paths from HTTP.
         $jobs = OperationJob::query()->where('workspace_id', $workspace->id)->whereIn('type', self::JOB_TYPES)
             ->whereIn('status', ['succeeded', 'failed'])->with('steps')->latest('id')->limit(200)->get();
         foreach ($jobs as $job) {
             foreach ($job->steps->firstWhere('key', 'gate')?->checkpoint['packages'] ?? [] as $row) {
                 $key = $row['package'] ?? '';
-                $entry = $this->catalog()[$key] ?? [];
+                $entry = $catalog[$key] ?? [];
                 if (! isset($results[$key]) && ($row['verified'] ?? false) === true && isset($row['executable_path'])
-                    && $row['executable_path'] === ($entry['executable_path'] ?? null)) {
+                    && $this->verifiedExecutablePath($entry, $row) !== null) {
                     $results[$key] = $row;
                 }
             }
         }
 
         return array_values($results);
+    }
+
+    public function verifiedExecutablePath(array $entry, array $row): ?string
+    {
+        $path = $entry['executable_path'] ?? null;
+        if (($entry['kind'] ?? '') === 'chrome'
+            && preg_match('/^[0-9]+(?:\.[0-9]+){3}$/D', (string) ($row['version'] ?? '')) === 1) {
+            $path = '/opt/rahandaz/browsers/chrome/'.$row['version'].'/chrome-linux64/chrome';
+        }
+
+        return ($row['verified'] ?? false) === true && is_string($path) && ($row['executable_path'] ?? null) === $path ? $path : null;
     }
 
     public function validate(array $packages): array

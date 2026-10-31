@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Domain\Access\OperationAccess;
 use App\Domain\Catalog\ChromeInstallation;
 use App\Domain\Catalog\SoftwareCapability;
+use App\Domain\Catalog\SoftwareInventory;
 use App\Http\CurrentWorkspace;
 use App\Http\HostMutation;
 use App\Http\PaginatorPayload;
@@ -113,6 +114,7 @@ class CatalogController extends Controller
     private function softwareState(Request $request, Workspace $workspace, ?LocalHost $host, array $jobTypes): array
     {
         $software = app(SoftwareCapability::class);
+        $installed = $software->installed($workspace);
 
         return [
             'request_key' => (string) Str::uuid(),
@@ -120,7 +122,8 @@ class CatalogController extends Controller
             'can_request' => app(OperationAccess::class)->managesWorkspace($request->user(), $workspace->id),
             'catalog' => $software->browserCatalog(),
             'categories' => $software->categories(),
-            'installed' => $software->installed($workspace),
+            'installed' => $installed,
+            'inventory' => $host === null ? null : app(SoftwareInventory::class)->observe($software->catalog(), $installed),
             'job' => $software->payload($software->latest($workspace, $jobTypes)),
             'active' => $software->payload($software->active($workspace)),
         ];

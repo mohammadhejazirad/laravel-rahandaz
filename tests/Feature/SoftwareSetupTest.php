@@ -6,7 +6,9 @@ namespace Tests\Feature;
 
 use App\Domain\Accounts\Enums\MembershipRole;
 use App\Domain\Catalog\SoftwareCapability;
+use App\Domain\Catalog\SoftwareInventory;
 use App\Domain\Jobs\OperationRunner;
+use App\Http\Middleware\ThrottleByRoute;
 use App\Infrastructure\Executor\ExecutionGate;
 use App\Models\LocalHost;
 use App\Models\Membership;
@@ -28,7 +30,7 @@ class SoftwareSetupTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->withoutMiddleware([\App\Http\Middleware\ThrottleByRoute::class, ThrottleRequests::class]);
+        $this->withoutMiddleware([ThrottleByRoute::class, ThrottleRequests::class]);
         $this->partialMock(SoftwareCapability::class, fn ($mock) => $mock->shouldReceive('available')->andReturn(true));
         Process::fake();
     }
@@ -250,6 +252,21 @@ class SoftwareSetupTest extends TestCase
         app(OperationRunner::class)->run($job->id);
         $this->assertSame('succeeded', $job->fresh()->status->value);
         $this->assertSame('8.4.27-1', app(SoftwareCapability::class)->installed($job->workspace)[0]['version']);
-        Process::assertRan(fn ($process): bool => str_contains((string) $process->input(), '"operation":"software.upgrade"'));
+        Process::assertRan(fn ($process): bool => str_contains((string) $process->input, '"operation":"software.upgrade"'));
+    }
+
+    public function test_catalog_and_installed_pages_refresh_inventory_without_executing_commands(): void
+    {
+        $this->account(true);
+        $inventory = ['checked_at' => now()->toIso8601String(), 'packages' => ['php' => ['state' => 'installed', 'version' => '8.4.27-1']]];
+        $this->mock(SoftwareInventory::class, fn ($mock) => $mock->shouldReceive('observe')->twice()->andReturn($inventory));
+        foreach (['catalog.index', 'catalog.installed'] as $route) {
+            $this->get(route($route))->assertOk()->assertInertia(fn (Assert $page) => $page
+                ->where('software.inventory.packages.php.state', 'installed')
+                ->where('software.inventory.packages.php.version', '8.4.27-1')
+                ->where('software.catalog.node.version', '24.22.0'));
+        }
+        Process::assertNothingRan();
+        $this->assertDatabaseCount('operation_jobs', 0);
     }
 }
