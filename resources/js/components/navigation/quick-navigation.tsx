@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import { Link } from '@inertiajs/react';
 import { Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -21,9 +22,9 @@ export function QuickNavigation({ base, groups }: { base: string; groups: PanelG
     }, []);
     const results = groups.flatMap(group => group.destinations).filter(item => normalize(`${item.label} ${item.description}`).includes(normalize(query)));
     return <>
-        <button type="button" onClick={() => { setQuery(''); setOpen(true); }} aria-label="جست‌وجوی بخش‌های پنل" aria-keyshortcuts="Control+k Meta+k" className="flex min-h-11 min-w-11 items-center gap-2 rounded-xl border border-line bg-surface px-3 text-sm text-muted hover:border-accent/40 hover:text-ink">
+        <Button variant="secondary" onClick={() => { setQuery(''); setOpen(true); }} aria-label="جست‌وجوی بخش‌های پنل" aria-keyshortcuts="Control+k Meta+k" className="flex min-h-11 min-w-11 items-center gap-2 rounded-xl border border-line bg-surface px-3 text-sm text-muted hover:border-accent/40 hover:text-ink">
             <Search className="size-4" aria-hidden="true" /><span className="hidden xl:inline">کدام بخش را می‌خواهید؟</span><kbd dir="ltr" className="hidden rounded border border-line px-1.5 font-mono text-[10px] xl:inline">Ctrl K</kbd>
-        </button>
+        </Button>
         <Modal open={open} onOpenChange={setOpen}><ModalContent className="max-h-[85dvh] overflow-y-auto">
             <ModalHeader><ModalTitle>رفتن سریع به بخش‌ها</ModalTitle><ModalDescription>نام بخش یا کاری که می‌خواهید انجام دهید را بنویسید.</ModalDescription></ModalHeader>
             <div className="mt-4"><Input label="جست‌وجوی بخش" name="panel-navigation-search" type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="مثلاً پروژه، گیت یا پشتیبان" /></div>

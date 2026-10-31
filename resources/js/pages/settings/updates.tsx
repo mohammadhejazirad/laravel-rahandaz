@@ -1,9 +1,10 @@
 import { PageSections } from '@/components/ui/page-sections';
 import { PersianDate } from '@/components/dates/persian-date';
 import { Head, router, usePage } from "@inertiajs/react";
-import { useState } from "react";
 import { UpdateAvailableCard } from "@/components/updates/UpdateAvailableCard";
 import { updateStateText, type ReleaseStatus } from "@/components/updates/update-status";
+import { CopyField } from '@/components/ui/copy-field';
+import { RequestButton } from '@/components/ui/request-button';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AppLayout } from "@/layouts/app-layout";
@@ -11,17 +12,6 @@ import type { SharedProps } from "@/types";
 
 export default function SystemUpdates({ release }: { release: ReleaseStatus }) {
     const base = usePage<SharedProps>().props.app.base_path;
-    const [copied, setCopied] = useState(false);
-
-    async function copyCommand() {
-        try {
-            await navigator.clipboard.writeText(release.command);
-            setCopied(true);
-        } catch {
-            setCopied(false);
-        }
-    }
-
     return (
         <AppLayout title="به‌روزرسانی" description="وضعیت نسخه راه‌انداز، یادداشت انتشار و دستور به‌روزرسانی. پنل این دستور را اجرا نمی‌کند.">
             <Head title="به‌روزرسانی راه‌انداز" />
@@ -53,13 +43,13 @@ export default function SystemUpdates({ release }: { release: ReleaseStatus }) {
                 </dl>
                 <div className="mt-4 flex flex-wrap gap-2">
                     {release.notes_url ? (
-                        <a className="inline-flex rounded-md border border-line px-3 py-2 text-sm font-semibold" href={release.notes_url}>
+                        <Button asChild variant="secondary"><a href={release.notes_url}>
                             مشاهده تغییرات
-                        </a>
+                        </a></Button>
                     ) : null}
-                    <Button type="button" variant="secondary" onClick={() => router.post(`${base}/settings/updates/check`, {})}>
+                    <RequestButton variant="secondary" loadingLabel="در حال بررسی نسخه…" request={finish => router.post(`${base}/settings/updates/check`, {}, { onFinish: finish })}>
                         بررسی دوباره نسخه
-                    </Button>
+                    </RequestButton>
                 </div>
             </Card>
 </> },
@@ -70,21 +60,7 @@ export default function SystemUpdates({ release }: { release: ReleaseStatus }) {
                     پیش از اجرا باید نسخه پشتیبان متعلق به راه‌انداز آماده باشد و PHP پنل همان ۸٫۴ بماند. پروژه‌ها، استخرهای PHP و سایت‌های دیگر تغییر نمی‌کنند.
                     اگر تغییر اسکیما ناسازگار باشد، بازگشت خودکار پایگاه انجام نمی‌شود.
                 </p>
-                <label className="mt-4 block text-xs text-muted" htmlFor="update-command">
-                    فرمان قابل کپی
-                </label>
-                <input
-                    id="update-command"
-                    className="technical-value mt-1 w-full rounded-md border border-line bg-surface px-3 py-2 text-sm"
-                    dir="ltr"
-                    readOnly
-                    value={release.command}
-                />
-                <div className="mt-3 flex flex-wrap gap-2">
-                    <Button type="button" onClick={copyCommand}>
-                        {copied ? "کپی شد" : "کپی دستور به‌روزرسانی"}
-                    </Button>
-                </div>
+                <div className="mt-4"><CopyField value={release.command} label="فرمان قابل کپی" copyLabel="کپی دستور به‌روزرسانی" /></div>
                 <p className="technical-value mt-3 text-xs text-muted" dir="ltr">
                     {release.version_command} · {release.history_command}
                 </p>

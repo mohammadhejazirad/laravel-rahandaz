@@ -103,3 +103,11 @@ Signed beta39 changes only conflict guidance to acknowledge partial new dependen
 Read-only PHP inventory observes dpkg records, fixed catalog executable presence and archive receipts. No Bash, installer, helper command contract or execution gate was changed. Local PHP fixture tests cover pre-existing apt packages, unreadable evidence, missing binaries, archive checksums and version-bound Chrome paths. Related feature tests use the isolated PostgreSQL test database and fake process execution; they do not certify host installation.
 
 Ubuntu 22.04, 24.04 and 26.04: this UI/inventory revision has not been executed in the Ubuntu container lab or a full VM. No new supported/production-ready claim is made. Browser host was unavailable, so interactive viewport and visual verification remain unperformed.
+
+## 2026-10-31 — Shared frontend actions and persisted Git sync progress
+
+No Bash, installer, host command, helper contract or execution gate was changed. Frontend request/submit loading and persisted Git synchronization evidence were tested locally with isolated PostgreSQL and fake provider/queue integrations. Ubuntu 22.04/24.04/26.04 lab and VM certification were not rerun for this revision; no new host support claim is made. Static React rendering is not interactive browser or responsive viewport verification.
+
+### ۲۰۲۶-۱۰-۳۱ — SelectBox رابط
+
+تغییر فقط رابط و جست‌وجوی محلی گزینه‌هاست؛ قرارداد عملیات، Bash و installer تغییر نکرده‌اند. آزمون Ubuntu 22.04/24.04/26.04 برای این تغییر اجرا نشده و هیچ وضعیت supported یا گواهی VM تغییر نمی‌کند. آزمون ASCII منابع Bash و ۱۵ آزمون PHP صفحات با ۳۹۸ assertion موفق بودند. دسترسی مرورگر محیط فراهم نبود؛ آزمون دیداری/تعاملی گزارش نمی‌شود.

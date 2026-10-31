@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import { usePage } from '@inertiajs/react';
 import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -75,13 +76,14 @@ function flashToastId(type: string, message: string): string {
 
 function ToastCloseButton({ closeToast }: CloseButtonProps) {
     return (
-        <button
-            type="button"
+        <Button
+            variant="ghost"
+            size="icon"
             className="rahandaz-toast-close"
             aria-label="بستن پیام"
             onClick={closeToast}
         >
             <X aria-hidden="true" />
-        </button>
+        </Button>
     );
 }

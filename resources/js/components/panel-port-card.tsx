@@ -112,7 +112,7 @@ export function PanelPortCard({ panel }: { panel: PanelPortState }) {
             } finally { setSubmitting(false); }
         }}>
             <Input name="port" label="پورت پنل" isRequired inputMode="numeric" pattern="[0-9]{4,5}" maxLength={5} dir="ltr" className="font-mono" value={form.data.port} error={form.errors.port ?? form.errors.expected_port} onChange={event => form.setData('port', event.target.value)} help="پورت سرویس دیگری را انتخاب نکنید. پورت‌های محدودشدهٔ مرورگر پذیرفته نمی‌شوند." />
-            <Button type="submit" loading={submitting} disabled={pending}>ذخیره و بازخوانی پنل</Button>
+            <Button type="submit" loading={submitting || pending} loadingLabel="در حال اعمال و بررسی پورت…" disabled={!panel.available}>ذخیره و بازخوانی پنل</Button>
         </Form>}
         {panel.available && !panel.can_change && <p className="text-sm text-muted">این تنظیم فقط در اختیار مالک نصب است.</p>}
         {pending && <p role="status" className="text-sm text-muted">در انتظار نتیجهٔ واقعی عملیات؛ پس از تأیید سلامت، به نشانی جدید منتقل می‌شوید.</p>}

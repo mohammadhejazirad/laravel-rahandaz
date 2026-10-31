@@ -12,6 +12,7 @@ use App\Domain\Git\Exceptions\GitRejected;
 use App\Domain\Git\GitConnector;
 use App\Domain\Git\GitHubManifest;
 use App\Domain\Git\GitOAuthClient;
+use App\Domain\Git\GitSyncState;
 use App\Http\CurrentWorkspace;
 use App\Http\PaginatorPayload;
 use App\Http\WorkspaceAccess;
@@ -361,8 +362,13 @@ final class GitConnectionController extends Controller
         $this->authorizeConnection($request, $connection, 'update');
 
         abort_if($connection->state === GitConnectionState::Revoked, 409);
-        SyncGitRepositories::dispatch($connection->uuid, $request->user()->uuid);
         $this->log($request, $connection, 'git.sync_requested', AuditResult::Success);
+        try {
+            SyncGitRepositories::dispatch($connection->uuid, $request->user()->uuid);
+        } catch (Throwable $exception) {
+            $this->log($request, $connection, 'git.sync_failed', AuditResult::Failure);
+            throw $exception;
+        }
 
         return back()->with('info', 'درخواست دریافت مخزن‌ها ثبت شد؛ نتیجه و مرحله‌ها در تاریخچه نمایش داده می‌شوند.');
     }
@@ -438,6 +444,7 @@ final class GitConnectionController extends Controller
     {
         return ['uuid' => $c->uuid, 'provider' => $c->provider === GitProvider::Gitlab && $c->base_url !== 'https://gitlab.com' ? 'gitlabSelf' : $c->provider->value, 'base_url' => $c->base_url, 'account_label' => $c->account_label, 'auth_method' => $c->auth_method->value,
             'state' => $c->state->value, 'last_synced_at' => $c->last_synced_at?->utc()->toIso8601ZuluString(), 'expires_at' => $c->expires_at?->utc()->toIso8601ZuluString(),
+            'sync_pending' => app(GitSyncState::class)->pending($c),
             'repository_count' => $c->repositories_count ?? $c->repositories()->count(), 'selected_count' => $c->selected_count ?? $c->repositories()->where('is_selected', true)->where('disabled', false)->count()];
     }
 }

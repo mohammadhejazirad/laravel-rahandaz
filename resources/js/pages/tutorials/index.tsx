@@ -1,3 +1,5 @@
+import { Select } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Form } from '@/components/ui/form';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Bookmark, BookOpen } from 'lucide-react';
@@ -24,9 +26,9 @@ export default function TutorialsIndex({ tutorials, categories, filters }: {
         <Head title="آموزش‌ها" />
         <Card><Form onSubmit={(e) => { e.preventDefault(); form.get(`${app.base_path}/tutorials`, { preserveState: true }); }} className="grid gap-4 md:grid-cols-[2fr_1fr_auto]">
             <Input name="q" label="جست‌وجو در آموزش‌ها" placeholder="عنوان، متن، دسته‌بندی یا مشکل خود را جست‌وجو کنید" value={form.data.q} onChange={(e) => form.setData('q', e.target.value)} maxLength={120} error={form.errors.q} />
-            <label className="block text-sm">دسته‌بندی<select name="category" className="mt-1.5 min-h-11 w-full rounded-xl border border-line bg-surface px-3 text-base" value={form.data.category} onChange={(e) => form.setData('category', e.target.value)}><option value="">همه دسته‌ها</option>{categories.map((c) => <option key={c} value={c}>{c}</option>)}</select></label>
+            <Select searchable label="دسته‌بندی" name="category" value={form.data.category} onChange={(e) => form.setData('category', e.target.value)}><option value="">همه دسته‌ها</option>{categories.map((c) => <option key={c} value={c}>{c}</option>)}</Select>
             <Button type="submit" loading={form.processing} className="self-end">جست‌وجو</Button>
-            <label className="flex min-h-11 items-center gap-2 text-sm md:col-span-3"><input type="checkbox" checked={form.data.bookmarked === '1'} onChange={(e) => form.setData('bookmarked', e.target.checked ? '1' : '0')} />فقط آموزش‌های نشان‌شده</label>
+            <div className="md:col-span-3"><Checkbox name="bookmarked" checked={form.data.bookmarked === '1'} onChange={(e) => form.setData('bookmarked', e.target.checked ? '1' : '0')}>فقط آموزش‌های نشان‌شده</Checkbox></div>
         </Form></Card>
         <div className="flex flex-wrap items-center gap-3 text-sm text-muted"><BookOpen size={18} aria-hidden="true" />{tutorials.meta.total} آموزش در نتیجه<Link className="min-h-11 content-center text-accent" href={`${app.base_path}/tutorials?bookmarked=1`}>آموزش‌های نشان‌شده</Link><Link className="min-h-11 content-center text-accent" href={`${app.base_path}/tutorials`}>همه آموزش‌ها</Link></div>
         {tutorials.data.length === 0 ? <EmptyState title="آموزشی پیدا نشد">عبارت کوتاه‌تر یا دسته دیگری را انتخاب کنید.</EmptyState> : <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{tutorials.data.map((tutorial) => <Card key={tutorial.slug}>

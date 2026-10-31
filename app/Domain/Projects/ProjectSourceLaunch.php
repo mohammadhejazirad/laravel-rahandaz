@@ -10,6 +10,7 @@ use App\Domain\Git\Enums\GitConnectionState;
 use App\Domain\Git\Enums\GitProvider;
 use App\Domain\Git\Exceptions\GitRejected;
 use App\Domain\Git\GitConnector;
+use App\Domain\Git\GitSyncState;
 use App\Domain\Projects\Enums\DeploymentStrategy;
 use App\Domain\Projects\Enums\EnvironmentStatus;
 use App\Domain\Projects\Enums\ProjectStatus;
@@ -37,7 +38,7 @@ final class ProjectSourceLaunch
     ) {}
 
     /**
-     * @return list<array{uuid: string, provider: string, account_label: string, base_url: string, repository_count: int}>
+     * @return list<array{uuid: string, provider: string, account_label: string, base_url: string, repository_count: int, sync_pending: bool}>
      */
     public function accounts(Workspace $workspace): array
     {
@@ -53,6 +54,7 @@ final class ProjectSourceLaunch
                 'account_label' => $connection->account_label,
                 'base_url' => $connection->base_url,
                 'repository_count' => (int) $connection->repositories_count,
+                'sync_pending' => app(GitSyncState::class)->pending($connection),
             ])
             ->all();
     }

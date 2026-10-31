@@ -1,8 +1,9 @@
-import { useContext, type InputHTMLAttributes } from 'react';
+import { useContext, type Ref, type InputHTMLAttributes } from 'react';
 import { FormErrors } from './form-context';
 import { cn } from '@/lib/cn';
 
 type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'required'> & {
+    ref?: Ref<HTMLInputElement>;
     isRequired?: boolean;
     label: string;
     error?: string;

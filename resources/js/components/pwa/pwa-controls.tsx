@@ -11,8 +11,8 @@ export function PwaControls() {
 
     return <section aria-label="نصب و وضعیت برنامه" className="my-3 min-w-0 space-y-2 text-sm">
         <div className="flex flex-wrap items-center gap-2">
-            {!pwa.installed && <Button variant="ghost" size="sm" disabled={pwa.busy} onClick={() => { if (pwa.canPrompt) void pwa.install(); else setDialog('install'); }}><Download className="size-4" aria-hidden="true" />نصب برنامه</Button>}
-            {pwa.updateAvailable && <Button variant="secondary" size="sm" disabled={pwa.busy} onClick={() => setDialog('update')}><RefreshCw className="size-4" aria-hidden="true" />نسخهٔ تازه آماده است</Button>}
+            {!pwa.installed && <Button variant="ghost" size="sm" loading={pwa.busy} loadingLabel="در حال آماده‌سازی…" onClick={() => { if (pwa.canPrompt) void pwa.install(); else setDialog('install'); }}><Download className="size-4" aria-hidden="true" />نصب برنامه</Button>}
+            {pwa.updateAvailable && <Button variant="secondary" size="sm" loading={pwa.busy} loadingLabel="در حال بارگذاری…" onClick={() => setDialog('update')}><RefreshCw className="size-4" aria-hidden="true" />نسخهٔ تازه آماده است</Button>}
             {pwa.busy && <span role="status" className="text-muted">در حال آماده‌سازی…</span>}
         </div>
         {pwa.offline && <p role="status" className="rounded-lg border border-line bg-surface p-3 text-muted">اتصال شبکه قطع شده است؛ عملیات پنل به ارتباط زنده با سرور نیاز دارند.</p>}
@@ -34,7 +34,7 @@ export function PwaControls() {
                 </div>}
                 <ModalFooter>
                     <Button variant="secondary" onClick={() => setDialog(null)}>بستن</Button>
-                    {dialog === 'update' && <Button disabled={pwa.busy || pwa.offline} onClick={() => { setDialog(null); pwa.update(); }}>ذخیره کرده‌ام؛ بارگذاری دوباره</Button>}
+                    {dialog === 'update' && <Button loading={pwa.busy} loadingLabel="در حال بارگذاری…" disabled={pwa.offline} onClick={() => { setDialog(null); pwa.update(); }}>ذخیره کرده‌ام؛ بارگذاری دوباره</Button>}
                 </ModalFooter>
             </ModalContent>
         </Modal>

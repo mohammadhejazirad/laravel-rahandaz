@@ -1,6 +1,6 @@
 import { SoftwareProgress, type SoftwareJob } from '@/components/catalog/software-picker';
 import { useSoftwareCompletion } from '@/lib/software-jobs';
-import { router } from '@inertiajs/react';
+import { ReloadButton } from '@/components/ui/request-button';
 import { Button } from '@/components/ui/button';
 import { useVisiblePoll } from '@/hooks/use-visible-poll';
 import { Head, Link, usePage } from "@inertiajs/react";
@@ -118,7 +118,7 @@ export default function JobShow({
             )}
             <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-sm font-semibold">لاگ‌ها از قدیم به جدید · صفحهٔ {logs.meta.current_page.toLocaleString('fa-IR')}</h2>{logs.meta.current_page < logs.meta.last_page ? <Button asChild variant="secondary"><Link href={`${base}/jobs/${job.uuid}?page=${logs.meta.last_page}#operation-logs`}>رفتن به آخرین لاگ‌ها</Link></Button> : null}</div>
             <Pagination meta={logs.meta} />
-            <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-xs text-muted">{active ? 'تا پایان عملیات، لاگ‌های همین صفحه هنگام بازبودن پنجره هر ۵ ثانیه تازه می‌شوند.' : 'عملیات در وضعیت پایانی است؛ دریافت دوره‌ای متوقف شده است.'}</p><Button variant="secondary" onClick={() => router.reload({ only: ['job', 'logs', 'software'] })}>تازه‌سازی لاگ‌ها</Button></div>
+            <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-xs text-muted">{active ? 'تا پایان عملیات، لاگ‌های همین صفحه هنگام بازبودن پنجره هر ۵ ثانیه تازه می‌شوند.' : 'عملیات در وضعیت پایانی است؛ دریافت دوره‌ای متوقف شده است.'}</p><ReloadButton only={['job', 'logs', 'software']}>تازه‌سازی لاگ‌ها</ReloadButton></div>
         </AppLayout>
     );
 }

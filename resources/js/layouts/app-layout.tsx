@@ -222,8 +222,8 @@ function UserMenu({ user, base }: { user: AuthUser; base: string }) {
         <>
             <DropdownMenu dir="rtl">
                 <DropdownMenuTrigger asChild>
-                    <button
-                        type="button"
+                    <Button
+                        variant="secondary"
                         className="flex h-11 max-w-48 items-center gap-2 rounded-xl border border-line bg-surface px-1.5 pe-2.5 text-start shadow-sm hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                         aria-label="باز کردن منوی حساب"
                     >
@@ -242,7 +242,7 @@ function UserMenu({ user, base }: { user: AuthUser; base: string }) {
                             className="hidden size-3.5 text-muted sm:block"
                             aria-hidden="true"
                         />
-                    </button>
+                    </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                     <DropdownMenuLabel>

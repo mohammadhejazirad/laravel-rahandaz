@@ -92,3 +92,11 @@
 ## ۲۰۲۶-۱۰-۳۱ — آیکون‌های سبک کاتالوگ
 
 آیکون‌های کاربردی با import ثابت از lucide-react موجود استفاده می‌شوند؛ بسته، تصویر bitmap، فونت آیکون و درخواست شبکهٔ جدید اضافه نشد. این‌ها آیکون مرتبط با کارکرد نرم‌افزار هستند و ادعای لوگوی رسمی ندارند. افزایش مجموع فایل‌های JavaScript یکتای manifest در build محلی: ۵۷۰۴ بایت خام و ۲۳۵۶ بایت gzip. اندازه با تغییر build ممکن است متفاوت باشد.
+
+## ۲۰۲۶-۱۰-۳۱ — کامپوننت‌های عملیات و فرم
+
+وابستگی تازه‌ای اضافه نشد. Button/RequestButton/ReloadButton/AsyncButton/ChoiceButton، Checkbox، RadioCard و CopyField از React، Inertia، Lucide و primitiveهای فعلی استفاده می‌کنند. `action-lock.ts` قفل هم‌زمان را پیش از رندر React اعمال می‌کند و `use-request-action.ts` تغییر state پس از unmount را کنار می‌گذارد. spinner با `motion-safe` فعال می‌شود. آزمون SSR موجود Vite با `ws:false` و HMR غیرفعال بدون بازکردن پورت اجرا می‌شود.
+
+## ۲۰۲۶-۱۰-۳۱ — SelectBox
+
+بدون وابستگی تازه: SelectBox از Popover پکیج موجود `radix-ui`، آیکون‌های ChevronDown/Search/Check موجود در `lucide-react` و Button مشترک استفاده می‌کند. فایل یا فونت خارجی دانلود نشده است.

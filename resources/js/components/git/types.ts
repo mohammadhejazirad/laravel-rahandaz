@@ -9,6 +9,7 @@ export interface GitAccount {
     auth_method: string;
     repository_count: number;
     selected_count: number;
+    sync_pending: boolean;
     last_synced_at: string | null;
     expires_at: string | null;
 }

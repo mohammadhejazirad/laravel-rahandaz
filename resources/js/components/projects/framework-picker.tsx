@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import { FrameworkIcon } from './framework-icon';
 import { frameworkCatalog, frameworkGroups } from './framework-catalog';
 import { FormErrors } from '@/components/ui/form-context';
-import { cn } from '@/lib/cn';
+import { RadioCard } from '@/components/ui/radio-card';
 
 export function FrameworkPicker({
     name,
@@ -48,29 +48,12 @@ export function FrameworkPicker({
                             {group.items.map(item => {
                                 const selected = value === item.id;
                                 return (
-                                    <label
-                                        key={item.id}
-                                        className={cn(
-                                            'flex aspect-square min-h-28 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border bg-surface p-2 text-center transition-[border-color,background-color,box-shadow] focus-within:ring-2 focus-within:ring-accent',
-                                            selected ? 'border-accent bg-accent-soft' : 'border-line hover:border-accent',
-                                            disabled ? 'cursor-not-allowed opacity-70' : '',
-                                        )}
-                                    >
-                                        <input
-                                            type="radio"
-                                            name={name}
-                                            value={item.id}
-                                            checked={selected}
-                                            aria-required={isRequired || undefined}
-                                            disabled={disabled}
-                                            className="sr-only"
-                                            onChange={() => onChange(item.id)}
-                                        />
+                                    <RadioCard key={item.id} name={name} value={item.id} checked={selected} isRequired={isRequired} disabled={disabled} layout="tile" className={`aspect-square min-h-28 gap-1.5 p-2 ${selected ? 'bg-accent-soft' : 'bg-surface'}`} onChange={() => onChange(item.id)}>
                                         <FrameworkIcon icon={item.icon} />
                                         {suggested === item.id ? <span className="rounded-md bg-surface px-1.5 text-[11px] leading-5 text-muted">پیشنهاد</span> : null}
                                         <span dir="ltr" className="max-w-full font-mono text-sm font-semibold leading-5 text-ink">{item.name}</span>
                                         <span className="line-clamp-2 text-xs leading-4 text-muted">{item.description}</span>
-                                    </label>
+                                    </RadioCard>
                                 );
                             })}
                         </div>

@@ -110,7 +110,8 @@ export function ThemeToggle() {
                         variant="secondary"
                         size="icon"
                         aria-label={`تغییر پوسته؛ ${actionLabel}`}
-                        disabled={saving}
+                        loading={saving}
+                        loadingLabel="در حال ذخیرهٔ پوسته…"
                         onClick={() => select(next.value)}
                     >
                         <SelectedIcon

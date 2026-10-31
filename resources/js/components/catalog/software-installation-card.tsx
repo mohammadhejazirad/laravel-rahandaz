@@ -1,6 +1,7 @@
-import { Link, router, useForm, usePage } from '@inertiajs/react';
+import { Link, useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { CatalogSoftwareIcon } from './catalog-icons';
+import { ReloadButton } from '@/components/ui/request-button';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
@@ -13,7 +14,6 @@ export function SoftwareInstallationCard({ software }: { software: SoftwareState
     const base = page.props.app.base_path;
     const initialCategory = new URLSearchParams(page.url.split('?')[1] ?? '').get('category') ?? undefined;
     const form = useForm({ packages: [] as string[], idempotency_key: software.request_key });
-    const [refreshing, setRefreshing] = useState(false);
     const [review, setReview] = useState(false);
     const [submitted, setSubmitted] = useState<string | null>(null);
     const pending = isSoftwarePending(software.job) || isSoftwarePending(software.active);
@@ -23,7 +23,7 @@ export function SoftwareInstallationCard({ software }: { software: SoftwareState
     return <Card className="space-y-6">
         <div className="grid gap-3 sm:grid-cols-3">{[['نرم‌افزار در کاتالوگ', Object.keys(software.catalog).length], ['نسخهٔ نصب‌شدهٔ مشاهده‌شده', installedCount], ['نسخه در فهرست نصب', form.data.packages.length]].map(([label, count]) => <div key={label} className="rounded-2xl border border-line bg-surface-muted p-4"><p className="text-2xl font-bold tabular-nums">{Number(count).toLocaleString('fa-IR')}</p><p className="mt-1 text-xs text-muted">{label}</p></div>)}</div>
         <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-semibold">نصب نرم‌افزار روی سرور</h2><Link className="text-sm text-primary underline" href={`${base}/catalog/installed`}>نرم‌افزارهای نصب‌شده</Link></div>
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface-muted p-3"><p className="text-xs leading-6 text-muted">{software.inventory ? `بررسی وضعیت: ${new Date(software.inventory.checked_at).toLocaleString('fa-IR')} · مشاهدهٔ بسته‌ها به معنی سلامت سرویس نیست.` : 'وضعیت میزبان هنوز قابل مشاهده نیست.'}</p><Button type="button" variant="secondary" loading={refreshing} loadingLabel="در حال بررسی…" onClick={() => router.reload({ only: ['software'], onStart: () => setRefreshing(true), onFinish: () => setRefreshing(false) })}>بررسی دوبارهٔ وضعیت</Button></div>
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface-muted p-3"><p className="text-xs leading-6 text-muted">{software.inventory ? `بررسی وضعیت: ${new Date(software.inventory.checked_at).toLocaleString('fa-IR')} · مشاهدهٔ بسته‌ها به معنی سلامت سرویس نیست.` : 'وضعیت میزبان هنوز قابل مشاهده نیست.'}</p><ReloadButton only={['software']} loadingLabel="در حال بررسی…">بررسی دوبارهٔ وضعیت</ReloadButton></div>
         <SoftwareProgress job={software.job} />
         {software.active?.uuid !== software.job?.uuid && <SoftwareProgress job={software.active} />}
         {(software.installed ?? []).filter(item => item.verified && software.inventory?.packages[item.package]?.state === 'installed' && item.executable_path?.startsWith('/opt/rahandaz/')).map(item => <ExecutablePath key={item.package} path={item.executable_path!} name={software.catalog[item.package]?.name ?? item.package} />)}

@@ -1,3 +1,4 @@
+import { Select } from '@/components/ui/select';
 import { Form } from '@/components/ui/form';
 import { Link, useForm } from "@inertiajs/react";
 import { FileArchive, GitBranch, ShieldCheck, UploadCloud } from "lucide-react";
@@ -130,12 +131,9 @@ export function ArchiveUpload({ basePath, projectUuid, environments, available, 
                     <Form className="space-y-4" onSubmit={submit}>
                         <ol className="grid grid-cols-2 gap-2 text-xs" aria-label="مراحل دریافت منبع"><li aria-current={!reviewing ? 'step' : undefined} className={`border-t-2 pt-3 ${!reviewing ? 'border-accent text-accent' : 'border-line text-muted'}`}>۱. انتخاب فایل و محیط</li><li aria-current={reviewing ? 'step' : undefined} className={`border-t-2 pt-3 ${reviewing ? 'border-accent text-accent' : 'border-line text-muted'}`}>۲. بررسی و ثبت درخواست</li></ol>
                         <div hidden={reviewing} className="space-y-4">
-                        <label className="block text-sm" htmlFor="archive-environment">
-                            <span className="mb-1.5 block font-medium text-ink">محیط مقصد</span>
-                            <select id="archive-environment" className="min-h-11 w-full rounded-xl border border-line bg-surface px-3.5 py-2 text-ink shadow-sm outline-none focus:border-accent focus:ring-4 focus:ring-accent/10" value={environmentUuid} onChange={(event) => setEnvironmentUuid(event.target.value)}>
-                                {environments.map((environment) => <option key={environment.uuid} value={environment.uuid}>{environment.name} ({environment.slug})</option>)}
-                            </select>
-                        </label>
+                        <Select searchable id="archive-environment" name="environment_uuid" label="محیط مقصد" disabled={form.processing} value={environmentUuid} onChange={event => setEnvironmentUuid(event.target.value)}>
+                            {environments.map(environment => <option key={environment.uuid} value={environment.uuid}>{environment.name} ({environment.slug})</option>)}
+                        </Select>
 
                         <label
                             htmlFor="project-archive"

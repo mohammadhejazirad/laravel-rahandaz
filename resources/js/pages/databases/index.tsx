@@ -51,10 +51,10 @@ export default function DatabasesIndex({ databases, instances, environments, can
             <Alert tone="warning">ثبت درخواست به معنی ساخت موفق دیتابیس نیست. عملیات اجرایی و حذف داده هنوز تأیید نشده‌اند.</Alert>
             {!instances.length || !environments.length ? <p className="my-4 text-sm leading-7 text-muted">برای ثبت درخواست، یک نمونهٔ موتور مجاز و یک محیط پروژه لازم است.</p> : null}
             <Form className="mt-5 grid gap-4 md:grid-cols-2" onSubmit={event => { event.preventDefault(); form.post(`${app.base_path}/databases`, { onFinish: () => form.reset('password') }); }}>
-                <Select name="instance_uuid" label="نمونه موتور" value={form.data.instance_uuid} onChange={event => form.setData('instance_uuid', event.target.value)} error={form.errors.instance_uuid} isRequired>
+                <Select searchable name="instance_uuid" label="نمونه موتور" value={form.data.instance_uuid} onChange={event => form.setData('instance_uuid', event.target.value)} error={form.errors.instance_uuid} isRequired>
                     <option value="">انتخاب نمونه</option>{instances.map(instance => <option key={instance.uuid} value={instance.uuid}>{instance.engine} {instance.version}</option>)}
                 </Select>
-                <Select name="environment_uuid" label="محیط پروژه" value={form.data.environment_uuid} onChange={event => form.setData('environment_uuid', event.target.value)} error={form.errors.environment_uuid} isRequired>
+                <Select searchable name="environment_uuid" label="محیط پروژه" value={form.data.environment_uuid} onChange={event => form.setData('environment_uuid', event.target.value)} error={form.errors.environment_uuid} isRequired>
                     <option value="">انتخاب محیط</option>{environments.map(environment => <option key={environment.uuid} value={environment.uuid}>{environment.name}</option>)}
                 </Select>
                 <Input name="name" label="نام دیتابیس" dir="ltr" className="font-mono" value={form.data.name} onChange={event => form.setData('name', event.target.value)} error={form.errors.name} isRequired />
