@@ -255,6 +255,72 @@
       "entry": "ops_service_action verify"
     },
     {
+      "name": "docker.compose.status",
+      "version": "1",
+      "privilege": "project",
+      "timeout_seconds": 120,
+      "lock": "docker-project",
+      "idempotency": "explicit",
+      "mutating": false,
+      "script": "docker/compose-status.sh",
+      "entry": "ops_docker_action status"
+    },
+    {
+      "name": "docker.compose.up",
+      "version": "1",
+      "privilege": "project",
+      "timeout_seconds": 180,
+      "lock": "docker-project",
+      "idempotency": "explicit",
+      "mutating": true,
+      "script": "docker/compose-up.sh",
+      "entry": "ops_docker_action up"
+    },
+    {
+      "name": "docker.compose.stop",
+      "version": "1",
+      "privilege": "project",
+      "timeout_seconds": 180,
+      "lock": "docker-project",
+      "idempotency": "explicit",
+      "mutating": true,
+      "script": "docker/compose-stop.sh",
+      "entry": "ops_docker_action stop"
+    },
+    {
+      "name": "docker.compose.restart",
+      "version": "1",
+      "privilege": "project",
+      "timeout_seconds": 180,
+      "lock": "docker-project",
+      "idempotency": "explicit",
+      "mutating": true,
+      "script": "docker/compose-restart.sh",
+      "entry": "ops_docker_action restart"
+    },
+    {
+      "name": "docker.compose.down",
+      "version": "1",
+      "privilege": "project",
+      "timeout_seconds": 180,
+      "lock": "docker-project",
+      "idempotency": "explicit",
+      "mutating": true,
+      "script": "docker/compose-down.sh",
+      "entry": "ops_docker_action down"
+    },
+    {
+      "name": "docker.image.build",
+      "version": "1",
+      "privilege": "project",
+      "timeout_seconds": 300,
+      "lock": "docker-project",
+      "idempotency": "explicit",
+      "mutating": true,
+      "script": "docker/image-build.sh",
+      "entry": "ops_docker_action build"
+    },
+    {
       "name": "nginx.install",
       "version": "1",
       "privilege": "helper",

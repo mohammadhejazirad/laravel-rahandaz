@@ -63,6 +63,7 @@ Route::prefix(trim((string) config('rahandaz.base_path'), '/'))->group(function 
                 Route::get('/dashboard', DashboardController::class)->name('dashboard');
                 Route::get('/servers', [ServerController::class, 'index'])->name('servers.index');
                 Route::get('/servers/{localHost}', [ServerController::class, 'show'])->name('servers.show');
+                Route::post('/servers/{localHost}/services', [ServerController::class, 'service'])->middleware('throttle:20,1')->name('servers.services');
                 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
                 Route::get('/catalog/installed', [CatalogController::class, 'installed'])->name('catalog.installed');
                 Route::post('/catalog/software/install', [CatalogController::class, 'installSoftware'])->middleware('throttle:5,1')->name('catalog.software.install');
@@ -103,6 +104,7 @@ Route::prefix(trim((string) config('rahandaz.base_path'), '/'))->group(function 
                 Route::get('/backups/{backup}', [BackupController::class, 'show'])->name('backups.show');
                 Route::get('/monitoring', [MonitoringController::class, 'index'])->name('monitoring.index');
                 Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
+                Route::post('/projects/{project}/docker', [ProjectController::class, 'docker'])->middleware('throttle:20,1')->name('projects.docker');
                 Route::post('/projects/{project}/environments/{environment}/source-archives', [ProjectArchiveController::class, 'store'])
                     ->middleware('throttle:5,1')
                     ->name('projects.source-archives.store');

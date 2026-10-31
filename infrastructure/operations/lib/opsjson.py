@@ -450,6 +450,42 @@ def main() -> None:
         if name in PROTECTED_DATABASES.get(engine, set()):
             fail("PROTECTED_DATABASE", "The control-plane database is protected.")
         return
+    if command == "docker-slug":
+        slug = sys.argv[2]
+        if not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,48}", slug) or slug.startswith("rahandaz"):
+            fail("CONTROL_PLANE_PROJECT", "This project name is reserved or not a project slug.")
+        return
+    if command == "docker-file":
+        kind, name = sys.argv[2], sys.argv[3]
+        compose = re.fullmatch(r"(docker-compose|compose)\.ya?ml", name)
+        dockerfile = re.fullmatch(r"Dockerfile(\.[A-Za-z0-9._-]{1,32})?", name)
+        if kind == "compose" and compose is None:
+            fail("INVALID_INPUT", "Compose file name is not allowed.")
+        if kind == "dockerfile" and dockerfile is None:
+            fail("INVALID_INPUT", "Dockerfile name is not allowed.")
+        if "/" in name or name.startswith("."):
+            fail("INVALID_INPUT", "File name must be a basename.")
+        return
+    if command == "docker-layout":
+        compose = False
+        dockerfile = False
+        for name in sys.argv[2:]:
+            base = Path(name).name
+            if base != name or "/" in name or "\\" in name:
+                fail("INVALID_INPUT", "Layout names must be basenames.")
+            if re.fullmatch(r"(docker-compose|compose)\.ya?ml", base):
+                compose = True
+            if re.fullmatch(r"Dockerfile(\.[A-Za-z0-9._-]{1,32})?", base):
+                dockerfile = True
+        if compose and dockerfile:
+            print("compose_and_dockerfile")
+        elif compose:
+            print("compose_only")
+        elif dockerfile:
+            print("dockerfile_only")
+        else:
+            print("absent")
+        return
     if command == "protected-unit":
         unit = sys.argv[2]
         bare = unit.removesuffix(".service")

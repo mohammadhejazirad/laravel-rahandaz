@@ -2,6 +2,10 @@
 
 این فایل گزارش واقعیت مخزن است. نقشه در `.docs/ROADMAP.md` و مشخصات در `.docs/PROJECT_SPEC.md` است.
 
+## ۲۰۲۶-۱۰-۳۱ — درخواست مدیریت سرویس و Docker پروژه
+
+صفحهٔ میزبان برای Nginx، Docker، PHP-FPM، MySQL، MariaDB، PostgreSQL و Redis دکمهٔ وضعیت، شروع و ریست دارد. توقف Nginx، PHP-FPM، PostgreSQL و Redis راه‌انداز همچنان رد می‌شود. Node.js واحد systemd سراسری نیست. صفحهٔ پروژه سه حالت Docker را می‌پذیرد: فقط Compose، فقط Dockerfile، یا هر دو. درخواست از موتور عملیات رد می‌شود و تا باز بودن executor روی میزبان اجرا نمی‌شود. قرارداد Bash در حالت plan آزموده شد؛ VM و Docker زنده آزموده نشد.
+
 ## ۲۰۲۶-۱۰-۳۱ — نسخهٔ شناور Chrome
 
 مخزن آینه به `mohammadhejazirad/install-google-chrome-server` تغییر نام داده است. نصب Chrome دیگر نسخهٔ `158.0.8110.0` را ثابت نمی‌کند. helper هنگام نصب `latest_stable` را از `manifest.json` شاخهٔ `main` می‌خواند، قطعات را از همان مخزن می‌گیرد و SHA-256 را با همان manifest مقایسه می‌کند. نصب‌کنندهٔ اولیه همچنان Chrome را نصب نمی‌کند و این مسیر روی VM تأیید نشده است.

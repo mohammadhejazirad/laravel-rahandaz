@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Domain\Access\OperationAccess;
 use App\Domain\Access\ProjectAccess;
+use App\Domain\Projects\DockerLayout;
+use App\Domain\Projects\DockerProjectControl;
 use App\Http\CurrentWorkspace;
+use App\Http\HostMutation;
 use App\Http\PaginatorPayload;
 use App\Http\WorkspaceAccess;
 use App\Models\Environment;
 use App\Models\Project;
 use App\Models\ProjectSourceArchive;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -120,6 +125,43 @@ class ProjectController extends Controller
                 'execution_mode' => (string) config('rahandaz.execution_mode'),
             ],
             'deploy_available' => false,
+            'docker' => [
+                'can_request' => app(OperationAccess::class)->managesWorkspace($request->user(), $workspace->id) && ! str_starts_with($project->slug, 'rahandaz'),
+                'execution_available' => false,
+                'layouts' => [
+                    ['id' => DockerLayout::COMPOSE_ONLY, 'label' => 'فقط Compose', 'detail' => 'یک فایل yml، بدون Dockerfile'],
+                    ['id' => DockerLayout::DOCKERFILE_ONLY, 'label' => 'فقط Dockerfile', 'detail' => 'ساخت تصویر، بدون Compose'],
+                    ['id' => DockerLayout::BOTH, 'label' => 'هر دو', 'detail' => 'Compose و Dockerfile با هم'],
+                ],
+            ],
         ]);
+    }
+
+    public function docker(Request $request, Project $project, DockerProjectControl $control): RedirectResponse
+    {
+        $this->authorize('view', $project);
+        $workspace = CurrentWorkspace::get($request);
+        $input = $request->validate([
+            'layout' => ['required', 'string', 'max:32'],
+            'action' => ['required', 'string', 'max:16'],
+            'filenames' => ['nullable', 'array', 'max:40'],
+            'filenames.*' => ['string', 'max:80'],
+            'service' => ['nullable', 'string', 'max:63'],
+            'compose_file' => ['nullable', 'string', 'max:40'],
+            'dockerfile' => ['nullable', 'string', 'max:48'],
+        ]);
+        $job = $control->request(
+            $workspace,
+            $project,
+            $request->user(),
+            $input['layout'],
+            $input['action'],
+            array_values($input['filenames'] ?? []),
+            $input['service'] ?? null,
+            $input['compose_file'] ?? null,
+            $input['dockerfile'] ?? null,
+        );
+
+        return redirect()->route('jobs.show', $job)->with('status', HostMutation::queuedMessage());
     }
 }

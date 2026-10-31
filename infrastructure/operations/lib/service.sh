@@ -6,7 +6,7 @@ ops_service_plan() {
 
 ops_service_reloadable() {
     case "$1" in
-        nginx | nginx.service | ssh | ssh.service | postgresql | postgresql.service)
+        nginx | nginx.service | ssh | ssh.service | postgresql | postgresql.service | php*-fpm | php*-fpm.service)
             return 0
             ;;
         *)
