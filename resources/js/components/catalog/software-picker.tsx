@@ -1,6 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import { useId, useRef, useState } from 'react';
-import { Check, Layers, Search } from 'lucide-react';
+import { Check, Search } from 'lucide-react';
+import { CatalogCategoryIcon, CatalogSoftwareIcon } from './catalog-icons';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/cn';
 import { isSoftwarePending } from '@/lib/software-jobs';
@@ -50,7 +51,7 @@ export function SoftwarePicker({ catalog, categories = defaultCategories, select
                 const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : event.key === 'ArrowLeft' ? (index + 1) % tabs.length : event.key === 'ArrowRight' ? (index - 1 + tabs.length) % tabs.length : null;
                 if (next === null) return;
                 event.preventDefault(); setCategory(tabs[next][0]); document.getElementById(`${id}-tab-${tabs[next][0]}`)?.focus();
-            }} className={cn('min-h-11 rounded-xl px-3 py-2 text-sm font-medium transition-colors', category === key ? 'bg-surface text-accent shadow-sm' : 'text-muted hover:bg-surface/60 hover:text-ink')}>{label}</button>)}
+            }} className={cn('inline-flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-colors', category === key ? 'bg-surface text-accent shadow-sm' : 'text-muted hover:bg-surface/60 hover:text-ink')}><CatalogCategoryIcon category={key} />{label}</button>)}
         </div>
         <div className="relative max-w-md"><Search aria-hidden="true" className="pointer-events-none absolute start-3 top-10 size-4 text-muted" /><Input label="جست‌وجوی نرم‌افزار" id={`${id}-search`} value={search} onChange={event => setSearch(event.target.value)} className="ps-10" onKeyDown={event => { if (event.key === 'Enter') event.preventDefault(); }} placeholder="نام نرم‌افزار یا کاربرد آن…" /></div>
         <div id={`${id}-panel`} role="tabpanel" aria-labelledby={`${id}-tab-${category}`} tabIndex={0} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -89,7 +90,7 @@ function PackageChoice({ items, selected, onChange, disabled, inventory, install
         onChange(selected.includes(match) ? selected : [...selected, match]); setOpen(false);
     }
     return <article className={cn('flex min-w-0 flex-col gap-4 rounded-2xl border bg-surface p-5', chosen.length ? 'border-accent ring-1 ring-accent/20' : 'border-line')}>
-        <div className="flex items-start justify-between gap-3"><span className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent"><Layers className="size-5" aria-hidden="true" /></span>{chosen.length > 0 && <span className="inline-flex items-center gap-1 rounded-full bg-accent-soft px-2 py-1 text-xs text-accent"><Check className="size-3" aria-hidden="true" />انتخاب‌شده</span>}</div>
+        <div className="flex items-start justify-between gap-3"><span className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent"><CatalogSoftwareIcon software={first.product ?? items[0][0]} category={first.category} /></span>{chosen.length > 0 && <span className="inline-flex items-center gap-1 rounded-full bg-accent-soft px-2 py-1 text-xs text-accent"><Check className="size-3" aria-hidden="true" />انتخاب‌شده</span>}</div>
         <div><h3 dir="ltr" className="break-words font-mono font-semibold">{first.product_name ?? first.name}</h3><p className="mt-2 text-sm leading-7 text-muted">{first.product_description ?? first.description}</p></div>
         <div className="space-y-1 rounded-xl bg-surface-muted p-3 text-xs leading-6">
             {present.length ? present.map(row => <p key={row.key} className="text-success">نصب است · نسخهٔ بسته <bdi dir="ltr" className="break-all font-mono">{row.current?.version}</bdi></p>) : <p className="text-muted">{allAbsent ? 'نصب نشده است' : 'وضعیت نصب قابل تأیید نیست'}</p>}
@@ -98,7 +99,7 @@ function PackageChoice({ items, selected, onChange, disabled, inventory, install
         {chosen.length > 0 && <ul className="space-y-2" aria-label="نسخه‌های انتخاب‌شده">{chosen.map(([key, item]) => <li key={key} className="flex min-w-0 items-center justify-between gap-2 text-sm"><bdi dir="ltr" className="break-all font-mono">{label(item)}</bdi><Button type="button" variant="ghost" disabled={disabled} aria-label={`حذف ${item.name} از فهرست نصب`} onClick={() => onChange(selected.filter(value => value !== key))}>حذف</Button></li>)}</ul>}
         <Button type="button" variant={chosen.length ? 'secondary' : 'primary'} className="mt-auto w-full" disabled={disabled} onClick={() => { setDraft(items.find(([key]) => inventory?.packages[key]?.state !== 'installed')?.[0] ?? keys[0]); setCustom(''); setError(''); setOpen(true); }}>انتخاب نسخه و افزودن</Button>
         <Modal open={open} onOpenChange={setOpen}><ModalContent>
-            <ModalHeader><ModalTitle>نصب <bdi dir="ltr">{first.product_name ?? first.name}</bdi></ModalTitle><ModalDescription>نسخه را انتخاب و به فهرست اضافه کنید. برای افزودن نسخهٔ دیگر دوباره این پنجره را باز کنید؛ نصب همهٔ انتخاب‌ها با دکمهٔ نهایی آغاز می‌شود.</ModalDescription></ModalHeader>
+            <ModalHeader><ModalTitle className="flex items-center gap-2"><CatalogSoftwareIcon software={first.product ?? items[0][0]} category={first.category} />نصب <bdi dir="ltr">{first.product_name ?? first.name}</bdi></ModalTitle><ModalDescription>نسخه را انتخاب و به فهرست اضافه کنید. برای افزودن نسخهٔ دیگر دوباره این پنجره را باز کنید؛ نصب همهٔ انتخاب‌ها با دکمهٔ نهایی آغاز می‌شود.</ModalDescription></ModalHeader>
             <fieldset disabled={disabled} className="mt-5"><legend className="mb-3 text-sm font-semibold">نسخه‌های قابل نصب</legend><div className="grid grid-cols-2 gap-3">
                 {items.map(([key, item]) => <label key={key} className={cn('flex min-w-0 cursor-pointer items-start gap-2 rounded-xl border p-3 focus-within:ring-2 focus-within:ring-accent', draft === key ? 'border-accent bg-accent-soft' : 'border-line')}><input type="radio" name={`${id}-version`} value={key} checked={draft === key} onChange={() => { setDraft(key); setError(''); }} className="mt-1 size-4 shrink-0 accent-accent" /><span className="min-w-0 text-sm"><bdi dir="ltr" className="break-words font-mono">{label(item)}</bdi>{inventory?.packages[key]?.state === 'installed' && <span className="mt-1 block text-xs text-success">نصب است · نسخهٔ بسته <bdi dir="ltr" className="break-all font-mono">{inventory.packages[key].version}</bdi></span>}</span></label>)}
             </div></fieldset>

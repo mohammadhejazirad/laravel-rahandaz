@@ -1,4 +1,5 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { CatalogSoftwareIcon } from '@/components/catalog/catalog-icons';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
@@ -40,7 +41,7 @@ function InstalledRow({ item, software, pending }: { item: SoftwarePackageResult
 
     return <li><Card className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0 space-y-2">
-            <p className="text-xs text-success">نصب است · {item.verified ? 'سابقهٔ بررسی اجرای موفق دارد' : 'مشاهده از فهرست بسته‌های میزبان'}</p><h2 className="font-semibold"><bdi dir="ltr">{meta?.name ?? item.package}</bdi></h2>
+            <p className="text-xs text-success">نصب است · {item.verified ? 'سابقهٔ بررسی اجرای موفق دارد' : 'مشاهده از فهرست بسته‌های میزبان'}</p><h2 className="flex items-center gap-2 font-semibold"><CatalogSoftwareIcon software={meta?.product ?? item.package} category={meta?.category} /><bdi dir="ltr">{meta?.name ?? item.package}</bdi></h2>
             {item.version ? <p dir="ltr" className="break-all font-mono text-sm">{item.version}</p> : <p className="text-sm text-muted">نسخه در گزارش تأییدشده ثبت نشده است.</p>}
             {!upgradeable && <p className="text-sm leading-7 text-muted">{meta?.upgrade_note ?? 'به‌روزرسانی این مورد از پنل انجام نمی‌شود.'}</p>}
             {item.executable_path?.startsWith('/opt/rahandaz/') && <ExecutablePath path={item.executable_path} name={meta?.name ?? item.package} />}
